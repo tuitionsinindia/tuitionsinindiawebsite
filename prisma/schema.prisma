@@ -1,0 +1,115 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  role          Role      @default(STUDENT)
+  phone         String?   @unique
+  
+  // Tutor Specific
+  isVerified    Boolean   @default(false)
+  credits       Int       @default(0) // For unlocking leads
+  subscription  SubscriptionTier @default(FREE)
+  
+  // Relations
+  tutorListing  Listing?
+  reviewsGiven  Review[]  @relation("ReviewAuthor")
+  reviewsReceived Review[] @relation("ReviewTarget")
+  leadsPosted   Lead[]    @relation("LeadCreator")
+  leadsUnlocked LeadUnlock[]
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Listing {
+  id          String   @id @default(cuid())
+  tutorId     String   @unique
+  tutor       User     @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+  
+  title       String
+  bio         String   @db.Text
+  subjects    String[] // e.g., ["Math", "Physics"]
+  locations   String[] // e.g., ["Mumbai", "Online"]
+  hourlyRate  Int?
+  
+  // Metrics for search ranking
+  rating      Float    @default(0)
+  reviewCount Int      @default(0)
+  
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Lead {
+  id          String   @id @default(cuid())
+  studentId   String
+  student     User     @relation("LeadCreator", fields: [studentId], references: [id], onDelete: Cascade)
+  
+  subject     String
+  location    String
+  budget      String?
+  description String   @db.Text
+  
+  // Monetization Implementation
+  maxUnlocks  Int      @default(3)
+  unlockCount Int      @default(0)
+  status      LeadStatus @default(OPEN)
+  
+  unlockedBy  LeadUnlock[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model LeadUnlock {
+  id          String   @id @default(cuid())
+  leadId      String
+  lead        Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  tutorId     String
+  tutor       User     @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+  
+  unlockedAt  DateTime @default(now())
+
+  @@unique([leadId, tutorId])
+}
+
+model Review {
+  id          String   @id @default(cuid())
+  rating      Int      // 1-5
+  comment     String?  @db.Text
+  
+  authorId    String
+  author      User     @relation("ReviewAuthor", fields: [authorId], references: [id])
+  targetId    String
+  target      User     @relation("ReviewTarget", fields: [targetId], references: [id])
+  
+  createdAt   DateTime @default(now())
+}
+
+enum Role {
+  STUDENT
+  TUTOR
+  ADMIN
+}
+
+enum SubscriptionTier {
+  FREE
+  VERIFIED_PLUS
+}
+
+enum LeadStatus {
+  OPEN
+  CLOSED 
+}

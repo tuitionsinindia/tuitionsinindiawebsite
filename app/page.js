@@ -35,7 +35,7 @@ export default function Home() {
           Tuitions<span style={{ color: scrolled ? 'var(--text-main)' : 'white' }}>InIndia</span>
         </div>
         <div className={styles.navLinks}>
-          <a href="#" className={styles.navLink} style={{ color: scrolled ? 'var(--text-main)' : 'white' }}>Find Tutors</a>
+          <a href="/tutors" className={styles.navLink} style={{ color: scrolled ? 'var(--text-main)' : 'white' }}>Find Tutors</a>
           <a href="#" className={styles.navLink} style={{ color: scrolled ? 'var(--text-main)' : 'white' }}>Pricing</a>
           <a href="#" className={styles.navLink} style={{ color: scrolled ? 'var(--text-main)' : 'white' }}>For Tutors</a>
           <button className="btn-primary">Get Started</button>
