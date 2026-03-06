@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tuitionsinindia-web
+    restart: always
+    ports:
+      - "3006:3000" # Exposing on port 3006, map this in Nginx
+    env_file:
+      - .env.production
+    depends_on:
+      - db
+    networks:
+      - tuitions-network
+
+  db:
+    image: postgres:15-alpine
+    container_name: tuitionsinindia-db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-tuitions_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secure_password_here}
+      POSTGRES_DB: ${POSTGRES_DB:-tuitionsinindia}
+    ports:
+      - "5432:5432" # Optional: only if you need to access DB from outside the VPS
+    volumes:
+      - tuitions_pgdata:/var/lib/postgresql/data
+    networks:
+      - tuitions-network
+
+networks:
+  tuitions-network:
+    driver: bridge
+
+volumes:
+  tuitions_pgdata:
