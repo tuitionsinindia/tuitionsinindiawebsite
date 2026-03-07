@@ -1,0 +1,109 @@
+.container {
+    maxWidth: 800px;
+    margin: 0 auto;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.progressTracker {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.trackerStep {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid var(--glass-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: var(--text-muted);
+    position: relative;
+    transition: all 0.3s;
+}
+
+.trackerStep.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+}
+
+.trackerStep.completed {
+    background: rgba(16, 185, 129, 0.2);
+    border-color: rgb(16, 185, 129);
+    color: rgb(16, 185, 129);
+}
+
+.trackerStep:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: calc(100% + 5px);
+    width: 1rem;
+    height: 2px;
+    background: var(--glass-border);
+}
+
+.formTitle {
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--glass-border);
+    padding-bottom: 1rem;
+}
+
+.inputGroup {
+    margin-bottom: 1.5rem;
+}
+
+.inputGroup label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.inputGroup input,
+.inputGroup textarea {
+    width: 100%;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    color: var(--text-main);
+    outline: none;
+}
+
+.inputGroup input:focus,
+.inputGroup textarea:focus {
+    border-color: var(--primary);
+}
+
+.buttonGroup {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.buttonGroup button {
+    flex: 1;
+}
+
+.backBtn {
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    color: var(--text-main);
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.backBtn:hover {
+    background: rgba(255, 255, 255, 0.05);
+}

@@ -1,58 +1,65 @@
 .hero {
   position: relative;
-  height: 85vh;
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
   text-align: center;
   overflow: hidden;
-}
-
-.heroBackground {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: url('/hero-bg.png') no-repeat center center;
-  background-size: cover;
-  z-index: -1;
-  filter: brightness(0.6);
+  padding: 120px 2rem 80px;
 }
 
 .heroContent {
-  max-width: 800px;
-  padding: 2rem;
-  z-index: 1;
+  max-width: 1000px;
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .heroTitle {
-  font-size: 4rem;
-  margin-bottom: 1rem;
+  font-size: clamp(3rem, 8vw, 5.5rem);
+  margin-bottom: 1.5rem;
   font-weight: 800;
-  line-height: 1.1;
-  animation: fadeInUp 0.8s ease forwards;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  background: linear-gradient(135deg, #fff 0%, rgba(255, 255, 255, 0.7) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.3));
 }
 
 .heroSubtitle {
-  font-size: 1.5rem;
-  margin-bottom: 3rem;
-  opacity: 0.9;
-  animation: fadeInUp 0.8s ease forwards 0.2s;
-  opacity: 0;
-  animation-fill-mode: forwards;
+  font-size: clamp(1.1rem, 2vw, 1.4rem);
+  margin-bottom: 3.5rem;
+  color: rgba(255, 255, 255, 0.8);
+  max-width: 700px;
+  line-height: 1.5;
+}
+
+.searchBoxContainer {
+  width: 100%;
+  max-width: 900px;
+  margin-top: 2rem;
 }
 
 .searchBox {
   display: flex;
   gap: 1rem;
-  padding: 1rem;
-  border-radius: var(--radius-lg);
-  margin-top: 2rem;
-  animation: fadeInUp 0.8s ease forwards 0.4s;
-  opacity: 0;
-  animation-fill-mode: forwards;
+  padding: 1.25rem 2rem;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  transition: var(--transition-smooth);
+}
+
+.searchBox:focus-within {
+  background: rgba(255, 255, 255, 0.12);
+  transform: scale(1.02);
+  border-color: var(--primary-glow);
 }
 
 .searchInput {
@@ -60,8 +67,9 @@
   background: transparent;
   border: none;
   color: white;
-  font-size: 1.1rem;
-  padding: 0.5rem 1rem;
+  font-size: 1.2rem;
+  padding: 0.5rem 0.5rem;
+  outline: none;
 }
 
 .searchInput::placeholder {

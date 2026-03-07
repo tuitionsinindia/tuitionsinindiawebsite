@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Tutor Earnings &amp; Billing Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0d40a5",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101622",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined { font-size: 24px; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100">
+<div class="relative flex min-h-screen flex-col">
+<!-- Top Navigation Bar -->
+<header class="sticky top-0 z-50 w-full border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md px-4 md:px-10 py-3 flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="text-primary">
+<svg class="size-8" fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M24 4C25.7818 14.2173 33.7827 22.2182 44 24C33.7827 25.7818 25.7818 33.7827 24 44C22.2182 33.7827 14.2173 25.7818 4 24C14.2173 22.2182 22.2182 14.2173 24 4Z" fill="currentColor"></path>
+</svg>
+</div>
+<h2 class="text-xl font-bold tracking-tight">Tutor Dashboard</h2>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="h-10 w-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Tutor profile picture smiling professionally" src="https://lh3.googleusercontent.com/aida-public/AB6AXuATLrrRIYFZEsYR2xPFw9dvwLYtb55RB-mZZaR5F5pLO6G2NkUsIZa4ZwO56-nl_4GpQVwzfHECzb3GLtFcKbVJ60r1vo-YTmJRYE26p1sCdXOu3W55SNt2yfaHx41otLKne2XrRPLBe9ddu5m-Q6JuCz_kFLqQXrYLecNyW_se8uVYNnDc062FiYk_LLortwph0hNz8fWm1Wc66BkS-z04CCU8NlBkVMP4satCzMT0L-CNQnr0V92WRjf2reSdyjG2lIT57YDTuyY"/>
+</div>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- Sidebar Navigation -->
+<aside class="hidden lg:flex w-64 flex-col border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-background-dark p-4 gap-2">
+<div class="flex items-center gap-3 p-3 mb-6 bg-slate-50 dark:bg-slate-900 rounded-xl">
+<img class="size-10 rounded-full border border-primary/20" data-alt="Rajesh Kumar Mathematics Expert profile" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD91rSUdomRpJtCzIgRaSsNcDELGOCeU-0OFYEm72XDqni8z4913y_4Zzz7kGEK7hGu3dQTRsCYCaaAPoG5PGGwiRE24Z39BjMQQz_nTetE8AckBA2ijiVuTcl8VoI4hVvV64ZXGTyS4fnz7Mx81IU2CZVYiV5ZIaZICfQD7RkYb9yCUqGWpfW048anBFLfu4aYjhQK15oCOYlYUFqa8UFYM8S27DJQLrR6e19dfOvVg0b2Q_KiqzuxZKXBHTpdwoW1ElFPlDwdO1M"/>
+<div class="overflow-hidden">
+<p class="font-bold truncate">Rajesh Kumar</p>
+<p class="text-xs text-slate-500 truncate">Mathematics Expert</p>
+</div>
+</div>
+<nav class="space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 bg-primary/10 text-primary rounded-lg font-semibold" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span class="text-sm font-medium">Earnings</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">calendar_month</span>
+<span class="text-sm font-medium">Schedule</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="text-sm font-medium">Students</span>
+</a>
+</nav>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 overflow-y-auto p-4 md:p-8">
+<!-- Header Section -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+<div>
+<h1 class="text-3xl font-black tracking-tight text-slate-900 dark:text-white">Earnings &amp; Billing</h1>
+<p class="text-slate-500 dark:text-slate-400 mt-1">Track your income, deductions, and manage your payouts.</p>
+</div>
+<div class="flex gap-3">
+<button class="flex items-center gap-2 px-6 py-2.5 bg-primary text-white font-bold rounded-lg hover:bg-primary/90 transition-all shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+                            Request Payout
+                        </button>
+</div>
+</div>
+<!-- Metrics Overview -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<p class="text-sm text-slate-500 font-medium mb-1">Total This Month</p>
+<p class="text-2xl font-bold text-slate-900 dark:text-white">₹45,200</p>
+<div class="mt-2 flex items-center gap-1 text-emerald-600 text-sm font-bold">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+                            +12.5% vs last month
+                        </div>
+</div>
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<p class="text-sm text-slate-500 font-medium mb-1">Lifetime Earnings</p>
+<p class="text-2xl font-bold text-slate-900 dark:text-white">₹3,12,500</p>
+<div class="mt-2 flex items-center gap-1 text-primary text-sm font-bold">
+                            Total 412 Sessions
+                        </div>
+</div>
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<p class="text-sm text-slate-500 font-medium mb-1">Pending Payout</p>
+<p class="text-2xl font-bold text-amber-600">₹8,450</p>
+<div class="mt-2 flex items-center gap-1 text-slate-400 text-sm">
+                            Next payout in 2 days
+                        </div>
+</div>
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<p class="text-sm text-slate-500 font-medium mb-1">Platform Rating</p>
+<p class="text-2xl font-bold text-slate-900 dark:text-white">4.9/5.0</p>
+<div class="mt-2 flex items-center gap-1 text-amber-500 text-sm">
+<span class="material-symbols-outlined text-sm">stars</span>
+                            Top-rated expert
+                        </div>
+</div>
+</div>
+<!-- Payout Status Banner -->
+<div class="bg-primary/5 dark:bg-primary/10 border border-primary/20 p-4 rounded-xl mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
+<div class="flex items-center gap-4">
+<div class="size-10 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">sync</span>
+</div>
+<div>
+<p class="font-bold">Latest Payout Status: <span class="text-primary">Processing</span></p>
+<p class="text-sm text-slate-600 dark:text-slate-400">₹12,400 initiated on Oct 24, 2023. Estimated arrival in 24-48 hours.</p>
+</div>
+</div>
+<button class="text-sm font-bold text-primary hover:underline">View History</button>
+</div>
+<!-- Transactions and Invoices Table -->
+<div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+<div class="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between flex-wrap gap-4">
+<h2 class="text-lg font-bold">Recent Session History</h2>
+<div class="flex items-center gap-2">
+<button class="px-3 py-1.5 text-sm font-medium border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800">
+                                Filter by Month
+                            </button>
+<button class="px-3 py-1.5 text-sm font-medium bg-slate-100 dark:bg-slate-800 rounded-lg">
+                                All Sessions
+                            </button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead class="bg-slate-50 dark:bg-slate-800/50">
+<tr>
+<th class="p-4 text-xs font-bold uppercase tracking-wider text-slate-500">Date</th>
+<th class="p-4 text-xs font-bold uppercase tracking-wider text-slate-500">Student / Session</th>
+<th class="p-4 text-xs font-bold uppercase tracking-wider text-slate-500">Gross Amount</th>
+<th class="p-4 text-xs font-bold uppercase tracking-wider text-slate-500">Platform Fee (10%)</th>
+<th class="p-4 text-xs font-bold uppercase tracking-wider text-slate-500">Net Earnings</th>
+<th class="p-4 text-xs font-bold uppercase tracking-wider text-slate-500">Invoice</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+<!-- Row 1 -->
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="p-4 text-sm whitespace-nowrap">Oct 26, 2023</td>
+<td class="p-4">
+<div class="flex flex-col">
+<span class="font-semibold text-sm">Aditya Verma</span>
+<span class="text-xs text-slate-500">Calculus Advanced - 1.5 hrs</span>
+</div>
+</td>
+<td class="p-4 text-sm font-medium">₹1,500.00</td>
+<td class="p-4 text-sm text-red-500">-₹150.00</td>
+<td class="p-4 text-sm font-bold text-emerald-600">₹1,350.00</td>
+<td class="p-4">
+<button class="flex items-center gap-1.5 text-primary text-xs font-bold hover:underline">
+<span class="material-symbols-outlined text-sm">download</span>
+                                            PDF
+                                        </button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="p-4 text-sm whitespace-nowrap">Oct 25, 2023</td>
+<td class="p-4">
+<div class="flex flex-col">
+<span class="font-semibold text-sm">Priya Sharma</span>
+<span class="text-xs text-slate-500">Trigonometry Basics - 1 hr</span>
+</div>
+</td>
+<td class="p-4 text-sm font-medium">₹800.00</td>
+<td class="p-4 text-sm text-red-500">-₹80.00</td>
+<td class="p-4 text-sm font-bold text-emerald-600">₹720.00</td>
+<td class="p-4">
+<button class="flex items-center gap-1.5 text-primary text-xs font-bold hover:underline">
+<span class="material-symbols-outlined text-sm">download</span>
+                                            PDF
+                                        </button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="p-4 text-sm whitespace-nowrap">Oct 24, 2023</td>
+<td class="p-4">
+<div class="flex flex-col">
+<span class="font-semibold text-sm">Rahul Gupta</span>
+<span class="text-xs text-slate-500">Group Session (3) - 2 hrs</span>
+</div>
+</td>
+<td class="p-4 text-sm font-medium">₹3,200.00</td>
+<td class="p-4 text-sm text-red-500">-₹320.00</td>
+<td class="p-4 text-sm font-bold text-emerald-600">₹2,880.00</td>
+<td class="p-4">
+<button class="flex items-center gap-1.5 text-primary text-xs font-bold hover:underline">
+<span class="material-symbols-outlined text-sm">download</span>
+                                            PDF
+                                        </button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="p-4 text-sm whitespace-nowrap">Oct 22, 2023</td>
+<td class="p-4">
+<div class="flex flex-col">
+<span class="font-semibold text-sm">Sanya Iyer</span>
+<span class="text-xs text-slate-500">JEE Mock Review - 1.5 hrs</span>
+</div>
+</td>
+<td class="p-4 text-sm font-medium">₹1,800.00</td>
+<td class="p-4 text-sm text-red-500">-₹180.00</td>
+<td class="p-4 text-sm font-bold text-emerald-600">₹1,620.00</td>
+<td class="p-4">
+<button class="flex items-center gap-1.5 text-primary text-xs font-bold hover:underline">
+<span class="material-symbols-outlined text-sm">download</span>
+                                            PDF
+                                        </button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+<p class="text-sm text-slate-500">Showing 4 of 28 sessions this month</p>
+<div class="flex gap-2">
+<button class="p-2 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-50" disabled="">
+<span class="material-symbols-outlined text-base">chevron_left</span>
+</button>
+<button class="p-2 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800">
+<span class="material-symbols-outlined text-base">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Tax Information & Settings -->
+<div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800">
+<h3 class="font-bold mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">description</span>
+                            Tax &amp; Compliance
+                        </h3>
+<p class="text-sm text-slate-600 dark:text-slate-400 mb-4">All your earnings are subject to TDS as per Section 194J of the Income Tax Act. Download your Form 16A here.</p>
+<div class="space-y-3">
+<div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+<span class="text-sm font-medium">FY 2023-24 Q2 Summary</span>
+<button class="text-primary text-xs font-bold hover:underline">Download Report</button>
+</div>
+<div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+<span class="text-sm font-medium">GST Invoices (October)</span>
+<button class="text-primary text-xs font-bold hover:underline">Download Zip</button>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800">
+<h3 class="font-bold mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">account_balance</span>
+                            Payout Settings
+                        </h3>
+<div class="flex items-center gap-4 mb-4">
+<div class="size-12 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+<span class="material-symbols-outlined text-slate-400">food_bank</span>
+</div>
+<div>
+<p class="text-sm font-bold">HDFC Bank •••• 4920</p>
+<p class="text-xs text-slate-500">Savings Account | IFSC: HDFC0001234</p>
+</div>
+<button class="ml-auto text-primary text-xs font-bold">Edit</button>
+</div>
+<div class="p-3 bg-primary/5 dark:bg-primary/10 rounded-lg border border-primary/10">
+<p class="text-xs font-medium text-primary">Auto-payout is enabled. Your balance will be automatically transferred to your bank every Friday.</p>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+</body></html>

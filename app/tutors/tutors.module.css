@@ -5,11 +5,14 @@
 
 .filterBar {
   display: flex;
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 0.5rem;
-  border-radius: var(--radius-lg);
+  max-width: 900px;
+  margin: 2rem auto 0;
+  padding: 0.75rem 1.5rem;
+  border-radius: 100px;
   gap: 1rem;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--glass-border);
 }
 
 .filterInput {
@@ -17,31 +20,32 @@
   background: transparent;
   border: none;
   padding: 0.5rem 1rem;
-  font-size: 1rem;
-  color: var(--text-main);
+  font-size: 1.1rem;
+  color: white;
   outline: none;
 }
 
 .filterInput::placeholder {
-  color: var(--text-muted);
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .divider {
   width: 1px;
-  background: var(--glass-border);
+  background: rgba(255, 255, 255, 0.1);
   margin: 0.5rem 0;
 }
 
 .directoryLayout {
   display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: 2rem;
-  padding-bottom: 4rem;
+  grid-template-columns: 320px 1fr;
+  gap: 3rem;
+  padding-bottom: 6rem;
+  margin-top: 4rem;
 }
 
 .sidebar {
   position: sticky;
-  top: 100px;
+  top: 120px;
   height: max-content;
 }
 
@@ -77,28 +81,41 @@
 }
 
 .tutorCard {
-  padding: 2rem;
+  padding: 2.5rem;
+  transition: var(--transition-smooth);
 }
 
 .tutorHeader {
   display: flex;
   align-items: flex-start;
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
+  gap: 2rem;
+  margin-bottom: 2rem;
 }
 
 .tutorAvatar {
-  width: 64px;
-  height: 64px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--primary), var(--secondary));
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2rem;
+  font-size: 2.2rem;
   font-weight: 700;
   flex-shrink: 0;
+  position: relative;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.avatarGlow {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  z-index: 5;
+  border: 3px solid #0f172a;
+  border-radius: 50%;
+  line-height: 0;
 }
 
 .tutorInfo {
@@ -106,45 +123,62 @@
 }
 
 .verifiedBadge {
-  background: rgba(34, 197, 94, 0.1);
-  color: #16a34a;
-  padding: 0.2rem 0.6rem;
-  border-radius: var(--radius-sm);
-  font-size: 0.8rem;
-  font-weight: 600;
-  border: 1px solid rgba(34, 197, 94, 0.2);
+  background: linear-gradient(90deg, #10b981, #059669);
+  color: white;
+  padding: 0.25rem 0.8rem;
+  border-radius: 50px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  border: none;
 }
 
 .tutorMeta {
   display: flex;
-  gap: 0.8rem;
-  font-size: 0.95rem;
-  margin-top: 0.3rem;
+  gap: 1rem;
+  font-size: 1rem;
+  margin-top: 0.5rem;
+  align-items: center;
 }
 
 .rateContainer {
   text-align: right;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--glass-border);
 }
 
 .rate {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--primary);
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: white;
+  line-height: 1;
 }
 
 .subjectsList {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.75rem;
   flex-wrap: wrap;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .subjectTag {
-  background: var(--glass-border);
-  padding: 0.3rem 0.8rem;
-  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(5px);
+  padding: 0.4rem 1.25rem;
+  border-radius: 50px;
   font-size: 0.85rem;
   font-weight: 500;
+  border: 1px solid var(--glass-border);
+  transition: var(--transition-fast);
+}
+
+.subjectTag:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: var(--primary-glow);
 }
 
 .bio {
@@ -176,7 +210,7 @@
   .directoryLayout {
     grid-template-columns: 1fr;
   }
-  
+
   .sidebar {
     position: static;
   }
@@ -188,15 +222,15 @@
     align-items: center;
     text-align: center;
   }
-  
+
   .tutorMeta {
     justify-content: center;
   }
-  
+
   .rateContainer {
     text-align: center;
   }
-  
+
   .cardActions {
     flex-direction: column;
   }

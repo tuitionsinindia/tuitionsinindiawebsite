@@ -9,8 +9,16 @@
   },
   "dependencies": {
     "@prisma/client": "^6.19.2",
+    "@tailwindcss/postcss": "^4.2.1",
     "next": "16.1.6",
+    "razorpay": "^2.9.6",
     "react": "19.2.3",
     "react-dom": "19.2.3"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.27",
+    "postcss": "^8.5.8",
+    "prisma": "^6.19.2",
+    "tailwindcss": "^4.2.1"
   }
 }
