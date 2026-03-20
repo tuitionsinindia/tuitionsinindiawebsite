@@ -3,6 +3,7 @@
 import { useState } from "react";
 import styles from "./register-tutor.module.css";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function RegisterTutor() {
     const [step, setStep] = useState(1);
