@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(request) {
     try {
         const body = await request.json();
-        let { name, email, phone, title, bio, subjects, locations, hourlyRate } = body;
+        let { name, email, phone, title, bio, subjects, locations, hourlyRate, grades } = body;
 
         // Validation
         if (!email || !name || !phone || !title || !subjects) {
@@ -30,22 +30,40 @@ export async function POST(request) {
         // Process comma separated lists
         const subjectList = subjects.split(',').map(s => s.trim()).filter(s => s !== "");
         const locationList = locations.split(',').map(l => l.trim()).filter(l => l !== "");
+        const gradeList = grades ? grades.split(',').map(g => g.trim()).filter(g => g !== "") : [];
 
-        // 1. Create or Update user with TUTOR role
-        const user = await prisma.user.upsert({
-            where: { email },
-            update: {
-                name,
-                phone,
-                role: 'TUTOR',
-            },
-            create: {
-                email,
-                name,
-                phone,
-                role: 'TUTOR',
-            },
+        // 1. Find or create the Tutor user
+        let user = await prisma.user.findFirst({
+            where: {
+                OR: [
+                    { email },
+                    { phone }
+                ]
+            }
         });
+
+        if (user) {
+            // Update existing user to TUTOR role
+            user = await prisma.user.update({
+                where: { id: user.id },
+                data: {
+                    name,
+                    phone,
+                    email,
+                    role: 'TUTOR',
+                }
+            });
+        } else {
+            // Create new user
+            user = await prisma.user.create({
+                data: {
+                    email,
+                    name,
+                    phone,
+                    role: 'TUTOR',
+                },
+            });
+        }
 
         // 2. Create the Listing
         const listing = await prisma.listing.create({
@@ -54,6 +72,7 @@ export async function POST(request) {
                 title,
                 bio,
                 subjects: subjectList,
+                grades: gradeList,
                 locations: locationList,
                 hourlyRate: parseInt(hourlyRate) || 0,
                 isActive: false, // Profiles require admin approval by default
@@ -64,7 +83,7 @@ export async function POST(request) {
     } catch (error) {
         console.error("Error creating tutor profile:", error);
         return NextResponse.json(
-            { success: false, error: "Failed to create profile" },
+            { success: false, error: error.message || "Failed to create profile" },
             { status: 500 }
         );
     }

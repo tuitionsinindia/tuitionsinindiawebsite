@@ -177,8 +177,8 @@ export default function MessagesPage() {
                                     type="submit"
                                     disabled={!newMessage.trim()}
                                     className={`absolute right-2 size-10 rounded-full flex items-center justify-center transition-all ${newMessage.trim()
-                                            ? 'bg-primary text-white hover:bg-primary-glow shadow-md shadow-primary/30 scale-100'
-                                            : 'bg-slate-200 dark:bg-slate-700 text-slate-400 scale-95 cursor-not-allowed'
+                                        ? 'bg-primary text-white hover:bg-primary-glow shadow-md shadow-primary/30 scale-100'
+                                        : 'bg-slate-200 dark:bg-slate-700 text-slate-400 scale-95 cursor-not-allowed'
                                         }`}
                                 >
                                     <span className="material-symbols-outlined text-[18px]">send</span>

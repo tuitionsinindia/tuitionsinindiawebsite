@@ -22,6 +22,9 @@ export async function GET(request) {
                 role: true,
                 credits: true,
                 isVerified: true,
+                isIdVerified: true,
+                subscriptionTier: true,
+                subscriptionStatus: true,
             },
         });
 

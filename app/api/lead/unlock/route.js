@@ -29,23 +29,26 @@ export async function POST(request) {
                 select: { credits: true }
             });
 
-            if (!tutor || tutor.credits < 1) {
-                return NextResponse.json({ error: "Insufficient credits. Please top up." }, { status: 403 });
-            }
-
             const lead = await tx.lead.findUnique({
                 where: { id: leadId },
-                select: { unlockCount: true, maxUnlocks: true, status: true }
+                select: { unlockCount: true, maxUnlocks: true, status: true, premiumTier: true }
             });
 
-            if (!lead || lead.status === 'CLOSED' || lead.unlockCount >= lead.maxUnlocks) {
+            if (!lead || ['CLOSED', 'CLOSED_STUDENT', 'CLOSED_ADMIN'].includes(lead.status) || lead.unlockCount >= lead.maxUnlocks) {
                 return NextResponse.json({ error: "Lead is no longer available" }, { status: 410 });
             }
 
-            // Deduct credit
+            // Determine cost: 0: basic (1), 1: turbo (2), 2: verified (3)
+            const creditCost = lead.premiumTier === 2 ? 3 : lead.premiumTier === 1 ? 2 : 1;
+
+            if (!tutor || tutor.credits < creditCost) {
+                return NextResponse.json({ error: `Insufficient credits. This lead requires ${creditCost} credits.` }, { status: 403 });
+            }
+
+            // Deduct credits
             await tx.user.update({
                 where: { id: tutorId },
-                data: { credits: { decrement: 1 } }
+                data: { credits: { decrement: creditCost } }
             });
 
             // Create unlock record

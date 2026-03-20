@@ -7,11 +7,29 @@ export async function GET(request) {
     try {
         const { searchParams } = new URL(request.url);
         const tutorId = searchParams.get("tutorId");
+        const subject = searchParams.get("subject");
+        const location = searchParams.get("location");
+        const minBudget = searchParams.get("minBudget");
+
+        const where = {
+            status: 'OPEN',
+        };
+
+        if (subject) {
+            where.subject = { contains: subject, mode: 'insensitive' };
+        }
+        if (location) {
+            where.location = { contains: location, mode: 'insensitive' };
+        }
+        if (minBudget) {
+            // Note: budget is currently a string in schema (e.g., "500/hr"). 
+            // For real filtering, it should be numeric. We'll do a simple contains for now
+            // or assume the user wants to see leads WITH a certain budget.
+            where.budget = { contains: minBudget };
+        }
 
         const leads = await prisma.lead.findMany({
-            where: {
-                status: 'OPEN',
-            },
+            where,
             include: {
                 unlockedBy: {
                     where: {

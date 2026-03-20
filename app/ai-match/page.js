@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function AIMatchingFlow() {
     const router = useRouter();
@@ -43,57 +43,53 @@ export default function AIMatchingFlow() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-background-dark font-sans relative overflow-hidden flex flex-col pt-24 pb-20 px-4 md:px-8">
-            {/* Background Effects */}
-            <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-primary/10 rounded-full blur-[120px] pointer-events-none -translate-y-1/2 translate-x-1/3"></div>
-            <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-accent/10 rounded-full blur-[100px] pointer-events-none translate-y-1/3 -translate-x-1/3"></div>
-
+        <div className="min-h-screen bg-slate-50 font-sans relative overflow-hidden flex flex-col pt-32 pb-20 px-4 md:px-8">
             <div className="max-w-3xl mx-auto w-full relative z-10 flex flex-col flex-1 mt-10">
                 {/* Header */}
                 <div className="text-center mb-10">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-bold tracking-wider mb-6 border border-primary/20 shadow-sm animate-pulse-slow">
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/5 text-primary text-[10px] font-bold tracking-widest uppercase mb-6 border border-primary/10 shadow-sm">
                         <span className="material-symbols-outlined text-[18px]">auto_awesome</span>
                         AI-Powered Matching Engine
                     </div>
                     {step < 4 ? (
                         <>
-                            <h1 className="text-4xl md:text-5xl font-heading font-bold mb-4 text-slate-900 dark:text-white tracking-tight">
-                                Find Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">Perfect Tutor</span>
+                            <h1 className="text-4xl md:text-5xl font-bold mb-4 text-slate-900 tracking-tight">
+                                Find Your <span className="text-primary">Perfect Tutor</span>
                             </h1>
-                            <p className="text-lg text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
-                                Tell our AI about your learning goals and style, and we'll math you with the exact right educator for your needs.
+                            <p className="text-lg text-slate-500 font-medium max-w-xl mx-auto">
+                                Let AI analyze your learning style to find the absolute best match from our verified network.
                             </p>
                         </>
                     ) : (
                         <>
-                            <h1 className="text-4xl md:text-5xl font-heading font-bold mb-4 text-slate-900 dark:text-white tracking-tight">
-                                Analysis <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-400">Complete</span>
+                            <h1 className="text-4xl md:text-5xl font-bold mb-4 text-slate-900 tracking-tight">
+                                Analysis <span className="text-emerald-500">Complete</span>
                             </h1>
-                            <p className="text-lg text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
-                                We scanned verified tutors and found the absolute best matches based on your unique profile.
+                            <p className="text-lg text-slate-500 font-medium max-w-xl mx-auto">
+                                We've found the top educator matches based on your unique academic profile.
                             </p>
                         </>
                     )}
                 </div>
 
                 {/* Main Card */}
-                <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[2.5rem] p-8 md:p-12 border border-white/50 dark:border-slate-800 shadow-2xl shadow-primary/5 relative overflow-hidden">
+                <div className="bg-white rounded-[3rem] p-8 md:p-16 border border-slate-100 shadow-2xl shadow-primary/5 relative overflow-hidden">
 
                     {/* Progress Bar */}
                     {(!isAnalyzing && step < 4) && (
-                        <div className="flex gap-2 mb-10 w-full">
+                        <div className="flex gap-3 mb-12 w-full max-w-[200px] mx-auto">
                             {[1, 2, 3].map(i => (
-                                <div key={i} className={`h-2 flex-1 rounded-full transition-colors duration-500 ${step >= i ? 'bg-primary shadow-sm shadow-primary/50' : 'bg-slate-200 dark:bg-slate-800'}`}></div>
+                                <div key={i} className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${step >= i ? 'bg-primary' : 'bg-slate-100'}`}></div>
                             ))}
                         </div>
                     )}
 
                     {/* Step 1: Broad Goal */}
                     {step === 1 && !isAnalyzing && (
-                        <div className="animate-fade-in-up space-y-8">
-                            <div>
-                                <h2 className="text-2xl font-heading font-bold mb-2">What is your primary learning goal?</h2>
-                                <p className="text-slate-500">Select the option that best describes why you need a tutor right now.</p>
+                        <div className="animate-fade-in-up space-y-10">
+                            <div className="text-center">
+                                <h2 className="text-2xl font-bold mb-3">What is your primary goal?</h2>
+                                <p className="text-slate-400 font-medium">Select the option that best describes your current need.</p>
                             </div>
                             <div className="grid sm:grid-cols-2 gap-4">
                                 {[
@@ -105,11 +101,11 @@ export default function AIMatchingFlow() {
                                     <button
                                         key={opt.id}
                                         onClick={() => { setLearningGoal(opt.title); handleNext(); }}
-                                        className={`p-6 rounded-2xl border-2 text-left transition-all ${learningGoal === opt.title ? 'border-primary bg-primary/5 scale-[1.02]' : 'border-slate-200 dark:border-slate-800 hover:border-primary/50 bg-white dark:bg-slate-800'}`}
+                                        className={`p-8 rounded-[2rem] border-2 text-left transition-all group ${learningGoal === opt.title ? 'border-primary bg-primary/5' : 'border-slate-50 bg-slate-50/30 hover:border-primary/20 hover:bg-white'}`}
                                     >
-                                        <span className={`material-symbols-outlined text-4xl mb-4 ${learningGoal === opt.title ? 'text-primary' : 'text-slate-400'}`}>{opt.icon}</span>
-                                        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">{opt.title}</h3>
-                                        <p className="text-sm text-slate-500">{opt.desc}</p>
+                                        <span className={`material-symbols-outlined text-4xl mb-6 flex items-center justify-center size-16 rounded-2xl transition-all ${learningGoal === opt.title ? 'bg-primary text-white' : 'bg-white text-primary/40 group-hover:bg-primary/10 group-hover:text-primary'}`}>{opt.icon}</span>
+                                        <h3 className="text-lg font-bold text-slate-900 mb-1">{opt.title}</h3>
+                                        <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">{opt.desc}</p>
                                     </button>
                                 ))}
                             </div>
@@ -118,32 +114,32 @@ export default function AIMatchingFlow() {
 
                     {/* Step 2: Subject & Grade */}
                     {step === 2 && !isAnalyzing && (
-                        <div className="animate-fade-in-up space-y-8">
-                            <div>
-                                <h2 className="text-2xl font-heading font-bold mb-2">What do you want to learn?</h2>
-                                <p className="text-slate-500">Provide specific details so our AI can narrow down the expertise needed.</p>
+                        <div className="animate-fade-in-up space-y-10">
+                            <div className="text-center">
+                                <h2 className="text-2xl font-bold mb-3">Provide more details</h2>
+                                <p className="text-slate-400 font-medium">Our AI uses this to filter expertise levels.</p>
                             </div>
 
-                            <div className="space-y-6">
+                            <div className="space-y-8">
                                 <div>
-                                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Specific Subject / Topic</label>
+                                    <label className="block text-[10px] font-bold text-primary uppercase tracking-widest mb-3">Specific Subject / Topic</label>
                                     <input
                                         type="text"
                                         value={subject}
                                         onChange={(e) => setSubject(e.target.value)}
-                                        placeholder="e.g. Class 12 CBSE Physics, Python for Beginners"
-                                        className="w-full h-14 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl px-6 focus:ring-2 focus:ring-primary outline-none transition-all placeholder:text-slate-400 font-medium"
+                                        placeholder="e.g. Class 12 CBSE Physics"
+                                        className="w-full h-16 bg-slate-50 border-none rounded-2xl px-8 focus:ring-2 focus:ring-primary outline-none transition-all placeholder:text-slate-300 font-bold text-slate-700"
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Current Academic Level</label>
-                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                    <label className="block text-[10px] font-bold text-primary uppercase tracking-widest mb-3">Academic Level</label>
+                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                                         {['Primary', 'Middle', 'High School', 'College', 'Professional'].map(lvl => (
                                             <button
                                                 key={lvl}
                                                 onClick={() => setGradeLevel(lvl)}
-                                                className={`py-3 px-4 rounded-xl border text-sm font-bold transition-colors ${gradeLevel === lvl ? 'bg-primary text-white border-primary' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-primary/50'}`}
+                                                className={`py-4 px-4 rounded-xl border-2 text-xs font-bold transition-all ${gradeLevel === lvl ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20' : 'bg-white text-slate-500 border-slate-50 hover:border-primary/20'}`}
                                             >
                                                 {lvl}
                                             </button>
@@ -152,12 +148,12 @@ export default function AIMatchingFlow() {
                                 </div>
                             </div>
 
-                            <div className="flex gap-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-                                <button onClick={handleBack} className="px-6 py-4 rounded-xl font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">Back</button>
+                            <div className="flex gap-4 pt-10 border-t border-slate-50">
+                                <button onClick={handleBack} className="px-8 py-5 rounded-2xl font-bold text-slate-400 hover:text-slate-900 transition-colors uppercase tracking-widest text-xs">Back</button>
                                 <button
                                     onClick={handleNext}
                                     disabled={!subject || !gradeLevel}
-                                    className={`flex-1 rounded-xl font-bold py-4 transition-all ${subject && gradeLevel ? 'bg-primary text-white hover:bg-primary-glow shadow-lg shadow-primary/30' : 'bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-not-allowed'}`}
+                                    className={`flex-1 rounded-2xl font-bold py-5 transition-all uppercase tracking-widest text-xs ${subject && gradeLevel ? 'bg-primary text-white shadow-xl shadow-primary/20 hover:opacity-90' : 'bg-slate-100 text-slate-300 cursor-not-allowed'}`}
                                 >
                                     Continue
                                 </button>
@@ -167,26 +163,26 @@ export default function AIMatchingFlow() {
 
                     {/* Step 3: Learning Style */}
                     {step === 3 && !isAnalyzing && (
-                        <div className="animate-fade-in-up space-y-8">
-                            <div>
-                                <h2 className="text-2xl font-heading font-bold mb-2">How do you learn best?</h2>
-                                <p className="text-slate-500">This helps the AI match you with a tutor whose teaching style aligns with your learning style.</p>
+                        <div className="animate-fade-in-up space-y-10">
+                            <div className="text-center">
+                                <h2 className="text-2xl font-bold mb-3">Teaching approach preference</h2>
+                                <p className="text-slate-400 font-medium">How do you learn most effectively?</p>
                             </div>
 
                             <div className="space-y-4">
                                 {[
-                                    { id: "visual", title: "Visual & Interactive", desc: "Diagrams, videos, whiteboards, and interactive tools" },
-                                    { id: "practical", title: "Practical & Hands-on", desc: "Solving problems together, real-world examples" },
-                                    { id: "theoretical", title: "Deep Theoretical Focus", desc: "Understanding the core 'why' and foundational concepts" },
-                                    { id: "pace", title: "Patient & Slow-paced", desc: "I need someone who will repeat concepts patiently" }
+                                    { id: "visual", title: "Visual & Interactive", desc: "Diagrams, videos, whiteboards" },
+                                    { id: "practical", title: "Practical & Hands-on", desc: "Solving problems together" },
+                                    { id: "theoretical", title: "Deep Theory Focus", desc: "Understanding the core foundational concepts" },
+                                    { id: "pace", title: "Patient & Slow-paced", desc: "I need step-by-step repetition" }
                                 ].map(style => (
-                                    <label key={style.id} className={`flex items-start gap-4 p-5 rounded-2xl border-2 cursor-pointer transition-all ${learningStyle === style.title ? 'border-primary bg-primary/5' : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800 hover:border-primary/30'}`}>
-                                        <div className={`mt-1 size-6 rounded-full border-2 flex items-center justify-center ${learningStyle === style.title ? 'border-primary' : 'border-slate-300 dark:border-slate-600'}`}>
-                                            {learningStyle === style.title && <div className="size-3 bg-primary rounded-full"></div>}
+                                    <label key={style.id} className={`flex items-center gap-5 p-6 rounded-[1.5rem] border-2 cursor-pointer transition-all ${learningStyle === style.title ? 'border-primary bg-primary/5' : 'border-slate-50 bg-slate-50/20 hover:border-primary/10'}`}>
+                                        <div className={`size-6 rounded-full border-2 flex items-center justify-center transition-all ${learningStyle === style.title ? 'border-primary bg-primary' : 'border-slate-200'}`}>
+                                            {learningStyle === style.title && <div className="size-2 bg-white rounded-full"></div>}
                                         </div>
-                                        <div>
-                                            <h4 className="font-bold text-slate-900 dark:text-white mb-1">{style.title}</h4>
-                                            <p className="text-sm text-slate-500">{style.desc}</p>
+                                        <div className="flex-1">
+                                            <h4 className="font-bold text-slate-900 mb-1">{style.title}</h4>
+                                            <p className="text-xs text-slate-400 font-medium">{style.desc}</p>
                                         </div>
                                         <input
                                             type="radio"
@@ -199,14 +195,14 @@ export default function AIMatchingFlow() {
                                 ))}
                             </div>
 
-                            <div className="flex gap-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-                                <button onClick={handleBack} className="px-6 py-4 rounded-xl font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">Back</button>
+                            <div className="flex gap-4 pt-10 border-t border-slate-50">
+                                <button onClick={handleBack} className="px-8 py-5 rounded-2xl font-bold text-slate-400 hover:text-slate-900 transition-colors uppercase tracking-widest text-xs">Back</button>
                                 <button
                                     onClick={handleAnalyze}
                                     disabled={!learningStyle}
-                                    className={`flex-1 rounded-xl font-bold py-4 flex items-center justify-center gap-2 transition-all ${learningStyle ? 'bg-gradient-to-r from-primary to-accent text-white hover:shadow-lg hover:shadow-primary/30' : 'bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-not-allowed'}`}
+                                    className={`flex-1 rounded-2xl font-bold py-5 flex items-center justify-center gap-3 transition-all uppercase tracking-widest text-xs ${learningStyle ? 'bg-primary text-white shadow-xl shadow-primary/20' : 'bg-slate-100 text-slate-300 cursor-not-allowed'}`}
                                 >
-                                    <span className="material-symbols-outlined">psychology</span>
+                                    <span className="material-symbols-outlined text-lg">psychology</span>
                                     Analyze & Match
                                 </button>
                             </div>
@@ -215,114 +211,103 @@ export default function AIMatchingFlow() {
 
                     {/* AI Analysis Loading State */}
                     {isAnalyzing && (
-                        <div className="py-12 flex flex-col items-center justify-center text-center animate-fade-in-up">
-                            <div className="relative size-32 mb-8">
-                                <div className="absolute inset-0 border-4 border-primary/20 rounded-full"></div>
-                                <div className="absolute inset-0 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                        <div className="py-20 flex flex-col items-center justify-center text-center animate-fade-in-up">
+                            <div className="relative size-40 mb-10">
+                                <div className="absolute inset-0 border-8 border-slate-50 rounded-full"></div>
+                                <div className="absolute inset-0 border-8 border-primary border-t-transparent rounded-full animate-spin"></div>
                                 <div className="absolute inset-0 flex items-center justify-center text-primary">
-                                    <span className="material-symbols-outlined text-4xl animate-pulse">auto_awesome</span>
+                                    <span className="material-symbols-outlined text-5xl animate-pulse">auto_awesome</span>
                                 </div>
                             </div>
-                            <h2 className="text-2xl font-heading font-bold mb-2">Analyzing your profile...</h2>
-                            <p className="text-slate-500 max-w-sm">Our AI is scanning thousands of tutor profiles to find the perfect match for {subject || "your needs"}.</p>
+                            <h2 className="text-3xl font-bold mb-3 text-slate-900">Matching with Educators</h2>
+                            <p className="text-slate-400 font-medium max-w-sm">Scanning our network of experts for {subject || "your needs"}.</p>
 
-                            <div className="mt-8 space-y-3 w-full max-w-sm mx-auto text-left">
-                                <div className="flex items-center gap-3 text-sm font-semibold text-slate-600 dark:text-slate-300">
-                                    <span className="material-symbols-outlined text-emerald-500 text-[18px]">check_circle</span>
-                                    Goal analysis complete
-                                </div>
-                                <div className="flex items-center gap-3 text-sm font-semibold text-slate-600 dark:text-slate-300 relative overflow-hidden">
-                                    <span className="material-symbols-outlined text-emerald-500 text-[18px]">check_circle</span>
-                                    Filtering by {gradeLevel} level
-                                </div>
-                                <div className="flex items-center gap-3 text-sm font-semibold text-slate-400 animate-pulse">
-                                    <span className="material-symbols-outlined text-slate-300 text-[18px]">psychology</span>
-                                    Matching pedagogical styles...
-                                </div>
+                            <div className="mt-12 space-y-4 w-full max-w-xs mx-auto text-left">
+                                {[
+                                    { label: "Goal analysis complete", done: true },
+                                    { label: `Filtering by ${gradeLevel} depth`, done: true },
+                                    { label: "Validating pedagogical fit", done: false }
+                                ].map((item, i) => (
+                                    <div key={i} className={`flex items-center gap-3 text-xs font-bold uppercase tracking-widest ${item.done ? 'text-emerald-500' : 'text-slate-300 animate-pulse'}`}>
+                                        <span className="material-symbols-outlined text-[18px]">{item.done ? 'check_circle' : 'hourglass_top'}</span>
+                                        {item.label}
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     )}
 
                     {/* Step 4: Final Results UI */}
                     {step === 4 && !isAnalyzing && (
-                        <div className="animate-fade-in-up space-y-8">
+                        <div className="animate-fade-in-up space-y-10">
                             {aiResults && aiResults.length > 0 ? (
-                                <div className="space-y-6">
-                                    <div className="bg-emerald-50 dark:bg-emerald-900/10 p-4 border border-emerald-100 dark:border-emerald-800/30 rounded-2xl flex items-center justify-between shadow-inner">
-                                        <div className="flex items-center gap-3 text-emerald-800 dark:text-emerald-400 font-bold">
-                                            <span className="material-symbols-outlined">target</span> Match Score: <span className="text-xl">{Math.floor(Math.min(99, Math.max(75, (aiResults[0].matchScore / 100) * 110)))}%</span>
-                                        </div>
+                                <div className="space-y-8">
+                                    <div className="inline-flex items-center gap-3 bg-emerald-50 px-6 py-2 rounded-full border border-emerald-100 text-emerald-600 font-bold uppercase tracking-widest text-[10px]">
+                                        <span className="material-symbols-outlined text-sm">target</span> Match Score: {Math.floor(Math.min(99, Math.max(75, (aiResults[0].matchScore / 100) * 110)))}%
                                     </div>
 
                                     {/* Top Match Card */}
-                                    <div className="bg-gradient-to-tr from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 rounded-3xl p-6 md:p-8 border-[3px] border-primary shadow-2xl shadow-primary/20 relative overflow-hidden group">
-                                        <div className="absolute -top-4 -right-4 size-32 bg-primary/10 blur-2xl rounded-full"></div>
-                                        <div className="absolute top-0 right-0 bg-primary text-white text-[10px] font-bold uppercase tracking-widest px-4 py-1 rounded-bl-2xl shadow-sm">
-                                            #1 Recommended
+                                    <div className="bg-white rounded-[3rem] p-10 border-4 border-primary shadow-2xl shadow-primary/10 relative group">
+                                        <div className="absolute top-0 right-10 bg-primary text-white text-[10px] font-bold uppercase tracking-widest px-6 py-2 rounded-b-2xl">
+                                            Recommended Match
                                         </div>
 
-                                        <div className="flex flex-col md:flex-row gap-6 relative z-10 pt-2">
-                                            <div className="flex-shrink-0 text-center mx-auto md:mx-0">
-                                                <div className="size-24 rounded-[2rem] bg-gradient-to-tr from-primary to-accent p-[2px] shadow-lg shadow-primary/30 mx-auto mb-3">
-                                                    <div className="w-full h-full rounded-[1.9rem] bg-white dark:bg-slate-900 flex items-center justify-center text-3xl font-heading font-bold text-slate-900 dark:text-white border-2 border-white dark:border-slate-800">
-                                                        {aiResults[0].tutor.name.charAt(0)}
-                                                    </div>
+                                        <div className="flex flex-col md:flex-row gap-10 items-center md:items-start text-center md:text-left">
+                                            <div className="shrink-0">
+                                                <div className="size-32 rounded-[2.5rem] bg-slate-50 flex items-center justify-center text-4xl font-bold text-primary border-4 border-white shadow-xl shadow-primary/5">
+                                                    {aiResults[0].tutor.name.charAt(0)}
                                                 </div>
-                                                <div className="bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-full border border-slate-200 dark:border-slate-700 text-sm font-bold shadow-inner inline-block text-primary">
-                                                    ₹{aiResults[0].hourlyRate}/hr
-                                                </div>
+                                                <div className="mt-6 text-xl font-bold text-slate-900">₹{aiResults[0].hourlyRate}/hr</div>
                                             </div>
 
-                                            <div className="flex-1 w-full">
-                                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
-                                                    <div className="flex items-center gap-2">
-                                                        <h3 className="text-2xl font-bold font-heading text-slate-900 dark:text-white">{aiResults[0].tutor.name}</h3>
-                                                        {aiResults[0].tutor.isVerified && <span className="material-symbols-outlined text-emerald-500 fill-current" title="Verified">verified</span>}
-                                                    </div>
+                                            <div className="flex-1">
+                                                <div className="flex items-center justify-center md:justify-start gap-2 mb-6">
+                                                    <h3 className="text-3xl font-bold text-slate-900">{aiResults[0].tutor.name}</h3>
+                                                    {aiResults[0].tutor.isVerified && <span className="material-symbols-outlined text-emerald-500 fill-current">verified</span>}
                                                 </div>
 
-                                                <div className="bg-primary/5 dark:bg-primary/10 p-5 rounded-2xl border border-primary/10 mb-5">
-                                                    <h4 className="text-xs font-bold text-primary uppercase tracking-widest mb-3 flex items-center gap-2">
+                                                <div className="bg-slate-50/50 p-6 rounded-[2rem] border border-slate-100 mb-8">
+                                                    <h4 className="text-[10px] font-bold text-primary uppercase tracking-widest mb-4 flex items-center gap-2">
                                                         <span className="material-symbols-outlined text-[16px]">psychology</span>
-                                                        Why we chose them for you:
+                                                        AI Recommendation Basis
                                                     </h4>
-                                                    <ul className="space-y-2">
+                                                    <ul className="space-y-3">
                                                         {aiResults[0].matchReasons.map((reason, idx) => (
-                                                            <li key={idx} className="flex items-start gap-3 text-sm text-slate-700 dark:text-slate-300 font-semibold">
-                                                                <span className="material-symbols-outlined text-[16px] text-emerald-500 mt-0.5 font-bold">done</span>
+                                                            <li key={idx} className="flex items-start gap-3 text-sm text-slate-600 font-bold">
+                                                                <span className="material-symbols-outlined text-sm text-emerald-500 mt-0.5">check</span>
                                                                 {reason}
                                                             </li>
                                                         ))}
                                                     </ul>
                                                 </div>
 
-                                                <div className="flex flex-col sm:flex-row gap-3">
-                                                    <Link href={`/tutor/${aiResults[0].userId}`} className="flex-1 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-bold py-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 hover:border-primary transition-all text-center flex items-center justify-center gap-2">
-                                                        <span className="material-symbols-outlined text-[20px]">person</span> Full Profile
+                                                <div className="flex flex-col sm:flex-row gap-4">
+                                                    <Link href={`/tutor/${aiResults[0].userId}`} className="flex-1 bg-slate-50 text-slate-900 font-bold py-5 rounded-2xl hover:bg-slate-100 transition-all text-center uppercase tracking-widest text-xs">
+                                                        View Profile
                                                     </Link>
-                                                    <Link href="/post-requirement" className="flex-[2] bg-primary text-white font-bold py-4 rounded-xl hover:bg-primary-glow shadow-xl shadow-primary/30 transition-all text-center flex items-center justify-center gap-2">
-                                                        <span className="material-symbols-outlined text-[20px]">how_to_reg</span> Book Trial Class
+                                                    <Link href="/post-requirement" className="flex-[2] bg-primary text-white font-bold py-5 rounded-2xl hover:opacity-90 shadow-xl shadow-primary/10 transition-all text-center uppercase tracking-widest text-xs">
+                                                        Book Trial Class
                                                     </Link>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="text-center pt-4">
-                                        <Link href={`/tutors?subject=${encodeURIComponent(subject)}`} className="text-slate-500 font-bold hover:text-primary transition-colors flex items-center justify-center gap-2">
-                                            Or view all {aiResults.length - 1} other matches <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+                                    <div className="text-center pt-6">
+                                        <Link href={`/tutors?subject=${encodeURIComponent(subject)}`} className="text-slate-400 font-bold hover:text-primary transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-[10px]">
+                                            See {aiResults.length - 1} other matches <span className="material-symbols-outlined text-sm">arrow_forward</span>
                                         </Link>
                                     </div>
                                 </div>
                             ) : (
-                                <div className="text-center py-12 px-6 bg-slate-50 dark:bg-slate-800/50 rounded-3xl border border-dashed border-slate-300 dark:border-slate-700">
-                                    <div className="size-20 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-400 shadow-sm border border-slate-100 dark:border-slate-700">
-                                        <span className="material-symbols-outlined text-4xl">search_off</span>
+                                <div className="text-center py-20 bg-slate-50/50 rounded-[3rem] border-2 border-dashed border-slate-100">
+                                    <div className="size-24 bg-white rounded-[2rem] flex items-center justify-center mx-auto mb-8 text-slate-200 shadow-sm">
+                                        <span className="material-symbols-outlined text-5xl">search_off</span>
                                     </div>
-                                    <h3 className="text-2xl font-heading font-bold mb-3">No perfect matches found</h3>
-                                    <p className="text-slate-500 max-w-sm mx-auto mb-8 leading-relaxed">We couldn't find verified tutors matching your exact highly-specific criteria right now. Try broadening your subject or grade level.</p>
-                                    <button onClick={() => setStep(2)} className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-bold px-8 py-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 hover:border-primary transition-all shadow-sm">
-                                        Adjust Initial Criteria
+                                    <h3 className="text-2xl font-bold text-slate-900 mb-4">No direct matches found</h3>
+                                    <p className="text-slate-400 font-medium max-w-xs mx-auto mb-10">We couldn't find a perfect pedagogical fit for this specific request. Try broader criteria.</p>
+                                    <button onClick={() => setStep(2)} className="bg-white text-slate-900 font-bold px-10 py-5 rounded-2xl border-2 border-slate-100 hover:border-primary transition-all uppercase tracking-widest text-xs">
+                                        Adjust Criteria
                                     </button>
                                 </div>
                             )}

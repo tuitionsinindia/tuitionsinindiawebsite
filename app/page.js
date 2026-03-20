@@ -3,296 +3,532 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-
 export default function Home() {
   const [searchSubject, setSearchSubject] = useState("");
+  const [searchGrade, setSearchGrade] = useState("");
   const [searchLocation, setSearchLocation] = useState("");
+  const [searchCoords, setSearchCoords] = useState(null); // {lat, lng}
+  const [activeTab, setActiveTab] = useState("tutors"); // tutors, students, institutes
+  const [isDetecting, setIsDetecting] = useState(false);
+  const [searchError, setSearchError] = useState("");
+  
+  const [subjects, setSubjects] = useState([]);
+  const [filteredSubjects, setFilteredSubjects] = useState([]);
+  const [showSubjectSuggestions, setShowSubjectSuggestions] = useState(false);
+  
+  const [showCityDropdown, setShowCityDropdown] = useState(false);
+  const [showGradeDropdown, setShowGradeDropdown] = useState(false);
+
+  const majorCities = [
+    { name: "Mumbai", lat: 19.0760, lng: 72.8777 },
+    { name: "Delhi", lat: 28.6139, lng: 77.2090 },
+    { name: "Bangalore", lat: 12.9716, lng: 77.5946 },
+    { name: "Calcutta", lat: 22.5726, lng: 88.3639 },
+    { name: "Hyderabad", lat: 17.3850, lng: 78.4867 }
+  ];
+
+  const gradesList = [
+    "Primary (1-5)", "Middle (6-8)", "High School (9-10)", 
+    "Higher Secondary (11-12)", "Undergraduate", "Competitive Exams", "Other"
+  ];
+
   const router = useRouter();
 
+  useEffect(() => {
+    fetch("/api/subjects")
+      .then(res => res.json())
+      .then(data => setSubjects(data))
+      .catch(err => console.error("Failed to fetch subjects", err));
+  }, []);
+
+  useEffect(() => {
+    if (searchSubject.length > 1) {
+      const filtered = subjects.filter(s => 
+        s.toLowerCase().includes(searchSubject.toLowerCase())
+      );
+      setFilteredSubjects(filtered);
+      setShowSubjectSuggestions(filtered.length > 0);
+    } else {
+      setShowSubjectSuggestions(false);
+    }
+  }, [searchSubject, subjects]);
+
   const handleSearch = () => {
+    setSearchError("");
+    if (!searchSubject || !searchGrade) {
+      setSearchError("Please select both a Subject and a Grade level.");
+      return;
+    }
+
     const params = new URLSearchParams();
-    if (searchSubject) params.set("subject", searchSubject);
+    params.set("subject", searchSubject);
+    params.set("grade", searchGrade);
     if (searchLocation) params.set("location", searchLocation);
-    router.push(`/tutors?${params.toString()}`);
+    if (searchCoords) {
+      params.set("lat", searchCoords.lat);
+      params.set("lng", searchCoords.lng);
+    }
+    
+    // Map plural tabs to singular enum roles
+    const roleMapping = {
+      tutors: "TUTOR",
+      students: "STUDENT",
+      institutes: "INSTITUTE"
+    };
+    params.set("role", roleMapping[activeTab] || "TUTOR");
+
+    router.push(`/search?${params.toString()}`);
+  };
+
+  const detectLocation = () => {
+    setIsDetecting(true);
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(async (position) => {
+        try {
+          const { latitude, longitude } = position.coords;
+          setSearchCoords({ lat: latitude, lng: longitude });
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+          const data = await res.json();
+          const city = data.address.city || data.address.town || data.address.village || data.address.state || "Current Location";
+          setSearchLocation(city);
+        } catch (err) {
+          console.error("Location detection failed", err);
+          setSearchLocation("Current Location");
+        } finally {
+          setIsDetecting(false);
+        }
+      }, () => {
+        setIsDetecting(false);
+        alert("Location access denied.");
+      });
+    } else {
+      setIsDetecting(false);
+      alert("Geolocation not supported by your browser.");
+    }
   };
 
   return (
-    <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-sans min-h-screen">
-      {/* Top Navigation Bar */}
-      <header className="sticky top-0 z-50 w-full border-b border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-background-dark/90 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="text-primary dark:text-primary-glow">
-                <span className="material-symbols-outlined text-3xl font-bold">school</span>
-              </div>
-              <h1 className="text-xl font-heading font-bold tracking-tight text-primary dark:text-white">TuitionsInIndia</h1>
-            </Link>
-            <nav className="hidden md:flex items-center gap-8">
-              <Link href="/tutors" className="text-sm font-medium hover:text-primary transition-colors">Find Tutors</Link>
-              <Link href="/tutors" className="text-sm font-medium hover:text-primary transition-colors">Categories</Link>
-              <Link href="#" className="text-sm font-medium hover:text-primary transition-colors">How it Works</Link>
-            </nav>
-            <div className="flex items-center gap-3">
-              <Link href="/dashboard" className="hidden sm:flex text-sm font-semibold text-primary hover:text-primary/80 px-4 py-2">Login</Link>
-              <Link href="/register/tutor" className="bg-primary text-white text-sm font-bold px-5 py-2.5 rounded-lg hover:bg-primary-glow transition-all shadow-md">Join as Tutor</Link>
-            </div>
+    <div className="bg-white text-slate-900 font-sans min-h-screen">
+      <main className="flex-grow pt-24">
+        {/* REFINED MINIMALIST HERO SECTION - 100vh LOCK */}
+        <section className="relative h-screen min-h-[750px] flex flex-col items-center justify-center">
+          {/* Background Layer - Restored Public Asset */}
+          <div className="absolute inset-0 z-0">
+            <img 
+              src="/indian_hero.png" 
+              alt="Indian Tutor Teaching Student" 
+              className="w-full h-full object-cover scale-100"
+              onError={(e) => {
+                e.target.src = "https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80";
+              }}
+            />
+            {/* Darker Overlay for White Text contrast */}
+            <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-[1px]"></div>
           </div>
-        </div>
-      </header>
 
-      <main>
-        {/* Hero Section */}
-        <section className="relative bg-white dark:bg-background-dark overflow-hidden border-b border-slate-100 dark:border-slate-800">
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/50 via-white to-purple-50/50 dark:from-indigo-950/20 dark:via-background-dark dark:to-purple-950/20 pointer-events-none"></div>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 flex flex-col lg:flex-row items-center gap-12 relative z-10">
-            <div className="flex-1 space-y-8 text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider backdrop-blur-sm border border-primary/20">
-                <span className="material-symbols-outlined text-sm">verified_user</span>
-                India's Most Trusted Learning Platform
-              </div>
-              <h2 className="text-4xl sm:text-5xl lg:text-6xl font-heading font-bold leading-[1.1] text-slate-900 dark:text-white">
-                Find the Best Tutors for Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">Brightest Future</span>
-              </h2>
-              <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto lg:mx-0">
-                Personalized 1-on-1 learning from India's top educators for CBSE, ICSE, JEE, NEET, and Professional Skills.
-              </p>
-
-              {/* Magic Box Search Bar */}
-              <div className="flex flex-col sm:flex-row gap-2 p-2 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-2xl shadow-xl border border-white/50 dark:border-slate-700 max-w-3xl mx-auto lg:mx-0">
-                <div className="flex-1 flex items-center px-4 gap-2 border-b sm:border-b-0 sm:border-r border-slate-200 dark:border-slate-700">
-                  <span className="material-symbols-outlined text-primary">search</span>
-                  <input
-                    className="w-full border-none focus:ring-0 bg-transparent text-sm py-3 outline-none"
-                    placeholder="Subject (e.g. Mathematics, Coding)"
-                    type="text"
-                    value={searchSubject}
-                    onChange={(e) => setSearchSubject(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                  />
-                </div>
-                <div className="flex-1 flex items-center px-4 gap-2">
-                  <span className="material-symbols-outlined text-primary">location_on</span>
-                  <input
-                    className="w-full border-none focus:ring-0 bg-transparent text-sm py-3 outline-none"
-                    placeholder="City or Online"
-                    type="text"
-                    value={searchLocation}
-                    onChange={(e) => setSearchLocation(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                  />
-                </div>
-                <button
-                  onClick={handleSearch}
-                  className="bg-primary text-white font-bold px-8 py-3 rounded-xl hover:bg-primary-glow shadow-lg transition-all w-full sm:w-auto flex items-center justify-center gap-2">
-                  Search
-                  <span className="material-symbols-outlined text-sm">arrow_forward</span>
-                </button>
+          <div className="container-premium relative z-10 pt-32 pb-80 text-center">
+            <div className="max-w-4xl mx-auto space-y-12">
+              {/* Marketplace Focused Messaging - White for Premium Look */}
+              <div className="space-y-3 animate-premium-fade">
+                <h1 className="text-4xl sm:text-5xl md:text-6xl font-heading font-black tracking-tight text-white leading-[1.1] drop-shadow-2xl">
+                  India's Trusted Marketplace for <br />
+                  <span className="text-primary italic font-serif">Personalized</span> Tutoring.
+                </h1>
+                <p className="max-w-xl mx-auto text-[15px] text-white/90 font-medium leading-relaxed px-4 text-center drop-shadow-md opacity-80">
+                  Connecting ambitious students with world-class verified tutors. <br />
+                  Simple, direct, and zero-commission learning discovery.
+                </p>
               </div>
 
-              <div className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start pt-4">
-                <Link href="/ai-match" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 hover:border-primary/40 text-primary font-bold shadow-sm transition-all animate-pulse-slow">
-                  <span className="material-symbols-outlined text-[20px]">psychology</span>
-                  Try our AI Matchmaker
-                </Link>
-                <div className="flex flex-wrap justify-center gap-2">
-                  <span className="text-slate-500 text-sm font-medium mt-1">Popular:</span>
-                  <Link href="/tutors?subject=Mathematics" className="text-sm font-semibold text-primary hover:underline mt-1">IIT JEE Math</Link>
-                  <Link href="/tutors?subject=Programming" className="text-sm font-semibold text-primary hover:underline mt-1">Python</Link>
+              {/* CENTER-ALIGNED MINIMALIST CLEAN WHITE SEARCH HUB */}
+              <div className="w-full max-w-5xl mx-auto px-4">
+                <div className="bg-white rounded-xl shadow-[0_40px_100px_-20px_rgba(0,0,0,0.5)] border border-white/20 p-2 relative">
+                  
+                  {/* SEARCH TYPE TABS - Minimalist */}
+                  <div className="flex justify-center md:justify-start gap-5 mb-1 ml-0 md:ml-6">
+                    {["tutors", "students", "institutes"].map((tab) => (
+                      <button
+                        key={tab}
+                        onClick={() => setActiveTab(tab)}
+                        className={`py-2 text-[10px] font-black uppercase tracking-[0.2em] transition-all relative ${activeTab === tab
+                          ? "text-[#0d40a5] after:content-[''] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#0d40a5]"
+                          : "text-slate-400 hover:text-slate-600"
+                          }`}
+                      >
+                        {tab === "tutors" ? "Search Tutors" : tab === "students" ? "Student Leads" : "Institutes"}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* SEGMENTED SEARCH BAR - CLEAN WHITE MINIMAL */}
+                  <div className="flex flex-col md:flex-row items-stretch gap-0 relative">
+                    <div className="flex-1 relative px-6 py-4 border-b md:border-b-0 md:border-r border-slate-100 hover:bg-slate-50 transition-all rounded-t-lg md:rounded-l-lg md:rounded-tr-none">
+                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-0.5 text-left">Subject / Skill</p>
+                      <input
+                        className="w-full bg-transparent text-lg font-bold text-slate-900 outline-none placeholder:text-slate-400"
+                        placeholder="e.g. Mathematics"
+                        type="text"
+                        value={searchSubject}
+                        onChange={(e) => setSearchSubject(e.target.value)}
+                        onFocus={() => filteredSubjects.length > 0 && setShowSubjectSuggestions(true)}
+                        onBlur={() => setTimeout(() => setShowSubjectSuggestions(false), 200)}
+                      />
+                      {showSubjectSuggestions && (
+                        <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-100 rounded-lg shadow-2xl z-50 max-h-60 overflow-y-auto p-2">
+                          {filteredSubjects.map((s, i) => (
+                            <div key={i} onClick={() => {setSearchSubject(s); setShowSubjectSuggestions(false);}} className="px-5 py-3 hover:bg-slate-50 rounded-xl cursor-pointer text-left font-bold text-sm text-slate-700">
+                              {s}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex-[0.7] relative px-6 py-4 border-b md:border-b-0 md:border-r border-slate-100 hover:bg-slate-50 transition-all cursor-pointer" onClick={() => setShowGradeDropdown(!showGradeDropdown)}>
+                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-0.5 text-left">Level / Grade</p>
+                      <div className="flex justify-between items-center text-left">
+                        <span className={`text-lg font-bold ${searchGrade ? "text-slate-900" : "text-slate-400"}`}>
+                          {searchGrade || "Select Grade"}
+                        </span>
+                        <span className="material-symbols-outlined text-slate-300 text-[18px]">expand_more</span>
+                      </div>
+                      {showGradeDropdown && (
+                        <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-100 rounded-lg shadow-2xl z-50 max-h-60 overflow-y-auto p-2">
+                          {gradesList.map((g, i) => (
+                            <div key={i} onClick={() => {setSearchGrade(g); setShowGradeDropdown(false);}} className={`px-5 py-3 rounded-xl hover:bg-slate-50 cursor-pointer text-left font-bold text-sm transition-all ${searchGrade === g ? 'bg-primary/5 text-primary' : 'text-slate-700'}`}>
+                              {g}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex-1 relative px-6 py-4 hover:bg-slate-50 transition-all md:rounded-r-lg cursor-pointer" onClick={() => setShowCityDropdown(!showCityDropdown)}>
+                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-0.5 text-left">Location (5 Cities)</p>
+                      <div className="flex justify-between items-center text-left">
+                        <span className={`text-lg font-bold ${searchLocation ? "text-slate-900" : "text-slate-400"}`}>
+                          {searchLocation || "Select City"}
+                        </span>
+                        <span className="material-symbols-outlined text-slate-300 text-[18px]">location_on</span>
+                      </div>
+                      {showCityDropdown && (
+                        <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-100 rounded-lg shadow-2xl z-50 max-h-60 overflow-y-auto p-2">
+                          {["Mumbai", "Delhi", "Bangalore", "Calcutta", "Hyderabad"].map((city, i) => (
+                            <div key={i} onClick={() => {setSearchLocation(city); setShowCityDropdown(false);}} className="px-5 py-4 hover:bg-slate-50 rounded-xl cursor-pointer text-left font-bold text-sm text-slate-700 flex items-center justify-between">
+                              {city}
+                              {searchLocation === city && <span className="material-symbols-outlined text-primary text-sm">check_circle</span>}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* SEARCH ACTION BUTTON */}
+                    <div className="md:absolute md:-right-3 md:top-1/2 md:-translate-y-1/2 p-2 md:p-0">
+                      <button
+                        onClick={handleSearch}
+                        className="w-full md:size-14 bg-[#0d40a5] text-white font-black rounded-lg hover:bg-[#0a358a] hover:shadow-2xl transition-all flex items-center justify-center group"
+                      >
+                        <span className="md:hidden px-4 uppercase text-[12px] tracking-widest font-black">Find Tutors</span>
+                        <span className="material-symbols-outlined text-[28px]">search</span>
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Hero Image / Glass Card */}
-            <div className="flex-1 relative w-full max-w-[500px] lg:max-w-none perspective-1000">
-              <div className="aspect-square rounded-3xl bg-gradient-to-tr from-primary/20 to-secondary/20 overflow-hidden shadow-2xl relative border border-white/20 transform rotate-y-2 hover:rotate-y-0 transition-transform duration-700">
-                <img className="w-full h-full object-cover" alt="Student having a Eureka moment while learning" src="/hero_student_learning.png" />
-
-                {/* Floating Stats Card 1 */}
-                <div className="absolute top-6 left-6 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md p-4 rounded-xl shadow-lg border border-white/40 dark:border-slate-700 flex items-center gap-4 transform -translate-y-2 hover:translate-y-0 transition-transform">
-                  <div className="size-12 rounded-full bg-accent/20 flex items-center justify-center text-accent">
-                    <span className="material-symbols-outlined">star</span>
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold font-heading">4.9/5 Rating</p>
-                    <p className="text-xs text-slate-500">10,000+ Reviews</p>
-                  </div>
+              {/* SIMPLIFIED TRUST BADGES - WHITE VERSION */}
+              <div className="mt-16 flex flex-wrap justify-center gap-16 opacity-90">
+                <div className="flex items-center gap-3">
+                  <span className="material-symbols-outlined text-primary text-xl font-bold animate-pulse">verified</span>
+                  <span className="text-[11px] font-black uppercase tracking-[0.2em] text-white">Verified Identity</span>
                 </div>
-
-                {/* Floating Stats Card 2 */}
-                <div className="absolute bottom-6 right-6 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md p-4 rounded-xl shadow-lg border border-white/40 dark:border-slate-700 flex items-center gap-4 transform translate-y-2 hover:translate-y-0 transition-transform delay-100">
-                  <div className="size-12 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-600">
-                    <span className="material-symbols-outlined">verified</span>
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold font-heading">Verified Tutors</p>
-                    <p className="text-xs text-slate-500">Strictly Vetted</p>
-                  </div>
+                <div className="flex items-center gap-3">
+                  <span className="material-symbols-outlined text-primary text-xl font-bold animate-pulse">home_pin</span>
+                  <span className="text-[11px] font-black uppercase tracking-[0.2em] text-white">Local Experts</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="material-symbols-outlined text-primary text-xl font-bold animate-pulse">payments</span>
+                  <span className="text-[11px] font-black uppercase tracking-[0.2em] text-white">Direct Engagement</span>
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Categories Section */}
-        <section className="py-20 bg-background-light dark:bg-slate-900/40 relative">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div className="flex items-center justify-between mb-12">
-              <div>
-                <h3 className="text-3xl font-heading font-bold mb-2">Explore Top Subjects</h3>
-                <p className="text-slate-500">Find specialized expertise across every major discipline</p>
+        {/* Live Activity Feed - Small & Subtle */}
+        <section className="bg-slate-50 py-4 border-y border-slate-100 overflow-hidden">
+          <div className="max-w-7xl mx-auto px-6 whitespace-nowrap animate-marquee flex gap-12 items-center">
+            {[
+              "Rahul from Mumbai just booked a Physics trial",
+              "New Verified Tutor joined in Bangalore: Dr. Sharma (Mathematics)",
+              "Sneha unlocked 5 leads in Delhi",
+              "Satisfaction Guarantee: 100% refund for your first trial if not happy",
+              "AI Matchmaker: 450 matches found today",
+              "New Blog: 10 Tips for Finding the Perfect Math Tutor"
+            ].map((text, i) => (
+              <div key={i} className="flex items-center gap-3">
+                <div className="size-2 rounded-full bg-emerald-500"></div>
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{text}</span>
               </div>
-              <Link href="/tutors" className="hidden sm:flex text-primary font-semibold items-center gap-2 hover:underline group">
-                View all Catalog
+            ))}
+          </div>
+        </section>
+
+        {/* Categories Section - Clean White Grid */}
+        <section className="py-24 bg-white border-b border-slate-50">
+          <div className="max-w-7xl mx-auto px-6 lg:px-10 relative z-10">
+            <div className="flex flex-col md:flex-row items-center justify-between mb-16 gap-6">
+              <div className="text-center md:text-left">
+                <h3 className="text-4xl font-bold mb-4">Master Any <span className="text-primary tracking-tight">Subject</span></h3>
+                <p className="text-slate-500 text-lg max-w-xl font-medium">Find verified local mentors for in-person home tuition. From primary school to competitive exams.</p>
+              </div>
+              <Link href="/search?role=TUTOR" className="px-8 py-3 bg-slate-50 text-slate-900 border border-slate-200 rounded-2xl font-bold hover:bg-slate-100 transition-all flex items-center gap-2 group">
+                Browse Local Tutors
                 <span className="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
               </Link>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-6 mb-12">
               {[
-                { name: "Mathematics", icon: "calculate", color: "blue" },
-                { name: "Science", icon: "science", color: "amber" },
-                { name: "Languages", icon: "translate", color: "emerald" },
-                { name: "Coding", icon: "terminal", color: "purple" },
-                { name: "Arts", icon: "palette", color: "rose" },
-                { name: "Exams", icon: "assignment", color: "indigo" },
+                { name: "Mathematics", icon: "calculate", color: "blue", desc: "IIT/CBSE/ICSE" },
+                { name: "Science", icon: "science", color: "amber", desc: "Physics/Che/Bio" },
+                { name: "English", icon: "translate", color: "emerald", desc: "Spoken/Grammar" },
+                { name: "Coding", icon: "terminal", color: "purple", desc: "Python/Web/AI" },
+                { name: "Music", icon: "music_note", color: "rose", desc: "Guitar/Piano/Vocal" },
+                { name: "Arts", icon: "palette", color: "orange", desc: "Drawing/Painting" },
+                { name: "Competitive", icon: "assignment", color: "indigo", desc: "JEE/NEET/UPSC" },
+                { name: "Languages", icon: "language", color: "teal", desc: "Hindi/French/German" },
               ].map((cat, idx) => (
-                <Link key={idx} href={`/tutors?subject=${cat.name}`}
-                  className="flex flex-col items-center gap-4 p-6 bg-white dark:bg-slate-800/80 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-100 dark:border-slate-700 group hover:-translate-y-1 backdrop-blur-sm">
-                  <div className={`size-16 rounded-2xl bg-${cat.color}-50 dark:bg-${cat.color}-900/30 flex items-center justify-center text-${cat.color}-600 dark:text-${cat.color}-400 group-hover:scale-110 transition-transform duration-300`}>
+                <Link key={idx} href={`/search?role=TUTOR&subject=${cat.name}`}
+                  className="group flex flex-col items-center p-8 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl transition-all hover:shadow-2xl hover:border-primary/5 hover:-translate-y-2">
+                  <div className={`size-16 rounded-2xl bg-slate-50 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300 mb-6 shadow-sm`}>
                     <span className="material-symbols-outlined text-3xl">{cat.icon}</span>
                   </div>
-                  <span className="font-bold text-sm text-center font-heading">{cat.name}</span>
+                  <span className="font-bold text-slate-900 mb-1 text-center">{cat.name}</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">{cat.desc}</span>
                 </Link>
+              ))}
+            </div>
+
+            <div className="flex justify-center">
+              <Link href="/subjects" className="px-12 py-5 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest hover:bg-primary transition-all shadow-xl shadow-slate-900/10 flex items-center gap-3 group">
+                View All Subjects
+                <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Testimonials Section - Premium Design */}
+        <section className="py-32 bg-slate-50/50">
+          <div className="max-w-7xl mx-auto px-6 lg:px-10">
+            <div className="text-center mb-20">
+              <span className="px-4 py-2 bg-primary/10 text-primary rounded-full text-[10px] font-bold uppercase tracking-[0.2em] mb-6 inline-block">Success Stories</span>
+              <h2 className="text-4xl lg:text-5xl font-bold mb-6 text-slate-900">What our <span className="text-primary italic font-serif">Community</span> says</h2>
+              <p className="text-slate-500 text-lg max-w-2xl mx-auto font-medium">Join thousands of students and educators who have transformed their academic journey with us.</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {[
+                {
+                  quote: "Found the perfect Physics tutor for my son within 24 hours. The AI Matchmaker is truly a game changer for busy parents.",
+                  author: "Anita Sharma",
+                  role: "Parent, Delhi",
+                  img: "https://i.pravatar.cc/100?img=1"
+                },
+                {
+                  quote: "As a tutor, the quality of leads here is unmatched. I've grown my teaching business by 3x in just 3 months.",
+                  author: "Vikram Malhotra",
+                  role: "Mathematics Expert",
+                  img: "https://i.pravatar.cc/100?img=12"
+                },
+                {
+                  quote: "I was struggling with JEE Prep, but my TuitionsInIndia tutor made complex concepts so simple. Top-tier professionals!",
+                  author: "Aditya Verma",
+                  role: "Student, Mumbai",
+                  img: "https://i.pravatar.cc/100?img=33"
+                }
+              ].map((t, i) => (
+                <div key={i} className="bg-white p-10 rounded-xl border border-slate-100 shadow-sm hover:shadow-xl transition-all flex flex-col">
+                  <div className="flex text-amber-400 mb-6">
+                    {[1, 2, 3, 4, 5].map(s => <span key={s} className="material-symbols-outlined fill-1">star</span>)}
+                  </div>
+                  <p className="text-slate-700 font-medium italic mb-10 flex-1 leading-relaxed">"{t.quote}"</p>
+                  <div className="flex items-center gap-4">
+                    <img src={t.img} alt={t.author} className="size-12 rounded-full object-cover" />
+                    <div>
+                      <p className="font-bold text-slate-900">{t.author}</p>
+                      <p className="text-xs font-bold text-slate-400 uppercase items-center tracking-widest">{t.role}</p>
+                    </div>
+                  </div>
+                </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* How It Works */}
-        <section className="py-24 bg-white dark:bg-background-dark relative overflow-hidden">
-          <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-slate-200 dark:via-slate-800 to-transparent"></div>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-            <h2 className="text-3xl lg:text-4xl font-heading font-bold mb-16">Simple Steps to Start Learning</h2>
+        {/* UNIFIED HOW IT WORKS - 3 STEP FLOW */}
+        <section className="py-32 bg-slate-50/50">
+          <div className="max-w-7xl mx-auto px-6 lg:px-10">
+            <div className="text-center mb-20 text-slate-900">
+              <span className="px-4 py-2 bg-primary/10 text-primary rounded-full text-[10px] font-bold uppercase tracking-[0.2em] mb-6 inline-block">Simple Methodology</span>
+              <h2 className="text-4xl lg:text-5xl font-bold mb-6">How it <span className="text-primary">Works</span></h2>
+              <p className="text-slate-500 text-lg max-w-2xl mx-auto font-medium">Your journey to academic excellence simplified into three easy stages.</p>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
-              {/* Connector line for desktop */}
-              <div className="hidden md:block absolute top-[4rem] left-1/6 right-1/6 w-2/3 mx-auto h-0.5 bg-gradient-to-r from-primary/10 via-primary/40 to-primary/10 -z-10 border-dashed border-t-2 border-primary/30"></div>
-
-              <div className="flex flex-col items-center">
-                <div className="size-24 rounded-2xl bg-white dark:bg-slate-800 shadow-xl flex items-center justify-center text-primary mb-6 border border-primary/20 backdrop-blur-md relative overflow-hidden group">
-                  <div className="absolute inset-0 bg-primary/5 group-hover:bg-primary/10 transition-colors"></div>
-                  <span className="material-symbols-outlined text-4xl relative z-10">search_insights</span>
+              {/* Connector Line (Desktop) */}
+              <div className="hidden md:block absolute top-1/2 left-0 right-0 h-0.5 bg-slate-200 -translate-y-24 z-0"></div>
+              
+              {[
+                { step: "01", title: "Discover & Match", desc: "Search through thousands of verified tutors or use our AI Matchmaker to find your perfect academic partner.", icon: "person_search" },
+                { step: "02", title: "Verify & Connect", desc: "Review profiles, check background verification, and connect directly with tutors to discuss your goals.", icon: "verified_user" },
+                { step: "03", title: "Start Learning", desc: "Schedule your first trial class and begin your personalized education journey with 100% platform support.", icon: "calendar_month" }
+              ].map((item, i) => (
+                <div key={i} className="relative z-10 flex flex-col items-center text-center group">
+                  <div className="size-20 rounded-full bg-white border border-slate-100 flex items-center justify-center text-primary text-2xl font-black shadow-xl group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-500 mb-8">
+                    <span className="material-symbols-outlined text-3xl">{item.icon}</span>
+                  </div>
+                  <h3 className="text-xl font-bold mb-4 text-slate-900">{item.title}</h3>
+                  <p className="text-slate-500 text-sm font-medium leading-relaxed px-4">{item.desc}</p>
                 </div>
-                <h4 className="text-xl font-heading font-bold mb-3">1. Search & Filter</h4>
-                <p className="text-slate-600 dark:text-slate-400 max-w-xs">Browse thousands of verified tutors based on subject, price, and location.</p>
-              </div>
+              ))}
+            </div>
+          </div>
+        </section>
 
-              <div className="flex flex-col items-center">
-                <div className="size-24 rounded-2xl bg-white dark:bg-slate-800 shadow-xl flex items-center justify-center text-primary mb-6 border border-primary/20 backdrop-blur-md relative overflow-hidden group">
-                  <div className="absolute inset-0 bg-primary/5 group-hover:bg-primary/10 transition-colors"></div>
-                  <span className="material-symbols-outlined text-4xl relative z-10">chat_bubble</span>
-                </div>
-                <h4 className="text-xl font-heading font-bold mb-3">2. Message Instantly</h4>
-                <p className="text-slate-600 dark:text-slate-400 max-w-xs">Connect with tutors to discuss requirements and book a free demo class.</p>
-              </div>
+        {/* FAQ SECTION - ACCORDION STYLE */}
+        <section className="py-32 bg-white">
+          <div className="max-w-4xl mx-auto px-6">
+            <div className="text-center mb-20">
+              <h2 className="text-4xl font-bold text-slate-900 mb-6">Common <span className="text-primary italic font-serif">Questions</span></h2>
+              <p className="text-slate-500 font-medium">Everything you need to know about India's elite tuition marketplace.</p>
+            </div>
 
-              <div className="flex flex-col items-center">
-                <div className="size-24 rounded-2xl bg-white dark:bg-slate-800 shadow-xl flex items-center justify-center text-primary mb-6 border border-primary/20 backdrop-blur-md relative overflow-hidden group">
-                  <div className="absolute inset-0 bg-primary/5 group-hover:bg-primary/10 transition-colors"></div>
-                  <span className="material-symbols-outlined text-4xl relative z-10">workspace_premium</span>
+            <div className="space-y-4">
+              {[
+                { q: "How do I find a verified tutor?", a: "Simply use our segmented search bar on the hero section. You can filter by subject, grade, and city to find the best local matches." },
+                { q: "Are all tutors background checked?", a: "Yes, we implement a multi-stage verification process including ID checks and academic credential verification for all listed tutors." },
+                { q: "How much does it cost?", a: "TuitionsInIndia is a transparent marketplace. Tutors set their own rates, and we charge zero commission on your payments to them." },
+                { q: "Can I request a trial class?", a: "Most of our elite tutors offer a trial session to ensure a perfect match before commitment. Look for the 'Trial Available' badge on profiles." }
+              ].map((faq, i) => (
+                <details key={i} className="group bg-slate-50 rounded-3xl border border-slate-100 open:bg-white open:shadow-2xl transition-all duration-300">
+                  <summary className="flex items-center justify-between p-8 cursor-pointer list-none">
+                    <span className="text-lg font-bold text-slate-900">{faq.q}</span>
+                    <span className="material-symbols-outlined text-primary group-open:rotate-180 transition-transform">expand_more</span>
+                  </summary>
+                  <div className="p-8 pt-0 text-slate-500 font-medium leading-relaxed">
+                    {faq.a}
+                  </div>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Pricing Selection */}
+        <section className="py-24 bg-white">
+          <div className="max-w-7xl mx-auto px-6 lg:px-10">
+            <div className="bg-primary rounded-[3.5rem] p-12 lg:p-24 text-white relative overflow-hidden shadow-2xl">
+              <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/5 rounded-full blur-[120px] -mr-40 -mt-40"></div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center relative z-10">
+                <div>
+                  <h2 className="text-4xl lg:text-6xl font-bold mb-8 leading-tight">Join the Elite <br /><span className="text-accent italic font-serif">Academic Circle</span></h2>
+                  <p className="text-white/70 text-lg font-medium mb-12">Whether you need homework help or a career-defining certification, we have the resources to get you there.</p>
+                  <div className="flex gap-4">
+                    <Link href="/pricing/student" className="px-8 py-4 bg-white text-primary font-bold rounded-2xl hover:bg-slate-50 transition-all shadow-xl">Detailed Pricing</Link>
+                    <Link href="/kb/student" className="px-8 py-4 bg-white/10 border border-white/20 text-white font-bold rounded-2xl hover:bg-white/20 transition-all">Knowledge Base</Link>
+                  </div>
                 </div>
-                <h4 className="text-xl font-heading font-bold mb-3">3. Learn & Succeed</h4>
-                <p className="text-slate-600 dark:text-slate-400 max-w-xs">Schedule your lessons and start your journey towards excellence.</p>
+                <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-10 space-y-8">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="size-10 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                        <span className="material-symbols-outlined">shield</span>
+                      </div>
+                      <span className="font-bold">Verified Leads</span>
+                    </div>
+                    <span className="text-emerald-400 font-bold">100% Secure</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="size-10 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center">
+                        <span className="material-symbols-outlined">support_agent</span>
+                      </div>
+                      <span className="font-bold">24/7 Support</span>
+                    </div>
+                    <span className="text-blue-400 font-bold">Always Live</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="size-10 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center">
+                        <span className="material-symbols-outlined">payments</span>
+                      </div>
+                      <span className="font-bold">Direct Payments</span>
+                    </div>
+                    <span className="text-orange-400 font-bold">No Commission</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* CTA Section */}
-        <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-          <div className="bg-slate-900 rounded-[2rem] p-10 md:p-16 flex flex-col md:flex-row items-center justify-between gap-10 relative overflow-hidden shadow-2xl">
-            <div className="absolute inset-0 bg-[url('/teacher_cta_bg.png')] opacity-20 MixBlendMode-overlay bg-cover bg-center"></div>
-            <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-900/90 to-transparent"></div>
-
-            <div className="relative z-10 flex-1">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/20 text-accent text-xs font-bold uppercase tracking-wider mb-6 border border-accent/20">
-                <span className="material-symbols-outlined text-sm">rocket_launch</span>
-                For Educators
-              </div>
-              <h2 className="text-3xl md:text-5xl font-heading font-bold text-white mb-6 leading-tight">
-                Are you a <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-yellow-200">professional tutor?</span>
-              </h2>
-              <p className="text-slate-300 max-w-md text-lg mb-8">
-                Scale your teaching business with verified high-intent student leads delivered directly to your dashboard. Join 5,000+ educators today.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link href="/register/tutor" className="bg-primary text-white font-bold px-8 py-4 rounded-xl hover:bg-primary-glow transition-all shadow-xl text-center">
-                  Create Tutor Profile
-                </Link>
-                <Link href="/post-requirement" className="bg-white/10 text-white border border-white/20 font-bold px-8 py-4 rounded-xl hover:bg-white/20 transition-all backdrop-blur-sm text-center">
-                  I'm a Student
-                </Link>
-              </div>
+        {/* Final CTA */}
+        <section className="py-32 bg-white text-center">
+          <div className="max-w-4xl mx-auto px-6">
+            <h2 className="text-5xl font-bold text-slate-900 mb-8 leading-tight">Ready to start your <br /><span className="text-primary italic font-serif">Success Story?</span></h2>
+            <div className="flex flex-col sm:flex-row gap-6 justify-center">
+              <Link href="/get-started" className="px-12 py-5 bg-primary text-white font-bold rounded-2xl hover:opacity-90 transition-all shadow-xl shadow-primary/20 text-lg">Detailed Enrollment</Link>
+              <Link href="/post-requirement" className="px-12 py-5 bg-slate-50 text-slate-900 border border-slate-200 font-bold rounded-2xl hover:bg-slate-100 transition-all text-lg">Post Requirement</Link>
             </div>
           </div>
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 pt-16 pb-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
-            <div className="space-y-6">
-              <div className="flex items-center gap-2">
-                <div className="text-primary">
-                  <span className="material-symbols-outlined text-3xl font-bold">school</span>
-                </div>
-                <h3 className="text-xl font-heading font-bold tracking-tight text-slate-900 dark:text-white">TuitionsInIndia</h3>
-              </div>
-              <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
-                Connecting India's brightest minds with world-class educators. Making quality education accessible and personalized for every student.
+      {/* Footer - Compact & Horizontal */}
+      <footer className="bg-slate-50 border-t border-slate-100 py-8">
+        <div className="max-w-7xl mx-auto px-6 lg:px-10">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-8 pb-8 border-b border-slate-200">
+            <div className="flex flex-col md:flex-row items-center gap-6 text-center md:text-left">
+              <Link href="/" className="shrink-0">
+                <img src="/logo_horizontal.png" alt="Tuitions In India" className="h-10 w-auto object-contain" />
+              </Link>
+              <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest max-w-xs">
+                India's leading managed marketplace for private tuitions since 2024.
               </p>
             </div>
 
-            <div>
-              <h4 className="font-heading font-bold mb-6 text-slate-900 dark:text-white">Quick Links</h4>
-              <ul className="space-y-4 text-sm text-slate-500 dark:text-slate-400">
-                <li><Link href="/tutors" className="hover:text-primary transition-colors">Find a Tutor</Link></li>
-                <li><Link href="/register/tutor" className="hover:text-primary transition-colors">Become a Tutor</Link></li>
-                <li><Link href="/dashboard" className="hover:text-primary transition-colors">Tutor Dashboard</Link></li>
-              </ul>
-            </div>
+            <nav className="flex flex-wrap justify-center gap-x-8 gap-y-4">
+              <Link href="/tutors" className="text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-primary transition-colors">Find Tutors</Link>
+              <Link href="/ai-match" className="text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-primary transition-colors">AI Matchmaker</Link>
+              <Link href="/pricing/student" className="text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-primary transition-colors">Pricing</Link>
+              <Link href="/register/tutor" className="text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-primary transition-colors">Join as Tutor</Link>
+              <Link href="/how-it-works/tutor" className="text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-primary transition-colors">Methodology</Link>
+              <Link href="/legal/privacy" className="text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-primary transition-colors">Privacy</Link>
+              <Link href="/legal/terms" className="text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-primary transition-colors">Terms</Link>
+            </nav>
 
-            <div>
-              <h4 className="font-heading font-bold mb-6 text-slate-900 dark:text-white">Top Categories</h4>
-              <ul className="space-y-4 text-sm text-slate-500 dark:text-slate-400">
-                <li><Link href="/tutors?subject=Mathematics" className="hover:text-primary transition-colors">Mathematics Tutors</Link></li>
-                <li><Link href="/tutors?subject=Science" className="hover:text-primary transition-colors">Science Tutors</Link></li>
-                <li><Link href="/tutors?subject=English" className="hover:text-primary transition-colors">English Tutors</Link></li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-heading font-bold mb-6 text-slate-900 dark:text-white">Contact Us</h4>
-              <ul className="space-y-4 text-sm text-slate-500 dark:text-slate-400">
-                <li className="flex items-start gap-3">
-                  <span className="material-symbols-outlined text-sm mt-1">mail</span>
-                  support@tuitionsinindia.com
-                </li>
-              </ul>
+            <div className="flex gap-4">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="size-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-primary transition-colors cursor-pointer">
+                  <span className="material-symbols-outlined text-lg">share</span>
+                </div>
+              ))}
             </div>
           </div>
 
-          <div className="pt-8 border-t border-slate-100 dark:border-slate-800/50 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-xs text-slate-400">© 2026 TuitionsInIndia Marketplace. All rights reserved.</p>
-            <div className="flex gap-6 text-xs text-slate-400">
-              <Link href="#" className="hover:text-primary transition-colors">Terms of Service</Link>
-              <Link href="#" className="hover:text-primary transition-colors">Privacy Policy</Link>
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 pt-8">
+            <p className="text-slate-400 text-[9px] font-black uppercase tracking-[0.2em]">© 2026 TuitionsInIndia. Proudly Made in India.</p>
+            <div className="flex items-center gap-4 opacity-40 grayscale hover:grayscale-0 transition-all">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/Razorpay_logo.svg" alt="Razorpay" className="h-4" />
             </div>
           </div>
         </div>
       </footer>
+
     </div>
   );
 }

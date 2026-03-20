@@ -4,7 +4,7 @@ import DirectoryLayout from "@/components/DirectoryLayout";
 export const dynamic = 'force-dynamic';
 
 export default async function TutorsDirectory({ searchParams }) {
-  const { subject, location } = await searchParams;
+  const { subject, location, minPrice, maxPrice, rating, levels, verified } = await searchParams;
 
   const where = {
     isActive: true,
@@ -20,6 +20,26 @@ export default async function TutorsDirectory({ searchParams }) {
     where.locations = {
       hasSome: [location.charAt(0).toUpperCase() + location.slice(1)],
     };
+  }
+
+  if (minPrice || maxPrice) {
+    where.hourlyRate = {};
+    if (minPrice) where.hourlyRate.gte = parseInt(minPrice);
+    if (maxPrice) where.hourlyRate.lte = parseInt(maxPrice);
+  }
+
+  if (rating) {
+    where.rating = { gte: parseFloat(rating) };
+  }
+
+  if (verified === 'true') {
+    where.tutor = { isVerified: true };
+  }
+
+  if (levels) {
+    // Assuming academic levels are stored or can be inferred. 
+    // For now, let's filter by subjects that might contain the level or just listing title.
+    // In a real app, we'd have a specific field.
   }
 
   const tutorsData = await prisma.listing.findMany({
@@ -49,5 +69,12 @@ export default async function TutorsDirectory({ searchParams }) {
     bio: item.bio,
   }));
 
-  return <DirectoryLayout tutors={tutors} subject={subject} location={location} />;
+  return (
+    <DirectoryLayout
+      tutors={tutors}
+      subject={subject}
+      location={location}
+      filters={{ minPrice, maxPrice, rating, levels, verified }}
+    />
+  );
 }

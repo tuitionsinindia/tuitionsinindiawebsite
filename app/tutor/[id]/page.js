@@ -4,25 +4,37 @@ import Link from "next/link";
 
 export const dynamic = 'force-dynamic';
 
-export default async function TutorProfile({ params }) {
+export default async function TutorProfile({ params, searchParams }) {
     const id = params.id;
+    const viewerId = searchParams.viewerId;
 
     // Fetch tutor and listing data
     const tutor = await prisma.user.findUnique({
         where: { id },
         include: {
-            listing: true
+            tutorListing: true
         }
     });
 
-    if (!tutor || tutor.role !== "TUTOR" || !tutor.listing) {
+    if (!tutor || (tutor.role !== "TUTOR" && tutor.role !== "INSTITUTE")) {
         notFound();
     }
 
-    const listing = tutor.listing;
+    const listing = tutor.tutorListing || { bio: "", subjects: [], experience: 0, hourlyRate: 0 };
+
+    // Fetch viewer data for paywall check
+    let viewer = null;
+    if (viewerId) {
+        viewer = await prisma.user.findUnique({
+            where: { id: viewerId },
+            select: { role: true, subscriptionTier: true }
+        });
+    }
+
+    const canContactProactively = viewer ? (viewer.role === 'ADMIN' || viewer.subscriptionTier !== 'FREE') : false;
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans relative overflow-hidden flex flex-col pt-24 pb-20 px-4 md:px-8">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans relative overflow-hidden flex flex-col pt-32 pb-20 px-4 md:px-8">
             {/* Background Effects */}
             <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-primary/10 rounded-full blur-[120px] pointer-events-none -translate-y-1/2 translate-x-1/3"></div>
             <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-accent/10 rounded-full blur-[100px] pointer-events-none translate-y-1/3 -translate-x-1/3"></div>
@@ -44,10 +56,10 @@ export default async function TutorProfile({ params }) {
                         <div className="relative flex-shrink-0">
                             <div className="size-32 md:size-40 rounded-[2rem] bg-gradient-to-tr from-primary to-accent p-1 shadow-2xl shadow-primary/30 rotate-3 group-hover:rotate-0 transition-transform duration-500">
                                 <div className="w-full h-full rounded-[1.8rem] bg-white dark:bg-slate-900 flex items-center justify-center text-5xl md:text-6xl font-heading font-bold text-slate-900 dark:text-white border-4 border-white dark:border-slate-900">
-                                    {tutor.name.charAt(0)}
+                                    {(tutor.name || "U").charAt(0)}
                                 </div>
                             </div>
-                            {tutor.isVerified && (
+                            {(tutor.isVerified || tutor.isIdVerified) && (
                                 <div className="absolute -bottom-4 -right-4 size-12 bg-emerald-500 rounded-full border-4 border-white dark:border-slate-900 flex items-center justify-center text-white shadow-xl" title="Verified Expert">
                                     <span className="material-symbols-outlined text-[24px]">verified</span>
                                 </div>
@@ -59,10 +71,12 @@ export default async function TutorProfile({ params }) {
                             <div className="flex flex-col sm:flex-row items-center sm:justify-between gap-4 mb-4">
                                 <div>
                                     <h1 className="text-4xl md:text-5xl font-heading font-bold text-slate-900 dark:text-white mb-2">{tutor.name}</h1>
-                                    <p className="text-lg text-slate-500 font-semibold">{tutor.isVerified ? "Verified Premium Tutor" : "Independent Tutor"}</p>
+                                    <p className="text-lg text-slate-500 font-semibold">
+                                        {tutor.subscriptionTier === 'ELITE' ? "Elite Marketplace Partner" : tutor.subscriptionTier === 'PRO' ? "Premium Member" : "Independent Partner"}
+                                    </p>
                                 </div>
                                 <div className="text-center sm:text-right bg-slate-50 dark:bg-slate-800/50 px-6 py-4 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-inner">
-                                    <div className="text-3xl font-heading font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">₹{listing.hourlyRate}</div>
+                                    <div className="text-3xl font-heading font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">₹{listing.hourlyRate || "TBD"}</div>
                                     <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">per hour</div>
                                 </div>
                             </div>
@@ -70,24 +84,31 @@ export default async function TutorProfile({ params }) {
                             <div className="flex flex-wrap justify-center md:justify-start gap-4 mb-6">
                                 <div className="flex items-center gap-2 text-amber-500 bg-amber-50 dark:bg-amber-900/20 px-4 py-2 rounded-xl border border-amber-100 dark:border-amber-900/50 font-bold">
                                     <span className="material-symbols-outlined text-[20px]">star</span>
-                                    {listing.rating > 0 ? listing.rating : "New"}
-                                    <span className="text-slate-500 dark:text-slate-400 font-semibold">({listing.reviewCount} reviews)</span>
+                                    {(listing.rating > 0) ? listing.rating : "New"}
+                                    <span className="text-slate-500 dark:text-slate-400 font-semibold">({listing.reviewCount || 0} reviews)</span>
                                 </div>
-                                {listing.locations && listing.locations.length > 0 && (
+                                {listing.city && (
                                     <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 font-bold">
                                         <span className="material-symbols-outlined text-[20px] text-slate-400">location_on</span>
-                                        {listing.locations.join(", ")}
+                                        {listing.city}
                                     </div>
                                 )}
                             </div>
 
                             <div className="flex flex-col sm:flex-row gap-4 w-full">
-                                <Link href="/post-requirement" className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-primary text-white font-bold py-4 px-8 rounded-xl hover:bg-primary-glow shadow-xl shadow-primary/30 transition-all">
+                                <Link href={`/post-requirement?tutorId=${id}`} className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-primary text-white font-bold py-4 px-8 rounded-xl hover:bg-primary-glow shadow-xl shadow-primary/30 transition-all">
                                     <span className="material-symbols-outlined">how_to_reg</span> Book a Demo Class
                                 </Link>
-                                <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-bold py-4 px-8 rounded-xl border-2 border-slate-200 dark:border-slate-700 hover:border-primary hover:text-primary transition-all shadow-sm">
-                                    <span className="material-symbols-outlined">chat</span> Message
-                                </button>
+
+                                {canContactProactively ? (
+                                    <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-bold py-4 px-8 rounded-xl border-2 border-slate-200 dark:border-slate-700 hover:border-primary hover:text-primary transition-all shadow-sm">
+                                        <span className="material-symbols-outlined">chat</span> Message
+                                    </button>
+                                ) : (
+                                    <Link href={`/dashboard/student/subscription?studentId=${viewerId}`} className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-amber-500/10 text-amber-600 font-bold py-4 px-8 rounded-xl border-2 border-amber-500/20 hover:bg-amber-500/20 transition-all">
+                                        <span className="material-symbols-outlined">lock</span> Upgrade to Message
+                                    </Link>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -118,11 +139,11 @@ export default async function TutorProfile({ params }) {
                             <div className="grid sm:grid-cols-2 gap-6">
                                 <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-2xl border border-slate-100 dark:border-slate-800">
                                     <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-1">Total Experience</p>
-                                    <p className="text-2xl font-bold text-slate-900 dark:text-white">{listing.experienceYears || 0}+ Years</p>
+                                    <p className="text-2xl font-bold text-slate-900 dark:text-white">{listing.experience || 0}+ Years</p>
                                 </div>
                                 <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-2xl border border-slate-100 dark:border-slate-800">
-                                    <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-1">Highest Qualification</p>
-                                    <p className="text-xl font-bold text-slate-900 dark:text-white capitalize">{listing.qualifications || "Not specified"}</p>
+                                    <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-1">Status</p>
+                                    <p className="text-xl font-bold text-slate-900 dark:text-white capitalize">{tutor.isVerified ? "Verified Expert" : "Community Member"}</p>
                                 </div>
                             </div>
                         </div>

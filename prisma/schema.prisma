@@ -15,101 +15,213 @@ model User {
   image         String?
   role          Role      @default(STUDENT)
   phone         String?   @unique
-  
-  // Tutor Specific
-  isVerified    Boolean   @default(false)
-  credits       Int       @default(0) // For unlocking leads
-  subscription  SubscriptionTier @default(FREE)
-  
+  lat           Float?
+  lng           Float?
+
+  // Monetization
+  isVerified         Boolean            @default(false)
+  isIdVerified       Boolean            @default(false)
+  credits            Int                @default(0)
+  subscriptionTier   SubscriptionTier   @default(FREE)
+  subscriptionStatus SubscriptionStatus @default(INACTIVE)
+  subscriptionId     String?            @unique // Razorpay Subscription ID
+
   // Relations
-  tutorListing  Listing?
-  reviewsGiven  Review[]  @relation("ReviewAuthor")
-  reviewsReceived Review[] @relation("ReviewTarget")
-  leadsPosted   Lead[]    @relation("LeadCreator")
-  leadsUnlocked LeadUnlock[]
-  
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  tutorListing    Listing?
+  reviewsGiven    Review[]      @relation("ReviewAuthor")
+  reviewsReceived Review[]      @relation("ReviewTarget")
+  leadsPosted     Lead[]        @relation("LeadCreator")
+  leadsUnlocked   LeadUnlock[]
+  transactions    Transaction[]
+  courses         Course[]      @relation("InstituteCourses")
+  ads             AdSlot[]      @relation("UserAds")
+
+  // Chat Relations
+  studentChats ChatSession[] @relation("StudentChats")
+  tutorChats   ChatSession[] @relation("TutorChats")
+  messagesSent Message[]     @relation("SentMessages")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Listing {
-  id          String   @id @default(cuid())
-  tutorId     String   @unique
-  tutor       User     @relation(fields: [tutorId], references: [id], onDelete: Cascade)
-  
-  title       String
-  bio         String   @db.Text
-  subjects    String[] // e.g., ["Math", "Physics"]
-  locations   String[] // e.g., ["Mumbai", "Online"]
-  hourlyRate  Int?
-  
+  id      String @id @default(cuid())
+  tutorId String @unique
+  tutor   User   @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+
+  title      String
+  bio        String   @db.Text
+  subjects   String[] // e.g., ["Math", "Physics"]
+  grades     String[] // e.g., ["Class 10", "Class 12"]
+  locations  String[] // e.g., ["Mumbai", "Online"]
+  hourlyRate Int?
+
   // Metrics for search ranking
-  rating      Float    @default(0)
-  reviewCount Int      @default(0)
-  
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  rating      Float @default(0)
+  reviewCount Int   @default(0)
+  viewCount   Int   @default(0)
+
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Lead {
-  id          String   @id @default(cuid())
-  studentId   String
-  student     User     @relation("LeadCreator", fields: [studentId], references: [id], onDelete: Cascade)
-  
+  id        String @id @default(cuid())
+  studentId String
+  student   User   @relation("LeadCreator", fields: [studentId], references: [id], onDelete: Cascade)
+
   subject     String
+  grade       String?
   location    String
+  lat         Float?
+  lng         Float?
   budget      String?
-  description String   @db.Text
-  
+  description String  @db.Text
+
   // Monetization Implementation
-  maxUnlocks  Int      @default(3)
-  unlockCount Int      @default(0)
+  isPremium   Boolean    @default(false)
+  premiumTier Int        @default(0) // 0: House, 1: Turbo, 2: Verified Match
+  maxUnlocks  Int        @default(5)
+  unlockCount Int        @default(0)
   status      LeadStatus @default(OPEN)
-  
-  unlockedBy  LeadUnlock[]
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+
+  unlockedBy LeadUnlock[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model LeadUnlock {
-  id          String   @id @default(cuid())
-  leadId      String
-  lead        Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
-  tutorId     String
-  tutor       User     @relation(fields: [tutorId], references: [id], onDelete: Cascade)
-  
-  unlockedAt  DateTime @default(now())
+  id      String @id @default(cuid())
+  leadId  String
+  lead    Lead   @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  tutorId String
+  tutor   User   @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+
+  unlockedAt DateTime @default(now())
 
   @@unique([leadId, tutorId])
 }
 
 model Review {
+  id      String  @id @default(cuid())
+  rating  Int // 1-5
+  comment String? @db.Text
+
+  authorId String
+  author   User   @relation("ReviewAuthor", fields: [authorId], references: [id])
+  targetId String
+  target   User   @relation("ReviewTarget", fields: [targetId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model Course {
   id          String   @id @default(cuid())
-  rating      Int      // 1-5
-  comment     String?  @db.Text
-  
-  authorId    String
-  author      User     @relation("ReviewAuthor", fields: [authorId], references: [id])
-  targetId    String
-  target      User     @relation("ReviewTarget", fields: [targetId], references: [id])
-  
+  instituteId String
+  institute   User     @relation("InstituteCourses", fields: [instituteId], references: [id], onDelete: Cascade)
+  title       String
+  description String   @db.Text
+  duration    String
+  price       Int
+  category    String
+  isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model AdSlot {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation("UserAds", fields: [userId], references: [id], onDelete: Cascade)
+  type        AdType // BANNER, SEARCH_TOP, SIDEBAR
+  imageUrl    String?
+  targetUrl   String?
+  startTime   DateTime
+  endTime     DateTime
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Transaction {
+  id                String            @id @default(cuid())
+  userId            String
+  user              User              @relation(fields: [userId], references: [id])
+  amount            Int // in INR
+  currency          String            @default("INR")
+  status            TransactionStatus @default(PENDING)
+  razorpayOrderId   String?           @unique
+  razorpayPaymentId String?           @unique
+  description       String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ChatSession {
+  id        String    @id @default(cuid())
+  studentId String
+  student   User      @relation("StudentChats", fields: [studentId], references: [id])
+  tutorId   String
+  tutor     User      @relation("TutorChats", fields: [tutorId], references: [id])
+  messages  Message[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([studentId, tutorId])
+}
+
+model Message {
+  id        String      @id @default(cuid())
+  sessionId String
+  session   ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  senderId  String
+  sender    User        @relation("SentMessages", fields: [senderId], references: [id])
+  content   String      @db.Text
+  isRead    Boolean     @default(false)
+
+  createdAt DateTime @default(now())
 }
 
 enum Role {
   STUDENT
   TUTOR
+  INSTITUTE
   ADMIN
+}
+
+enum AdType {
+  BANNER
+  SEARCH_TOP
+  SIDEBAR
 }
 
 enum SubscriptionTier {
   FREE
-  VERIFIED_PLUS
+  PRO
+  ELITE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  INACTIVE
+  EXPIRED
+  CANCELLED
 }
 
 enum LeadStatus {
   OPEN
-  CLOSED 
+  CLOSED
+  CLOSED_STUDENT
+  CLOSED_ADMIN
+}
+
+enum TransactionStatus {
+  PENDING
+  SUCCESS
+  FAILED
 }

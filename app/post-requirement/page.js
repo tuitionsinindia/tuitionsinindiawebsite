@@ -20,6 +20,9 @@ export default function PostRequirement() {
 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
+    const [otpSent, setOtpSent] = useState(false);
+    const [otp, setOtp] = useState("");
+    const [otpError, setOtpError] = useState("");
 
     const nextStep = () => setStep(step + 1);
     const prevStep = () => setStep(step - 1);
@@ -28,11 +31,51 @@ export default function PostRequirement() {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleSubmit = async (e) => {
+    const handleSendOTP = async () => {
+        setIsSubmitting(true);
+        setOtpError("");
+        try {
+            const res = await fetch("/api/auth/send-otp", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ phone: formData.phone }),
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setOtpSent(true);
+                nextStep(); // Move to OTP entry step (Step 5)
+            } else {
+                setOtpError(data.error || "Failed to send OTP.");
+            }
+        } catch (error) {
+            console.error(error);
+            setOtpError("Error sending OTP.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleVerifyAndSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
+        setOtpError("");
 
         try {
+            // 1. Verify OTP
+            const verifyRes = await fetch("/api/auth/verify-otp", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ phone: formData.phone, otp }),
+            });
+
+            if (!verifyRes.ok) {
+                const verifyData = await verifyRes.json();
+                setOtpError(verifyData.error || "Invalid OTP.");
+                setIsSubmitting(false);
+                return;
+            }
+
+            // 2. Submit Lead
             const res = await fetch("/api/lead/post", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -46,7 +89,7 @@ export default function PostRequirement() {
             }
         } catch (error) {
             console.error(error);
-            alert("Error submitting requirement.");
+            setOtpError("Error submitting requirement.");
         } finally {
             setIsSubmitting(false);
         }
@@ -58,8 +101,8 @@ export default function PostRequirement() {
                 <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80')] opacity-5 bg-cover bg-center"></div>
 
                 <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-10 md:p-16 rounded-[2rem] shadow-2xl border border-white/50 dark:border-slate-800 max-w-lg w-full text-center relative z-10 animate-fade-in-up">
-                    <div className="size-24 rounded-full bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center mx-auto mb-8 shadow-inner">
-                        <span className="material-symbols-outlined text-6xl text-emerald-500">task_alt</span>
+                    <div className="size-24 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-8 shadow-inner">
+                        <span className="material-symbols-outlined text-6xl text-primary">task_alt</span>
                     </div>
                     <h1 className="text-3xl font-heading font-bold mb-4 text-slate-900 dark:text-white">Request Sent!</h1>
                     <p className="text-slate-500 mb-8 leading-relaxed">
@@ -103,11 +146,11 @@ export default function PostRequirement() {
                     </div>
 
                     <div className="flex justify-between relative z-10">
-                        {[1, 2, 3, 4].map((s) => (
-                            <div key={s} className="flex flex-col items-center">
+                        {[1, 2, 3, 4, 5].map((s) => (
+                            <div key={s} className={`flex flex-col items-center ${s === 5 ? 'hidden sm:flex' : ''}`}>
                                 <div className={`size-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 border-4 border-slate-50 dark:border-background-dark ${step > s ? 'bg-primary text-white' :
-                                        step === s ? 'bg-primary text-white shadow-lg shadow-primary/30 scale-110' :
-                                            'bg-slate-200 dark:bg-slate-800 text-slate-400'
+                                    step === s ? 'bg-primary text-white shadow-lg shadow-primary/30 scale-110' :
+                                        'bg-slate-200 dark:bg-slate-800 text-slate-400'
                                     }`}>
                                     {step > s ? <span className="material-symbols-outlined text-[20px]">check</span> : s}
                                 </div>
@@ -116,6 +159,7 @@ export default function PostRequirement() {
                                     {s === 2 && "Level"}
                                     {s === 3 && "Details"}
                                     {s === 4 && "Contact"}
+                                    {s === 5 && "Verify"}
                                 </span>
                             </div>
                         ))}
@@ -127,7 +171,7 @@ export default function PostRequirement() {
 
                     <div className="h-2 w-full bg-gradient-to-r from-primary via-secondary to-accent"></div>
 
-                    <form onSubmit={handleSubmit} className="p-8 md:p-12">
+                    <form onSubmit={step === 5 ? handleVerifyAndSubmit : (e) => e.preventDefault()} className="p-8 md:p-12">
                         {step === 1 && (
                             <div className="animate-fade-in-up">
                                 <span className="text-primary font-bold text-sm tracking-wide uppercase mb-2 block">Step 1 of 4</span>
@@ -342,19 +386,57 @@ export default function PostRequirement() {
                                             <span className="material-symbols-outlined text-sm">arrow_back</span> Back
                                         </button>
                                         <button
-                                            type="submit"
-                                            className="flex-[2] bg-emerald-500 text-white font-bold py-4 rounded-xl hover:bg-emerald-600 shadow-lg shadow-emerald-500/30 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            type="button"
+                                            className="flex-[2] bg-primary text-white font-bold py-4 rounded-xl hover:bg-primary-glow shadow-lg shadow-primary/30 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            onClick={handleSendOTP}
                                             disabled={isSubmitting || !formData.name || !formData.phone || !formData.email}>
                                             {isSubmitting ? (
                                                 <><span className="material-symbols-outlined text-[18px] animate-spin">refresh</span> Processing...</>
                                             ) : (
-                                                <><span className="material-symbols-outlined text-[18px]">send</span> Post Requirement</>
+                                                <><span className="material-symbols-outlined text-[18px]">send</span> Send OTP</>
                                             )}
                                         </button>
                                     </div>
                                     <p className="text-center text-xs text-slate-400 mt-2">
                                         Your details are secure. Tutors can only contact you if they choose to use credits.
                                     </p>
+                                    {otpError && <p className="text-center text-sm text-red-500 font-bold mt-2">{otpError}</p>}
+                                </div>
+                            </div>
+                        )}
+
+                        {step === 5 && (
+                            <div className="animate-fade-in-up text-center">
+                                <h3 className="text-3xl font-heading font-bold mb-4 text-slate-900 dark:text-white">Verify your Number</h3>
+                                <p className="text-slate-500 mb-8 max-w-sm mx-auto">
+                                    We sent a 6-digit code to <span className="font-bold text-slate-700 dark:text-slate-300">{formData.phone}</span>.
+                                    <br />(Check server logs in demo mode).
+                                </p>
+                                <div className="max-w-[250px] mx-auto mb-8">
+                                    <input
+                                        type="text"
+                                        value={otp}
+                                        onChange={(e) => setOtp(e.target.value)}
+                                        maxLength="6"
+                                        required
+                                        placeholder="• • • • • •"
+                                        className="w-full bg-slate-50 dark:bg-slate-800 border box-border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-4 focus:ring-2 focus:ring-primary outline-none transition-all text-2xl tracking-[0.5em] text-center font-bold"
+                                    />
+                                </div>
+                                {otpError && <p className="text-center text-sm text-red-500 font-bold mb-6">{otpError}</p>}
+                                <div className="flex gap-4">
+                                    <button
+                                        type="button"
+                                        className="flex-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold py-4 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
+                                        onClick={prevStep}>
+                                        Change Number
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        disabled={isSubmitting || otp.length < 6}
+                                        className="flex-[2] bg-primary text-white font-bold py-4 rounded-xl hover:bg-primary-glow shadow-lg shadow-primary/30 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                                        {isSubmitting ? "Verifying..." : "Verify & Post Requirement"}
+                                    </button>
                                 </div>
                             </div>
                         )}
