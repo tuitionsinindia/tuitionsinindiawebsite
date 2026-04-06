@@ -27,28 +27,14 @@ import {
     UserPlus,
     Navigation,
     Globe,
-    Atom
+    Atom,
+    Calculator
 } from "lucide-react";
+import { SUBJECT_CATEGORIES, ALL_SUBJECTS, POPULAR_SUBJECTS } from "../lib/subjects";
 
 export default function Home() {
     // Comprehensive local subject list (loads instantly)
-    const LOCAL_SUBJECTS = [
-        "Mathematics", "Physics", "Chemistry", "Biology", "Science",
-        "English", "Hindi", "Sanskrit", "French", "German", "Spanish",
-        "Tamil", "Telugu", "Kannada", "Malayalam", "Marathi", "Bengali", "Gujarati", "Punjabi", "Urdu",
-        "Social Science", "History", "Geography", "Economics", "Civics", "Political Science",
-        "Accountancy", "Business Studies", "Commerce", "Statistics",
-        "Computer Science", "Coding", "Python", "Java", "C++", "Web Development", "Data Science", "Machine Learning",
-        "JEE Preparation", "NEET Preparation", "UPSC Exams", "Banking Exams", "SSC Exams", "CLAT", "CAT", "GATE", "GRE", "GMAT",
-        "IELTS", "TOEFL", "SAT", "IB Curriculum", "IGCSE",
-        "Vocal Music", "Guitar", "Piano", "Keyboard", "Flute", "Tabla", "Harmonium",
-        "Classical Dance", "Western Dance", "Yoga",
-        "Drawing", "Painting", "Art & Craft", "Photography",
-        "Personality Development", "Spoken English", "Public Speaking",
-        "Vedic Maths", "Abacus", "Chess", "Financial Literacy",
-        "Environmental Science", "Psychology", "Sociology", "Philosophy",
-        "Mechanical Engineering", "Electrical Engineering", "Civil Engineering"
-    ];
+    const LOCAL_SUBJECTS = ALL_SUBJECTS;
 
     const [searchSubject, setSearchSubject] = useState("");
     const [searchGrade, setSearchGrade] = useState("");
@@ -92,24 +78,30 @@ export default function Home() {
         fetch("/api/subjects")
             .then(res => res.json())
             .then(data => {
-                // Merge API subjects with local fallback, deduplicate
-                const merged = Array.from(new Set([...LOCAL_SUBJECTS, ...data])).sort();
+                // Merge API subject names with local fallback, deduplicate
+                const apiNames = Array.isArray(data) 
+                    ? data.map(item => (typeof item === 'object' && item !== null) ? item.name : item)
+                          .filter(name => typeof name === 'string' && name.trim().length > 0)
+                    : [];
+                const merged = Array.from(new Set([...LOCAL_SUBJECTS, ...apiNames]))
+                    .filter(s => typeof s === 'string')
+                    .sort();
                 setSubjects(merged);
             })
             .catch(err => console.error("Failed to fetch subjects", err));
     }, []);
 
     useEffect(() => {
-        if (searchSubject.length > 0) {
+        if (typeof searchSubject === 'string' && searchSubject.length >= 2) {
+            const query = searchSubject.toLowerCase();
             const filtered = subjects.filter(s => 
-                s.toLowerCase().includes(searchSubject.toLowerCase())
+                typeof s === 'string' && s.toLowerCase().includes(query)
             );
             setFilteredSubjects(filtered);
-            if (filtered.length > 0) setShowSubjectSuggestions(true);
-            else setShowSubjectSuggestions(false);
+            setShowSubjectSuggestions(filtered.length > 0);
         } else {
-            // Show popular subjects when field is empty but focused
-            setFilteredSubjects(subjects.slice(0, 15));
+            setFilteredSubjects([]);
+            setShowSubjectSuggestions(false);
         }
     }, [searchSubject, subjects]);
 
@@ -217,15 +209,12 @@ export default function Home() {
                                 <Search className="text-gray-400 mr-3" size={20} />
                                 <input 
                                     className="w-full bg-transparent border-none focus:ring-0 text-gray-800 placeholder:text-gray-400 font-medium outline-none" 
-                                    placeholder="Subject (e.g. Mathematics)" 
+                                    placeholder="Subject (e.g. Maths)" 
                                     type="text"
                                     value={searchSubject}
                                     onChange={(e) => setSearchSubject(e.target.value)}
                                     onFocus={() => {
-                                        if (searchSubject.length > 1 && filteredSubjects.length > 0) {
-                                            setShowSubjectSuggestions(true);
-                                        } else if (searchSubject.length <= 1 && subjects.length > 0) {
-                                            setFilteredSubjects(subjects.slice(0, 15));
+                                        if (searchSubject.length >= 2 && filteredSubjects.length > 0) {
                                             setShowSubjectSuggestions(true);
                                         }
                                     }}
@@ -398,21 +387,20 @@ export default function Home() {
                     </div>
                     
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                        {[
-                            { title: "Mathematics", icon: TrendingUp },
-                            { title: "Science", icon: Atom },
-                            { title: "English", icon: Languages },
-                            { title: "Computer Science", icon: CodeIcon },
-                            { title: "Physics", icon: ArrowRight },
-                            { title: "Chemistry", icon: BookOpen },
-                            { title: "Class 1st - 5th", icon: Layers },
-                            { title: "IIT JEE", icon: Award }
-                        ].map((cat, i) => (
-                            <div key={i} onClick={() => { setSearchSubject(cat.title); window.scrollTo({top: 0, behavior: 'smooth'}); }} className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md cursor-pointer flex flex-col items-center justify-center text-center group transition-all">
-                                <div className="text-blue-600 mb-4 bg-blue-50 p-4 rounded-full group-hover:scale-110 transition-transform"><cat.icon size={28} /></div>
-                                <h3 className="font-bold text-gray-800">{cat.title}</h3>
-                            </div>
+                        {POPULAR_SUBJECTS.map((cat, i) => (
+                            <Link key={i} href={`/select-level?subject=${encodeURIComponent(cat.title)}`} className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm hover:shadow-2xl cursor-pointer flex flex-col items-center justify-center text-center group transition-all hover:-translate-y-2">
+                                <div className="text-blue-600 mb-6 bg-blue-50 p-5 rounded-3xl group-hover:bg-blue-600 group-hover:text-white transition-all shadow-inner"><cat.icon size={32} /></div>
+                                <h3 className="font-extrabold text-gray-900 text-lg tracking-tight">{cat.title}</h3>
+                                <p className="text-[10px] font-bold text-gray-400 uppercase mt-1 tracking-widest group-hover:text-blue-600 transition-colors">Popular Choice</p>
+                            </Link>
                         ))}
+                    </div>
+
+                    <div className="mt-16 text-center">
+                        <Link href="/categories" className="inline-flex items-center gap-3 px-10 py-5 bg-gray-900 text-white rounded-full font-black text-sm uppercase tracking-widest hover:bg-blue-600 transition-all shadow-xl hover:shadow-blue-200 active:scale-95 group">
+                            View All Categories
+                            <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                        </Link>
                     </div>
                 </div>
             </section>
@@ -460,7 +448,7 @@ export default function Home() {
                             </div>
                             <div className="mt-auto pt-6 border-t border-blue-500 relative z-10">
                                 <p className="font-bold">Rahul M.</p>
-                                <p className="text-sm text-blue-200 font-medium">Mathematics Tutor • Delhi</p>
+                                <p className="text-sm text-blue-200 font-medium">Maths Tutor • Delhi</p>
                             </div>
                         </div>
 
