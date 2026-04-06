@@ -1,51 +1,74 @@
+"use client";
+
 import Link from "next/link";
+import { 
+    GraduationCap, 
+    BookOpen, 
+    CreditCard, 
+    LayoutGrid, 
+    Rocket, 
+    Zap,
+    Search,
+    UserCheck,
+    MessageSquare,
+    Star,
+    Video
+} from "lucide-react";
 
 export default function StudentKB() {
     const categories = [
         {
             title: "Getting Started",
-            icon: "rocket_launch",
+            icon: Rocket,
             topics: ["How to create a profile", "Finding your first tutor", "Using the AI Matchmaker"]
         },
         {
             title: "Learning Tips",
-            icon: "tips_and_updates",
+            icon: Zap,
             topics: ["Effective online study habits", "How to prepare for board exams", "Setting learning goals"]
         },
         {
             title: "Payments & Refunds",
-            icon: "payments",
+            icon: CreditCard,
             topics: ["Understanding pricing bundles", "Managing your credits", "How to request a refund"]
         },
         {
             title: "Platform Features",
-            icon: "extension",
+            icon: LayoutGrid,
             topics: ["Using the internal chat", "Leaving reviews for tutors", "Tracking your progress"]
         }
     ];
 
     return (
-        <div className="min-h-screen bg-slate-50 pt-32 pb-20 px-4 md:px-8">
-            <div className="max-w-6xl mx-auto">
-                <div className="text-center mb-16">
-                    <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6 font-heading tracking-tight">Student Knowledge Base</h1>
-                    <p className="text-slate-500 font-medium text-lg max-w-2xl mx-auto">
+        <div className="min-h-screen bg-background-dark font-sans text-on-background-dark antialiased pt-40 pb-32 selection:bg-primary/30">
+            <div className="max-w-7xl mx-auto px-6">
+                <div className="text-center mb-24 space-y-6">
+                    <div className="inline-flex items-center gap-3 px-4 py-2 bg-primary/10 rounded-full border border-primary/20 mb-8">
+                        <GraduationCap size={14} className="text-primary" />
+                        <span className="text-primary text-[10px] font-black uppercase tracking-[0.3em]">Student Intelligence Hub</span>
+                    </div>
+                    <h1 className="text-6xl md:text-8xl font-black text-white italic tracking-tighter leading-none uppercase">
+                        Knowledge <br />
+                        <span className="text-primary font-serif lowercase tracking-normal not-italic px-4">repository</span>.
+                    </h1>
+                    <p className="text-on-background-dark/40 font-medium text-xl max-w-2xl mx-auto leading-relaxed italic">
                         In-depth guides and expert advice to help you master your subjects and achieve academic excellence.
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-32">
                     {categories.map((cat, idx) => (
-                        <div key={idx} className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all group">
-                            <div className="size-14 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center mb-6 group-hover:bg-orange-600 group-hover:text-white transition-all">
-                                <span className="material-symbols-outlined text-2xl">{cat.icon}</span>
+                        <div key={idx} className="bg-surface-dark p-10 rounded-[3rem] border border-border-dark shadow-4xl hover:border-primary/30 transition-all group">
+                            <div className="size-14 rounded-2xl bg-background-dark border border-border-dark flex items-center justify-center mb-8 text-primary group-hover:scale-110 transition-transform">
+                                <cat.icon size={24} />
                             </div>
-                            <h2 className="text-xl font-bold text-slate-900 mb-6">{cat.title}</h2>
+                            <h2 className="text-xl font-black text-white mb-8 mb-6 uppercase italic tracking-tight">{cat.title}</h2>
                             <ul className="space-y-4">
                                 {cat.topics.map((topic, i) => (
                                     <li key={i}>
-                                        <Link href="#" className="text-sm font-medium text-slate-500 hover:text-primary transition-colors flex items-center gap-2">
-                                            <span className="size-1.5 rounded-full bg-slate-200"></span> {topic}
+                                        <Link href="#" className="text-xs font-black uppercase tracking-widest text-on-surface-dark/40 hover:text-primary transition-colors flex items-center gap-3 group/link">
+                                            <div className="size-1.5 rounded-full bg-primary/20 group-hover/link:bg-primary transition-colors"></div>
+                                            {topic}
                                         </Link>
                                     </li>
                                 ))}
@@ -54,17 +77,19 @@ export default function StudentKB() {
                     ))}
                 </div>
 
-                <div className="bg-gradient-to-tr from-primary to-accent rounded-[3rem] p-12 text-white text-center relative overflow-hidden">
-                    <div className="relative z-10">
-                        <h2 className="text-3xl font-bold mb-4">Want specialized advice?</h2>
-                        <p className="text-white/80 mb-8 font-medium max-w-xl mx-auto">Join our weekly student webinars to learn from India's top-performing students and educators.</p>
-                        <button className="bg-white text-primary font-bold px-10 py-4 rounded-2xl hover:bg-slate-50 transition-all shadow-xl">
-                            Register for Webinar
+                {/* Webinar CTA */}
+                <div className="p-16 md:p-24 bg-primary rounded-[5rem] text-white text-center shadow-4xl relative overflow-hidden group">
+                    <div className="absolute inset-0 bg-black/5 opacity-50"></div>
+                    <div className="absolute -right-32 -bottom-32 size-[600px] bg-white/10 rounded-full blur-[120px] group-hover:scale-110 transition-transform duration-1000"></div>
+                    
+                    <div className="relative z-10 space-y-10 max-w-3xl mx-auto">
+                        <Video size={48} className="mx-auto mb-8 text-white/50" />
+                        <h2 className="text-4xl md:text-6xl font-black uppercase italic tracking-tighter leading-none"> Want specialized <span className="text-black font-serif lowercase tracking-normal not-italic px-4">advice?</span></h2>
+                        <p className="text-xl text-white/80 font-medium italic leading-relaxed">Join our weekly student webinars to learn from Bharat's top-performing students and legendary educators.</p>
+                        <button className="bg-white text-primary font-black px-12 py-5 rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-xl shadow-black/20 uppercase tracking-[0.3em] text-[10px]">
+                            Register for Session
                         </button>
                     </div>
-                    {/* Abstract Shapes */}
-                    <div className="absolute top-0 right-0 size-64 bg-white/5 rounded-full -mr-20 -mt-20 blur-3xl"></div>
-                    <div className="absolute bottom-0 left-0 size-64 bg-black/5 rounded-full -ml-20 -mb-20 blur-3xl"></div>
                 </div>
             </div>
         </div>

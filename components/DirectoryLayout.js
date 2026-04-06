@@ -242,13 +242,40 @@ export default function DirectoryLayout({ tutors, subject, location, filters, ti
                                                 {tutor.bio}
                                             </p>
 
-                                            <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-slate-50">
-                                                <Link href={`/tutor/${tutor.id}`} className="flex-1 bg-slate-50 text-slate-900 font-bold py-4 rounded-2xl border border-slate-100 hover:bg-slate-100 transition-all text-center">
-                                                    View Profile
-                                                </Link>
-                                                <Link href={`/messages?tutorId=${tutor.id}`} className="flex-1 bg-primary text-white font-bold py-4 rounded-2xl hover:opacity-90 shadow-lg shadow-primary/10 transition-all text-center">
-                                                    Contact Now
-                                                </Link>
+                                            <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-slate-50 relative">
+                                                {/* Contact Placeholders (Locked State) */}
+                                                <div className="flex-1 flex flex-col justify-center gap-2">
+                                                    <div className="flex items-center gap-2 text-[10px] font-bold text-slate-300 uppercase tracking-widest italic group-hover:text-slate-400 transition-colors">
+                                                        <span className="material-symbols-outlined text-sm">mail</span>
+                                                        <span>u••••@••••.net</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2 text-[10px] font-bold text-slate-300 uppercase tracking-widest italic group-hover:text-slate-400 transition-colors">
+                                                        <span className="material-symbols-outlined text-sm">call</span>
+                                                        <span>+91 9•••• ••••8</span>
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex gap-4">
+                                                    <Link 
+                                                        href={`/tutor/${tutor.id}`} 
+                                                        className="px-8 bg-slate-50 text-slate-900 font-bold py-4 rounded-2xl border border-slate-100 hover:bg-slate-100 transition-all text-center text-xs whitespace-nowrap"
+                                                    >
+                                                        View Profile
+                                                    </Link>
+                                                    <Link 
+                                                        href={`/get-started?intent=unlock&tutorId=${tutor.id}&subject=${subject || ""}&location=${location || ""}`} 
+                                                        className="px-8 bg-primary text-white font-bold py-4 rounded-2xl hover:opacity-90 shadow-lg shadow-primary/10 transition-all text-center flex items-center gap-3 text-xs whitespace-nowrap"
+                                                    >
+                                                        <span className="material-symbols-outlined text-sm">lock</span>
+                                                        Unlock Contact
+                                                    </Link>
+                                                </div>
+
+                                                {/* Micro-Unlock Banner */}
+                                                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-white px-4 py-1 rounded-full border border-slate-100 text-[8px] font-black text-slate-400 uppercase tracking-wider shadow-sm flex items-center gap-2">
+                                                    <span className="material-symbols-outlined text-[10px]">shield</span>
+                                                    Verify Identity to Access Contact
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

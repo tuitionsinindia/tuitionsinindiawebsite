@@ -1,5 +1,8 @@
 import prisma from "@/lib/prisma";
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 3600; // Cache for 1 hour
+
 export default async function sitemap() {
     // Base URL of the deployed application
     const baseUrl = "https://tuitionsinindia.com";
@@ -7,15 +10,20 @@ export default async function sitemap() {
     // Static core application routes
     const routes = [
         "",
-        "/tutors",
+        "/search",
         "/pricing/student",
         "/pricing/tutor",
         "/how-it-works/student",
         "/how-it-works/tutor",
         "/login",
+        "/register/student",
+        "/register/tutor",
         "/post-requirement",
         "/ai-match",
-        "/register/tutor"
+        "/about",
+        "/contact",
+        "/legal/terms",
+        "/legal/privacy"
     ].map((route) => ({
         url: `${baseUrl}${route}`,
         lastModified: new Date(),
@@ -33,7 +41,8 @@ export default async function sitemap() {
             select: {
                 id: true,
                 updatedAt: true
-            }
+            },
+            take: 5000 // Limit for safety
         });
 
         const tutorRoutes = tutors.map((tutor) => ({

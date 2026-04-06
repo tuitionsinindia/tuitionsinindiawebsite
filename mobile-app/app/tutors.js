@@ -1,7 +1,7 @@
-import { View, Text, TouchableOpacity, SafeAreaView, FlatList, TextInput, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, SafeAreaView, FlatList, TextInput, ActivityIndicator, StatusBar } from 'react-native';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
-import { ChevronLeft, Search, SlidersHorizontal, MapPin, Star, Bookmark, GraduationCap } from 'lucide-react-native';
+import { ChevronLeft, Search, SlidersHorizontal, MapPin, Star, Bookmark, GraduationCap, ShieldCheck, BadgeCheck } from 'lucide-react-native';
 import { api } from '../lib/api';
 
 export default function TutorsDirectory() {
@@ -20,12 +20,12 @@ export default function TutorsDirectory() {
             const data = await api.get('/tutors');
             setTutors(data.tutors || []);
         } catch (error) {
-            console.error(error);
+            console.error("API Fetch Error:", error);
             // Fallback for demo
             setTutors([
-                { id: '1', name: 'Dr. Arvinder Singh', subjects: ['Physics', 'Mathematics'], hourlyRate: 500, city: 'New Delhi', rating: 4.9 },
-                { id: '2', name: 'Priya Sharma', subjects: ['English', 'History'], hourlyRate: 400, city: 'Mumbai', rating: 4.8 },
-                { id: '3', name: 'Rahul Verma', subjects: ['Chemistry', 'Biology'], hourlyRate: 450, city: 'Bangalore', rating: 4.7 }
+                { id: '1', name: 'Dr. Arvinder Singh', subjects: ['Physics', 'Mathematics'], hourlyRate: 500, city: 'New Delhi', rating: 4.9, isVerified: true },
+                { id: '2', name: 'Priya Sharma', subjects: ['English', 'History'], hourlyRate: 400, city: 'Mumbai', rating: 4.8, isVerified: true },
+                { id: '3', name: 'Rahul Verma', subjects: ['Chemistry', 'Biology'], hourlyRate: 450, city: 'Bangalore', rating: 4.7, isVerified: false }
             ]);
         } finally {
             setLoading(false);
@@ -35,82 +35,99 @@ export default function TutorsDirectory() {
     const renderTutor = ({ item }) => (
         <TouchableOpacity
             onPress={() => router.push(`/tutor/${item.id}`)}
-            className="bg-white rounded-[2.5rem] border border-slate-100 mb-6 overflow-hidden shadow-sm shadow-slate-200/50"
+            className="bg-surface-dark rounded-[2.5rem] border border-border-dark mb-6 overflow-hidden shadow-2xl active:scale-[0.98] transition-all"
         >
-            <View className="flex-row p-6">
-                <View className="size-20 bg-slate-50 rounded-2xl items-center justify-center border border-slate-100">
-                    <Text className="text-primary text-2xl font-bold">{item.name?.charAt(0)}</Text>
+            <View className="flex-row p-7">
+                <View className="size-20 bg-background-dark rounded-3xl items-center justify-center border-2 border-border-dark shadow-inner relative">
+                    <Text className="text-primary text-3xl font-black">{item.name?.charAt(0)}</Text>
+                    {item.isVerified && (
+                        <View className="absolute -bottom-1 -right-1 bg-primary p-1 rounded-lg border-2 border-surface-dark">
+                            <ShieldCheck size={12} color="white" />
+                        </View>
+                    )}
                 </View>
-                <View className="flex-1 ml-5 justify-center">
-                    <View className="flex-row justify-between items-start mb-1">
-                        <Text className="text-slate-900 text-lg font-bold tracking-tight">{item.name}</Text>
-                        <Bookmark size={20} color="#cbd5e1" />
+                <View className="flex-1 ml-6 justify-center">
+                    <View className="flex-row justify-between items-center mb-2">
+                        <View className="flex-row items-center gap-2">
+                            <Text className="text-white text-lg font-black tracking-tight">{item.name}</Text>
+                            {item.isVerified && <BadgeCheck size={16} color="#0066ff" />}
+                        </View>
+                        <Bookmark size={20} color="#1a2333" />
                     </View>
-                    <Text className="text-primary font-bold text-[10px] uppercase tracking-widest">{item.subjects?.join(' • ')}</Text>
-                    <View className="flex-row items-center mt-3">
-                        <MapPin size={12} color="#94a3b8" />
-                        <Text className="text-slate-400 text-xs font-bold ml-1 uppercase tracking-widest">{item.city || 'Remote'}</Text>
+                    
+                    <Text className="text-primary font-black text-[10px] uppercase tracking-[0.15em] mb-3">{item.subjects?.join(' • ')}</Text>
+                    
+                    <View className="flex-row items-center">
+                        <MapPin size={12} color="#6c757d" />
+                        <Text className="text-[#6c757d] text-[10px] font-black ml-1.5 uppercase tracking-widest">{item.city || 'Remote Collaboration'}</Text>
                     </View>
                 </View>
             </View>
 
-            <View className="bg-slate-50 px-6 py-4 flex-row justify-between items-center border-t border-slate-50">
-                <View className="flex-row items-center">
-                    <Star size={14} color="#f2994a" fill="#f2994a" />
-                    <Text className="text-slate-900 font-bold ml-1.5 text-sm">{item.rating || '4.9'}</Text>
-                    <Text className="text-slate-400 text-[10px] font-bold ml-2 uppercase tracking-widest">Reviews</Text>
+            <View className="bg-background-dark/30 px-7 py-5 flex-row justify-between items-center border-t border-border-dark">
+                <View className="flex-row items-center bg-surface-dark/50 px-4 py-2 rounded-xl border border-border-dark">
+                    <Star size={14} color="#ff9500" fill="#ff9500" />
+                    <Text className="text-white font-black ml-2 text-xs">{item.rating || '4.9'}</Text>
+                    <View className="size-1 bg-[#4a5568] rounded-full mx-2" />
+                    <Text className="text-[#6c757d] text-[10px] font-black uppercase tracking-widest">Verified</Text>
                 </View>
                 <View className="flex-row items-end">
-                    <Text className="text-slate-900 font-bold text-lg">₹{item.hourlyRate}</Text>
-                    <Text className="text-slate-400 font-bold text-[10px] mb-1 ml-1 uppercase">/hr</Text>
+                    <Text className="text-white font-black text-xl">₹{item.hourlyRate}</Text>
+                    <Text className="text-[#6c757d] font-black text-[10px] mb-1.5 ml-1.5 uppercase tracking-tighter">/ Session</Text>
                 </View>
             </View>
         </TouchableOpacity >
     );
 
     return (
-        <SafeAreaView className="flex-1 bg-white">
-            {/* Header */}
-            <View className="px-6 py-4 flex-row items-center justify-between">
-                <TouchableOpacity onPress={() => router.back()} className="p-2 -ml-2">
-                    <ChevronLeft size={24} color="#1e448a" />
+        <SafeAreaView className="flex-1 bg-background-dark">
+            <StatusBar barStyle="light-content" />
+            {/* Executive Header */}
+            <View className="px-8 py-6 flex-row items-center justify-between">
+                <TouchableOpacity onPress={() => router.back()} className="p-3 bg-surface-dark rounded-2xl border border-border-dark">
+                    <ChevronLeft size={20} color="white" strokeWidth={3} />
                 </TouchableOpacity>
-                <Text className="text-slate-900 text-xl font-bold">Verified Tutors</Text>
-                <TouchableOpacity className="p-2 -mr-2">
-                    <SlidersHorizontal size={20} color="#1e448a" />
+                <View className="items-center">
+                    <Text className="text-white text-xl font-black tracking-tight">Institutional Specialists</Text>
+                    <Text className="text-primary text-[10px] font-black uppercase tracking-widest">Verified Active Profiles</Text>
+                </View>
+                <TouchableOpacity className="p-3 bg-surface-dark rounded-2xl border border-border-dark">
+                    <SlidersHorizontal size={20} color="white" />
                 </TouchableOpacity>
             </View>
 
-            {/* Search Bar */}
-            <View className="px-6 mb-8 mt-4">
-                <View className="bg-slate-50 rounded-2xl flex-row items-center px-5 py-4 border border-slate-100 shadow-sm shadow-slate-100">
-                    <Search size={18} color="#94a3b8" />
+            {/* Smart Discovery Filter */}
+            <View className="px-8 mb-10 mt-4">
+                <View className="bg-surface-dark rounded-3xl flex-row items-center px-6 py-5 border border-border-dark shadow-2xl">
+                    <Search size={20} color="#0066ff" />
                     <TextInput
                         value={search}
                         onChangeText={setSearch}
-                        placeholder="Search subject or tutor name..."
-                        placeholderTextColor="#94a3b8"
-                        className="flex-1 ml-4 text-slate-900 font-medium"
+                        placeholder="Search discipline or expert name..."
+                        placeholderTextColor="#4a5568"
+                        className="flex-1 ml-4 text-white font-black text-sm"
                     />
                 </View>
             </View>
 
-            {/* Tutors List */}
+            {/* Specialist Inventory List */}
             {loading ? (
                 <View className="flex-1 justify-center items-center">
-                    <ActivityIndicator size="large" color="#1e448a" />
+                    <ActivityIndicator size="large" color="#0066ff" />
                 </View>
             ) : (
                 <FlatList
                     data={tutors}
                     renderItem={renderTutor}
                     keyExtractor={(item) => item.id}
-                    contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 40 }}
+                    contentContainerStyle={{ paddingHorizontal: 32, paddingBottom: 60 }}
                     showsVerticalScrollIndicator={false}
                     ListEmptyComponent={
-                        <View className="items-center mt-20">
-                            <GraduationCap size={48} color="#cbd5e1" />
-                            <Text className="text-slate-400 text-lg font-bold mt-5">No tutors found</Text>
+                        <View className="items-center mt-24">
+                            <View className="bg-surface-dark p-8 rounded-[3rem] border border-border-dark mb-6">
+                                <GraduationCap size={48} color="#1a2333" />
+                            </View>
+                            <Text className="text-[#6c757d] text-lg font-black uppercase tracking-widest">No Matches Identified</Text>
                         </View>
                     }
                 />

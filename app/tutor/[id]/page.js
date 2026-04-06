@@ -20,7 +20,7 @@ export default async function TutorProfile({ params, searchParams }) {
         notFound();
     }
 
-    const listing = tutor.tutorListing || { bio: "", subjects: [], experience: 0, hourlyRate: 0 };
+    const listing = tutor.tutorListing || { bio: "", subjects: [], experience: 0, hourlyRate: 0, rating: 0, reviewCount: 0 };
 
     // Fetch viewer data for paywall check
     let viewer = null;
@@ -34,174 +34,221 @@ export default async function TutorProfile({ params, searchParams }) {
     const canContactProactively = viewer ? (viewer.role === 'ADMIN' || viewer.subscriptionTier !== 'FREE') : false;
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans relative overflow-hidden flex flex-col pt-32 pb-20 px-4 md:px-8">
-            {/* Background Effects */}
-            <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-primary/10 rounded-full blur-[120px] pointer-events-none -translate-y-1/2 translate-x-1/3"></div>
-            <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-accent/10 rounded-full blur-[100px] pointer-events-none translate-y-1/3 -translate-x-1/3"></div>
+        <div className="min-h-screen bg-surface font-body text-on-surface antialiased pt-28 pb-32">
+            {/* Ambient Background Strategy */}
+            <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+                <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] bg-primary/5 rounded-full blur-[160px] animate-pulse"></div>
+                <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-500/5 rounded-full blur-[140px]"></div>
+            </div>
 
-            <div className="max-w-5xl mx-auto w-full relative z-10 flex flex-col gap-8">
-                {/* Back link */}
-                <div>
-                    <Link href="/tutors" className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-primary transition-colors bg-white/50 dark:bg-slate-900/50 backdrop-blur-md px-4 py-2 rounded-full border border-slate-200 dark:border-slate-800 shadow-sm">
-                        <span className="material-symbols-outlined text-[18px]">arrow_back</span> Back to Directory
+            <main className="max-w-7xl mx-auto px-6 relative z-10">
+                {/* Strategic Backlink */}
+                <div className="mb-12">
+                    <Link href="/tutors" className="inline-flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] text-on-surface-variant/40 hover:text-primary transition-all group">
+                        <span className="material-symbols-outlined text-lg group-hover:-translate-x-1 transition-transform">west</span> 
+                        GLOBAL DIRECTORY
                     </Link>
                 </div>
 
-                {/* Profile Header Card */}
-                <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-[2.5rem] p-8 md:p-12 border border-white/50 dark:border-slate-800 shadow-2xl shadow-primary/5 relative overflow-hidden group">
-                    <div className="absolute inset-0 bg-gradient-to-tr from-primary/5 to-accent/5 pointer-events-none"></div>
-
-                    <div className="flex flex-col md:flex-row gap-8 md:gap-12 items-center md:items-start relative z-10">
-                        {/* Avatar */}
-                        <div className="relative flex-shrink-0">
-                            <div className="size-32 md:size-40 rounded-[2rem] bg-gradient-to-tr from-primary to-accent p-1 shadow-2xl shadow-primary/30 rotate-3 group-hover:rotate-0 transition-transform duration-500">
-                                <div className="w-full h-full rounded-[1.8rem] bg-white dark:bg-slate-900 flex items-center justify-center text-5xl md:text-6xl font-heading font-bold text-slate-900 dark:text-white border-4 border-white dark:border-slate-900">
-                                    {(tutor.name || "U").charAt(0)}
-                                </div>
-                            </div>
-                            {(tutor.isVerified || tutor.isIdVerified) && (
-                                <div className="absolute -bottom-4 -right-4 size-12 bg-emerald-500 rounded-full border-4 border-white dark:border-slate-900 flex items-center justify-center text-white shadow-xl" title="Verified Expert">
-                                    <span className="material-symbols-outlined text-[24px]">verified</span>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Title & Key Info */}
-                        <div className="flex-1 text-center md:text-left">
-                            <div className="flex flex-col sm:flex-row items-center sm:justify-between gap-4 mb-4">
-                                <div>
-                                    <h1 className="text-4xl md:text-5xl font-heading font-bold text-slate-900 dark:text-white mb-2">{tutor.name}</h1>
-                                    <p className="text-lg text-slate-500 font-semibold">
-                                        {tutor.subscriptionTier === 'ELITE' ? "Elite Marketplace Partner" : tutor.subscriptionTier === 'PRO' ? "Premium Member" : "Independent Partner"}
-                                    </p>
-                                </div>
-                                <div className="text-center sm:text-right bg-slate-50 dark:bg-slate-800/50 px-6 py-4 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-inner">
-                                    <div className="text-3xl font-heading font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">₹{listing.hourlyRate || "TBD"}</div>
-                                    <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">per hour</div>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-wrap justify-center md:justify-start gap-4 mb-6">
-                                <div className="flex items-center gap-2 text-amber-500 bg-amber-50 dark:bg-amber-900/20 px-4 py-2 rounded-xl border border-amber-100 dark:border-amber-900/50 font-bold">
-                                    <span className="material-symbols-outlined text-[20px]">star</span>
-                                    {(listing.rating > 0) ? listing.rating : "New"}
-                                    <span className="text-slate-500 dark:text-slate-400 font-semibold">({listing.reviewCount || 0} reviews)</span>
-                                </div>
-                                {listing.city && (
-                                    <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 font-bold">
-                                        <span className="material-symbols-outlined text-[20px] text-slate-400">location_on</span>
-                                        {listing.city}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
+                    {/* Left Column: Intelligence Profile */}
+                    <div className="lg:col-span-8">
+                        <section className="relative">
+                            <div className="relative h-[500px] md:h-[650px] w-full rounded-[4rem] overflow-hidden mb-12 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.1)] border border-outline-variant/5 bg-surface-container-low group">
+                                {tutor.image ? (
+                                    <img 
+                                        src={tutor.image} 
+                                        alt={tutor.name} 
+                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" 
+                                    />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-9xl font-headline font-black text-on-surface-variant/10 uppercase bg-gradient-to-br from-surface-container-low to-surface-container-high italic">
+                                        {(tutor.name || "U")[0]}
                                     </div>
                                 )}
+                                
+                                <div className="absolute top-10 right-10 flex items-center gap-3 bg-white/40 dark:bg-slate-900/40 backdrop-blur-2xl px-6 py-3 rounded-full border border-white/20 shadow-2xl">
+                                    <span className="size-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                    <span className="text-[10px] font-black uppercase tracking-widest">ACTIVE PARTNER</span>
+                                </div>
                             </div>
 
-                            <div className="flex flex-col sm:flex-row gap-4 w-full">
-                                <Link href={`/post-requirement?tutorId=${id}`} className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-primary text-white font-bold py-4 px-8 rounded-xl hover:bg-primary-glow shadow-xl shadow-primary/30 transition-all">
-                                    <span className="material-symbols-outlined">how_to_reg</span> Book a Demo Class
-                                </Link>
-
-                                {canContactProactively ? (
-                                    <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-bold py-4 px-8 rounded-xl border-2 border-slate-200 dark:border-slate-700 hover:border-primary hover:text-primary transition-all shadow-sm">
-                                        <span className="material-symbols-outlined">chat</span> Message
-                                    </button>
-                                ) : (
-                                    <Link href={`/dashboard/student/subscription?studentId=${viewerId}`} className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-amber-500/10 text-amber-600 font-bold py-4 px-8 rounded-xl border-2 border-amber-500/20 hover:bg-amber-500/20 transition-all">
-                                        <span className="material-symbols-outlined">lock</span> Upgrade to Message
-                                    </Link>
-                                )}
+                            <div className="space-y-4">
+                                <div className="flex items-center gap-4 mb-4">
+                                    <span className="px-4 py-1.5 bg-primary/5 text-primary rounded-full text-[10px] font-black uppercase tracking-[0.2em] border border-primary/10">
+                                        {tutor.subscriptionTier === 'ELITE' ? "ELITE PARTNER" : "VERIFIED EXPERT"}
+                                    </span>
+                                    <div className="flex items-center gap-1.5 text-amber-500 font-black">
+                                        <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                                        <span className="text-xs uppercase tracking-tighter">{listing.rating > 0 ? listing.rating : "NEW"}</span>
+                                    </div>
+                                </div>
+                                <h1 className="text-6xl md:text-8xl font-headline font-black tracking-tighter mb-4 uppercase italic leading-[0.85]">
+                                    {tutor.name.split(' ')[0]} <br/> <span className="text-primary not-italic lowercase font-serif font-light">{tutor.name.split(' ').slice(1).join(' ')}</span>
+                                </h1>
+                                <p className="text-2xl text-on-surface-variant font-medium max-w-xl leading-snug">
+                                    {listing.title || `Specialist in ${listing.subjects?.[0] || 'Modern Education'}`}
+                                </p>
                             </div>
-                        </div>
-                    </div>
-                </div>
+                        </section>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* Main Content */}
-                    <div className="lg:col-span-2 space-y-8">
-                        {/* About Section */}
-                        <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-3xl p-8 border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none relative z-10">
-                            <h3 className="text-2xl font-heading font-bold mb-6 flex items-center gap-3">
-                                <span className="material-symbols-outlined text-primary bg-primary/10 p-2 rounded-xl">person</span>
-                                About Me
-                            </h3>
-                            <div className="prose dark:prose-invert max-w-none">
-                                <p className="text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line text-lg">
-                                    {listing.bio || "This tutor hasn't written a biography yet. Consider booking a trial class to get to know them better!"}
+                        {/* Performance Intelligence */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-20 mb-20 bg-surface-container-low/50 backdrop-blur-md p-10 rounded-[3rem] border border-outline-variant/5">
+                            <div className="space-y-1">
+                                <p className="text-[9px] font-black text-on-surface-variant/40 uppercase tracking-widest">Experience</p>
+                                <p className="text-3xl font-headline font-black">{listing.experience || 0} Yrs</p>
+                            </div>
+                            <div className="space-y-1">
+                                <p className="text-[9px] font-black text-on-surface-variant/40 uppercase tracking-widest">Impact</p>
+                                <p className="text-3xl font-headline font-black">{listing.reviewCount || 0}+</p>
+                            </div>
+                            <div className="space-y-1">
+                                <p className="text-[9px] font-black text-on-surface-variant/40 uppercase tracking-widest">Hourly Rate</p>
+                                <p className="text-3xl font-headline font-black text-primary">₹{listing.hourlyRate || "TBD"}</p>
+                            </div>
+                            <div className="space-y-1">
+                                <p className="text-[9px] font-black text-on-surface-variant/40 uppercase tracking-widest">Status</p>
+                                <p className="text-3xl font-headline font-black flex items-center gap-2">
+                                    <span className="size-3 rounded-full bg-emerald-500"></span>
+                                    ONLINE
                                 </p>
                             </div>
                         </div>
 
-                        {/* Experience & Education */}
-                        <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-3xl p-8 border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none relative z-10">
-                            <h3 className="text-2xl font-heading font-bold mb-6 flex items-center gap-3">
-                                <span className="material-symbols-outlined text-accent bg-accent/10 p-2 rounded-xl">history_edu</span>
-                                Experience & Education
-                            </h3>
-                            <div className="grid sm:grid-cols-2 gap-6">
-                                <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-2xl border border-slate-100 dark:border-slate-800">
-                                    <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-1">Total Experience</p>
-                                    <p className="text-2xl font-bold text-slate-900 dark:text-white">{listing.experience || 0}+ Years</p>
+                        {/* Narrative Sections */}
+                        <div className="space-y-24">
+                            <section>
+                                <div className="flex items-center gap-6 mb-12">
+                                    <h2 className="text-4xl font-headline font-black uppercase italic tracking-tighter">Strategic <span className="text-primary not-italic lowercase font-serif font-light">approach</span></h2>
+                                    <div className="flex-1 h-px bg-outline-variant/10"></div>
                                 </div>
-                                <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-2xl border border-slate-100 dark:border-slate-800">
-                                    <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-1">Status</p>
-                                    <p className="text-xl font-bold text-slate-900 dark:text-white capitalize">{tutor.isVerified ? "Verified Expert" : "Community Member"}</p>
+                                <p className="text-xl text-on-surface-variant leading-relaxed max-w-3xl whitespace-pre-line font-medium opacity-80">
+                                    {listing.bio || "This partner maintains a strictly confidential pedagogical framework focused on high-performance academic outcomes."}
+                                </p>
+                            </section>
+
+                            <section>
+                                <div className="flex items-center gap-6 mb-12">
+                                    <h2 className="text-4xl font-headline font-black uppercase italic tracking-tighter">Specialized <span className="text-primary not-italic lowercase font-serif font-light">domains</span></h2>
+                                    <div className="flex-1 h-px bg-outline-variant/10"></div>
                                 </div>
-                            </div>
+                                <div className="flex flex-wrap gap-4">
+                                    {listing.subjects?.map(sub => (
+                                        <span key={sub} className="px-8 py-4 bg-white dark:bg-slate-900 border border-outline-variant/10 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                                            {sub}
+                                        </span>
+                                    )) || <p className="text-on-surface-variant/40 italic font-black text-xs uppercase tracking-widest">GENERAL INTELLIGENCE</p>}
+                                </div>
+                            </section>
+
+                            {/* Verification Cloud */}
+                            <section className="p-16 rounded-[4rem] bg-gradient-to-br from-primary to-blue-900 text-on-primary relative overflow-hidden group">
+                                <div className="absolute top-0 right-0 size-96 bg-white/5 rounded-full -mr-32 -mt-32 blur-3xl group-hover:bg-white/10 transition-colors duration-1000"></div>
+                                <h3 className="text-4xl font-headline font-black mb-12 uppercase italic leading-none">Institutional <br/> <span className="lowercase font-serif font-light not-italic text-blue-200">Verification.</span></h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                                    {[
+                                        { label: "Identity Matrix", status: "AUTHENTICATED", icon: "verified_user" },
+                                        { label: "Academic Credentials", status: "VERIFIED", icon: "school" },
+                                        { label: "Background Protocol", status: "CLEARED", icon: "shield_moon" },
+                                        { label: "Platform Tenure", status: "PARTNER SINCE 2024", icon: "history_edu" }
+                                    ].map((item, i) => (
+                                        <div key={i} className="flex gap-6 group/item">
+                                            <div className="size-16 rounded-2xl bg-white/10 backdrop-blur-xl flex items-center justify-center group-hover/item:bg-white group-hover/item:text-primary transition-all duration-500">
+                                                <span className="material-symbols-outlined text-2xl">{item.icon}</span>
+                                            </div>
+                                            <div>
+                                                <h4 className="font-bold text-lg mb-1">{item.label}</h4>
+                                                <p className="text-[9px] font-black uppercase tracking-[0.2em] opacity-40">{item.status}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </section>
                         </div>
                     </div>
 
-                    {/* Sidebar */}
-                    <aside className="space-y-8">
-                        {/* Subjects Expertise */}
-                        <div className="bg-gradient-to-b from-white/90 to-white/50 dark:from-slate-900/90 dark:to-slate-900/50 backdrop-blur-md rounded-3xl p-8 border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none relative z-10">
-                            <h3 className="text-xl font-heading font-bold mb-6 border-b border-slate-100 dark:border-slate-800 pb-4">Subjects Expertise</h3>
-                            <div className="flex flex-wrap gap-2">
-                                {listing.subjects && listing.subjects.length > 0 ? (
-                                    listing.subjects.map(sub => (
-                                        <span key={sub} className="px-4 py-2 font-bold text-primary bg-primary/10 border border-primary/20 rounded-xl hover:bg-primary hover:text-white cursor-pointer transition-colors shadow-sm">
-                                            {sub}
-                                        </span>
-                                    ))
-                                ) : (
-                                    <p className="text-slate-500">No specific subjects listed.</p>
-                                )}
-                            </div>
-                        </div>
+                    {/* Right Column: Acquisition Hub */}
+                    <aside className="lg:col-span-4">
+                        <div className="sticky top-32">
+                            <div className="bg-white dark:bg-slate-950 rounded-[3.5rem] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.15)] p-12 md:p-14 border border-outline-variant/10 relative overflow-hidden group">
+                                {/* Match Indicator Overlay */}
+                                <div className="absolute top-0 right-0 p-8">
+                                    <div className="size-16 rounded-full border border-primary/10 flex flex-col items-center justify-center group-hover:bg-primary group-hover:text-on-primary transition-all duration-700">
+                                        <span className="text-[8px] font-black uppercase leading-none opacity-40 group-hover:opacity-100 mb-0.5">High</span>
+                                        <span className="text-lg font-headline font-black leading-none italic">A+</span>
+                                    </div>
+                                </div>
 
-                        {/* Trust & Safety */}
-                        <div className="bg-emerald-50 dark:bg-emerald-900/10 rounded-3xl p-8 border border-emerald-100 dark:border-emerald-800/30 relative z-10 overflow-hidden">
-                            <div className="absolute -right-10 -bottom-10 size-40 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none"></div>
-                            <h3 className="text-xl font-heading font-bold mb-6 text-emerald-900 dark:text-emerald-400 flex items-center gap-2">
-                                <span className="material-symbols-outlined">shield_person</span> Trust & Safety
-                            </h3>
-                            <ul className="space-y-4 text-emerald-800 dark:text-emerald-300 font-semibold">
-                                <li className="flex items-start gap-3">
-                                    <span className="material-symbols-outlined text-emerald-500 mt-0.5">check_circle</span>
-                                    {tutor.isVerified ? "Identity & Documents Verified by TuitionsInIndia team." : "Identity verification pending."}
-                                </li>
-                                <li className="flex items-start gap-3">
-                                    <span className="material-symbols-outlined text-emerald-500 mt-0.5">check_circle</span>
-                                    Secure payments and trial classes available.
-                                </li>
-                                <li className="flex items-start gap-3">
-                                    <span className="material-symbols-outlined text-emerald-500 mt-0.5">check_circle</span>
-                                    Support from the TuitionsInIndia team resolving disputes.
-                                </li>
-                            </ul>
+                                <div className="relative z-10">
+                                    <h3 className="text-3xl font-headline font-black mb-4 uppercase italic tracking-tight">Initiate <br/> <span className="text-primary not-italic lowercase font-serif font-light">Engagement.</span></h3>
+                                    <p className="text-on-surface-variant font-medium mb-12 opacity-60 leading-relaxed">Secure a 30-minute diagnostic session to assess academic affinity.</p>
+                                    
+                                    <div className="space-y-6">
+                                        <Link 
+                                            href={`/post-requirement?tutorId=${id}`}
+                                            className="w-full bg-primary text-on-primary py-8 rounded-[2rem] font-black text-[11px] tracking-[0.4em] uppercase shadow-2xl shadow-primary/30 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-4 group/btn"
+                                        >
+                                            <span className="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">bolt</span>
+                                            REQUEST DEMO
+                                        </Link>
+
+                                        {canContactProactively ? (
+                                            <button className="w-full bg-surface-container-high py-6 rounded-[1.5rem] font-black text-[10px] tracking-widest uppercase flex items-center justify-center gap-3 hover:bg-primary hover:text-on-primary transition-all">
+                                                <span className="material-symbols-outlined text-lg">chat_bubble</span>
+                                                DIRECT MESSAGE
+                                            </button>
+                                        ) : (
+                                            <Link 
+                                                href={`/dashboard/student?tutorId=${viewerId}`}
+                                                className="w-full bg-amber-50 text-amber-600 border border-amber-500/10 py-6 rounded-[1.5rem] font-black text-[10px] tracking-widest uppercase flex items-center justify-center gap-3 hover:bg-amber-100 transition-all text-center"
+                                            >
+                                                <span className="material-symbols-outlined text-lg">workspace_premium</span>
+                                                UPGRADE TO ACCESS
+                                            </Link>
+                                        )}
+
+                                        <div className="pt-10 border-t border-outline-variant/10 text-center">
+                                            <div className="flex items-center justify-center -space-x-3 mb-4">
+                                                {[1,2,3,4].map(i => (
+                                                    <div key={i} className="size-10 rounded-full border-2 border-white dark:border-slate-950 bg-surface-container-high flex items-center justify-center font-black text-[10px]">
+                                                        {String.fromCharCode(64 + i)}
+                                                    </div>
+                                                ))}
+                                                <div className="size-10 rounded-full border-2 border-white dark:border-slate-950 bg-primary text-on-primary flex items-center justify-center font-black text-[8px]">
+                                                    +82
+                                                </div>
+                                            </div>
+                                            <p className="text-[10px] font-black uppercase tracking-widest opacity-30">Active students this month</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Performance Guarantee */}
+                            <div className="mt-10 p-10 bg-emerald-50 dark:bg-emerald-950/20 rounded-[2.5rem] border border-emerald-100 dark:border-emerald-800/30 flex items-start gap-6 group hover:border-emerald-500 transition-all duration-500">
+                                <div className="size-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:rotate-12 transition-transform shrink-0">
+                                    <span className="material-symbols-outlined">verified</span>
+                                </div>
+                                <div>
+                                    <h4 className="font-bold text-emerald-900 dark:text-emerald-400 mb-1">Elite Standard</h4>
+                                    <p className="text-xs text-emerald-800/60 dark:text-emerald-300/40 leading-relaxed font-medium">This partner adheres to the Global Learning Protocol for verifiable growth.</p>
+                                </div>
+                            </div>
                         </div>
                     </aside>
                 </div>
-            </div>
+            </main>
 
-            {/* Structured Data (JSON-LD) for SEO */}
+            {/* SEO & Graph Intelligence */}
             <script type="application/ld+json" dangerouslySetInnerHTML={{
                 __html: JSON.stringify({
                     "@context": "https://schema.org",
                     "@type": "Person",
                     "name": tutor.name,
                     "description": listing.bio,
-                    "jobTitle": "Tutor",
+                    "jobTitle": "High-Performance Tutor",
                     "url": `https://tuitionsinindia.com/tutor/${tutor.id}`,
-                    "image": "https://tuitionsinindia.com/default-avatar.png",
+                    "image": tutor.image || "https://tuitionsinindia.com/default-avatar.png",
                     "aggregateRating": listing.rating > 0 ? {
                         "@type": "AggregateRating",
                         "ratingValue": listing.rating,

@@ -1,0 +1,409 @@
+---
+---
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8" />
+<meta content="width=device-width, initial-scale=1.0" name="viewport" />
+<script src="/assets/03ba5d9f9e95fc3599acebcbe7e5fb9a.js" is:inline="" />
+<link href="/assets/89577a3e16b34f11b17c77d7ada749b4.css" rel="stylesheet" />
+<link href="/assets/a39f5c6fcbb87b419667ec984d2e579a.css" rel="stylesheet" />
+<link href="/assets/a39f5c6fcbb87b419667ec984d2e579a.css" rel="stylesheet" />
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-tint": "#2b5bb5",
+                        "on-primary-fixed-variant": "#00429c",
+                        "primary": "#003178",
+                        "surface-bright": "#f8f9fa",
+                        "tertiary-container": "#743e00",
+                        "on-tertiary-fixed-variant": "#6d3a00",
+                        "surface-container": "#edeeef",
+                        "on-secondary-fixed": "#002203",
+                        "error-container": "#ffdad6",
+                        "on-primary": "#ffffff",
+                        "background": "#f8f9fa",
+                        "secondary-fixed": "#acf4a4",
+                        "surface-container-lowest": "#ffffff",
+                        "on-surface": "#191c1d",
+                        "outline-variant": "#c3c6d4",
+                        "on-background": "#191c1d",
+                        "surface-container-low": "#f3f4f5",
+                        "outline": "#737783",
+                        "primary-container": "#0d47a1",
+                        "on-error-container": "#93000a",
+                        "primary-fixed-dim": "#b0c6ff",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-fixed-dim": "#ffb77a",
+                        "on-secondary": "#ffffff",
+                        "inverse-primary": "#b0c6ff",
+                        "inverse-on-surface": "#f0f1f2",
+                        "primary-fixed": "#d9e2ff",
+                        "surface-dim": "#d9dadb",
+                        "surface-container-highest": "#e1e3e4",
+                        "on-tertiary-container": "#ffa95b",
+                        "tertiary": "#532b00",
+                        "on-primary-container": "#a1bbff",
+                        "secondary-container": "#acf4a4",
+                        "on-primary-fixed": "#001945",
+                        "on-error": "#ffffff",
+                        "error": "#ba1a1a",
+                        "surface": "#f8f9fa",
+                        "secondary": "#2a6b2c",
+                        "on-tertiary-fixed": "#2e1500",
+                        "on-secondary-container": "#307231",
+                        "on-surface-variant": "#434652",
+                        "surface-container-high": "#e7e8e9",
+                        "inverse-surface": "#2e3132",
+                        "surface-variant": "#e1e3e4",
+                        "secondary-fixed-dim": "#91d78a",
+                        "on-secondary-fixed-variant": "#0c5216",
+                        "tertiary-fixed": "#ffdcc2"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope"],
+                        "body": ["Plus Jakarta Sans"],
+                        "label": ["Plus Jakarta Sans"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>.grain-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.02;
+    background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuAqwWekPlmmQdEEF9WqM7Zuo6pMYx71hcuxfRf9L4wJKy1eJs-mpn8cvT7IvtyqJHUtLSqQ-aRh3YxjdMBK5JljTVHM2X5Rw_nVv841cjEmM5f45HSIf0UmMeEHVoUxXaL2ZirDwwxbhO2EGtS0agUtU4KLfz98UYXfwZx5AKJOCcF248YWxlTfv64b2rtwD6aW3FQUILkFvXNThNT7rQUC3OSkkRmZILisiRaJBhOBrZWk6K3zSQA3AUpOcNk2lEDkdIuc3IL4C-c)
+    }
+.glass-header {
+    background: rgba(248, 249, 250, 0.8);
+    backdrop-filter: blur(20px)
+    }
+.sidebar-active {
+    background-color: #0d47a1;
+    color: #fff
+    }
+.seal-approval {
+    transform: rotate(-5deg)
+    }</style>
+</head>
+<body class="bg-background text-on-surface font-body selection:bg-primary-fixed selection:text-on-primary-fixed">
+<div class="grain-overlay" />
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 w-full z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm dark:shadow-none">
+<div class="flex items-center justify-between px-8 py-4 max-w-screen-2xl mx-auto">
+<div class="flex items-center gap-8">
+<span class="text-2xl font-extrabold text-blue-900 dark:text-blue-100 font-headline tracking-tight">TuitionsInIndia</span>
+<nav class="hidden md:flex items-center gap-6 font-headline font-bold tracking-tight">
+<a class="text-slate-600 dark:text-slate-400 hover:text-blue-900 transition-colors" href="#">Find Tutors</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-blue-900 transition-colors" href="#">Courses</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-blue-900 transition-colors" href="#">Resources</a>
+<a class="text-blue-700 dark:text-blue-300 border-b-2 border-blue-700 pb-1" href="#">Dashboard</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="bg-gradient-to-r from-primary to-primary-container text-on-primary px-6 py-2.5 rounded-xl font-semibold transition-all hover:scale-95 duration-150 ease-in-out">
+                    Post a Requirement
+                </button>
+<div class="w-10 h-10 rounded-full bg-surface-container-highest overflow-hidden border border-outline-variant/15">
+<img class="w-full h-full object-cover" data-alt="professional headshot of a student user for dashboard profile icon" src="/assets/9c918cda87522b9a1a166df6e42d9f8d.png" />
+</div>
+</div>
+</div>
+</header>
+<div class="pt-24 pb-12 flex max-w-screen-2xl mx-auto px-8 gap-8">
+<!-- Sidebar Navigation -->
+<aside class="w-64 hidden lg:flex flex-col gap-2 shrink-0 h-[calc(100vh-120px)] sticky top-24">
+<div class="p-4 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-primary text-white font-semibold transition-all shadow-md" href="#">
+<span class="material-symbols-outlined">dashboard</span> Dashboard
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-low transition-colors" href="#">
+<span class="material-symbols-outlined">mail</span> Messages
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-low transition-colors" href="#">
+<span class="material-symbols-outlined">event_available</span> Bookings
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-low transition-colors" href="#">
+<span class="material-symbols-outlined">favorite</span> Saved Tutors
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-low transition-colors" href="#">
+<span class="material-symbols-outlined">payments</span> Transactions
+                </a>
+<div class="my-6 border-t border-outline-variant/15" />
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-low transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span> Settings
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-error hover:bg-error-container transition-colors" href="#">
+<span class="material-symbols-outlined">logout</span> Logout
+                </a>
+</div>
+<!-- Academic Progress Mini-Card -->
+<div class="mt-auto p-5 rounded-2xl bg-surface-container-low mx-4 mb-4">
+<p class="text-xs font-bold text-primary uppercase tracking-widest mb-2">Learning Goal</p>
+<p class="text-sm font-semibold mb-3">Mastering Advanced Calculus</p>
+<div class="w-full bg-surface-container-highest h-2 rounded-full overflow-hidden">
+<div class="bg-primary w-[65%] h-full" />
+</div>
+<p class="text-[10px] mt-2 text-on-surface-variant">65% toward monthly goal</p>
+</div>
+</aside>
+<!-- Main Dashboard Canvas -->
+<main class="flex-1 space-y-10">
+<!-- Header Section -->
+<header>
+<h1 class="text-4xl font-headline font-extrabold text-primary tracking-tight">Student Activity Hub</h1>
+<p class="text-on-surface-variant mt-2 text-lg">Welcome back, Arnav. Here's what's happening with your learning journey.</p>
+</header>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Active Inquiries Card -->
+<section class="md:col-span-2 bg-surface-container-lowest rounded-xl p-8 transition-shadow">
+<div class="flex justify-between items-center mb-8">
+<h2 class="text-xl font-headline font-bold">Active Inquiries</h2>
+<button class="text-primary font-semibold text-sm flex items-center gap-1 hover:underline">
+                            View All <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+<div class="space-y-6">
+<div class="group flex items-center justify-between p-6 rounded-2xl bg-surface-container-low transition-all hover:bg-surface-container">
+<div class="flex items-center gap-5">
+<div class="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-3xl">functions</span>
+</div>
+<div>
+<h3 class="font-bold text-lg">IIT-JEE Physics &amp; Maths</h3>
+<p class="text-on-surface-variant text-sm">Requirement posted 2 days ago</p>
+</div>
+</div>
+<div class="text-right">
+<span class="inline-flex items-center gap-1 px-4 py-1.5 rounded-full bg-secondary-container text-on-secondary-container text-xs font-bold uppercase tracking-wider">
+                                    3 Tutors Responded
+                                </span>
+<p class="mt-2 text-xs text-on-surface-variant font-medium">Next step: Review proposals</p>
+</div>
+</div>
+<div class="group flex items-center justify-between p-6 rounded-2xl bg-surface-container-low transition-all hover:bg-surface-container">
+<div class="flex items-center gap-5">
+<div class="w-14 h-14 bg-tertiary-container/10 rounded-2xl flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined text-3xl">translate</span>
+</div>
+<div>
+<h3 class="font-bold text-lg">Advanced Spoken English</h3>
+<p class="text-on-surface-variant text-sm">Requirement posted 5 days ago</p>
+</div>
+</div>
+<div class="text-right">
+<span class="inline-flex items-center gap-1 px-4 py-1.5 rounded-full bg-surface-container-highest text-on-surface-variant text-xs font-bold uppercase tracking-wider">
+                                    Pending Review
+                                </span>
+<p class="mt-2 text-xs text-on-surface-variant font-medium">Wait for more responses</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Calendar / Upcoming Demos -->
+<section class="bg-surface-container-lowest rounded-xl p-8 flex flex-col">
+<h2 class="text-xl font-headline font-bold mb-6">Upcoming Demo Sessions</h2>
+<div class="space-y-6 flex-1">
+<div class="relative pl-6 border-l-2 border-primary-fixed-dim py-1">
+<div class="absolute -left-1.5 top-0 w-3 h-3 rounded-full bg-primary" />
+<p class="text-xs font-bold text-primary mb-1 uppercase tracking-tighter">Today, 04:30 PM</p>
+<h4 class="font-bold text-base leading-tight">Physics Concept Walkthrough</h4>
+<p class="text-xs text-on-surface-variant mt-1">with Dr. Sameer Khan</p>
+<button class="mt-3 w-full py-2 bg-primary-fixed text-on-primary-fixed text-xs font-bold rounded-lg hover:bg-primary-fixed-dim transition-colors">Join Session</button>
+</div>
+<div class="relative pl-6 border-l-2 border-outline-variant/30 py-1">
+<div class="absolute -left-1.5 top-0 w-3 h-3 rounded-full bg-outline-variant" />
+<p class="text-xs font-bold text-on-surface-variant mb-1 uppercase tracking-tighter">Tomorrow, 11:00 AM</p>
+<h4 class="font-bold text-base leading-tight">Organic Chemistry Demo</h4>
+<p class="text-xs text-on-surface-variant mt-1">with Prof. Anita Nair</p>
+</div>
+<div class="relative pl-6 border-l-2 border-outline-variant/30 py-1 opacity-60">
+<div class="absolute -left-1.5 top-0 w-3 h-3 rounded-full bg-outline-variant" />
+<p class="text-xs font-bold text-on-surface-variant mb-1 uppercase tracking-tighter">24 Oct, 05:00 PM</p>
+<h4 class="font-bold text-base leading-tight">Math Foundation Check</h4>
+<p class="text-xs text-on-surface-variant mt-1">with Rahul Sharma</p>
+</div>
+</div>
+<button class="mt-8 py-3 rounded-xl border border-outline-variant/30 text-on-surface-variant text-sm font-semibold hover:bg-surface-container-low transition-colors">
+                        View Calendar
+                    </button>
+</section>
+<!-- Saved Tutors Section -->
+<section class="md:col-span-3">
+<div class="flex items-center justify-between mb-8">
+<h2 class="text-2xl font-headline font-bold text-primary">Saved Tutors</h2>
+<div class="flex gap-2">
+<button class="w-10 h-10 flex items-center justify-center rounded-full border border-outline-variant/30 text-on-surface-variant hover:bg-surface-container-low">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-full border border-outline-variant/30 text-on-surface-variant hover:bg-surface-container-low">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+<!-- Tutor Card 1 -->
+<div class="bg-surface-container-lowest rounded-xl p-6 group cursor-pointer transition-all hover:-translate-y-1">
+<div class="relative mb-6">
+<div class="w-20 h-20 rounded-2xl bg-surface-container-high overflow-hidden -mt-10 mx-auto shadow-lg">
+<img class="w-full h-full object-cover" data-alt="portrait of a female academic tutor with glasses in a professional studio setting" src="/assets/5db7da6243e6d58d519d93be1b855c6b.png" />
+</div>
+<div class="absolute -top-12 -right-2 seal-approval bg-tertiary-container text-on-tertiary-fixed text-[10px] font-bold px-2 py-1 rounded shadow-sm">
+                                    CERTIFIED
+                                </div>
+</div>
+<div class="text-center">
+<h3 class="font-headline font-bold text-lg mb-1">Dr. Sunita Rao</h3>
+<p class="text-sm text-on-surface-variant font-medium mb-3">PhD, Molecular Biology</p>
+<div class="flex items-center justify-center gap-1 mb-4">
+<span class="material-symbols-outlined text-amber-500 text-sm" data-weight="fill">star</span>
+<span class="text-xs font-bold">4.9</span>
+<span class="text-xs text-on-surface-variant">(124 reviews)</span>
+</div>
+<div class="flex flex-wrap gap-2 justify-center mb-6">
+<span class="bg-secondary-container/30 text-on-secondary-container px-2 py-1 rounded-md text-[10px] font-bold">BIOLOGY</span>
+<span class="bg-secondary-container/30 text-on-secondary-container px-2 py-1 rounded-md text-[10px] font-bold">NEET</span>
+</div>
+<button class="w-full py-2.5 rounded-xl border-2 border-primary text-primary font-bold text-sm hover:bg-primary hover:text-white transition-all">
+                                    Message
+                                </button>
+</div>
+</div>
+<!-- Tutor Card 2 -->
+<div class="bg-surface-container-lowest rounded-xl p-6 group cursor-pointer transition-all hover:-translate-y-1">
+<div class="relative mb-6">
+<div class="w-20 h-20 rounded-2xl bg-surface-container-high overflow-hidden -mt-10 mx-auto shadow-lg">
+<img class="w-full h-full object-cover" data-alt="confident male mathematics tutor in professional attire looking friendly" src="/assets/5cc17615a7ab2a7d3e534389c1ec7db9.png" />
+</div>
+<div class="absolute -top-4 right-0">
+<span class="flex items-center gap-1 bg-secondary-container text-on-secondary-container px-2 py-1 rounded-full text-[10px] font-bold">
+<span class="material-symbols-outlined text-xs" data-weight="fill">verified</span> VERIFIED
+                                    </span>
+</div>
+</div>
+<div class="text-center">
+<h3 class="font-headline font-bold text-lg mb-1">Vikram Malhotra</h3>
+<p class="text-sm text-on-surface-variant font-medium mb-3">M.Tech, IIT Bombay</p>
+<div class="flex items-center justify-center gap-1 mb-4">
+<span class="material-symbols-outlined text-amber-500 text-sm" data-weight="fill">star</span>
+<span class="text-xs font-bold">5.0</span>
+<span class="text-xs text-on-surface-variant">(248 reviews)</span>
+</div>
+<div class="flex flex-wrap gap-2 justify-center mb-6">
+<span class="bg-secondary-container/30 text-on-secondary-container px-2 py-1 rounded-md text-[10px] font-bold">MATHS</span>
+<span class="bg-secondary-container/30 text-on-secondary-container px-2 py-1 rounded-md text-[10px] font-bold">JEE MAIN</span>
+</div>
+<button class="w-full py-2.5 rounded-xl border-2 border-primary text-primary font-bold text-sm hover:bg-primary hover:text-white transition-all">
+                                    Message
+                                </button>
+</div>
+</div>
+<!-- Placeholder for "Add More" -->
+<div class="border-2 border-dashed border-outline-variant/30 rounded-xl flex flex-col items-center justify-center p-8 group hover:bg-surface-container-low transition-colors cursor-pointer">
+<div class="w-12 h-12 rounded-full bg-surface-container-highest flex items-center justify-center text-outline mb-4 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl">add</span>
+</div>
+<p class="font-bold text-on-surface-variant text-sm">Save New Tutors</p>
+<p class="text-[11px] text-center text-outline mt-1 px-4">Browse our directory to find more experts</p>
+</div>
+</div>
+</section>
+<!-- Recommendations Section -->
+<section class="md:col-span-3 bg-gradient-to-br from-primary to-primary-container rounded-3xl p-10 text-white relative overflow-hidden">
+<div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl" />
+<div class="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+<div>
+<h2 class="text-3xl font-headline font-extrabold mb-4 leading-tight">Personalized for You</h2>
+<p class="text-primary-fixed-dim text-lg mb-8">Based on your recent search for "Physics IIT-JEE" and "Linear Algebra", we found 12 new tutors that match your learning pace.</p>
+<button class="px-8 py-4 bg-white text-primary rounded-xl font-bold text-base shadow-xl shadow-black/20 hover:scale-105 transition-transform">
+                                View Recommendations
+                            </button>
+</div>
+<div class="flex gap-4">
+<div class="flex-1 bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/20">
+<p class="text-xs font-bold text-primary-fixed uppercase tracking-wider mb-4">Trending in JEE</p>
+<div class="flex items-center gap-3 mb-4">
+<div class="w-12 h-12 rounded-lg bg-surface-container-highest overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="professional male tutor for math" src="/assets/ba016f2381fee62c7ad2bfcbdc13c703.png" />
+</div>
+<div>
+<p class="font-bold text-sm">Rajesh Gupta</p>
+<p class="text-[10px] text-white/70">Ex-FIITJEE Faculty</p>
+</div>
+</div>
+<button class="w-full py-2 bg-white/20 rounded-lg text-xs font-bold hover:bg-white/30 transition-all">Quick Profile</button>
+</div>
+<div class="flex-1 bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/20">
+<p class="text-xs font-bold text-primary-fixed uppercase tracking-wider mb-4">Top Rated Math</p>
+<div class="flex items-center gap-3 mb-4">
+<div class="w-12 h-12 rounded-lg bg-surface-container-highest overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="professional female tutor for chemistry" src="/assets/0e169294a6902832161da667c0eb2b27.png" />
+</div>
+<div>
+<p class="font-bold text-sm">Dr. Meera S.</p>
+<p class="text-[10px] text-white/70">Calculus Specialist</p>
+</div>
+</div>
+<button class="w-full py-2 bg-white/20 rounded-lg text-xs font-bold hover:bg-white/30 transition-all">Quick Profile</button>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+</div>
+<!-- Footer Section -->
+<footer class="bg-slate-50 dark:bg-slate-950 w-full border-t border-slate-200 dark:border-slate-800">
+<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8 px-12 py-16 max-w-7xl mx-auto font-body text-sm leading-relaxed">
+<div class="col-span-2">
+<span class="text-xl font-bold text-blue-900 dark:text-blue-100 font-headline mb-4 block">TuitionsInIndia</span>
+<p class="text-slate-500 dark:text-slate-400 max-w-xs">Empowering students through premium educational connections. Join the Ivory Tower of learning today.</p>
+</div>
+<div class="space-y-4">
+<h4 class="font-headline font-bold text-blue-900 dark:text-blue-400">Popular Locations</h4>
+<ul class="space-y-2">
+<li><a class="text-slate-500 hover:text-blue-700 hover:underline transition-all" href="#">Home Tuitions in Delhi</a></li>
+<li><a class="text-slate-500 hover:text-blue-700 hover:underline transition-all" href="#">Tutors in Mumbai</a></li>
+<li><a class="text-slate-500 hover:text-blue-700 hover:underline transition-all" href="#">Bangalore Coaching</a></li>
+</ul>
+</div>
+<div class="space-y-4">
+<h4 class="font-headline font-bold text-blue-900 dark:text-blue-400">Top Subjects</h4>
+<ul class="space-y-2">
+<li><a class="text-slate-500 hover:text-blue-700 hover:underline transition-all" href="#">Math Tutors</a></li>
+<li><a class="text-slate-500 hover:text-blue-700 hover:underline transition-all" href="#">Science Experts</a></li>
+</ul>
+</div>
+<div class="space-y-4">
+<h4 class="font-headline font-bold text-blue-900 dark:text-blue-400">Company</h4>
+<ul class="space-y-2">
+<li><a class="text-slate-500 hover:text-blue-700 hover:underline transition-all" href="#">Privacy Policy</a></li>
+<li><a class="text-slate-500 hover:text-blue-700 hover:underline transition-all" href="#">Terms of Service</a></li>
+</ul>
+</div>
+<div class="space-y-4">
+<h4 class="font-headline font-bold text-blue-900 dark:text-blue-400">Support</h4>
+<ul class="space-y-2">
+<li><a class="text-slate-500 hover:text-blue-700 hover:underline transition-all" href="#">Help Center</a></li>
+</ul>
+</div>
+</div>
+<div class="max-w-7xl mx-auto px-12 py-8 border-t border-slate-200 dark:border-slate-800 flex justify-between items-center">
+<p class="text-slate-500 text-xs">© 2024 TuitionsInIndia. The Digital Ivory Tower of Learning.</p>
+<div class="flex gap-4">
+<span class="material-symbols-outlined text-slate-400 cursor-pointer hover:text-primary transition-colors">language</span>
+<span class="material-symbols-outlined text-slate-400 cursor-pointer hover:text-primary transition-colors">share</span>
+</div>
+</div>
+</footer>
+</body></html>

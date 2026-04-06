@@ -1,82 +1,99 @@
-import { View, Text, TouchableOpacity, Image, SafeAreaView, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, Image, SafeAreaView, ScrollView, StatusBar } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Sparkles, Search, MessageSquare, GraduationCap } from 'lucide-react-native';
+import { Sparkles, Search, MessageSquare, GraduationCap, ArrowRight, ShieldCheck } from 'lucide-react-native';
 
 export default function WelcomeScreen() {
     const router = useRouter();
 
     return (
-        <SafeAreaView className="flex-1 bg-white">
-            <View className="flex-1 px-6 pt-10 pb-10">
-                {/* Header Section */}
-                <View className="flex-row items-center justify-between mb-12">
-                    <View className="flex-row items-center gap-3">
-                        <View className="bg-primary p-2.5 rounded-2xl shadow-lg shadow-primary/20">
-                            <GraduationCap size={24} color="white" />
+        <SafeAreaView className="flex-1 bg-background-dark">
+            <StatusBar barStyle="light-content" />
+            <View className="flex-1 px-8 pt-12 pb-10">
+                {/* Executive Header Branding */}
+                <View className="flex-row items-center justify-between mb-10">
+                    <View className="flex-row items-center gap-4">
+                        <View className="bg-primary p-3 rounded-2xl shadow-2xl shadow-primary/40 rotate-1">
+                            <GraduationCap size={28} color="white" />
                         </View>
                         <View>
-                            <Text className="text-slate-900 text-xl font-bold tracking-tight">TuitionsInIndia</Text>
-                            <Text className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Premium AI Learning</Text>
+                            <View className="flex-row items-center gap-2 mb-0.5">
+                                <View className="size-2 bg-primary rounded-full animate-pulse" />
+                                <Text className="text-primary text-[10px] font-black uppercase tracking-[0.25em]">Global Intelligence</Text>
+                            </View>
+                            <Text className="text-white text-2xl font-black tracking-tighter">TuitionsInIndia</Text>
                         </View>
                     </View>
                 </View>
 
-                {/* Hero Card - Premium White */}
-                <View className="bg-slate-50 p-8 rounded-[3rem] border border-slate-100 mb-10 overflow-hidden relative">
-                    <Text className="text-slate-900 text-3xl font-bold leading-tight mb-4">
+                {/* Premium Glassmorphic Hero Card */}
+                <View className="bg-surface-dark p-8 rounded-[3rem] border border-border-dark mb-10 overflow-hidden relative shadow-2xl">
+                    <View className="absolute top-0 right-0 -mr-16 -mt-16 bg-primary/5 size-48 rounded-full blur-3xl" />
+                    <View className="absolute bottom-0 left-0 -ml-16 -mb-16 bg-accent-amber/5 size-48 rounded-full blur-3xl" />
+
+                    <View className="flex-row items-center gap-2 mb-4">
+                        <ShieldCheck size={14} color="#0066ff" />
+                        <Text className="text-[#6c757d] text-[10px] font-black uppercase tracking-widest">Verified Academic Platform</Text>
+                    </View>
+
+                    <Text className="text-white text-3xl font-black leading-[1.2] mb-5 tracking-tight">
                         Master Any{"\n"}
-                        <Text className="text-primary">Subject</Text> with Top Experts
+                        <Text className="text-primary italic">Subject</Text> with India's Best
                     </Text>
-                    <Text className="text-slate-500 text-base mb-8 leading-relaxed font-medium">
-                        Connect with verified educators through India's most advanced AI-matching platform.
+                    
+                    <Text className="text-[#a0aec0] text-sm mb-10 leading-relaxed font-bold">
+                        Connect with verified PhDs and industry experts through our proprietary AI Matchmaker.
                     </Text>
 
-                    {/* AI CTA - Premium Blue */}
+                    {/* AI CTA - The Primary Action */}
                     <TouchableOpacity
                         onPress={() => router.push('/ai-match')}
-                        className="bg-primary py-5 rounded-2xl flex-row items-center justify-center shadow-2xl shadow-primary/20"
+                        className="bg-primary py-5 rounded-[2rem] flex-row items-center justify-center shadow-2xl shadow-primary/30 active:scale-95"
                     >
-                        <Sparkles size={18} color="white" />
-                        <Text className="text-white font-bold text-sm ml-2 uppercase tracking-widest">AI Matchmaker</Text>
+                        <Sparkles size={20} color="white" fill="white" />
+                        <Text className="text-white font-black text-xs ml-3 uppercase tracking-[0.2em]">Start Matching Now</Text>
                     </TouchableOpacity>
                 </View>
 
-                {/* Grid Actions */}
-                <View className="flex-row gap-4 mb-10">
+                {/* Bento Grid Actions - Institutional Style */}
+                <View className="flex-row gap-5 mb-10">
                     <TouchableOpacity
                         onPress={() => router.push('/tutors')}
-                        className="flex-1 bg-white p-6 rounded-[2rem] border border-slate-100 items-center justify-center shadow-sm"
+                        className="flex-1 bg-surface-dark p-8 rounded-[2.5rem] border border-border-dark items-center justify-center shadow-lg hover:border-primary/30 transition-all"
                     >
-                        <View className="bg-blue-50 p-4 rounded-2xl mb-4">
-                            <Search size={24} color="#1e448a" />
+                        <View className="bg-primary/10 p-4 rounded-[1.5rem] mb-4">
+                            <Search size={26} color="#0066ff" />
                         </View>
-                        <Text className="text-slate-900 font-bold text-xs uppercase tracking-widest text-center">Find Tutors</Text>
+                        <Text className="text-white font-black text-[10px] uppercase tracking-widest text-center">Find Experts</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
                         onPress={() => router.push('/messages')}
-                        className="flex-1 bg-white p-6 rounded-[2rem] border border-slate-100 items-center justify-center shadow-sm"
+                        className="flex-1 bg-surface-dark p-8 rounded-[2.5rem] border border-border-dark items-center justify-center shadow-lg hover:border-primary/30 transition-all"
                     >
-                        <View className="bg-emerald-50 p-4 rounded-2xl mb-4">
-                            <MessageSquare size={24} color="#10b981" />
+                        <View className="bg-success-green/10 p-4 rounded-[1.5rem] mb-4">
+                            <MessageSquare size={26} color="#34c759" />
                         </View>
-                        <Text className="text-slate-900 font-bold text-xs uppercase tracking-widest text-center">Chat Center</Text>
+                        <Text className="text-white font-black text-[10px] uppercase tracking-widest text-center">Chat Room</Text>
                     </TouchableOpacity>
                 </View>
 
-                {/* Secondary CTA */}
+                {/* Growth CTA Section */}
                 <View className="flex-1 justify-end">
                     <TouchableOpacity
                         onPress={() => console.log('Tutor Join')}
-                        className="bg-slate-900 py-5 rounded-2xl items-center shadow-xl"
+                        className="bg-white py-6 rounded-3xl items-center shadow-2xl flex-row justify-center gap-3 active:scale-95 transition-transform"
                     >
-                        <Text className="text-white font-bold text-xs uppercase tracking-widest">Join as a Verified Tutor</Text>
+                        <Text className="text-background-dark font-black text-xs uppercase tracking-[0.15em]">Partner as an Expert</Text>
+                        <ArrowRight size={16} color="#000a1e" strokeWidth={3} />
                     </TouchableOpacity>
+                    
                     <TouchableOpacity
-                        onPress={() => console.log('Login')}
-                        className="py-6 items-center"
+                        onPress={() => router.push('/login')}
+                        className="py-8 items-center group"
                     >
-                        <Text className="text-slate-400 font-bold text-[10px] uppercase tracking-widest">Already have an account? Login</Text>
+                        <Text className="text-[#6c757d] font-black text-[10px] uppercase tracking-[0.25em]">
+                            Existing User? <Text className="text-white">Admin / User Login</Text>
+                        </Text>
                     </TouchableOpacity>
                 </View>
             </View>

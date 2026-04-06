@@ -8,169 +8,148 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  role          Role      @default(STUDENT)
-  phone         String?   @unique
-  lat           Float?
-  lng           Float?
-
-  // Monetization
+  id                 String             @id @default(cuid())
+  name               String?
+  email              String?            @unique
+  emailVerified      DateTime?
+  image              String?
+  role               Role               @default(STUDENT)
+  phone              String?            @unique
+  lat                Float?
+  lng                Float?
   isVerified         Boolean            @default(false)
   isIdVerified       Boolean            @default(false)
   credits            Int                @default(0)
   subscriptionTier   SubscriptionTier   @default(FREE)
   subscriptionStatus SubscriptionStatus @default(INACTIVE)
-  subscriptionId     String?            @unique // Razorpay Subscription ID
-
-  // Relations
-  tutorListing    Listing?
-  reviewsGiven    Review[]      @relation("ReviewAuthor")
-  reviewsReceived Review[]      @relation("ReviewTarget")
-  leadsPosted     Lead[]        @relation("LeadCreator")
-  leadsUnlocked   LeadUnlock[]
-  transactions    Transaction[]
-  courses         Course[]      @relation("InstituteCourses")
-  ads             AdSlot[]      @relation("UserAds")
-
-  // Chat Relations
-  studentChats ChatSession[] @relation("StudentChats")
-  tutorChats   ChatSession[] @relation("TutorChats")
-  messagesSent Message[]     @relation("SentMessages")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  subscriptionId     String?            @unique
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  ads                AdSlot[]           @relation("UserAds")
+  studentChats       ChatSession[]      @relation("StudentChats")
+  tutorChats         ChatSession[]      @relation("TutorChats")
+  courses            Course[]           @relation("InstituteCourses")
+  leadsPosted        Lead[]             @relation("LeadCreator")
+  leadsUnlocked      LeadUnlock[]
+  tutorListing       Listing?
+  messagesSent       Message[]          @relation("SentMessages")
+  reviewsGiven       Review[]           @relation("ReviewAuthor")
+  reviewsReceived    Review[]           @relation("ReviewTarget")
+  transactions       Transaction[]
 }
 
 model Listing {
-  id      String @id @default(cuid())
-  tutorId String @unique
-  tutor   User   @relation(fields: [tutorId], references: [id], onDelete: Cascade)
-
-  title      String
-  bio        String   @db.Text
-  subjects   String[] // e.g., ["Math", "Physics"]
-  grades     String[] // e.g., ["Class 10", "Class 12"]
-  locations  String[] // e.g., ["Mumbai", "Online"]
-  hourlyRate Int?
-
-  // Metrics for search ranking
-  rating      Float @default(0)
-  reviewCount Int   @default(0)
-  viewCount   Int   @default(0)
-
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  tutorId     String   @unique
+  title       String
+  bio         String
+  subjects    String[]
+  grades      String[]
+  locations   String[]
+  hourlyRate  Int?
+  rating      Float    @default(0)
+  reviewCount Int      @default(0)
+  viewCount   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  tutor       User     @relation(fields: [tutorId], references: [id], onDelete: Cascade)
 }
 
 model Lead {
-  id        String @id @default(cuid())
-  studentId String
-  student   User   @relation("LeadCreator", fields: [studentId], references: [id], onDelete: Cascade)
-
+  id          String       @id @default(cuid())
+  studentId   String
   subject     String
   grade       String?
   location    String
   lat         Float?
   lng         Float?
   budget      String?
-  description String  @db.Text
-
-  // Monetization Implementation
-  isPremium   Boolean    @default(false)
-  premiumTier Int        @default(0) // 0: House, 1: Turbo, 2: Verified Match
-  maxUnlocks  Int        @default(5)
-  unlockCount Int        @default(0)
-  status      LeadStatus @default(OPEN)
-
-  unlockedBy LeadUnlock[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  description String
+  isPremium   Boolean      @default(false)
+  premiumTier Int          @default(0)
+  maxUnlocks  Int          @default(5)
+  unlockCount Int          @default(0)
+  status      LeadStatus   @default(OPEN)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  student     User         @relation("LeadCreator", fields: [studentId], references: [id], onDelete: Cascade)
+  unlockedBy  LeadUnlock[]
 }
 
 model LeadUnlock {
-  id      String @id @default(cuid())
-  leadId  String
-  lead    Lead   @relation(fields: [leadId], references: [id], onDelete: Cascade)
-  tutorId String
-  tutor   User   @relation(fields: [tutorId], references: [id], onDelete: Cascade)
-
+  id         String   @id @default(cuid())
+  leadId     String
+  tutorId    String
   unlockedAt DateTime @default(now())
+  lead       Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  tutor      User     @relation(fields: [tutorId], references: [id], onDelete: Cascade)
 
   @@unique([leadId, tutorId])
 }
 
 model Review {
-  id      String  @id @default(cuid())
-  rating  Int // 1-5
-  comment String? @db.Text
-
-  authorId String
-  author   User   @relation("ReviewAuthor", fields: [authorId], references: [id])
-  targetId String
-  target   User   @relation("ReviewTarget", fields: [targetId], references: [id])
-
+  id        String   @id @default(cuid())
+  rating    Int
+  comment   String?
+  authorId  String
+  targetId  String
   createdAt DateTime @default(now())
+  author    User     @relation("ReviewAuthor", fields: [authorId], references: [id])
+  target    User     @relation("ReviewTarget", fields: [targetId], references: [id])
 }
 
 model Course {
   id          String   @id @default(cuid())
   instituteId String
-  institute   User     @relation("InstituteCourses", fields: [instituteId], references: [id], onDelete: Cascade)
   title       String
-  description String   @db.Text
+  description String
   duration    String
   price       Int
   category    String
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  institute   User     @relation("InstituteCourses", fields: [instituteId], references: [id], onDelete: Cascade)
 }
 
 model AdSlot {
-  id          String   @id @default(cuid())
-  userId      String
-  user        User     @relation("UserAds", fields: [userId], references: [id], onDelete: Cascade)
-  type        AdType // BANNER, SEARCH_TOP, SIDEBAR
-  imageUrl    String?
-  targetUrl   String?
-  startTime   DateTime
-  endTime     DateTime
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(cuid())
+  userId    String
+  type      AdType
+  imageUrl  String?
+  targetUrl String?
+  startTime DateTime
+  endTime   DateTime
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation("UserAds", fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Transaction {
   id                String            @id @default(cuid())
   userId            String
-  user              User              @relation(fields: [userId], references: [id])
-  amount            Int // in INR
+  amount            Int
   currency          String            @default("INR")
   status            TransactionStatus @default(PENDING)
   razorpayOrderId   String?           @unique
   razorpayPaymentId String?           @unique
   description       String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  user              User              @relation(fields: [userId], references: [id])
 }
 
 model ChatSession {
   id        String    @id @default(cuid())
   studentId String
-  student   User      @relation("StudentChats", fields: [studentId], references: [id])
   tutorId   String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  student   User      @relation("StudentChats", fields: [studentId], references: [id])
   tutor     User      @relation("TutorChats", fields: [tutorId], references: [id])
   messages  Message[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
   @@unique([studentId, tutorId])
 }
@@ -178,13 +157,12 @@ model ChatSession {
 model Message {
   id        String      @id @default(cuid())
   sessionId String
-  session   ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   senderId  String
-  sender    User        @relation("SentMessages", fields: [senderId], references: [id])
-  content   String      @db.Text
+  content   String
   isRead    Boolean     @default(false)
-
-  createdAt DateTime @default(now())
+  createdAt DateTime    @default(now())
+  sender    User        @relation("SentMessages", fields: [senderId], references: [id])
+  session   ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 }
 
 enum Role {

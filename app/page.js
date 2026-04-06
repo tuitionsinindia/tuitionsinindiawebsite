@@ -3,532 +3,509 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { 
+    Search, 
+    Layers, 
+    MapPin, 
+    ChevronDown, 
+    Star, 
+    Zap, 
+    ShieldCheck, 
+    Award, 
+    ArrowRight, 
+    ArrowLeft,
+    BadgeCheck, 
+    TrendingUp, 
+    BookOpen, 
+    CodeIcon, 
+    Languages, 
+    MessageSquare, 
+    Quote, 
+    Rocket,
+    CheckCircle,
+    CheckCircle2,
+    UserPlus,
+    Navigation,
+    Globe,
+    Atom
+} from "lucide-react";
+
 export default function Home() {
-  const [searchSubject, setSearchSubject] = useState("");
-  const [searchGrade, setSearchGrade] = useState("");
-  const [searchLocation, setSearchLocation] = useState("");
-  const [searchCoords, setSearchCoords] = useState(null); // {lat, lng}
-  const [activeTab, setActiveTab] = useState("tutors"); // tutors, students, institutes
-  const [isDetecting, setIsDetecting] = useState(false);
-  const [searchError, setSearchError] = useState("");
-  
-  const [subjects, setSubjects] = useState([]);
-  const [filteredSubjects, setFilteredSubjects] = useState([]);
-  const [showSubjectSuggestions, setShowSubjectSuggestions] = useState(false);
-  
-  const [showCityDropdown, setShowCityDropdown] = useState(false);
-  const [showGradeDropdown, setShowGradeDropdown] = useState(false);
+    // Comprehensive local subject list (loads instantly)
+    const LOCAL_SUBJECTS = [
+        "Mathematics", "Physics", "Chemistry", "Biology", "Science",
+        "English", "Hindi", "Sanskrit", "French", "German", "Spanish",
+        "Tamil", "Telugu", "Kannada", "Malayalam", "Marathi", "Bengali", "Gujarati", "Punjabi", "Urdu",
+        "Social Science", "History", "Geography", "Economics", "Civics", "Political Science",
+        "Accountancy", "Business Studies", "Commerce", "Statistics",
+        "Computer Science", "Coding", "Python", "Java", "C++", "Web Development", "Data Science", "Machine Learning",
+        "JEE Preparation", "NEET Preparation", "UPSC Exams", "Banking Exams", "SSC Exams", "CLAT", "CAT", "GATE", "GRE", "GMAT",
+        "IELTS", "TOEFL", "SAT", "IB Curriculum", "IGCSE",
+        "Vocal Music", "Guitar", "Piano", "Keyboard", "Flute", "Tabla", "Harmonium",
+        "Classical Dance", "Western Dance", "Yoga",
+        "Drawing", "Painting", "Art & Craft", "Photography",
+        "Personality Development", "Spoken English", "Public Speaking",
+        "Vedic Maths", "Abacus", "Chess", "Financial Literacy",
+        "Environmental Science", "Psychology", "Sociology", "Philosophy",
+        "Mechanical Engineering", "Electrical Engineering", "Civil Engineering"
+    ];
 
-  const majorCities = [
-    { name: "Mumbai", lat: 19.0760, lng: 72.8777 },
-    { name: "Delhi", lat: 28.6139, lng: 77.2090 },
-    { name: "Bangalore", lat: 12.9716, lng: 77.5946 },
-    { name: "Calcutta", lat: 22.5726, lng: 88.3639 },
-    { name: "Hyderabad", lat: 17.3850, lng: 78.4867 }
-  ];
-
-  const gradesList = [
-    "Primary (1-5)", "Middle (6-8)", "High School (9-10)", 
-    "Higher Secondary (11-12)", "Undergraduate", "Competitive Exams", "Other"
-  ];
-
-  const router = useRouter();
-
-  useEffect(() => {
-    fetch("/api/subjects")
-      .then(res => res.json())
-      .then(data => setSubjects(data))
-      .catch(err => console.error("Failed to fetch subjects", err));
-  }, []);
-
-  useEffect(() => {
-    if (searchSubject.length > 1) {
-      const filtered = subjects.filter(s => 
-        s.toLowerCase().includes(searchSubject.toLowerCase())
-      );
-      setFilteredSubjects(filtered);
-      setShowSubjectSuggestions(filtered.length > 0);
-    } else {
-      setShowSubjectSuggestions(false);
-    }
-  }, [searchSubject, subjects]);
-
-  const handleSearch = () => {
-    setSearchError("");
-    if (!searchSubject || !searchGrade) {
-      setSearchError("Please select both a Subject and a Grade level.");
-      return;
-    }
-
-    const params = new URLSearchParams();
-    params.set("subject", searchSubject);
-    params.set("grade", searchGrade);
-    if (searchLocation) params.set("location", searchLocation);
-    if (searchCoords) {
-      params.set("lat", searchCoords.lat);
-      params.set("lng", searchCoords.lng);
-    }
+    const [searchSubject, setSearchSubject] = useState("");
+    const [searchGrade, setSearchGrade] = useState("");
+    const [searchLocation, setSearchLocation] = useState("");
+    const [searchCoords, setSearchCoords] = useState(null); 
+    const [isDetecting, setIsDetecting] = useState(false);
     
-    // Map plural tabs to singular enum roles
-    const roleMapping = {
-      tutors: "TUTOR",
-      students: "STUDENT",
-      institutes: "INSTITUTE"
-    };
-    params.set("role", roleMapping[activeTab] || "TUTOR");
+    const [subjects, setSubjects] = useState(LOCAL_SUBJECTS);
+    const [filteredSubjects, setFilteredSubjects] = useState([]);
+    const [showSubjectSuggestions, setShowSubjectSuggestions] = useState(false);
+    
+    const [showCityDropdown, setShowCityDropdown] = useState(false);
+    const [showGradeDropdown, setShowGradeDropdown] = useState(false);
 
-    router.push(`/search?${params.toString()}`);
-  };
+    const majorCities = [
+        { name: "Mumbai", lat: 19.0760, lng: 72.8777 },
+        { name: "Delhi", lat: 28.6139, lng: 77.2090 },
+        { name: "Bangalore", lat: 12.9716, lng: 77.5946 },
+        { name: "Kolkata", lat: 22.5726, lng: 88.3639 },
+        { name: "Hyderabad", lat: 17.3850, lng: 78.4867 },
+        { name: "Chennai", lat: 13.0827, lng: 80.2707 },
+        { name: "Pune", lat: 18.5204, lng: 73.8567 },
+        { name: "Ahmedabad", lat: 23.0225, lng: 72.5714 },
+        { name: "Jaipur", lat: 26.9124, lng: 75.7873 },
+        { name: "Lucknow", lat: 26.8467, lng: 80.9462 },
+        { name: "Chandigarh", lat: 30.7333, lng: 76.7794 },
+        { name: "Kochi", lat: 9.9312, lng: 76.2673 },
+        { name: "Indore", lat: 22.7196, lng: 75.8577 },
+        { name: "Bhopal", lat: 23.2599, lng: 77.4126 },
+        { name: "Noida", lat: 28.5355, lng: 77.3910 }
+    ];
 
-  const detectLocation = () => {
-    setIsDetecting(true);
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(async (position) => {
-        try {
-          const { latitude, longitude } = position.coords;
-          setSearchCoords({ lat: latitude, lng: longitude });
-          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
-          const data = await res.json();
-          const city = data.address.city || data.address.town || data.address.village || data.address.state || "Current Location";
-          setSearchLocation(city);
-        } catch (err) {
-          console.error("Location detection failed", err);
-          setSearchLocation("Current Location");
-        } finally {
-          setIsDetecting(false);
+    const gradesList = [
+        "Pre-School (Nursery/KG)", "Primary (1-5)", "Middle (6-8)", "High School (9-10)", 
+        "Higher Secondary (11-12)", "Undergraduate", "Postgraduate", "Competitive Exams", "Hobby / Skill-based"
+    ];
+
+    const router = useRouter();
+
+    useEffect(() => {
+        fetch("/api/subjects")
+            .then(res => res.json())
+            .then(data => {
+                // Merge API subjects with local fallback, deduplicate
+                const merged = Array.from(new Set([...LOCAL_SUBJECTS, ...data])).sort();
+                setSubjects(merged);
+            })
+            .catch(err => console.error("Failed to fetch subjects", err));
+    }, []);
+
+    useEffect(() => {
+        if (searchSubject.length > 0) {
+            const filtered = subjects.filter(s => 
+                s.toLowerCase().includes(searchSubject.toLowerCase())
+            );
+            setFilteredSubjects(filtered);
+            if (filtered.length > 0) setShowSubjectSuggestions(true);
+            else setShowSubjectSuggestions(false);
+        } else {
+            // Show popular subjects when field is empty but focused
+            setFilteredSubjects(subjects.slice(0, 15));
         }
-      }, () => {
-        setIsDetecting(false);
-        alert("Location access denied.");
-      });
-    } else {
-      setIsDetecting(false);
-      alert("Geolocation not supported by your browser.");
-    }
-  };
+    }, [searchSubject, subjects]);
 
-  return (
-    <div className="bg-white text-slate-900 font-sans min-h-screen">
-      <main className="flex-grow pt-24">
-        {/* REFINED MINIMALIST HERO SECTION - 100vh LOCK */}
-        <section className="relative h-screen min-h-[750px] flex flex-col items-center justify-center">
-          {/* Background Layer - Restored Public Asset */}
-          <div className="absolute inset-0 z-0">
-            <img 
-              src="/indian_hero.png" 
-              alt="Indian Tutor Teaching Student" 
-              className="w-full h-full object-cover scale-100"
-              onError={(e) => {
-                e.target.src = "https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80";
-              }}
-            />
-            {/* Darker Overlay for White Text contrast */}
-            <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-[1px]"></div>
-          </div>
+    const handleSearch = () => {
+        if (!searchSubject || !searchGrade) {
+            alert("Please input a Subject and Grade level to search.");
+            return;
+        }
 
-          <div className="container-premium relative z-10 pt-32 pb-80 text-center">
-            <div className="max-w-4xl mx-auto space-y-12">
-              {/* Marketplace Focused Messaging - White for Premium Look */}
-              <div className="space-y-3 animate-premium-fade">
-                <h1 className="text-4xl sm:text-5xl md:text-6xl font-heading font-black tracking-tight text-white leading-[1.1] drop-shadow-2xl">
-                  India's Trusted Marketplace for <br />
-                  <span className="text-primary italic font-serif">Personalized</span> Tutoring.
-                </h1>
-                <p className="max-w-xl mx-auto text-[15px] text-white/90 font-medium leading-relaxed px-4 text-center drop-shadow-md opacity-80">
-                  Connecting ambitious students with world-class verified tutors. <br />
-                  Simple, direct, and zero-commission learning discovery.
-                </p>
-              </div>
+        const params = new URLSearchParams();
+        params.set("subject", searchSubject);
+        params.set("grade", searchGrade);
+        if (searchLocation) params.set("location", searchLocation);
+        if (searchCoords) {
+            params.set("lat", searchCoords.lat);
+            params.set("lng", searchCoords.lng);
+        }
+        params.set("role", "TUTOR");
+        router.push(`/search?${params.toString()}`);
+    };
 
-              {/* CENTER-ALIGNED MINIMALIST CLEAN WHITE SEARCH HUB */}
-              <div className="w-full max-w-5xl mx-auto px-4">
-                <div className="bg-white rounded-xl shadow-[0_40px_100px_-20px_rgba(0,0,0,0.5)] border border-white/20 p-2 relative">
-                  
-                  {/* SEARCH TYPE TABS - Minimalist */}
-                  <div className="flex justify-center md:justify-start gap-5 mb-1 ml-0 md:ml-6">
-                    {["tutors", "students", "institutes"].map((tab) => (
-                      <button
-                        key={tab}
-                        onClick={() => setActiveTab(tab)}
-                        className={`py-2 text-[10px] font-black uppercase tracking-[0.2em] transition-all relative ${activeTab === tab
-                          ? "text-[#0d40a5] after:content-[''] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#0d40a5]"
-                          : "text-slate-400 hover:text-slate-600"
-                          }`}
-                      >
-                        {tab === "tutors" ? "Search Tutors" : tab === "students" ? "Student Leads" : "Institutes"}
-                      </button>
-                    ))}
-                  </div>
-
-                  {/* SEGMENTED SEARCH BAR - CLEAN WHITE MINIMAL */}
-                  <div className="flex flex-col md:flex-row items-stretch gap-0 relative">
-                    <div className="flex-1 relative px-6 py-4 border-b md:border-b-0 md:border-r border-slate-100 hover:bg-slate-50 transition-all rounded-t-lg md:rounded-l-lg md:rounded-tr-none">
-                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-0.5 text-left">Subject / Skill</p>
-                      <input
-                        className="w-full bg-transparent text-lg font-bold text-slate-900 outline-none placeholder:text-slate-400"
-                        placeholder="e.g. Mathematics"
-                        type="text"
-                        value={searchSubject}
-                        onChange={(e) => setSearchSubject(e.target.value)}
-                        onFocus={() => filteredSubjects.length > 0 && setShowSubjectSuggestions(true)}
-                        onBlur={() => setTimeout(() => setShowSubjectSuggestions(false), 200)}
-                      />
-                      {showSubjectSuggestions && (
-                        <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-100 rounded-lg shadow-2xl z-50 max-h-60 overflow-y-auto p-2">
-                          {filteredSubjects.map((s, i) => (
-                            <div key={i} onClick={() => {setSearchSubject(s); setShowSubjectSuggestions(false);}} className="px-5 py-3 hover:bg-slate-50 rounded-xl cursor-pointer text-left font-bold text-sm text-slate-700">
-                              {s}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex-[0.7] relative px-6 py-4 border-b md:border-b-0 md:border-r border-slate-100 hover:bg-slate-50 transition-all cursor-pointer" onClick={() => setShowGradeDropdown(!showGradeDropdown)}>
-                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-0.5 text-left">Level / Grade</p>
-                      <div className="flex justify-between items-center text-left">
-                        <span className={`text-lg font-bold ${searchGrade ? "text-slate-900" : "text-slate-400"}`}>
-                          {searchGrade || "Select Grade"}
-                        </span>
-                        <span className="material-symbols-outlined text-slate-300 text-[18px]">expand_more</span>
-                      </div>
-                      {showGradeDropdown && (
-                        <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-100 rounded-lg shadow-2xl z-50 max-h-60 overflow-y-auto p-2">
-                          {gradesList.map((g, i) => (
-                            <div key={i} onClick={() => {setSearchGrade(g); setShowGradeDropdown(false);}} className={`px-5 py-3 rounded-xl hover:bg-slate-50 cursor-pointer text-left font-bold text-sm transition-all ${searchGrade === g ? 'bg-primary/5 text-primary' : 'text-slate-700'}`}>
-                              {g}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex-1 relative px-6 py-4 hover:bg-slate-50 transition-all md:rounded-r-lg cursor-pointer" onClick={() => setShowCityDropdown(!showCityDropdown)}>
-                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-0.5 text-left">Location (5 Cities)</p>
-                      <div className="flex justify-between items-center text-left">
-                        <span className={`text-lg font-bold ${searchLocation ? "text-slate-900" : "text-slate-400"}`}>
-                          {searchLocation || "Select City"}
-                        </span>
-                        <span className="material-symbols-outlined text-slate-300 text-[18px]">location_on</span>
-                      </div>
-                      {showCityDropdown && (
-                        <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-100 rounded-lg shadow-2xl z-50 max-h-60 overflow-y-auto p-2">
-                          {["Mumbai", "Delhi", "Bangalore", "Calcutta", "Hyderabad"].map((city, i) => (
-                            <div key={i} onClick={() => {setSearchLocation(city); setShowCityDropdown(false);}} className="px-5 py-4 hover:bg-slate-50 rounded-xl cursor-pointer text-left font-bold text-sm text-slate-700 flex items-center justify-between">
-                              {city}
-                              {searchLocation === city && <span className="material-symbols-outlined text-primary text-sm">check_circle</span>}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* SEARCH ACTION BUTTON */}
-                    <div className="md:absolute md:-right-3 md:top-1/2 md:-translate-y-1/2 p-2 md:p-0">
-                      <button
-                        onClick={handleSearch}
-                        className="w-full md:size-14 bg-[#0d40a5] text-white font-black rounded-lg hover:bg-[#0a358a] hover:shadow-2xl transition-all flex items-center justify-center group"
-                      >
-                        <span className="md:hidden px-4 uppercase text-[12px] tracking-widest font-black">Find Tutors</span>
-                        <span className="material-symbols-outlined text-[28px]">search</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* SIMPLIFIED TRUST BADGES - WHITE VERSION */}
-              <div className="mt-16 flex flex-wrap justify-center gap-16 opacity-90">
-                <div className="flex items-center gap-3">
-                  <span className="material-symbols-outlined text-primary text-xl font-bold animate-pulse">verified</span>
-                  <span className="text-[11px] font-black uppercase tracking-[0.2em] text-white">Verified Identity</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="material-symbols-outlined text-primary text-xl font-bold animate-pulse">home_pin</span>
-                  <span className="text-[11px] font-black uppercase tracking-[0.2em] text-white">Local Experts</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="material-symbols-outlined text-primary text-xl font-bold animate-pulse">payments</span>
-                  <span className="text-[11px] font-black uppercase tracking-[0.2em] text-white">Direct Engagement</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Live Activity Feed - Small & Subtle */}
-        <section className="bg-slate-50 py-4 border-y border-slate-100 overflow-hidden">
-          <div className="max-w-7xl mx-auto px-6 whitespace-nowrap animate-marquee flex gap-12 items-center">
-            {[
-              "Rahul from Mumbai just booked a Physics trial",
-              "New Verified Tutor joined in Bangalore: Dr. Sharma (Mathematics)",
-              "Sneha unlocked 5 leads in Delhi",
-              "Satisfaction Guarantee: 100% refund for your first trial if not happy",
-              "AI Matchmaker: 450 matches found today",
-              "New Blog: 10 Tips for Finding the Perfect Math Tutor"
-            ].map((text, i) => (
-              <div key={i} className="flex items-center gap-3">
-                <div className="size-2 rounded-full bg-emerald-500"></div>
-                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{text}</span>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Categories Section - Clean White Grid */}
-        <section className="py-24 bg-white border-b border-slate-50">
-          <div className="max-w-7xl mx-auto px-6 lg:px-10 relative z-10">
-            <div className="flex flex-col md:flex-row items-center justify-between mb-16 gap-6">
-              <div className="text-center md:text-left">
-                <h3 className="text-4xl font-bold mb-4">Master Any <span className="text-primary tracking-tight">Subject</span></h3>
-                <p className="text-slate-500 text-lg max-w-xl font-medium">Find verified local mentors for in-person home tuition. From primary school to competitive exams.</p>
-              </div>
-              <Link href="/search?role=TUTOR" className="px-8 py-3 bg-slate-50 text-slate-900 border border-slate-200 rounded-2xl font-bold hover:bg-slate-100 transition-all flex items-center gap-2 group">
-                Browse Local Tutors
-                <span className="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-6 mb-12">
-              {[
-                { name: "Mathematics", icon: "calculate", color: "blue", desc: "IIT/CBSE/ICSE" },
-                { name: "Science", icon: "science", color: "amber", desc: "Physics/Che/Bio" },
-                { name: "English", icon: "translate", color: "emerald", desc: "Spoken/Grammar" },
-                { name: "Coding", icon: "terminal", color: "purple", desc: "Python/Web/AI" },
-                { name: "Music", icon: "music_note", color: "rose", desc: "Guitar/Piano/Vocal" },
-                { name: "Arts", icon: "palette", color: "orange", desc: "Drawing/Painting" },
-                { name: "Competitive", icon: "assignment", color: "indigo", desc: "JEE/NEET/UPSC" },
-                { name: "Languages", icon: "language", color: "teal", desc: "Hindi/French/German" },
-              ].map((cat, idx) => (
-                <Link key={idx} href={`/search?role=TUTOR&subject=${cat.name}`}
-                  className="group flex flex-col items-center p-8 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl transition-all hover:shadow-2xl hover:border-primary/5 hover:-translate-y-2">
-                  <div className={`size-16 rounded-2xl bg-slate-50 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300 mb-6 shadow-sm`}>
-                    <span className="material-symbols-outlined text-3xl">{cat.icon}</span>
-                  </div>
-                  <span className="font-bold text-slate-900 mb-1 text-center">{cat.name}</span>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">{cat.desc}</span>
-                </Link>
-              ))}
-            </div>
-
-            <div className="flex justify-center">
-              <Link href="/subjects" className="px-12 py-5 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest hover:bg-primary transition-all shadow-xl shadow-slate-900/10 flex items-center gap-3 group">
-                View All Subjects
-                <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        {/* Testimonials Section - Premium Design */}
-        <section className="py-32 bg-slate-50/50">
-          <div className="max-w-7xl mx-auto px-6 lg:px-10">
-            <div className="text-center mb-20">
-              <span className="px-4 py-2 bg-primary/10 text-primary rounded-full text-[10px] font-bold uppercase tracking-[0.2em] mb-6 inline-block">Success Stories</span>
-              <h2 className="text-4xl lg:text-5xl font-bold mb-6 text-slate-900">What our <span className="text-primary italic font-serif">Community</span> says</h2>
-              <p className="text-slate-500 text-lg max-w-2xl mx-auto font-medium">Join thousands of students and educators who have transformed their academic journey with us.</p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {[
-                {
-                  quote: "Found the perfect Physics tutor for my son within 24 hours. The AI Matchmaker is truly a game changer for busy parents.",
-                  author: "Anita Sharma",
-                  role: "Parent, Delhi",
-                  img: "https://i.pravatar.cc/100?img=1"
-                },
-                {
-                  quote: "As a tutor, the quality of leads here is unmatched. I've grown my teaching business by 3x in just 3 months.",
-                  author: "Vikram Malhotra",
-                  role: "Mathematics Expert",
-                  img: "https://i.pravatar.cc/100?img=12"
-                },
-                {
-                  quote: "I was struggling with JEE Prep, but my TuitionsInIndia tutor made complex concepts so simple. Top-tier professionals!",
-                  author: "Aditya Verma",
-                  role: "Student, Mumbai",
-                  img: "https://i.pravatar.cc/100?img=33"
+    const detectLocation = () => {
+        setIsDetecting(true);
+        if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                try {
+                    const { latitude, longitude } = position.coords;
+                    setSearchCoords({ lat: latitude, lng: longitude });
+                    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+                    const data = await res.json();
+                    const city = data.address.city || data.address.town || data.address.village || data.address.state || "Current Location";
+                    setSearchLocation(city);
+                } catch (err) {
+                    console.error("Location detection failed", err);
+                    setSearchLocation("Current Location");
+                } finally {
+                    setIsDetecting(false);
                 }
-              ].map((t, i) => (
-                <div key={i} className="bg-white p-10 rounded-xl border border-slate-100 shadow-sm hover:shadow-xl transition-all flex flex-col">
-                  <div className="flex text-amber-400 mb-6">
-                    {[1, 2, 3, 4, 5].map(s => <span key={s} className="material-symbols-outlined fill-1">star</span>)}
-                  </div>
-                  <p className="text-slate-700 font-medium italic mb-10 flex-1 leading-relaxed">"{t.quote}"</p>
-                  <div className="flex items-center gap-4">
-                    <img src={t.img} alt={t.author} className="size-12 rounded-full object-cover" />
-                    <div>
-                      <p className="font-bold text-slate-900">{t.author}</p>
-                      <p className="text-xs font-bold text-slate-400 uppercase items-center tracking-widest">{t.role}</p>
+            }, () => {
+                setIsDetecting(false);
+                alert("Location access denied.");
+            });
+        } else {
+            setIsDetecting(false);
+            alert("Geolocation not supported by your browser.");
+        }
+    };
+
+    const [activeTab, setActiveTab] = useState("TUTOR"); // TUTOR, STUDENT, INSTITUTE
+
+    return (
+        <div className="w-full bg-white text-gray-800 antialiased font-sans">
+            {/* HERO SECTION (Single Viewport) */}
+            <section className="relative h-screen flex flex-col items-center justify-center pt-32 px-4">
+                {/* Background Image with Overlay */}
+                <div 
+                    className="absolute inset-0 z-0 bg-cover bg-center"
+                    style={{ backgroundImage: "url('/hero-bg.png')" }}
+                >
+                    {/* Dark gradient overlay so text is highly readable */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-gray-900/80 via-gray-900/60 to-gray-900/90"></div>
+                </div>
+
+                <div className="relative z-10 w-full max-w-5xl mx-auto flex flex-col items-center">
+                    <div className="mb-6 text-center space-y-3">
+                        <span className="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">
+                            India's Trusted Tuition Platform
+                        </span>
+                        <h1 className="text-3xl md:text-5xl font-bold text-white tracking-tight">
+                            What are you looking for?
+                        </h1>
+                        <p className="text-gray-200 text-base md:text-lg font-medium max-w-2xl mx-auto">
+                            Connect with verified tutors, enthusiastic students, and top institutes in your city.
+                        </p>
                     </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
 
-        {/* UNIFIED HOW IT WORKS - 3 STEP FLOW */}
-        <section className="py-32 bg-slate-50/50">
-          <div className="max-w-7xl mx-auto px-6 lg:px-10">
-            <div className="text-center mb-20 text-slate-900">
-              <span className="px-4 py-2 bg-primary/10 text-primary rounded-full text-[10px] font-bold uppercase tracking-[0.2em] mb-6 inline-block">Simple Methodology</span>
-              <h2 className="text-4xl lg:text-5xl font-bold mb-6">How it <span className="text-primary">Works</span></h2>
-              <p className="text-slate-500 text-lg max-w-2xl mx-auto font-medium">Your journey to academic excellence simplified into three easy stages.</p>
-            </div>
+                    {/* SEARCH INTERFACE */}
+                    <div className="w-full max-w-4xl mx-auto shadow-2xl rounded-2xl overflow-visible animate-fade-in">
+                        {/* Tabs */}
+                        <div className="flex bg-white/10 backdrop-blur-md rounded-t-2xl overflow-hidden border-b border-white/20">
+                            {[
+                                { id: "TUTOR", label: "Find Tutors" },
+                                { id: "STUDENT", label: "Find Students" },
+                                { id: "INSTITUTE", label: "Find Institutes" }
+                            ].map(tab => (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => setActiveTab(tab.id)}
+                                    className={`flex-1 py-3 text-sm md:text-base font-bold transition-all ${
+                                        activeTab === tab.id 
+                                        ? "bg-white text-blue-700 border-t-4 border-blue-600" 
+                                        : "text-white hover:bg-white/20"
+                                    }`}
+                                >
+                                    {tab.label}
+                                </button>
+                            ))}
+                        </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
-              {/* Connector Line (Desktop) */}
-              <div className="hidden md:block absolute top-1/2 left-0 right-0 h-0.5 bg-slate-200 -translate-y-24 z-0"></div>
-              
-              {[
-                { step: "01", title: "Discover & Match", desc: "Search through thousands of verified tutors or use our AI Matchmaker to find your perfect academic partner.", icon: "person_search" },
-                { step: "02", title: "Verify & Connect", desc: "Review profiles, check background verification, and connect directly with tutors to discuss your goals.", icon: "verified_user" },
-                { step: "03", title: "Start Learning", desc: "Schedule your first trial class and begin your personalized education journey with 100% platform support.", icon: "calendar_month" }
-              ].map((item, i) => (
-                <div key={i} className="relative z-10 flex flex-col items-center text-center group">
-                  <div className="size-20 rounded-full bg-white border border-slate-100 flex items-center justify-center text-primary text-2xl font-black shadow-xl group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-500 mb-8">
-                    <span className="material-symbols-outlined text-3xl">{item.icon}</span>
-                  </div>
-                  <h3 className="text-xl font-bold mb-4 text-slate-900">{item.title}</h3>
-                  <p className="text-slate-500 text-sm font-medium leading-relaxed px-4">{item.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+                        {/* Search Bar Container */}
+                        <div className="bg-white p-4 md:p-5 flex flex-col md:flex-row items-center gap-3 rounded-b-2xl shadow-inner relative">
+                            
+                            {/* Subject Field */}
+                            <div className="w-full md:w-1/3 relative border border-gray-300 rounded-xl flex items-center px-4 py-3 bg-gray-50 focus-within:ring-2 focus-within:ring-blue-500 transition-all">
+                                <Search className="text-gray-400 mr-3" size={20} />
+                                <input 
+                                    className="w-full bg-transparent border-none focus:ring-0 text-gray-800 placeholder:text-gray-400 font-medium outline-none" 
+                                    placeholder="Subject (e.g. Mathematics)" 
+                                    type="text"
+                                    value={searchSubject}
+                                    onChange={(e) => setSearchSubject(e.target.value)}
+                                    onFocus={() => {
+                                        if (searchSubject.length > 1 && filteredSubjects.length > 0) {
+                                            setShowSubjectSuggestions(true);
+                                        } else if (searchSubject.length <= 1 && subjects.length > 0) {
+                                            setFilteredSubjects(subjects.slice(0, 15));
+                                            setShowSubjectSuggestions(true);
+                                        }
+                                    }}
+                                    onBlur={() => setTimeout(() => setShowSubjectSuggestions(false), 250)}
+                                />
+                                {showSubjectSuggestions && filteredSubjects.length > 0 && (
+                                    <div className="absolute bottom-full mb-2 left-0 w-full min-w-[250px] bg-white border border-gray-200 rounded-xl shadow-2xl z-[60] max-h-48 overflow-y-auto py-2">
+                                        {filteredSubjects.slice(0, 10).map((s, i) => (
+                                            <div key={i} onMouseDown={() => {setSearchSubject(s); setShowSubjectSuggestions(false);}} className="px-5 py-3 hover:bg-blue-50 cursor-pointer text-left font-medium text-gray-700 hover:text-blue-700 transition-colors">
+                                                {s}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
 
-        {/* FAQ SECTION - ACCORDION STYLE */}
-        <section className="py-32 bg-white">
-          <div className="max-w-4xl mx-auto px-6">
-            <div className="text-center mb-20">
-              <h2 className="text-4xl font-bold text-slate-900 mb-6">Common <span className="text-primary italic font-serif">Questions</span></h2>
-              <p className="text-slate-500 font-medium">Everything you need to know about India's elite tuition marketplace.</p>
-            </div>
+                            {/* Divider Line Hidden on Mobile */}
+                            <div className="hidden md:block w-px h-10 bg-gray-200"></div>
 
-            <div className="space-y-4">
-              {[
-                { q: "How do I find a verified tutor?", a: "Simply use our segmented search bar on the hero section. You can filter by subject, grade, and city to find the best local matches." },
-                { q: "Are all tutors background checked?", a: "Yes, we implement a multi-stage verification process including ID checks and academic credential verification for all listed tutors." },
-                { q: "How much does it cost?", a: "TuitionsInIndia is a transparent marketplace. Tutors set their own rates, and we charge zero commission on your payments to them." },
-                { q: "Can I request a trial class?", a: "Most of our elite tutors offer a trial session to ensure a perfect match before commitment. Look for the 'Trial Available' badge on profiles." }
-              ].map((faq, i) => (
-                <details key={i} className="group bg-slate-50 rounded-3xl border border-slate-100 open:bg-white open:shadow-2xl transition-all duration-300">
-                  <summary className="flex items-center justify-between p-8 cursor-pointer list-none">
-                    <span className="text-lg font-bold text-slate-900">{faq.q}</span>
-                    <span className="material-symbols-outlined text-primary group-open:rotate-180 transition-transform">expand_more</span>
-                  </summary>
-                  <div className="p-8 pt-0 text-slate-500 font-medium leading-relaxed">
-                    {faq.a}
-                  </div>
-                </details>
-              ))}
-            </div>
-          </div>
-        </section>
+                            {/* Grade Menu */}
+                            <div className="w-full md:w-1/4 relative border border-gray-300 rounded-xl bg-gray-50 flex flex-col cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => {setShowGradeDropdown(!showGradeDropdown); setShowCityDropdown(false); setShowSubjectSuggestions(false)}}>
+                                <div className="flex items-center justify-between px-4 py-3">
+                                    <div className="flex items-center">
+                                        <Layers className="text-gray-400 mr-3" size={20} />
+                                        <span className="font-medium text-gray-700 truncate">{searchGrade || "Select Level"}</span>
+                                    </div>
+                                    <ChevronDown size={16} className={`text-gray-500 transition-transform ${showGradeDropdown ? 'rotate-180' : ''}`} />
+                                </div>
+                                {showGradeDropdown && (
+                                    <div className="absolute bottom-full mb-2 left-0 w-full min-w-[200px] bg-white border border-gray-200 rounded-xl shadow-2xl z-[60] max-h-48 overflow-y-auto py-2">
+                                        {gradesList.map((g, i) => (
+                                            <div key={i} onClick={() => {setSearchGrade(g); setShowGradeDropdown(false);}} className={`px-5 py-3 rounded-lg hover:bg-blue-50 cursor-pointer text-left font-medium text-sm transition-colors ${searchGrade === g ? 'text-blue-700 bg-blue-50' : 'text-gray-700'}`}>
+                                                {g}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
 
-        {/* Pricing Selection */}
-        <section className="py-24 bg-white">
-          <div className="max-w-7xl mx-auto px-6 lg:px-10">
-            <div className="bg-primary rounded-[3.5rem] p-12 lg:p-24 text-white relative overflow-hidden shadow-2xl">
-              <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/5 rounded-full blur-[120px] -mr-40 -mt-40"></div>
+                            {/* Divider Line Hidden on Mobile */}
+                            <div className="hidden md:block w-px h-10 bg-gray-200"></div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center relative z-10">
-                <div>
-                  <h2 className="text-4xl lg:text-6xl font-bold mb-8 leading-tight">Join the Elite <br /><span className="text-accent italic font-serif">Academic Circle</span></h2>
-                  <p className="text-white/70 text-lg font-medium mb-12">Whether you need homework help or a career-defining certification, we have the resources to get you there.</p>
-                  <div className="flex gap-4">
-                    <Link href="/pricing/student" className="px-8 py-4 bg-white text-primary font-bold rounded-2xl hover:bg-slate-50 transition-all shadow-xl">Detailed Pricing</Link>
-                    <Link href="/kb/student" className="px-8 py-4 bg-white/10 border border-white/20 text-white font-bold rounded-2xl hover:bg-white/20 transition-all">Knowledge Base</Link>
-                  </div>
-                </div>
-                <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-10 space-y-8">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="size-10 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
-                        <span className="material-symbols-outlined">shield</span>
-                      </div>
-                      <span className="font-bold">Verified Leads</span>
+                            {/* City / Location Field */}
+                            <div className="w-full md:w-1/4 relative border border-gray-300 rounded-xl bg-gray-50 flex flex-col cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => {setShowCityDropdown(!showCityDropdown); setShowGradeDropdown(false); setShowSubjectSuggestions(false)}}>
+                                <div className="flex items-center justify-between px-4 py-3">
+                                    <div className="flex items-center">
+                                        <MapPin className="text-gray-400 mr-3" size={20} />
+                                        <span className="font-medium text-gray-700 truncate">{searchLocation || "Select City"}</span>
+                                    </div>
+                                    <ChevronDown size={16} className={`text-gray-500 transition-transform ${showCityDropdown ? 'rotate-180' : ''}`} />
+                                </div>
+                                {showCityDropdown && (
+                                    <div className="absolute bottom-full mb-2 right-0 w-full min-w-[260px] bg-white border border-gray-200 rounded-xl shadow-2xl z-[60] max-h-48 overflow-y-auto py-2">
+                                        <div onClick={() => {setSearchLocation(''); setSearchCoords(null); setShowCityDropdown(false);}} className="px-5 py-3 hover:bg-gray-50 cursor-pointer text-left font-medium text-sm text-gray-500">
+                                            Online / Anywhere
+                                        </div>
+                                        <div onClick={detectLocation} className="px-5 py-3 hover:bg-blue-50 cursor-pointer text-left font-bold text-sm text-blue-600 flex items-center gap-2 border-b border-gray-100 pb-3 mb-2">
+                                            <Navigation size={14} fill="currentColor" />
+                                            {isDetecting ? 'Detecting Location...' : 'Detect My Location'}
+                                        </div>
+                                        {majorCities.map((cityObj, i) => (
+                                            <div key={i} onClick={() => {setSearchLocation(cityObj.name); setSearchCoords({lat: cityObj.lat, lng: cityObj.lng}); setShowCityDropdown(false);}} className="px-5 py-3 hover:bg-gray-50 cursor-pointer text-left font-medium text-sm text-gray-800 flex items-center justify-between transition-colors">
+                                                {cityObj.name}
+                                                {searchLocation === cityObj.name && <CheckCircle2 size={16} className="text-blue-600" />}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Search Button */}
+                            <button 
+                                onClick={() => {
+                                    if (!searchSubject) { alert("Please type a subject."); return; }
+                                    // Save search context for registration pre-fill
+                                    try {
+                                        sessionStorage.setItem("last_search_subject", searchSubject);
+                                        sessionStorage.setItem("last_search_grade", searchGrade);
+                                        sessionStorage.setItem("last_search_location", searchLocation);
+                                        sessionStorage.setItem("last_search_role", activeTab);
+                                    } catch(e) {}
+                                    const params = new URLSearchParams();
+                                    params.set("subject", searchSubject);
+                                    if (searchGrade) params.set("grade", searchGrade);
+                                    if (searchLocation) params.set("location", searchLocation);
+                                    if (searchCoords) {
+                                        params.set("lat", searchCoords.lat);
+                                        params.set("lng", searchCoords.lng);
+                                    }
+                                    params.set("role", activeTab);
+                                    router.push(`/search?${params.toString()}`);
+                                }} 
+                                className="w-full md:w-auto md:ml-auto px-8 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 active:scale-95 transition-all shadow-md flex items-center justify-center gap-2"
+                            >
+                                Search <ArrowRight size={18} />
+                            </button>
+                        </div>
                     </div>
-                    <span className="text-emerald-400 font-bold">100% Secure</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="size-10 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center">
-                        <span className="material-symbols-outlined">support_agent</span>
-                      </div>
-                      <span className="font-bold">24/7 Support</span>
+
+                    <div className="mt-8 flex flex-wrap justify-center gap-6 md:gap-12 text-white/80 text-sm font-medium">
+                        <div className="flex items-center gap-2 drop-shadow-md">
+                            <ShieldCheck size={18} className="text-green-400" />
+                            <span>100% Verified Profiles</span>
+                        </div>
+                        <div className="flex items-center gap-2 drop-shadow-md">
+                            <Star size={18} className="text-yellow-400 fill-yellow-400" />
+                            <span>Top Rated Instructors</span>
+                        </div>
+                        <div className="flex items-center gap-2 drop-shadow-md">
+                            <MessageSquare size={18} className="text-blue-300" />
+                            <span>Direct Chat Access</span>
+                        </div>
                     </div>
-                    <span className="text-blue-400 font-bold">Always Live</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="size-10 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center">
-                        <span className="material-symbols-outlined">payments</span>
-                      </div>
-                      <span className="font-bold">Direct Payments</span>
+                </div>
+            </section>
+
+            {/* How it Works Section */}
+            <section className="py-24 bg-gray-50 border-t border-gray-200">
+                <div className="max-w-6xl mx-auto px-6 text-center">
+                    <h2 className="text-3xl font-bold text-gray-900 mb-4">How TuitionsInIndia Works</h2>
+                    <p className="text-gray-500 max-w-2xl mx-auto mb-16">Finding the perfect match for your academic needs is easier than ever. Follow these simple steps.</p>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+                        {[
+                            { step: "1", title: "Search", desc: "Enter your subject, grade, and city to find matching profiles instantly.", icon: Search },
+                            { step: "2", title: "Review", desc: "Check reviews, ratings, and verified credentials to pick the best fit.", icon: ShieldCheck },
+                            { step: "3", title: "Connect", desc: "Chat directly and easily finalize tuition timings and fees.", icon: MessageSquare }
+                        ].map((item, i) => (
+                            <div key={i} className="flex flex-col items-center bg-white p-8 rounded-3xl shadow-sm border border-gray-100 hover:shadow-lg transition-shadow">
+                                <div className="w-16 h-16 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mb-6 relative">
+                                    <item.icon size={28} />
+                                    <span className="absolute -top-2 -right-2 bg-yellow-400 text-gray-900 font-black text-xs w-6 h-6 rounded-full flex items-center justify-center border-2 border-white">{item.step}</span>
+                                </div>
+                                <h3 className="text-xl font-bold text-gray-900 mb-3">{item.title}</h3>
+                                <p className="text-gray-500 line-clamp-3">{item.desc}</p>
+                            </div>
+                        ))}
                     </div>
-                    <span className="text-orange-400 font-bold">No Commission</span>
-                  </div>
                 </div>
-              </div>
-            </div>
-          </div>
-        </section>
+            </section>
 
-        {/* Final CTA */}
-        <section className="py-32 bg-white text-center">
-          <div className="max-w-4xl mx-auto px-6">
-            <h2 className="text-5xl font-bold text-slate-900 mb-8 leading-tight">Ready to start your <br /><span className="text-primary italic font-serif">Success Story?</span></h2>
-            <div className="flex flex-col sm:flex-row gap-6 justify-center">
-              <Link href="/get-started" className="px-12 py-5 bg-primary text-white font-bold rounded-2xl hover:opacity-90 transition-all shadow-xl shadow-primary/20 text-lg">Detailed Enrollment</Link>
-              <Link href="/post-requirement" className="px-12 py-5 bg-slate-50 text-slate-900 border border-slate-200 font-bold rounded-2xl hover:bg-slate-100 transition-all text-lg">Post Requirement</Link>
-            </div>
-          </div>
-        </section>
-      </main>
-
-      {/* Footer - Compact & Horizontal */}
-      <footer className="bg-slate-50 border-t border-slate-100 py-8">
-        <div className="max-w-7xl mx-auto px-6 lg:px-10">
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-8 pb-8 border-b border-slate-200">
-            <div className="flex flex-col md:flex-row items-center gap-6 text-center md:text-left">
-              <Link href="/" className="shrink-0">
-                <img src="/logo_horizontal.png" alt="Tuitions In India" className="h-10 w-auto object-contain" />
-              </Link>
-              <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest max-w-xs">
-                India's leading managed marketplace for private tuitions since 2024.
-              </p>
-            </div>
-
-            <nav className="flex flex-wrap justify-center gap-x-8 gap-y-4">
-              <Link href="/tutors" className="text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-primary transition-colors">Find Tutors</Link>
-              <Link href="/ai-match" className="text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-primary transition-colors">AI Matchmaker</Link>
-              <Link href="/pricing/student" className="text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-primary transition-colors">Pricing</Link>
-              <Link href="/register/tutor" className="text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-primary transition-colors">Join as Tutor</Link>
-              <Link href="/how-it-works/tutor" className="text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-primary transition-colors">Methodology</Link>
-              <Link href="/legal/privacy" className="text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-primary transition-colors">Privacy</Link>
-              <Link href="/legal/terms" className="text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-primary transition-colors">Terms</Link>
-            </nav>
-
-            <div className="flex gap-4">
-              {[1, 2, 3].map(i => (
-                <div key={i} className="size-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-primary transition-colors cursor-pointer">
-                  <span className="material-symbols-outlined text-lg">share</span>
+            {/* Platform Stats / Assets */}
+            <section className="py-24 bg-white border-t border-gray-200">
+                <div className="max-w-6xl mx-auto px-6">
+                    <div className="bg-blue-600 rounded-[3rem] p-12 text-white shadow-xl flex flex-col md:flex-row justify-between items-center bg-[url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80')] bg-blend-multiply border border-blue-700">
+                        <div className="text-center md:text-left mb-8 md:mb-0">
+                            <h2 className="text-3xl md:text-5xl font-bold mb-4">India's Growing Tuition Network</h2>
+                            <p className="text-blue-100 text-lg">Join thousands of parents and teachers on our platform.</p>
+                        </div>
+                        <div className="flex gap-12">
+                            <div className="text-center">
+                                <p className="text-5xl font-black mb-2">50k+</p>
+                                <p className="text-blue-200 font-medium">Registered Tutors</p>
+                            </div>
+                            <div className="text-center">
+                                <p className="text-5xl font-black mb-2">2M+</p>
+                                <p className="text-blue-200 font-medium">Monthly Classes</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              ))}
-            </div>
-          </div>
+            </section>
 
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4 pt-8">
-            <p className="text-slate-400 text-[9px] font-black uppercase tracking-[0.2em]">© 2026 TuitionsInIndia. Proudly Made in India.</p>
-            <div className="flex items-center gap-4 opacity-40 grayscale hover:grayscale-0 transition-all">
-              <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/Razorpay_logo.svg" alt="Razorpay" className="h-4" />
-            </div>
-          </div>
+            {/* Popular Subjects */}
+            <section className="py-24 bg-gray-50">
+                <div className="max-w-6xl mx-auto px-6">
+                    <div className="text-center mb-16">
+                        <h2 className="text-3xl font-bold text-gray-900 mb-4">Popular Categories</h2>
+                        <p className="text-gray-500">Explore the most demanded subjects in your city.</p>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                        {[
+                            { title: "Mathematics", icon: TrendingUp },
+                            { title: "Science", icon: Atom },
+                            { title: "English", icon: Languages },
+                            { title: "Computer Science", icon: CodeIcon },
+                            { title: "Physics", icon: ArrowRight },
+                            { title: "Chemistry", icon: BookOpen },
+                            { title: "Class 1st - 5th", icon: Layers },
+                            { title: "IIT JEE", icon: Award }
+                        ].map((cat, i) => (
+                            <div key={i} onClick={() => { setSearchSubject(cat.title); window.scrollTo({top: 0, behavior: 'smooth'}); }} className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md cursor-pointer flex flex-col items-center justify-center text-center group transition-all">
+                                <div className="text-blue-600 mb-4 bg-blue-50 p-4 rounded-full group-hover:scale-110 transition-transform"><cat.icon size={28} /></div>
+                                <h3 className="font-bold text-gray-800">{cat.title}</h3>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* Testimonials */}
+            <section className="py-24 bg-white border-t border-gray-200">
+                <div className="max-w-6xl mx-auto px-6">
+                    <div className="text-center mb-16">
+                        <h2 className="text-3xl font-bold text-gray-900 mb-4">Trusted by the Community</h2>
+                        <p className="text-gray-500">See what our users are saying about TuitionsInIndia.</p>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        {/* Student Testimonial */}
+                        <div className="bg-gray-50 p-8 rounded-3xl border border-gray-100 flex flex-col relative text-center shadow-sm">
+                            <Quote className="text-blue-100 absolute top-6 right-6" size={48} />
+                            <div className="mb-6 relative z-10">
+                                <div className="flex justify-center text-yellow-400 mb-4">
+                                    <Star size={20} className="fill-yellow-400" />
+                                    <Star size={20} className="fill-yellow-400" />
+                                    <Star size={20} className="fill-yellow-400" />
+                                    <Star size={20} className="fill-yellow-400" />
+                                    <Star size={20} className="fill-yellow-400" />
+                                </div>
+                                <p className="text-gray-700 italic relative z-10 leading-relaxed font-medium">"I was struggling with Physics until I found an amazing tutor through this platform. The verified reviews helped me choose confidently, and my grades have improved drastically."</p>
+                            </div>
+                            <div className="mt-auto pt-6 border-t border-gray-200 relative z-10">
+                                <p className="font-bold text-gray-900">Priya S.</p>
+                                <p className="text-sm text-gray-500 font-medium">Class 12 Student • Bangalore</p>
+                            </div>
+                        </div>
+
+                        {/* Tutor Testimonial */}
+                        <div className="bg-blue-600 text-white p-8 rounded-3xl border border-blue-700 flex flex-col relative text-center shadow-md">
+                            <Quote className="text-blue-500 absolute top-6 right-6" size={48} />
+                            <div className="mb-6 relative z-10">
+                                <div className="flex justify-center text-yellow-400 mb-4">
+                                    <Star size={20} className="fill-yellow-400" />
+                                    <Star size={20} className="fill-yellow-400" />
+                                    <Star size={20} className="fill-yellow-400" />
+                                    <Star size={20} className="fill-yellow-400" />
+                                    <Star size={20} className="fill-yellow-400" />
+                                </div>
+                                <p className="text-blue-50 italic relative z-10 leading-relaxed font-medium">"As an independent educator, getting a verified badge here completely changed my career. I now get a steady stream of highly relevant student requests within my exact locality."</p>
+                            </div>
+                            <div className="mt-auto pt-6 border-t border-blue-500 relative z-10">
+                                <p className="font-bold">Rahul M.</p>
+                                <p className="text-sm text-blue-200 font-medium">Mathematics Tutor • Delhi</p>
+                            </div>
+                        </div>
+
+                        {/* Institute Testimonial */}
+                        <div className="bg-gray-50 p-8 rounded-3xl border border-gray-100 flex flex-col relative text-center shadow-sm">
+                            <Quote className="text-blue-100 absolute top-6 right-6" size={48} />
+                            <div className="mb-6 relative z-10">
+                                <div className="flex justify-center text-yellow-400 mb-4">
+                                    <Star size={20} className="fill-yellow-400" />
+                                    <Star size={20} className="fill-yellow-400" />
+                                    <Star size={20} className="fill-yellow-400" />
+                                    <Star size={20} className="fill-yellow-400" />
+                                    <Star size={20} className="fill-yellow-400" />
+                                </div>
+                                <p className="text-gray-700 italic relative z-10 leading-relaxed font-medium">"Managing multiple tutors and finding new students used to be a hassle. But listing our academy here significantly boosted our visibility and enrollments. Highly professional platform."</p>
+                            </div>
+                            <div className="mt-auto pt-6 border-t border-gray-200 relative z-10">
+                                <p className="font-bold text-gray-900">Apex Learning Institute</p>
+                                <p className="text-sm text-gray-500 font-medium">Coaching Center • Mumbai</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Final Call to Action */}
+            <section className="py-24 bg-white border-t border-gray-200 text-center">
+                <div className="max-w-3xl mx-auto px-6">
+                    <h2 className="text-4xl font-bold text-gray-900 mb-6">Are you a Teacher or an Institute?</h2>
+                    <p className="text-xl text-gray-500 mb-10">Start getting verified leads from students in your local area and grow your tuition business today.</p>
+                    
+                    <div className="flex flex-col sm:flex-row justify-center gap-6">
+                        <Link href="/register/tutor" className="px-10 py-5 bg-blue-600 text-white rounded-full font-bold text-lg shadow-lg hover:bg-blue-700 hover:shadow-xl transition-all">
+                            Register as Tutor
+                        </Link>
+                        <Link href="/register/institute" className="px-10 py-5 bg-gray-100 text-gray-800 border border-gray-300 rounded-full font-bold text-lg hover:bg-gray-200 transition-all">
+                            Register as Institute
+                        </Link>
+                    </div>
+                </div>
+            </section>
         </div>
-      </footer>
+    );
+}
 
-    </div>
-  );
+function PlusCircle({ size, className, strokeWidth }) {
+    return <UserPlus size={size} className={className} strokeWidth={strokeWidth} />;
 }
