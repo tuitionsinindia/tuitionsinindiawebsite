@@ -24,7 +24,7 @@ docker compose build --build-arg CACHE_BUST=$(date +%s)
 docker compose up -d
 
 echo "🗄️ Step 3: Synchronizing Database Schema..."
-docker exec tuitionsinindia-web npx prisma db push --accept-data-loss
+docker exec tuitionsinindia-web prisma db push --accept-data-loss
 
 echo "🧹 Pruning old images..."
 docker image prune -f
