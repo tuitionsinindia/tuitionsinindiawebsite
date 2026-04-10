@@ -17,7 +17,7 @@ export async function GET(request) {
         };
 
         // If tutorId is provided and we are NOT specifically asking for 'all', 
-        // we filter by tutor's preferred subjects/locations
+        // we filter by tutor's preferred subjects/locations using array overlap
         if (tutorId && !showAll && !subject && !location) {
             const tutorListing = await prisma.listing.findUnique({
                 where: { tutorId },
@@ -29,17 +29,13 @@ export async function GET(request) {
                 
                 if (tutorListing.subjects && tutorListing.subjects.length > 0) {
                     orConditions.push({
-                        subject: { in: tutorListing.subjects, mode: 'insensitive' }
-                    });
-                    // Also support fuzzy matching for subjects
-                    tutorListing.subjects.forEach(s => {
-                        orConditions.push({ subject: { contains: s, mode: 'insensitive' } });
+                        subjects: { hasSome: tutorListing.subjects }
                     });
                 }
 
                 if (tutorListing.locations && tutorListing.locations.length > 0) {
-                    tutorListing.locations.forEach(l => {
-                        orConditions.push({ location: { contains: l, mode: 'insensitive' } });
+                    orConditions.push({
+                        locations: { hasSome: tutorListing.locations }
                     });
                 }
 
@@ -51,13 +47,13 @@ export async function GET(request) {
 
         // Manual filters override intelligent matching or append to it
         if (subject) {
-            where.subject = { contains: subject, mode: 'insensitive' };
+            where.subjects = { hasSome: [subject.toUpperCase()] };
         }
         if (location) {
-            where.location = { contains: location, mode: 'insensitive' };
+            where.locations = { hasSome: [location.toUpperCase()] };
         }
         if (minBudget) {
-            where.budget = { contains: minBudget };
+            where.budget = { gte: parseInt(minBudget) };
         }
 
         const leads = await prisma.lead.findMany({

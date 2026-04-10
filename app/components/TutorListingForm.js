@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { 
     User, 
-    Mortarboard, 
+    GraduationCap, 
     Star, 
     ArrowRight,
     ArrowLeft,
@@ -195,7 +195,7 @@ export default function TutorListingForm({ user, onComplete }) {
                         <div className="space-y-4">
                             <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2">Subjects (Area of Dominion)</label>
                             <div className="relative group">
-                                <Mortarboard className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-indigo-600 transition-all" size={20} />
+                                <GraduationCap className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-indigo-600 transition-all" size={20} />
                                 <input 
                                     className="w-full pl-14 pr-4 py-5 bg-gray-50 border-2 border-transparent rounded-[1.8rem] focus:bg-white focus:border-indigo-600 transition-all outline-none font-black text-sm uppercase"
                                     placeholder="TYPE SUBJECT & PRESS ENTER"

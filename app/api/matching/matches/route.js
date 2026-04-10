@@ -1,0 +1,72 @@
+import { NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
+
+export const dynamic = 'force-dynamic';
+
+export async function GET(request) {
+    try {
+        const { searchParams } = new URL(request.url);
+        const userId = searchParams.get("id");
+        const role = searchParams.get("role");
+
+        if (!userId || !role) {
+            return NextResponse.json({ error: "Missing identity parameters" }, { status: 400 });
+        }
+
+        if (role === 'STUDENT') {
+            // 1. Get student's active leads to extract subjects/locations
+            const studentLeads = await prisma.lead.findMany({
+                where: { studentId: userId },
+                select: { subjects: true, locations: true }
+            });
+
+            const uniqueSubjects = [...new Set(studentLeads.flatMap(l => l.subjects))];
+            const uniqueLocations = [...new Set(studentLeads.flatMap(l => l.locations))];
+
+            // 2. Find listings (Tutors/Institutes) that match these subjects
+            const matches = await prisma.listing.findMany({
+                where: {
+                    subjects: { hasSome: uniqueSubjects },
+                    isActive: true
+                },
+                include: {
+                    tutor: {
+                        select: {
+                            name: true,
+                            image: true,
+                            role: true,
+                            subscriptionTier: true
+                        }
+                    }
+                }
+            });
+
+            return NextResponse.json(matches);
+        } else {
+            // Educators (TUTOR/INSTITUTE) - Find leads matching their listing
+            const tutorListing = await prisma.listing.findUnique({
+                where: { tutorId: userId },
+                select: { subjects: true, locations: true }
+            });
+
+            if (!tutorListing) return NextResponse.json([]);
+
+            const leads = await prisma.lead.findMany({
+                where: {
+                    subjects: { hasSome: tutorListing.subjects },
+                    status: 'OPEN'
+                },
+                include: {
+                    student: {
+                        select: { name: true, image: true }
+                    }
+                }
+            });
+
+            return NextResponse.json(leads);
+        }
+    } catch (error) {
+        console.error("Matching engine error:", error);
+        return NextResponse.json({ error: "Internal Matching Failure" }, { status: 500 });
+    }
+}
