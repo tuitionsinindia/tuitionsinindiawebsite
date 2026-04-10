@@ -77,9 +77,15 @@ export async function GET(request) {
             },
         });
 
+        // Fetch tutor info for premium check
+        const requester = tutorId ? await prisma.user.findUnique({ where: { id: tutorId }, select: { subscriptionTier: true } }) : null;
+        const isPremiumTutor = ['PRO', 'ELITE', 'INSTITUTE'].includes(requester?.subscriptionTier);
+
         // Sanitize leads
         const sanitizedLeads = leads.map(lead => {
-            const isUnlocked = lead.unlockedBy.length > 0;
+            const isUnlockedByCredit = lead.unlockedBy.length > 0;
+            const isUnlocked = isUnlockedByCredit || isPremiumTutor;
+            
             return {
                 ...lead,
                 student: isUnlocked ? lead.student : { name: "Hidden", phone: "Hidden", email: "Hidden" },

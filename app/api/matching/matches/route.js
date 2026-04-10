@@ -24,7 +24,7 @@ export async function GET(request) {
             const uniqueLocations = [...new Set(studentLeads.flatMap(l => l.locations))];
 
             // 2. Find listings (Tutors/Institutes) that match these subjects
-            const matches = await prisma.listing.findMany({
+            const listings = await prisma.listing.findMany({
                 where: {
                     subjects: { hasSome: uniqueSubjects },
                     isActive: true
@@ -32,14 +32,30 @@ export async function GET(request) {
                 include: {
                     tutor: {
                         select: {
+                            id: true,
                             name: true,
                             image: true,
                             role: true,
-                            subscriptionTier: true
+                            subscriptionTier: true,
+                            phone: true,
+                            email: true,
                         }
                     }
                 }
             });
+
+            // Harmonize to return user-first objects (like unlocked-tutors)
+            const matches = listings.map(l => ({
+                ...l.tutor,
+                tutorListing: {
+                    id: l.id,
+                    subjects: l.subjects,
+                    hourlyRate: l.hourlyRate,
+                    bio: l.bio,
+                    type: l.type,
+                    isInstitute: l.isInstitute
+                }
+            }));
 
             return NextResponse.json(matches);
         } else {

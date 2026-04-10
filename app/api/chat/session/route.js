@@ -40,7 +40,8 @@ export async function GET(req) {
 // Create or find a specific session between two users
 export async function POST(req) {
     try {
-        const { studentId, tutorId } = await req.json();
+        const body = await req.json();
+        const { studentId, tutorId } = body;
 
         if (!studentId || !tutorId) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -63,7 +64,7 @@ export async function POST(req) {
 
         // 2. If it's a NEW connection, enforce Protocol Access Control
         if (!session) {
-            const { initiatorId } = await req.json(); // Explicitly pass who is starting this
+            const { initiatorId } = body;
             
             if (!initiatorId) {
                 return NextResponse.json({ error: "Initiator ID required for new sessions" }, { status: 400 });
