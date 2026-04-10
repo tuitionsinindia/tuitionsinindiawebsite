@@ -459,37 +459,57 @@ function StudentDashboardContent() {
                                         <tbody className="divide-y-2 divide-border-dark">
                                             {unlockedTutors.length > 0 ? unlockedTutors.map((t) => (
                                                 <tr key={t.id} className="group hover:bg-white/5 transition-colors">
-                                                                <span className="text-sm uppercase tracking-[0.2em]">{t.email || 'ENCRYPTED_SIGNAL'}</span>
+                                                    <td className="px-12 py-12">
+                                                        <div className="flex items-center gap-8">
+                                                            <div className="size-20 rounded-[2rem] bg-blue-500/10 text-blue-500 flex items-center justify-center font-black text-4xl italic group-hover:scale-110 group-hover:bg-blue-500 group-hover:text-white transition-all shadow-xl border border-blue-500/10">
+                                                                {t.name[0]}
+                                                            </div>
+                                                            <div>
+                                                                <h4 className="text-xl font-black text-white uppercase italic tracking-tighter mb-1 leading-none">{t.name}</h4>
+                                                                <p className="text-[10px] font-black text-white/20 uppercase tracking-widest italic">{t.tutorListing?.subjects?.[0] || "Academic Professional"}</p>
                                                             </div>
                                                         </div>
                                                     </td>
-                                                    <td className="px-10 py-12">
-                                                        <div className="flex gap-4">
-                                                            <a href={`tel:${t.phone}`} className="size-14 bg-indigo-600 text-white rounded-2xl flex items-center justify-center hover:bg-white hover:text-indigo-600 transition-all shadow-xl active:scale-90">
+                                                    <td className="px-12 py-12">
+                                                        <div className="inline-flex items-center gap-3 px-5 py-2.5 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-xl">
+                                                            <BadgeCheck size={14} className="fill-emerald-500/20" />
+                                                            <span className="text-[10px] font-black uppercase tracking-widest italic leading-none">Established_Link</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-12 py-12">
+                                                        <div className="flex items-center gap-4">
+                                                            <a href={`tel:${t.phone}`} className="size-14 bg-blue-500 text-white rounded-2xl flex items-center justify-center hover:bg-white hover:text-blue-500 transition-all shadow-xl active:scale-95">
                                                                 <Phone size={20} strokeWidth={3} />
                                                             </a>
                                                             <button 
                                                                 onClick={async () => {
-                                                                    const res = await fetch("/api/chat/session", {
-                                                                        method: "POST",
-                                                                        headers: { "Content-Type": "application/json" },
-                                                                        body: JSON.stringify({ studentId, tutorId: t.id })
-                                                                    });
-                                                                    if (res.ok) {
-                                                                        await fetchChatSessions();
-                                                                        setActiveTab("CHAT");
-                                                                    }
+                                                                    setLoadingChat(true);
+                                                                    try {
+                                                                        const res = await fetch("/api/chat/session", {
+                                                                            method: "POST",
+                                                                            headers: { "Content-Type": "application/json" },
+                                                                            body: JSON.stringify({ 
+                                                                                studentId, 
+                                                                                tutorId: t.id,
+                                                                                initiatorId: studentId
+                                                                            })
+                                                                        });
+                                                                        if (res.ok) {
+                                                                            await fetchChatSessions();
+                                                                            setActiveTab("CHAT");
+                                                                        }
+                                                                    } catch (err) { console.error(err); } finally { setLoadingChat(false); }
                                                                 }}
-                                                                className="size-14 bg-white/5 border border-white/10 text-white rounded-2xl flex items-center justify-center hover:bg-white hover:text-black transition-all active:scale-90"
+                                                                className="size-14 bg-white/5 border border-white/10 text-white rounded-2xl flex items-center justify-center hover:bg-white hover:text-black transition-all active:scale-95"
                                                             >
-                                                                <MessageCircle size={20} strokeWidth={3} />
+                                                                {loadingChat ? <Loader2 className="animate-spin" size={20} /> : <MessageCircle size={20} className="font-black" strokeWidth={3} />}
                                                             </button>
                                                             <button 
                                                                 onClick={() => {
                                                                     setSelectedTutorForReview(t);
                                                                     setIsReviewOpen(true);
                                                                 }}
-                                                                className="size-14 bg-amber-500 text-white rounded-2xl flex items-center justify-center hover:bg-white hover:text-amber-500 transition-all shadow-xl active:scale-90"
+                                                                className="size-14 bg-amber-500 text-white rounded-2xl flex items-center justify-center hover:bg-white hover:text-amber-500 transition-all shadow-xl active:scale-95"
                                                             >
                                                                 <StarIcon size={20} strokeWidth={3} fill="currentColor" />
                                                             </button>
@@ -498,7 +518,12 @@ function StudentDashboardContent() {
                                                 </tr>
                                             )) : (
                                                 <tr>
-                                                    <td colSpan={3} className="px-10 py-32 text-center opacity-20 text-[10px] font-black uppercase tracking-[0.5em] italic">No secure links active in this directory.</td>
+                                                    <td colSpan={3} className="px-12 py-40 text-center">
+                                                        <div className="flex flex-col items-center justify-center opacity-20 italic font-black uppercase tracking-[0.4em] text-white">
+                                                            <div className="p-8 bg-white/5 rounded-full border border-white/10 mb-8"><Search size={48} strokeWidth={1} /></div>
+                                                            No verified nodes in secure directory.
+                                                        </div>
+                                                    </td>
                                                 </tr>
                                             )}
                                         </tbody>
