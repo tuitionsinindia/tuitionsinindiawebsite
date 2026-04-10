@@ -1,9 +1,12 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
-import Script from "next/script";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import DashboardHeader from "@/app/components/DashboardHeader";
+import FacultyChat from "@/app/components/chat/FacultyChat";
+import SettingsModule from "@/app/components/tutor/SettingsModule";
+import BillingModule from "@/app/components/tutor/BillingModule";
 import { 
     Building2, 
     LayoutDashboard, 
@@ -24,43 +27,47 @@ import {
     Award,
     BadgeCheck,
     Globe,
-    Target
+    Target,
+    MessageCircle,
+    Loader2,
+    LogOut,
+    Clock,
+    Settings,
+    UserPlus,
+    Activity,
+    Box
 } from "lucide-react";
 
 function InstituteDashboardContent() {
+    const router = useRouter();
     const searchParams = useSearchParams();
     const [instituteId, setInstituteId] = useState(searchParams.get("instituteId") || "");
     const [leads, setLeads] = useState([]);
+    const [recruitmentLeads, setRecruitmentLeads] = useState([]);
     const [courses, setCourses] = useState([]);
     const [ads, setAds] = useState([]);
     const [loading, setLoading] = useState(true);
     const [instituteData, setInstituteData] = useState(null);
-    const [stats, setStats] = useState(null);
-    const [activeTab, setActiveTab] = useState("leads"); // leads, courses, ads
+    const [activeTab, setActiveTab] = useState("leads"); // leads, recruitment, courses, ads, settings, billing, chat
+    
+    // Chat States
+    const [chatSessions, setChatSessions] = useState([]);
+    const [selectedSession, setSelectedSession] = useState(null);
+    const [loadingChat, setLoadingChat] = useState(false);
 
     // Course Form State
     const [showCourseForm, setShowCourseForm] = useState(false);
-    const [newCourse, setNewCourse] = useState({ title: "", description: "", duration: "", price: "", category: "Academic" });
 
     useEffect(() => {
         if (instituteId) {
             fetchInstituteData();
-            fetchStats();
+            fetchChatSessions();
             if (activeTab === "leads") fetchLeads();
+            if (activeTab === "recruitment") fetchRecruitmentLeads();
             if (activeTab === "courses") fetchCourses();
             if (activeTab === "ads") fetchAds();
         }
     }, [instituteId, activeTab]);
-
-    const fetchStats = async () => {
-        try {
-            const res = await fetch(`/api/tutor/stats?tutorId=${instituteId}`);
-            if (res.ok) {
-                const data = await res.json();
-                setStats(data);
-            }
-        } catch (err) { console.error(err); }
-    };
 
     const fetchLeads = async () => {
         setLoading(true);
@@ -68,6 +75,16 @@ function InstituteDashboardContent() {
             const res = await fetch(`/api/lead/list?tutorId=${instituteId}`);
             const data = await res.json();
             setLeads(data);
+        } catch (err) { console.error(err); } finally { setLoading(false); }
+    };
+
+    const fetchRecruitmentLeads = async () => {
+        setLoading(true);
+        try {
+            // Fetch tutors looking for work (role: TUTOR)
+            const res = await fetch(`/api/search?role=TUTOR`);
+            const data = await res.json();
+            setRecruitmentLeads(data.results || []);
         } catch (err) { console.error(err); } finally { setLoading(false); }
     };
 
@@ -96,27 +113,22 @@ function InstituteDashboardContent() {
                 const data = await res.json();
                 setInstituteData(data);
             }
-        } catch (err) { console.error(err); }
+        } catch (err) { console.error(err); } finally { setLoading(false); }
     };
 
-    const handleAddCourse = async (e) => {
-        e.preventDefault();
+    const fetchChatSessions = async () => {
+        setLoadingChat(true);
         try {
-            const res = await fetch("/api/institute/courses", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ ...newCourse, instituteId }),
-            });
+            const res = await fetch(`/api/chat/session?userId=${instituteId}`);
             if (res.ok) {
-                alert("Course added!");
-                setShowCourseForm(false);
-                fetchCourses();
+                const data = await res.json();
+                setChatSessions(data.sessions);
             }
-        } catch (err) { console.error(err); }
+        } catch (err) { console.error(err); } finally { setLoadingChat(false); }
     };
 
     const handleUnlock = async (leadId) => {
-        if (!confirm("Unlock this lead?")) return;
+        if (!confirm("UNLOCK_MANDATE: Spend 1 credit to synchronize with this student?")) return;
         try {
             const res = await fetch("/api/lead/unlock", {
                 method: "POST",
@@ -124,372 +136,296 @@ function InstituteDashboardContent() {
                 body: JSON.stringify({ leadId, tutorId: instituteId }),
             });
             if (res.ok) {
-                alert("Lead unlocked!");
                 fetchLeads();
                 fetchInstituteData();
             } else {
                 const err = await res.json();
-                alert(err.error || "Failed to unlock.");
-            }
-        } catch (err) { console.error(err); }
-    };
-
-
-    const handleKYCUpload = async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        
-        try {
-            const formData = new FormData();
-            formData.append("file", file);
-            formData.append("userId", instituteId);
-            formData.append("documentType", "GOVERNMENT_ID");
-
-            alert("Uploading document for verification...");
-
-            const res = await fetch("/api/kyc/upload", {
-                method: "POST",
-                body: formData,
-            });
-
-            if (res.ok) {
-                alert("Document verified successfully!");
-                fetchInstituteData(); // Refresh UI to show CLEAR status
-            } else {
-                alert("Failed to verify document.");
+                alert(err.error || "PROTOCOL_SYNC_FAILED");
             }
         } catch (err) { console.error(err); }
     };
 
     if (!instituteId) {
         return (
-            <div className="flex items-center justify-center min-h-screen bg-background-dark p-4 font-sans relative overflow-hidden">
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-[600px] bg-primary/10 rounded-full blur-[120px] -z-10 animate-pulse"></div>
+            <div className="flex items-center justify-center min-h-screen bg-background-dark p-4 font-sans relative overflow-hidden text-white italic">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-[600px] bg-indigo-500/10 rounded-full blur-[120px] -z-10 animate-pulse"></div>
                 <div className="bg-surface-dark/40 backdrop-blur-3xl p-10 rounded-[2.5rem] shadow-2xl border border-border-dark max-w-md w-full relative z-10 text-center">
                     <div className="size-20 rounded-3xl bg-indigo-500/10 flex items-center justify-center text-indigo-500 mx-auto mb-8 border border-indigo-500/20">
                         <Building2 size={40} strokeWidth={1.5} />
                     </div>
-                    <h2 className="text-3xl font-black text-white mb-3 tracking-tighter uppercase italic">Institutional Portal.</h2>
-                    <p className="text-on-surface-dark/40 mb-10 text-[11px] font-black uppercase tracking-widest leading-relaxed italic">Verification required to access the B2B academic command center.</p>
+                    <h2 className="text-3xl font-black mb-3 tracking-tighter uppercase">Institutional Portal.</h2>
+                    <p className="text-on-surface-dark/40 mb-10 text-[11px] font-black uppercase tracking-widest leading-relaxed italic">Verification required to access the academic command center.</p>
                     <input
                         type="text"
                         placeholder="ENTER INSTITUTE PROTOCOL ID"
-                        className="w-full bg-background-dark/50 border border-border-dark rounded-2xl p-5 text-white font-black text-xs uppercase tracking-widest focus:ring-2 focus:ring-indigo-500 outline-none transition-all placeholder:text-white/10 mb-6"
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                                setInstituteId(e.target.value);
-                            }
-                        }}
+                        className="w-full bg-background-dark/50 border border-border-dark rounded-2xl p-5 text-white font-black text-xs uppercase tracking-widest focus:ring-2 focus:ring-indigo-500 outline-none transition-all placeholder:text-white/10 mb-6 italic"
+                        onKeyDown={(e) => { if (e.key === 'Enter') setInstituteId(e.target.value); }}
                         id="instInput"
                     />
                     <button
-                        className="group w-full bg-indigo-600 text-white font-black py-5 rounded-2xl hover:bg-indigo-700 shadow-2xl shadow-indigo-500/20 transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-xs active:scale-95 leading-none"
-                        onClick={() => {
-                            const id = document.getElementById('instInput').value;
-                            setInstituteId(id);
-                        }}>
-                        AUTHORIZE ACCESS <ArrowRight size={16} strokeWidth={3} className="group-hover:translate-x-1 transition-transform" />
+                        className="w-full bg-indigo-600 text-white font-black py-5 rounded-2xl hover:bg-white hover:text-indigo-600 shadow-xl transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-xs active:scale-95 leading-none"
+                        onClick={() => setInstituteId(document.getElementById('instInput').value)}>
+                        AUTHORIZE ACCESS <ArrowRight size={16} strokeWidth={3} />
                     </button>
-                    <Link href="/" className="inline-block mt-8 text-[10px] font-black uppercase tracking-[0.3em] text-on-surface-dark/20 hover:text-indigo-500 transition-colors italic border-b border-transparent hover:border-indigo-500 pb-1">Bypass Terminal</Link>
+                    <Link href="/" className="inline-block mt-8 text-[10px] font-black uppercase tracking-[0.3em] text-white/20 hover:text-indigo-500 transition-colors italic">Bypass Terminal</Link>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="relative flex min-h-screen flex-col bg-background-dark font-sans text-on-background-dark antialiased selection:bg-indigo-500/20 selection:text-indigo-500">
-            <header className="sticky top-0 z-[60] w-full border-b border-border-dark bg-background-dark/80 backdrop-blur-2xl px-6 md:px-12 py-5 flex items-center justify-between">
-                <Link href="/" className="flex items-center gap-3 group">
-                    <div className="size-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-600/20 group-hover:scale-110 transition-transform">
-                        <Building2 size={20} strokeWidth={2.5} />
-                    </div>
-                    <div className="flex flex-col leading-none">
-                        <span className="text-xl font-black tracking-tighter text-white uppercase italic">tuitionsinindia</span>
-                        <span className="text-[10px] font-black text-indigo-500/40 tracking-[0.4em] uppercase">Institute Terminal</span>
-                    </div>
-                </Link>
-
-                <div className="flex items-center gap-4 md:gap-8">
-                    <div className="hidden sm:flex items-center gap-4 px-6 py-3 bg-surface-dark border border-border-dark rounded-2xl hover:border-indigo-500/30 transition-colors cursor-default group">
-                        <div className="text-right">
-                             <p className="text-[9px] font-black uppercase tracking-widest text-on-surface-dark/30 leading-none mb-1">Corporate Asset</p>
-                            <p className="text-sm font-black text-indigo-500 leading-none tracking-tighter uppercase italic">{instituteData?.subscriptionTier || "BASE"} <span className="opacity-40 not-italic">TIER</span></p>
-                        </div>
-                        <div className="size-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                            <Zap size={16} fill="currentColor" />
-                        </div>
-                    </div>
-
-                    <div className="flex items-center gap-4 pl-6 border-l border-border-dark">
-                        <div className="flex flex-col text-right hidden lg:block leading-none">
-                            <span className="text-[10px] font-black text-white uppercase tracking-widest">{instituteData?.name || "AUTHENTICATED_ENTITY"}</span>
-                            <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest mt-1 italic">Verified Partner</span>
-                        </div>
-                        <div className="size-12 rounded-2xl bg-gradient-to-tr from-indigo-600 to-blue-800 border border-white/10 shadow-2xl flex items-center justify-center text-white font-black text-lg italic tracking-tighter">
-                            {(instituteData?.name || "I")[0].toUpperCase()}
-                        </div>
-                    </div>
-                </div>
-            </header>
+        <div className="relative flex min-h-screen flex-col bg-background-dark font-sans text-on-background-dark antialiased selection:bg-indigo-500/30">
+            <DashboardHeader 
+                user={instituteData} 
+                role="INSTITUTE" 
+                credits={instituteData?.credits || 0} 
+                onLogout={() => router.push("/")}
+            />
 
             <div className="flex flex-1">
-                {/* Fixed B2B Sidebar */}
-                <aside className="fixed left-0 top-[85px] bottom-0 w-80 bg-surface-dark/20 backdrop-blur-3xl border-r border-border-dark p-10 hidden xl:flex flex-col">
-                    <div className="mb-12">
-                        <h4 className="text-[10px] font-black text-on-surface-dark/20 uppercase tracking-[0.4em] mb-8 italic">Management Controls</h4>
-                        <nav className="space-y-3">
-                            {[
-                                { id: "leads", icon: Target, label: "STUDENT LEADS" },
-                                { id: "courses", icon: BookOpen, label: "MY COURSES" },
-                                { id: "ads", icon: Megaphone, label: "ADS & PROMO" }
-                            ].map((item) => (
-                                <button 
-                                    key={item.id}
-                                    onClick={() => setActiveTab(item.id)}
-                                    className={`w-full flex items-center gap-4 px-6 py-5 rounded-2xl font-black text-[11px] tracking-widest transition-all group active:scale-95 leading-none italic border ${activeTab === item.id ? 'bg-indigo-600 text-white border-transparent shadow-xl shadow-indigo-600/20' : 'bg-transparent text-on-surface-dark/40 border-transparent hover:bg-surface-dark hover:text-indigo-500 hover:border-border-dark'}`}
-                                >
-                                    <item.icon size={18} strokeWidth={2.5} className={activeTab === item.id ? 'opacity-100' : 'opacity-40 group-hover:opacity-100'} />
-                                    {item.label}
-                                    {activeTab === item.id && <ArrowRight size={14} strokeWidth={3} className="ml-auto opacity-40 animate-pulse" />}
-                                </button>
-                            ))}
-                        </nav>
+                <aside className="fixed left-0 top-[85px] bottom-0 w-24 md:w-80 bg-surface-dark/20 backdrop-blur-3xl border-r border-border-dark flex flex-col items-center md:items-stretch py-8 px-4 md:px-10 z-50">
+                    <div className="mb-12 hidden md:block px-6">
+                        <h4 className="text-[10px] font-black text-on-surface-dark/20 uppercase tracking-[0.4em] mb-8 italic">Academy Command</h4>
                     </div>
 
-                    <div className="mt-auto p-10 rounded-[3rem] bg-surface-dark border border-border-dark text-on-surface-dark relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 size-32 bg-indigo-600/10 rounded-full -mr-16 -mt-16 blur-3xl group-hover:bg-indigo-600/20 transition-colors"></div>
-                        <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-500 mb-4 italic">B2B Inventory</h4>
-                        <p className="text-xl font-black text-white leading-none tracking-tighter italic mb-4">{instituteData?.credits || 0} <span className="text-[10px] not-italic opacity-20">POINTS</span></p>
-                        <p className="text-[9px] font-black text-on-surface-dark/30 leading-relaxed mb-8 uppercase tracking-widest">Acquire premium student mandates instantly.</p>
-                        <Link href={`/dashboard/subscription?tutorId=${instituteId}`} className="block w-full bg-white text-black py-4 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all shadow-xl active:scale-95 leading-none text-center">
-                            SCALE PROTOCOL
-                        </Link>
-                    </div>
+                    <nav className="space-y-4 w-full">
+                        {[
+                            { id: "leads", label: "ADMISSIONS_LEADS", icon: Target },
+                            { id: "recruitment", label: "FACULTY_RECRUIT", icon: UserPlus },
+                            { id: "chat", label: "MESSAGING_HUB", icon: MessageCircle },
+                            { id: "courses", label: "BATCH_MANAGER", icon: Box },
+                            { id: "ads", label: "CAMPAIGNS", icon: Megaphone },
+                            { id: "billing", label: "BILLING_LEDGER", icon: CreditCard },
+                            { id: "settings", label: "SYNC_SETTINGS", icon: Settings }
+                        ].map((item) => (
+                            <button
+                                key={item.id}
+                                onClick={() => setActiveTab(item.id)}
+                                className={`w-full flex items-center gap-4 px-4 md:px-6 py-4 rounded-2xl font-black text-[11px] tracking-widest transition-all group relative overflow-hidden ${
+                                    activeTab === item.id 
+                                    ? "bg-indigo-600 text-white shadow-xl shadow-indigo-600/20" 
+                                    : "text-on-surface-dark/40 hover:bg-surface-dark hover:text-indigo-500 border border-transparent hover:border-border-dark"
+                                }`}
+                            >
+                                <item.icon size={20} strokeWidth={2.5} className={activeTab === item.id ? "opacity-100 font-black" : "opacity-40"} />
+                                <span className="hidden md:block">{item.label}</span>
+                                {activeTab === item.id && <div className="absolute right-0 top-0 bottom-0 w-1.5 bg-white md:hidden"></div>}
+                            </button>
+                        ))}
+                    </nav>
+
+                    <button 
+                        onClick={() => router.push("/")}
+                        className="mt-auto flex items-center justify-center md:justify-start gap-4 px-6 md:px-6 py-4 text-red-500/40 hover:text-red-500 text-[10px] font-black uppercase tracking-[0.3em] transition-colors"
+                    >
+                        <LogOut size={16} strokeWidth={3} />
+                        <span className="hidden md:block">EXIT HUB</span>
+                    </button>
                 </aside>
 
-                {/* Institute Workspace */}
-                <main className="flex-1 xl:pl-80 p-6 md:p-12 lg:p-16">
+                <main className="flex-1 ml-24 md:ml-80 p-6 md:p-12 lg:p-16">
                     <div className="max-w-7xl mx-auto">
-                        {/* High-Impact Hero */}
-                        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-12 mb-24">
-                            <div className="max-w-2xl relative">
-                                <div className="absolute -left-12 top-0 text-[180px] font-black text-white/5 leading-none tracking-tighter italic select-none pointer-events-none uppercase">INST</div>
-                                <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500/5 rounded-full border border-indigo-500/10 mb-8 relative z-10">
-                                    <span className="size-2 rounded-full bg-indigo-500 animate-pulse"></span>
-                                    <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest italic">Protocol: Corporate Academic Suite</span>
+                        
+                        {(activeTab !== "chat" && activeTab !== "settings" && activeTab !== "billing") && (
+                            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-12 mb-24">
+                                <div className="max-w-2xl relative">
+                                    <div className="absolute -left-12 top-0 text-[180px] font-black text-white/5 leading-none tracking-tighter italic select-none pointer-events-none uppercase">HUB</div>
+                                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500/5 rounded-full border border-indigo-500/10 mb-8">
+                                        <Activity size={14} className="animate-pulse text-indigo-500" />
+                                        <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest italic tracking-[0.2em]">Institutional Command Active</span>
+                                    </div>
+                                    <h1 className="text-6xl md:text-8xl font-black tracking-tighter mb-8 uppercase italic leading-[0.85] text-white">
+                                        Strategic <br/><span className="text-indigo-500 underline decoration-indigo-500/20 decoration-8 underline-offset-8">Output.</span>
+                                    </h1>
+                                    <p className="text-xl text-on-surface-dark/60 font-medium leading-relaxed max-w-xl italic">
+                                        Monitoring <span className="text-white font-black italic">{instituteData?.name || "Corporate Hub"}</span>. {activeTab.toUpperCase()}_SCAN active.
+                                    </p>
                                 </div>
-                                <h1 className="text-6xl md:text-8xl font-black tracking-tighter mb-8 uppercase italic leading-[0.85] relative z-10 text-white">
-                                    Strategic <span className="text-indigo-500 underline decoration-indigo-500/20 decoration-8 underline-offset-8">Output.</span>
-                                </h1>
-                                <p className="text-xl text-on-surface-dark/60 font-medium leading-relaxed max-w-xl relative z-10">
-                                    Welcome back, <span className="text-white font-black italic">{instituteData?.name || "Managing Director"}</span>. Tracking assets for {activeTab === 'leads' ? 'Student Mandates' : activeTab === 'courses' ? 'Institutional Batches' : 'Market Presence'}.
-                                </p>
                             </div>
-                            {activeTab === 'courses' && (
-                                <div className="flex gap-4 relative z-10">
-                                    <button onClick={() => setShowCourseForm(true)} className="group relative flex items-center gap-4 px-12 py-6 bg-indigo-600 text-white rounded-[2rem] font-black text-[11px] tracking-widest shadow-2xl shadow-indigo-600/20 hover:scale-[1.05] transition-all active:scale-95 uppercase leading-none box-border">
-                                       <PlusCircle size={18} strokeWidth={3} />
-                                       PUBLISH BATCH
-                                    </button>
-                                </div>
-                            )}
-                        </div>
+                        )}
 
-                        {/* Verification & Trust Center (Embedded) */}
-                        <div className="mb-24 bg-surface-dark/40 backdrop-blur-xl rounded-[4rem] border border-border-dark p-12 shadow-2xl relative overflow-hidden group border-b-8 hover:border-indigo-500/30 transition-all duration-700">
-                             <div className="absolute top-0 right-0 p-12 opacity-[0.03] group-hover:opacity-[0.1] transition-all duration-1000 group-hover:scale-125 group-hover:rotate-6 text-white pointer-events-none">
-                                <ShieldCheck size={200} strokeWidth={1} />
-                            </div>
-                            <div className="relative z-10 max-w-3xl">
-                                <div className="flex items-center gap-3 text-indigo-500 mb-4 leading-none">
-                                    <BadgeCheck size={20} strokeWidth={2.5} />
-                                    <span className="text-[10px] font-black uppercase tracking-[0.4em] italic">Institutional Clearance Hub</span>
-                                </div>
-                                <h2 className="text-4xl font-black text-white mb-6 uppercase italic tracking-tighter">Verification <span className="text-indigo-500 not-italic font-serif font-light lowercase">Status.</span></h2>
-                                <p className="text-on-surface-dark/40 mb-12 font-medium text-sm italic uppercase tracking-widest leading-loose">"The academy rewards verified entities with higher discovery placement and premium lead affinity."</p>
+                        <div className="animate-in fade-in slide-in-from-bottom-8 duration-700">
+                            {activeTab === "settings" && <SettingsModule user={instituteData} onUpdate={fetchInstituteData} />}
+                            {activeTab === "billing" && <BillingModule user={instituteData} />}
 
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                    {[
-                                        { label: "Owner Phone", val: instituteData?.phone ? 'AUTHENTICATED' : 'SYNC_PENDING', verified: instituteData?.phone, icon: Phone },
-                                        { label: "Entity Profile", val: instituteData?.isIdVerified ? 'CLEARED' : 'UNVERIFIED', verified: instituteData?.isIdVerified, icon: Globe }
-                                    ].map((item, i) => (
-                                        <div key={i} className="bg-background-dark/80 p-8 rounded-[2.5rem] flex items-center justify-between border border-border-dark border-b-4 hover:bg-surface-dark transition-all group/item shadow-inner">
-                                            <div className="flex items-center gap-6">
-                                                <div className={`size-14 rounded-2xl flex items-center justify-center border border-border-dark shadow-2xl group-hover/item:scale-105 transition-transform ${item.verified ? 'bg-indigo-600 text-white' : 'bg-surface-dark text-on-surface-dark/20'}`}>
-                                                    <item.icon size={22} strokeWidth={2.5} />
+                            {activeTab === "chat" && (
+                                <div className="h-[75vh] grid grid-cols-1 lg:grid-cols-12 gap-10">
+                                    <div className="lg:col-span-4 bg-surface-dark/20 backdrop-blur-3xl rounded-[3rem] border border-border-dark overflow-hidden flex flex-col">
+                                        <div className="p-8 border-b border-border-dark flex items-center justify-between">
+                                            <h3 className="text-[10px] font-black text-white/40 uppercase tracking-[0.5em] italic">Secure Directory</h3>
+                                            <div className="size-8 rounded-lg bg-indigo-500/10 text-indigo-500 flex items-center justify-center font-black text-xs">{chatSessions.length}</div>
+                                        </div>
+                                        <div className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-hide">
+                                            {loadingChat ? (
+                                                <div className="flex flex-col items-center justify-center py-20 gap-4 opacity-20 italic font-black uppercase text-[10px] tracking-widest">
+                                                    <Loader2 className="animate-spin" size={24} />
+                                                    Syncing Nodes...
                                                 </div>
-                                                <div>
-                                                    <p className="text-[9px] font-black uppercase tracking-[0.3em] text-on-surface-dark/20 mb-1 leading-none">{item.label}</p>
-                                                    <p className={`text-sm font-black uppercase italic tracking-widest leading-none ${item.verified ? 'text-white' : 'text-amber-500/60'}`}>{item.val}</p>
-                                                </div>
-                                            </div>
-                                            {!item.verified && (
-                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-500 hover:text-white transition-colors flex items-center gap-2 cursor-pointer">
-                                                    INITIATE <ArrowRight size={10} strokeWidth={4} />
-                                                    <input type="file" className="hidden" onChange={handleKYCUpload} accept=".pdf,.jpg,.jpeg,.png" />
-                                                </label>
+                                            ) : chatSessions.length > 0 ? chatSessions.map((session) => {
+                                                const recipient = session.tutorId === instituteId ? session.student : session.tutor;
+                                                const isActive = selectedSession?.id === session.id;
+                                                return (
+                                                    <button
+                                                        key={session.id}
+                                                        onClick={() => setSelectedSession(session)}
+                                                        className={`w-full p-6 rounded-[2rem] flex items-center gap-4 transition-all border border-transparent hover:scale-[1.02] active:scale-95 group overflow-hidden relative ${
+                                                            isActive ? "bg-indigo-600 border-indigo-600 shadow-xl shadow-indigo-600/20 text-white" : "bg-white/5 hover:bg-white/10 text-white"
+                                                        }`}
+                                                    >
+                                                        <div className={`size-12 rounded-2xl flex items-center justify-center font-black text-lg italic shadow-xl transition-all ${isActive ? "bg-white text-indigo-600" : "bg-indigo-600 text-white"}`}>
+                                                            {recipient?.name?.[0] || "?"}
+                                                        </div>
+                                                        <div className="flex-1 text-left min-w-0">
+                                                            <p className="text-[10px] font-black uppercase tracking-tight truncate italic leading-none mb-2">{recipient?.name}</p>
+                                                            <p className={`text-[9px] font-medium tracking-wide truncate italic opacity-40 leading-none ${isActive ? "text-white" : "text-white/60"}`}>FACULTY SYNCHRONIZATION ACTIVE</p>
+                                                        </div>
+                                                    </button>
+                                                )
+                                            }) : (
+                                                <div className="py-20 text-center opacity-20 italic font-black uppercase tracking-[0.3em] text-[10px] px-10 text-white leading-relaxed">No scholarly nodes detected.</div>
                                             )}
                                         </div>
-                                    ))}
+                                    </div>
+                                    <div className="lg:col-span-8 overflow-hidden">
+                                        {selectedSession ? (
+                                            <FacultyChat 
+                                                sessionId={selectedSession.id} 
+                                                currentUser={{ id: instituteId, name: instituteData?.name }} 
+                                                recipientName={selectedSession.tutorId === instituteId ? selectedSession.student?.name : selectedSession.tutor?.name}
+                                            />
+                                        ) : (
+                                            <div className="h-full flex flex-col items-center justify-center space-y-8 bg-surface-dark/10 rounded-[4rem] border-4 border-dashed border-border-dark/50 p-20 text-center text-white italic">
+                                                <MessageCircle size={64} className="text-indigo-500/20" />
+                                                <h2 className="text-4xl font-black uppercase tracking-tighter">Secure <span className="text-indigo-500">Dialogue.</span></h2>
+                                                <p className="text-white/20 max-w-sm mx-auto font-black text-[10px] tracking-widest uppercase">Select an active neural link to initiate synchronization protocol.</p>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
+                            )}
 
-                        {/* Content Tab Area */}
-                        <div className="relative">
                             {activeTab === "leads" && (
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10 pb-24">
                                     {loading ? (
-                                        <div className="col-span-2 py-40 flex flex-col items-center justify-center opacity-50 bg-surface-dark/20 rounded-[4rem] border border-border-dark">
-                                            <div className="size-20 rounded-[2rem] border-[8px] border-indigo-500/5 border-t-indigo-500 animate-spin mb-10 shadow-2xl"></div>
-                                            <p className="font-black text-[12px] uppercase tracking-[0.6em] italic">Synthesizing Mandate Grid...</p>
+                                        <div className="col-span-2 py-40 flex flex-col items-center justify-center opacity-50 bg-surface-dark/20 rounded-[4rem] border border-border-dark text-white italic">
+                                            <Loader2 className="animate-spin mb-10" size={48} strokeWidth={3} />
+                                            <p className="font-black text-[12px] uppercase tracking-[0.6em] italic">Synthesizing Admission Demand Grid...</p>
                                         </div>
-                                    ) : leads.length > 0 ? (
-                                        leads.map((lead) => (
-                                            <div key={lead.id} className="group relative bg-surface-dark/40 backdrop-blur-md border border-border-dark rounded-[3.5rem] p-12 hover:shadow-[0_40px_100px_-20px_rgba(79,70,229,0.15)] hover:border-indigo-500/30 transition-all duration-700 overflow-hidden border-b-8 flex flex-col h-full">
-                                                <div className="relative z-10">
-                                                    <div className="flex justify-between items-center mb-10">
-                                                        <span className="px-6 py-2.5 bg-indigo-500/10 text-indigo-500 rounded-full text-[10px] font-black uppercase tracking-widest border border-indigo-500/20 leading-none italic">{lead.subject}</span>
-                                                        <div className="flex items-center gap-2 px-3 py-1 bg-background-dark/80 rounded-lg text-emerald-500/60 text-[9px] font-black uppercase tracking-widest leading-none border border-emerald-500/10">ACTIVE_DEMAND</div>
-                                                    </div>
-                                                    <h3 className="text-3xl font-black text-white mb-4 leading-[1.05] tracking-tighter uppercase italic group-hover:text-indigo-400 transition-colors">"{lead.description}"</h3>
-                                                    <div className="flex items-center gap-3 text-[10px] font-black text-on-surface-dark/40 uppercase tracking-widest mb-12 italic opacity-60">
-                                                        <Search size={14} className="text-indigo-500" strokeWidth={3} />
-                                                        LOCATION: {lead.location}
-                                                    </div>
-                                                    <button onClick={() => handleUnlock(lead.id)} className="w-full bg-indigo-600 text-white font-black py-8 rounded-[2.5rem] flex items-center justify-center gap-4 text-[12px] tracking-[0.4em] uppercase transition-all shadow-2xl shadow-indigo-600/20 active:scale-95 leading-none">
-                                                        <Lock size={18} strokeWidth={3} className="opacity-40" />
-                                                        ACQUIRE MANDATE
-                                                    </button>
+                                    ) : leads.length > 0 ? leads.map((lead) => (
+                                        <div key={lead.id} className="group relative bg-surface-dark/40 border border-border-dark rounded-[3.5rem] p-12 hover:border-indigo-500/30 transition-all duration-700 overflow-hidden border-b-8 flex flex-col text-white">
+                                            <div className="relative z-10">
+                                                <div className="flex justify-between items-center mb-10 italic">
+                                                    <span className="px-6 py-2.5 bg-indigo-500/10 text-indigo-500 rounded-xl text-[10px] font-black uppercase tracking-widest border border-indigo-500/20 leading-none">{lead.subjects?.[0] || 'ADMISSIONS'}</span>
+                                                    <div className="flex items-center gap-2 px-3 py-1 bg-background-dark/80 rounded-lg text-emerald-500/60 text-[9px] font-black uppercase tracking-widest leading-none border border-emerald-500/10 italic">ACTIVE_ENROLLMENT</div>
                                                 </div>
-                                                <div className="absolute -bottom-24 -right-24 size-80 bg-indigo-600/5 rounded-full blur-[120px] pointer-events-none group-hover:bg-indigo-600/10 transition-colors"></div>
+                                                <h3 className="text-4xl font-black text-white mb-10 leading-[1.05] tracking-tighter uppercase italic group-hover:text-indigo-400 transition-colors">"{lead.description}"</h3>
+                                                
+                                                {lead.isUnlocked ? (
+                                                    <div className="p-8 bg-background-dark/80 rounded-[2.5rem] border border-border-dark flex items-center gap-8 border-b-4 border-emerald-500/20 overflow-hidden">
+                                                        <div className="size-16 rounded-2xl bg-emerald-500 text-white flex items-center justify-center font-black text-2xl italic shadow-xl">{lead.student?.name?.[0]}</div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <h4 className="text-xl font-black uppercase italic text-white truncate">{lead.student?.name}</h4>
+                                                            <p className="text-[9px] font-black text-emerald-500/60 uppercase tracking-widest leading-none mt-1">SECURE_SYNC_LOCKED</p>
+                                                        </div>
+                                                        <button 
+                                                            onClick={async () => {
+                                                                const res = await fetch("/api/chat/session", {
+                                                                    method: "POST",
+                                                                    headers: { "Content-Type": "application/json" },
+                                                                    body: JSON.stringify({ studentId: lead.studentId, tutorId: instituteId })
+                                                                });
+                                                                if (res.ok) { await fetchChatSessions(); setActiveTab("chat"); }
+                                                            }}
+                                                            className="size-14 bg-emerald-500 text-white rounded-2xl flex items-center justify-center hover:bg-white hover:text-emerald-500 transition-all active:scale-95 shadow-xl"
+                                                        >
+                                                            <MessageCircle size={20} strokeWidth={3} />
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    <button onClick={() => handleUnlock(lead.id)} className="w-full bg-indigo-600 text-white font-black py-8 rounded-[2.5rem] flex items-center justify-center gap-4 text-[12px] tracking-[0.4em] uppercase transition-all shadow-2xl hover:bg-white hover:text-indigo-600 active:scale-95 leading-none italic">
+                                                        <Lock size={18} strokeWidth={3} className="opacity-40" />
+                                                        ENROLL STUDENT
+                                                    </button>
+                                                )}
                                             </div>
-                                        ))
-                                    ) : (
-                                        <div className="col-span-2 py-40 text-center bg-surface-dark/10 rounded-[5rem] border-4 border-dashed border-border-dark p-20 relative overflow-hidden group">
-                                            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                            <div className="size-32 rounded-[3.5rem] bg-surface-dark border border-border-dark shadow-2xl flex items-center justify-center mx-auto mb-10 group-hover:scale-110 group-hover:rotate-12 transition-all duration-700">
-                                                <Target size={48} className="opacity-10 text-white" strokeWidth={1} />
-                                            </div>
-                                            <p className="text-on-surface-dark/20 font-black uppercase tracking-[0.8em] italic">No active pipelines found</p>
                                         </div>
+                                    )) : (
+                                        <div className="col-span-2 py-40 text-center opacity-20 italic font-black uppercase tracking-[0.8em] text-white">Market Consensus: Zero Demand</div>
+                                    )}
+                                </div>
+                            )}
+
+                            {activeTab === "recruitment" && (
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-24">
+                                    {loading ? (
+                                        <div className="col-span-3 py-40 flex flex-col items-center justify-center opacity-50 italic text-white font-black uppercase tracking-[0.5em]">
+                                            <Loader2 size={48} className="animate-spin mb-6" />
+                                            Scanning Faculty Directory...
+                                        </div>
+                                    ) : recruitmentLeads.length > 0 ? recruitmentLeads.map((tutor) => (
+                                        <div key={tutor.id} className="bg-surface-dark/40 border border-border-dark rounded-[2.5rem] p-8 hover:border-indigo-500/30 transition-all flex flex-col gap-6 text-white group relative overflow-hidden">
+                                            <div className="flex items-center gap-6">
+                                                <div className="size-20 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-black text-3xl italic shadow-xl shadow-indigo-600/20">{tutor.tutor?.name?.[0]}</div>
+                                                <div className="flex-1 min-w-0">
+                                                    <h3 className="font-black uppercase italic tracking-tighter text-xl truncate group-hover:text-indigo-400">{tutor.tutor?.name}</h3>
+                                                    <div className="flex items-center gap-1.5 text-amber-500 text-[10px] font-black uppercase tracking-widest mt-1">
+                                                        <Award size={12} fill="currentColor" /> EXPERT_FACULTY
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="flex flex-wrap gap-2 py-4 border-y border-white/5 italic">
+                                                {tutor.subjects?.slice(0, 3).map(s => (
+                                                    <span key={s} className="px-3 py-1 bg-white/5 rounded-lg text-[8px] font-black uppercase tracking-widest text-white/40">{s}</span>
+                                                ))}
+                                            </div>
+                                            <button 
+                                                className="w-full py-5 bg-white text-indigo-600 rounded-2xl font-black text-[10px] tracking-widest uppercase hover:bg-indigo-600 hover:text-white transition-all active:scale-95 italic"
+                                                onClick={() => router.push(`/search/${tutor.id}`)}
+                                            >
+                                                RECRUIT_PROFILE
+                                            </button>
+                                        </div>
+                                    )) : (
+                                        <div className="col-span-3 py-40 text-center opacity-20 italic font-black uppercase tracking-[0.8em] text-white">Faculty Sync: 0 Active Tutors</div>
                                     )}
                                 </div>
                             )}
 
                             {activeTab === "courses" && (
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-24">
-                                    {courses.length > 0 ? (
-                                        courses.map(course => (
-                                            <div key={course.id} className="bg-surface-dark/40 backdrop-blur-md rounded-[3rem] border border-border-dark p-10 hover:shadow-2xl hover:border-indigo-500/30 transition-all duration-500 relative overflow-hidden group border-b-8">
-                                                <div className="flex justify-between items-start mb-10 relative z-10">
-                                                    <span className="px-5 py-2 bg-emerald-500/10 text-emerald-500 text-[10px] font-black rounded-full uppercase tracking-widest italic border border-emerald-500/20 leading-none">{course.category}</span>
-                                                    <p className="text-3xl font-black text-white italic tracking-tighter uppercase leading-none">₹{course.price}</p>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-10 pb-24">
+                                    {courses.length > 0 ? courses.map((course) => (
+                                        <div key={course.id} className="bg-surface-dark/40 border border-border-dark rounded-[3rem] p-10 flex flex-col gap-8 text-white group hover:border-indigo-500/20 transition-all">
+                                            <div className="flex justify-between items-start">
+                                                <div className="px-5 py-2 bg-indigo-500/10 text-indigo-500 rounded-xl text-[9px] font-black uppercase tracking-widest italic border border-indigo-500/10">{course.category}</div>
+                                                <div className="flex flex-col items-end">
+                                                    <span className="text-3xl font-black italic tracking-tighter text-white">₹{course.price}</span>
+                                                    <span className="text-[8px] font-black text-white/20 uppercase tracking-widest italic">PER_SEAT_INDEX</span>
                                                 </div>
-                                                <h4 className="font-black text-2xl text-white mb-3 uppercase italic tracking-tighter leading-tight group-hover:text-indigo-400 transition-colors">{course.title}</h4>
-                                                <p className="text-[10px] font-black text-on-surface-dark/40 mb-12 uppercase tracking-[0.2em] italic flex items-center gap-2">
-                                                    <Clock size={12} className="text-indigo-500" /> {course.duration}
-                                                </p>
-                                                <div className="flex gap-4 relative z-10">
-                                                    <button className="flex-1 py-5 bg-background-dark/80 border border-border-dark text-on-surface-dark/20 rounded-2xl text-[10px] font-black uppercase tracking-widest cursor-not-allowed leading-none italic">EDIT_LOCKED</button>
-                                                    <button className="size-16 bg-red-500/5 text-red-500 rounded-2xl flex items-center justify-center hover:bg-red-500 hover:text-white transition-all active:scale-95 border border-red-500/10">
-                                                        <Trash2 size={20} strokeWidth={2.5} />
-                                                    </button>
+                                            </div>
+                                            <h3 className="text-3xl font-black uppercase italic tracking-tighter group-hover:text-indigo-400 transition-all leading-none">{course.title}</h3>
+                                            <div className="grid grid-cols-2 gap-4 py-8 border-y border-white/5 italic">
+                                                <div>
+                                                    <p className="text-[8px] font-black text-white/20 uppercase tracking-widest mb-2 leading-none">Occupancy</p>
+                                                    <p className="font-black text-xs text-indigo-400 italic leading-none">{course.enrolledCount} / {course.maxSeats} SEATS</p>
                                                 </div>
-                                                 <div className="absolute -bottom-24 -right-24 size-64 bg-indigo-500/5 rounded-full blur-[80px] pointer-events-none transition-opacity opacity-0 group-hover:opacity-100"></div>
+                                                <div>
+                                                    <p className="text-[8px] font-black text-white/20 uppercase tracking-widest mb-2 leading-none">Status</p>
+                                                    <p className="font-black text-xs text-emerald-500 italic leading-none">{course.isActive ? 'OPERATIONAL' : 'DEACTIVATED'}</p>
+                                                </div>
                                             </div>
-                                        ))
-                                    ) : (
-                                        <div className="col-span-3 py-40 text-center bg-surface-dark/10 rounded-[5rem] border-4 border-dashed border-border-dark p-20 relative overflow-hidden group">
-                                             <div className="size-24 rounded-[2.5rem] bg-surface-dark border border-border-dark flex items-center justify-center mx-auto mb-10">
-                                                <BookOpen size={40} className="opacity-10 text-white" strokeWidth={1} />
-                                            </div>
-                                            <p className="text-on-surface-dark/20 font-black uppercase tracking-[0.6em] italic">Protocol Inventory Empty</p>
+                                        </div>
+                                    )) : (
+                                        <div className="col-span-2 py-40 flex flex-col items-center justify-center bg-white/5 rounded-[4rem] border border-dashed border-white/10 italic text-white/20">
+                                            <Box size={48} className="mb-6 opacity-20" />
+                                            <p className="font-black text-[10px] uppercase tracking-[0.5em]">Inventory Empty: Deploy Batches</p>
                                         </div>
                                     )}
-                                </div>
-                            )}
-
-                            {activeTab === "ads" && (
-                                <div className="max-w-4xl mx-auto py-24 text-center">
-                                    <div className="size-32 rounded-[3.5rem] bg-indigo-500/10 border border-indigo-500/20 text-indigo-500 flex items-center justify-center mx-auto mb-12 shadow-2xl relative group cursor-default">
-                                        <div className="absolute inset-0 bg-indigo-600/10 rounded-[3.5rem] animate-ping opacity-20"></div>
-                                        <Award size={48} className="relative z-10 transition-transform group-hover:scale-110" strokeWidth={1} />
-                                    </div>
-                                    <h2 className="text-5xl font-black mb-8 uppercase italic tracking-tighter text-white">Market <span className="text-indigo-500 not-italic font-serif font-light lowercase">Authority.</span></h2>
-                                    <p className="text-xl text-on-surface-dark/60 font-medium leading-relaxed mb-20 italic">"Accelerate institutional authority by placing Batches on the global homepage and prioritzer search matrices."</p>
-
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 text-left">
-                                        <div className="p-10 bg-surface-dark/40 backdrop-blur-xl border border-border-dark rounded-[3.5rem] hover:shadow-2xl transition-all duration-500 border-l-8 border-l-indigo-600 group">
-                                            <div className="size-16 rounded-2xl bg-indigo-600/5 border border-indigo-600/10 flex items-center justify-center mb-10 text-indigo-600 group-hover:scale-110 transition-transform">
-                                                <TrendingUp size={28} strokeWidth={2.5} />
-                                            </div>
-                                            <h4 className="text-2xl font-black text-white mb-4 uppercase italic tracking-tighter">Strategic Banner</h4>
-                                            <p className="text-[12px] font-black text-on-surface-dark/40 mb-10 uppercase tracking-widest leading-loose">Integrate your institution on the primary portal slider.</p>
-                                            <button className="flex items-center gap-4 text-indigo-500 font-black text-[10px] uppercase tracking-[0.3em] hover:text-white transition-colors">CONNECT_SALES <ArrowRight size={14} strokeWidth={3} /></button>
-                                        </div>
-                                        <div className="p-10 bg-surface-dark/40 backdrop-blur-xl border border-border-dark rounded-[3.5rem] hover:shadow-2xl transition-all duration-500 border-l-8 border-l-amber-500 group">
-                                            <div className="size-16 rounded-2xl bg-amber-500/5 border border-amber-500/10 flex items-center justify-center mb-10 text-amber-500 group-hover:scale-110 transition-transform">
-                                                <Target size={28} strokeWidth={2.5} />
-                                            </div>
-                                            <h4 className="text-2xl font-black text-white mb-4 uppercase italic tracking-tighter">Discovery Priority</h4>
-                                            <p className="text-[12px] font-black text-on-surface-dark/40 mb-10 uppercase tracking-widest leading-loose">Appear as the primary mandate match for city-wide subjects.</p>
-                                            <button className="flex items-center gap-4 text-amber-500 font-black text-[10px] uppercase tracking-[0.3em] hover:text-white transition-colors">CONNECT_SALES <ArrowRight size={14} strokeWidth={3} /></button>
-                                        </div>
-                                    </div>
                                 </div>
                             )}
                         </div>
                     </div>
                 </main>
             </div>
-
-            {/* Course Form Modal */}
-            {showCourseForm && (
-                <div className="fixed inset-0 z-[100] bg-background-dark/90 backdrop-blur-3xl flex items-center justify-center p-6">
-                    <div className="bg-surface-dark border border-border-dark rounded-[4rem] p-16 max-w-2xl w-full shadow-[0_0_150px_-20px_rgba(79,70,229,0.2)] relative overflow-hidden border-b-[12px] animate-in fade-in zoom-in duration-500">
-                         <div className="absolute top-0 right-0 p-12 opacity-[0.03] text-white pointer-events-none">
-                            <BookOpen size={180} strokeWidth={1} />
-                        </div>
-                        <button onClick={() => setShowCourseForm(false)} className="absolute right-12 top-12 text-on-surface-dark/20 hover:text-white transition-colors">
-                            <X size={32} strokeWidth={3} />
-                        </button>
-                        <div className="relative z-10">
-                            <div className="flex items-center gap-3 text-indigo-500 mb-4 leading-none">
-                                <PlusCircle size={20} strokeWidth={2.5} />
-                                <span className="text-[10px] font-black uppercase tracking-[0.4em] italic">Mandate Creation Protocol</span>
-                            </div>
-                            <h2 className="text-5xl font-black mb-12 uppercase italic tracking-tighter text-white leading-none">New <span className="text-indigo-500">Batch.</span></h2>
-                            <form onSubmit={handleAddCourse} className="space-y-10">
-                                <div>
-                                    <label className="text-[10px] font-black uppercase text-on-surface-dark/40 mb-3 block tracking-widest italic">Inventory Label (Title)</label>
-                                    <input required type="text" className="w-full bg-background-dark/50 border border-border-dark p-6 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 text-white font-black uppercase tracking-widest text-xs transition-all placeholder:text-white/5" placeholder="E.G., UPSC_FOUNDATION_2024" value={newCourse.title} onChange={e => setNewCourse({ ...newCourse, title: e.target.value })} />
-                                </div>
-                                <div className="grid grid-cols-2 gap-8">
-                                    <div>
-                                        <label className="text-[10px] font-black uppercase text-on-surface-dark/40 mb-3 block tracking-widest italic">Latency (Duration)</label>
-                                        <input required type="text" className="w-full bg-background-dark/50 border border-border-dark p-6 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 text-white font-black uppercase tracking-widest text-xs transition-all placeholder:text-white/5" placeholder="E.G., 6_MONTHS" value={newCourse.duration} onChange={e => setNewCourse({ ...newCourse, duration: e.target.value })} />
-                                    </div>
-                                    <div>
-                                        <label className="text-[10px] font-black uppercase text-on-surface-dark/40 mb-3 block tracking-widest italic">Value (INR)</label>
-                                        <input required type="number" className="w-full bg-background-dark/50 border border-border-dark p-6 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 text-white font-black uppercase tracking-widest text-xs transition-all placeholder:text-white/5" placeholder="E.G., 15000" value={newCourse.price} onChange={e => setNewCourse({ ...newCourse, price: e.target.value })} />
-                                    </div>
-                                </div>
-                                <div>
-                                    <label className="text-[10px] font-black uppercase text-on-surface-dark/40 mb-3 block tracking-widest italic">Vector Category</label>
-                                    <select className="w-full bg-background-dark/50 border border-border-dark p-6 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 text-white font-black uppercase tracking-[0.2em] text-[10px] transition-all appearance-none cursor-pointer" value={newCourse.category} onChange={e => setNewCourse({ ...newCourse, category: e.target.value })}>
-                                        <option className="bg-background-dark">ACADEMIC</option>
-                                        <option className="bg-background-dark">COMPETITIVE</option>
-                                        <option className="bg-background-dark">VOCATIONAL</option>
-                                        <option className="bg-background-dark">LANGUAGES</option>
-                                    </select>
-                                </div>
-                                <button type="submit" className="w-full bg-indigo-600 text-white font-black py-8 rounded-[2.5rem] shadow-2xl shadow-indigo-600/20 mt-6 uppercase tracking-[0.4em] text-[12px] italic hover:bg-white hover:text-indigo-600 transition-all active:scale-95 leading-none">EXECUTE_PUBLISH</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 }
@@ -497,16 +433,13 @@ function InstituteDashboardContent() {
 export default function InstituteDashboard() {
     return (
         <Suspense fallback={
-            <div className="flex items-center justify-center min-h-screen bg-background-dark font-sans overflow-hidden relative">
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-[400px] bg-indigo-600/10 rounded-full blur-[100px] animate-pulse"></div>
-                <div className="flex flex-col items-center relative z-10">
-                    <div className="size-24 bg-surface-dark border border-border-dark rounded-[2.5rem] flex items-center justify-center mb-10 shadow-2xl animate-spin-slow">
-                         <div className="size-12 bg-indigo-600/20 rounded-2xl flex items-center justify-center">
-                            <Building2 size={28} className="text-indigo-600 animate-pulse" />
-                         </div>
+            <div className="flex items-center justify-center min-h-screen bg-background-dark font-sans overflow-hidden text-indigo-500 italic">
+                 <div className="flex flex-col items-center gap-10">
+                    <div className="size-24 rounded-[3.5rem] bg-indigo-500/10 border-2 border-indigo-500/20 flex items-center justify-center animate-spin-slow shadow-[0_0_50px_rgba(79,70,229,0.2)]">
+                        <Building2 size={32} className="animate-pulse" strokeWidth={3} />
                     </div>
-                    <p className="font-black text-[12px] text-on-surface-dark/20 uppercase tracking-[0.6em] italic animate-pulse">Initializing Corporate Terminal...</p>
-                </div>
+                    <p className="text-[11px] font-black uppercase tracking-[0.8em] animate-pulse">Initializing Corporate Terminal...</p>
+                 </div>
             </div>
         }>
             <InstituteDashboardContent />

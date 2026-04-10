@@ -10,11 +10,46 @@ export async function GET(request) {
         const subject = searchParams.get("subject");
         const location = searchParams.get("location");
         const minBudget = searchParams.get("minBudget");
+        const showAll = searchParams.get("all") === "true";
 
-        const where = {
+        let where = {
             status: 'OPEN',
         };
 
+        // If tutorId is provided and we are NOT specifically asking for 'all', 
+        // we filter by tutor's preferred subjects/locations
+        if (tutorId && !showAll && !subject && !location) {
+            const tutorListing = await prisma.listing.findUnique({
+                where: { tutorId },
+                select: { subjects: true, locations: true, grades: true }
+            });
+
+            if (tutorListing) {
+                const orConditions = [];
+                
+                if (tutorListing.subjects && tutorListing.subjects.length > 0) {
+                    orConditions.push({
+                        subject: { in: tutorListing.subjects, mode: 'insensitive' }
+                    });
+                    // Also support fuzzy matching for subjects
+                    tutorListing.subjects.forEach(s => {
+                        orConditions.push({ subject: { contains: s, mode: 'insensitive' } });
+                    });
+                }
+
+                if (tutorListing.locations && tutorListing.locations.length > 0) {
+                    tutorListing.locations.forEach(l => {
+                        orConditions.push({ location: { contains: l, mode: 'insensitive' } });
+                    });
+                }
+
+                if (orConditions.length > 0) {
+                    where.OR = orConditions;
+                }
+            }
+        }
+
+        // Manual filters override intelligent matching or append to it
         if (subject) {
             where.subject = { contains: subject, mode: 'insensitive' };
         }
@@ -22,9 +57,6 @@ export async function GET(request) {
             where.location = { contains: location, mode: 'insensitive' };
         }
         if (minBudget) {
-            // Note: budget is currently a string in schema (e.g., "500/hr"). 
-            // For real filtering, it should be numeric. We'll do a simple contains for now
-            // or assume the user wants to see leads WITH a certain budget.
             where.budget = { contains: minBudget };
         }
 
@@ -49,7 +81,7 @@ export async function GET(request) {
             },
         });
 
-        // Sanitize leads: students' contact info should only be visible if unlockedBy contains the current tutor
+        // Sanitize leads
         const sanitizedLeads = leads.map(lead => {
             const isUnlocked = lead.unlockedBy.length > 0;
             return {

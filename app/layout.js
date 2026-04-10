@@ -54,6 +54,63 @@ export default function RootLayout({ children }) {
     <html lang="en" className={`${inter.variable} ${manrope.variable} scroll-smooth`}>
       <body className="bg-background-dark text-on-background-dark font-sans antialiased selection:bg-primary/30">
         <GoogleAnalytics />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              "name": "TuitionsInIndia",
+              "url": "https://tuitionsinindia.com",
+              "potentialAction": {
+                "@type": "SearchAction",
+                "target": "https://tuitionsinindia.com/search?q={search_term_string}",
+                "query-input": "required name=search_term_string"
+              }
+            })
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "LocalBusiness",
+              "name": "TuitionsInIndia",
+              "image": "https://tuitionsinindia.com/logo.png",
+              "@id": "https://tuitionsinindia.com",
+              "url": "https://tuitionsinindia.com",
+              "telephone": "+910000000000",
+              "address": {
+                "@type": "PostalAddress",
+                "streetAddress": "Academic Hub",
+                "addressLocality": "Mumbai",
+                "addressRegion": "MH",
+                "postalCode": "400001",
+                "addressCountry": "IN"
+              },
+              "geo": {
+                "@type": "GeoCoordinates",
+                "latitude": 19.0760,
+                "longitude": 72.8777
+              },
+              "openingHoursSpecification": {
+                "@type": "OpeningHoursSpecification",
+                "dayOfWeek": [
+                  "Monday",
+                  "Tuesday",
+                  "Wednesday",
+                  "Thursday",
+                  "Friday",
+                  "Saturday",
+                  "Sunday"
+                ],
+                "opens": "00:00",
+                "closes": "23:59"
+              }
+            })
+          }}
+        />
         <Header />
         <main className="flex-1 flex flex-col min-h-screen">
           {children}

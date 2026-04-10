@@ -15,6 +15,9 @@ model User {
   image              String?
   role               Role               @default(STUDENT)
   phone              String?            @unique
+  phoneVerified      Boolean            @default(false)
+  isProfileComplete  Boolean            @default(false)
+  privacySettings    Json?              @default("{\"showPhonePublicly\": true, \"preferredContact\": \"PHONE\"}")
   lat                Float?
   lng                Float?
   isVerified         Boolean            @default(false)
@@ -39,42 +42,59 @@ model User {
 }
 
 model Listing {
-  id          String   @id @default(cuid())
-  tutorId     String   @unique
-  title       String
-  bio         String
-  subjects    String[]
-  grades      String[]
-  locations   String[]
-  hourlyRate  Int?
-  rating      Float    @default(0)
-  reviewCount Int      @default(0)
-  viewCount   Int      @default(0)
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  tutor       User     @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+  id             String   @id @default(cuid())
+  tutorId        String   @unique
+  title          String
+  bio            String
+  subjects       String[]
+  grades         String[]
+  locations      String[]
+  hourlyRate     Int?
+  rating         Float    @default(0)
+  reviewCount    Int      @default(0)
+  viewCount      Int      @default(0)
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  boards         String[]
+  experience     Int?
+  gender         String?
+  teachingModes  String[]
+  timings        String[]
+  languages      String[]
+  expertiseLevel String?
+  type           ListingType @default(PRIVATE)
+  maxSeats       Int?        @default(1)
+  enrolledCount  Int         @default(0)
+  isInstitute    Boolean     @default(false)
+  tutor          User        @relation(fields: [tutorId], references: [id], onDelete: Cascade)
 }
 
 model Lead {
-  id          String       @id @default(cuid())
-  studentId   String
-  subject     String
-  grade       String?
-  location    String
-  lat         Float?
-  lng         Float?
-  budget      String?
-  description String
-  isPremium   Boolean      @default(false)
-  premiumTier Int          @default(0)
-  maxUnlocks  Int          @default(5)
-  unlockCount Int          @default(0)
-  status      LeadStatus   @default(OPEN)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  student     User         @relation("LeadCreator", fields: [studentId], references: [id], onDelete: Cascade)
-  unlockedBy  LeadUnlock[]
+  id               String       @id @default(cuid())
+  studentId        String
+  subjects         String[]
+  grades           String[]
+  locations        String[]
+  lat              Float?
+  lng              Float?
+  budget           Int?
+  budgetMax        Int?
+  modes            String[]
+  boards           String[]
+  timings          String[]
+  genderPreference String?
+  description      String
+  isPremium        Boolean      @default(false)
+  premiumTier      Int          @default(0)
+  maxUnlocks       Int          @default(5)
+  unlockCount      Int          @default(0)
+  status           LeadStatus   @default(OPEN)
+  type             LeadType     @default(ACADEMIC)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  student          User         @relation("LeadCreator", fields: [studentId], references: [id], onDelete: Cascade)
+  unlockedBy       LeadUnlock[]
 }
 
 model LeadUnlock {
@@ -107,6 +127,9 @@ model Course {
   duration    String
   price       Int
   category    String
+  timings     String[]
+  maxSeats    Int?     @default(20)
+  enrolledCount Int     @default(0)
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -202,4 +225,14 @@ enum TransactionStatus {
   PENDING
   SUCCESS
   FAILED
+}
+
+enum ListingType {
+  PRIVATE
+  GROUP
+}
+
+enum LeadType {
+  ACADEMIC
+  RECRUITMENT
 }

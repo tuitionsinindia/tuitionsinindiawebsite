@@ -22,7 +22,17 @@ export async function GET(request) {
                     select: {
                         tutor: {
                             select: {
-                                name: true
+                                id: true,
+                                name: true,
+                                phone: true,
+                                email: true,
+                                image: true,
+                                tutorListing: {
+                                    select: {
+                                        title: true,
+                                        subjects: true
+                                    }
+                                }
                             }
                         }
                     }

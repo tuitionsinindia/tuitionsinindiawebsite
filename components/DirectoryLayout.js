@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import MapComponent from "@/app/components/MapComponent";
+import MatchBadge from "@/app/components/MatchBadge";
 
 export default function DirectoryLayout({ tutors, subject, location, filters, title }) {
     const router = useRouter();
@@ -205,11 +206,22 @@ export default function DirectoryLayout({ tutors, subject, location, filters, ti
                                                 )}
                                             </div>
 
-                                            <div className="w-full space-y-2">
+                                            <div className="w-full space-y-4">
                                                 <div className="bg-slate-50/50 p-4 rounded-2xl border border-slate-100 text-center">
                                                     <div className="text-2xl font-bold text-slate-900">{tutor.hourlyRate}</div>
                                                     <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Per Hour fee</div>
                                                 </div>
+                                                
+                                                {/* Match Score UI */}
+                                                <div className="flex justify-center scale-90 -mt-2">
+                                                    <MatchBadge 
+                                                        score={tutor.matchScore} 
+                                                        label={tutor.matchLabel} 
+                                                        factors={tutor.matchFactors}
+                                                        showDetails={false} 
+                                                    />
+                                                </div>
+
                                                 <div className="flex items-center justify-center gap-1.5 p-2 bg-amber-50 rounded-xl">
                                                     <span className="material-symbols-outlined text-amber-500 text-sm">star</span>
                                                     <span className="font-bold text-amber-700 text-xs">{tutor.rating}</span>

@@ -1,5 +1,5 @@
-import prisma from "@/lib/prisma";
 import DirectoryLayout from "@/components/DirectoryLayout";
+import { calculateMatchScore } from "@/lib/matchEngine";
 
 export async function generateMetadata({ params }) {
     const { subject, city } = await params;
@@ -44,17 +44,33 @@ export default async function CitySubjectDirectory({ params }) {
         },
     });
 
-    const tutors = tutorsData.map(item => ({
-        id: item.id,
-        name: item.tutor.name || "Anonymous Tutor",
-        subjects: item.subjects,
-        location: item.locations[0] || "Online",
-        rating: item.rating,
-        reviews: item.reviewCount,
-        isVerified: item.tutor.isVerified,
-        hourlyRate: `₹${item.hourlyRate}`,
-        bio: item.bio,
-    }));
+    const tutors = tutorsData.map(item => {
+        const match = calculateMatchScore({ 
+            subjects: [decodedSubject], 
+            locations: [decodedCity] 
+        }, {
+            subjects: item.subjects,
+            locations: item.locations,
+            isVerified: item.tutor.isVerified,
+            grades: item.grades || [],
+            timings: item.timings || []
+        });
+
+        return {
+            id: item.id,
+            name: item.tutor.name || "Anonymous Tutor",
+            subjects: item.subjects,
+            location: item.locations[0] || "Online",
+            rating: item.rating,
+            reviews: item.reviewCount,
+            isVerified: item.tutor.isVerified,
+            hourlyRate: `₹${item.hourlyRate}`,
+            bio: item.bio,
+            matchScore: match.score,
+            matchLabel: match.label,
+            matchFactors: match.factors
+        };
+    });
 
     return <DirectoryLayout tutors={tutors} subject={decodedSubject} location={decodedCity} />;
 }

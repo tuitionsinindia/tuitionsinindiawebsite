@@ -1,168 +1,108 @@
+// prisma/seed_comprehensive.js
+
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-async function main() {
-    console.log("🌱 Creating Comprehensive Dummy Data...");
+const SUBJECTS_BY_CAT = {
+    "school_k5": ["English", "Maths", "EVS", "Science", "Hindi"],
+    "school_6_10": ["Maths", "Science", "Physics", "Chemistry", "Biology", "English", "Hindi", "Social Studies"],
+    "school_11_12_sci": ["Physics", "Chemistry", "Maths", "Biology", "Computer Science", "Psychology"],
+    "school_11_12_comm": ["Accountancy", "Economics", "Business Studies", "Maths (Applied)", "Statistics"],
+    "school_11_12_hum": ["History", "Geography", "Political Science", "Sociology", "Psychology"],
+    "college_uni": ["Engineering Maths", "Programming (C/C++)", "Financial Accounting", "B.Sc Physics"],
+    "exam_prep": ["IIT JEE Mains", "IIT JEE Advanced", "NEET", "CLAT", "CAT", "UPSC (GS/CSAT)", "Banking (IBPS/SBI)", "SSC CGL"],
+    "study_abroad": ["IELTS", "TOEFL", "GRE", "GMAT", "SAT"],
+    "languages": ["Spoken English", "French", "German", "Spanish", "Japanese", "Sanskrit"],
+    "it_coding": ["Python", "Java", "Web Development", "Data Science", "Machine Learning", "Digital Marketing"],
+    "hobbies_arts": ["Vocal Music (Hindustani)", "Guitar", "Piano", "Drawing", "Classical Dance", "Yoga"]
+};
 
-    // 0. Cleanup old dummy data to avoid unique constraint errors
-    console.log("🧹 Cleaning up old dummy data...");
+const CITY_COORDS = [
+    { name: "Mumbai", lat: 19.0760, lng: 72.8777 },
+    { name: "Delhi", lat: 28.6139, lng: 77.2090 },
+    { name: "Bangalore", lat: 12.9716, lng: 77.5946 },
+    { name: "Kolkata", lat: 22.5726, lng: 88.3639 },
+    { name: "Hyderabad", lat: 17.3850, lng: 78.4867 },
+    { name: "Chennai", lat: 13.0827, lng: 80.2707 },
+    { name: "Pune", lat: 18.5204, lng: 73.8567 },
+    { name: "Ahmedabad", lat: 23.0225, lng: 72.5714 },
+    { name: "Jaipur", lat: 26.9124, lng: 75.7873 },
+    { name: "Lucknow", lat: 26.8467, lng: 80.9462 }
+];
+
+const NAMES = [
+    "Rajesh Kumar", "Dr. Sarah Ahmed", "Anita Desai", "Michael Fernandes", "Vikram Singh",
+    "Priya Sharma", "Amit Patel", "Sneha Rao", "John Doe", "Aisha Khan",
+    "Rohan Gupta", "Deepika Padukone", "Suresh Raina", "Meera Nair", "Arjun Kapoor",
+    "Kavita Reddy", "Sanjay Dutt", "Nisha Verma", "Vivek Oberoi", "Sunita Williams",
+    "Manish Tiwari", "Anjali Menon", "Pradeep Joshi", "Neha Kakkar", "Rahul Dravid",
+    "Shreya Ghoshal", "Abhishek Bachchan", "Kriti Sanon", "Varun Dhawan", "Alia Bhatt",
+    "Ranbir Kapoor", "Shraddha Kapoor", "Kartik Aaryan", "Sara Ali Khan", "Ishaan Khatter",
+    "Janhvi Kapoor", "Ananya Panday", "Tiger Shroff", "Disha Patani", "Sushant Singh Rajput",
+    "Irfan Khan", "Rishi Kapoor", "Sridevi", "Amrish Puri", "Manoj Bajpayee",
+    "Naseeruddin Shah", "Om Puri", "Paresh Rawal", "Anupam Kher", "Boman Irani"
+];
+
+const GRADES = ["Primary (1-5)", "Middle (6-8)", "High School (9-10)", "Higher Secondary (11-12)", "Undergraduate", "Competitive Exams"];
+
+async function main() {
+    console.log("🌱 Creating 50+ Comprehensive Dummy Data...");
+
+    // 0. Cleanup
+    console.log("🧹 Cleaning up old '@example.com' users...");
     await prisma.user.deleteMany({
-        where: {
-            OR: [
-                { email: { contains: '@example.com' } },
-                { id: { startsWith: 'tut_' } },
-                { id: 'st_demo' }
-            ]
-        }
+        where: { email: { contains: '@example.com' } }
     });
 
-    // 1. Create Diverse Tutors
-    const tutorsData = [
-        {
-            id: 'tut_math_1',
-            name: 'Rajesh Kumar',
-            email: 'rajesh.math@example.com',
-            phone: '9876543210',
-            role: 'TUTOR',
-            lat: 19.0760, lng: 72.8777, // Mumbai
-            isVerified: true,
-            subscriptionTier: 'ELITE',
-            listing: {
-                title: 'Senior Mathematics Specialist',
-                bio: 'IIT Graduate with 15 years of experience in teaching Calculus and Algebra for JEE aspirants.',
-                subjects: ['Mathematics', 'Further Maths'],
-                grades: ['High School (9-10)', 'Higher Secondary (11-12)', 'Competitive Exams'],
-                locations: ['Mumbai', 'Online'],
-                hourlyRate: 1500,
-                rating: 4.9,
-                reviewCount: 42
-            }
-        },
-        {
-            id: 'tut_phys_1',
-            name: 'Dr. Sarah Ahmed',
-            email: 'sarah.phys@example.com',
-            phone: '9876543211',
-            role: 'TUTOR',
-            lat: 28.6139, lng: 77.2090, // Delhi
-            isVerified: true,
-            subscriptionTier: 'PRO',
-            listing: {
-                title: 'Physics Professor & Mentor',
-                bio: 'PhD in Astrophysics. I make complex Physics concepts simple for middle and high school students.',
-                subjects: ['Physics', 'Science'],
-                grades: ['Middle (6-8)', 'High School (9-10)', 'Higher Secondary (11-12)'],
-                locations: ['Delhi', 'Online'],
-                hourlyRate: 1200,
-                rating: 4.7,
-                reviewCount: 18
-            }
-        },
-        {
-            id: 'tut_coding_1',
-            name: 'Anita Desai',
-            email: 'anita.code@example.com',
-            phone: '9876543212',
-            role: 'TUTOR',
-            lat: 12.9716, lng: 77.5946, // Bangalore
-            isVerified: false,
-            subscriptionTier: 'FREE',
-            listing: {
-                title: 'Full Stack Web Developer & Coding Tutor',
-                bio: 'Expert in Python, JavaScript, and React. Teaching coding to kids and undergraduates.',
-                subjects: ['Coding', 'Computer Science'],
-                grades: ['Primary (1-5)', 'Middle (6-8)', 'Undergraduate'],
-                locations: ['Bangalore', 'Online'],
-                hourlyRate: 600,
-                rating: 4.5,
-                reviewCount: 12
-            }
-        },
-        {
-            id: 'tut_music_1',
-            name: 'Michael Fernandes',
-            email: 'michael.music@example.com',
-            phone: '9876543213',
-            role: 'TUTOR',
-            lat: 15.2993, lng: 74.1240, // Goa (Let's stick to major cities though)
-            lat: 19.0800, lng: 72.8800, // Near Mumbai
-            isVerified: true,
-            subscriptionTier: 'PRO',
-            listing: {
-                title: 'Professional Guitar & Music Theory Coach',
-                bio: 'Learn Guitar from basics to advanced. 8 years as a session musician.',
-                subjects: ['Music', 'Arts'],
-                grades: ['Primary (1-5)', 'Middle (6-8)', 'High School (9-10)', 'Other'],
-                locations: ['Mumbai'],
-                hourlyRate: 800,
-                rating: 4.8,
-                reviewCount: 30
-            }
-        },
-        {
-            id: 'tut_chem_1',
-            name: 'Vikram Singh',
-            email: 'vikram.chem@example.com',
-            phone: '9876543214',
-            role: 'TUTOR',
-            lat: 17.3850, lng: 78.4867, // Hyderabad
-            isVerified: true,
-            subscriptionTier: 'FREE',
-            listing: {
-                title: 'Chemistry Expert for NEET/AIPMT',
-                bio: 'Specializing in Organic and Inorganic Chemistry for medical entrance exams.',
-                subjects: ['Chemistry', 'Science'],
-                grades: ['Higher Secondary (11-12)', 'Competitive Exams'],
-                locations: ['Hyderabad', 'Online'],
-                hourlyRate: 2000,
-                rating: 4.6,
-                reviewCount: 22
-            }
-        }
-    ];
+    // 1. Generate Tutors/Students
+    for (let i = 0; i < 200; i++) {
+        const name = NAMES[i % NAMES.length];
+        const email = `test_user_${i}_${Date.now()}@example.com`;
+        const city = CITY_COORDS[i % CITY_COORDS.length];
+        const tier = i % 10 === 0 ? 'ELITE' : i % 5 === 0 ? 'PRO' : 'FREE';
+        
+        // Randomize location slightly around city center
+        const lat = city.lat + (Math.random() - 0.5) * 0.2;
+        const lng = city.lng + (Math.random() - 0.5) * 0.2;
 
-    for (const data of tutorsData) {
-        const { listing, ...userData } = data;
-        const user = await prisma.user.upsert({
-            where: { email: userData.email },
-            update: userData,
-            create: userData,
-        });
-
-        await prisma.listing.upsert({
-            where: { tutorId: user.id },
-            update: { ...listing, tutorId: user.id },
-            create: { ...listing, tutorId: user.id },
+        const catKeys = Object.keys(SUBJECTS_BY_CAT);
+        // Ensure even distribution of subjects
+        const randomCat = catKeys[i % catKeys.length];
+        const subjects = [SUBJECTS_BY_CAT[randomCat][Math.floor(Math.random() * SUBJECTS_BY_CAT[randomCat].length)]];
+        const role = i % 2 === 0 ? 'TUTOR' : 'STUDENT';
+        
+        const user = await prisma.user.create({
+            data: {
+                name,
+                email,
+                phone: `${i % 2 === 0 ? '9' : '8'}0000001${i.toString().padStart(2, '0')}`,
+                role: role,
+                lat,
+                lng,
+                isVerified: Math.random() > 0.3,
+                subscriptionTier: tier,
+                ...(role === 'TUTOR' ? {
+                    tutorListing: {
+                        create: {
+                            title: `${name} - ${subjects[0]} Specialist`,
+                            bio: `Professional educator with years of experience helping students excel in ${subjects[0]} and related areas.`,
+                            subjects,
+                            grades: [GRADES[Math.floor(Math.random() * GRADES.length)]],
+                            locations: [city.name, "Online"],
+                            hourlyRate: 300 + Math.floor(Math.random() * 1500),
+                            rating: parseFloat((4.0 + Math.random() * 1.0).toFixed(1)),
+                            reviewCount: Math.floor(Math.random() * 50),
+                            experience: 2 + Math.floor(Math.random() * 15),
+                            boards: ["CBSE", "ICSE", "State Board"],
+                            teachingModes: ["Online", "Home Tuition"]
+                        }
+                    }
+                } : {})
+            }
         });
     }
 
-    // 2. Create Diverse Student Leads
-    const leadsData = [
-        {
-            studentId: 'st_demo', // Using existing demo student if exists
-            subject: 'Mathematics',
-            grade: 'High School (9-10)',
-            location: 'Mumbai',
-            lat: 19.0760, lng: 72.8777,
-            budget: '5000/month',
-            description: 'Looking for a Math tutor for my daughter in 10th grade. Focus on Algebra.',
-            status: 'OPEN',
-            isPremium: true
-        },
-        {
-            studentId: 'st_demo',
-            subject: 'Physics',
-            grade: 'Higher Secondary (11-12)',
-            location: 'Delhi',
-            lat: 28.6139, lng: 77.2090,
-            budget: '1000/hour',
-            description: 'Need help with 12th Board Physics. Prefer evening sessions.',
-            status: 'OPEN',
-            isPremium: false
-        }
-    ];
-
-    // Ensure demo student exists
+    // 2. Ensuring the Demo Student exists
     await prisma.user.upsert({
         where: { email: 'demo_student@example.com' },
         update: {},
@@ -175,11 +115,7 @@ async function main() {
         },
     });
 
-    for (const lead of leadsData) {
-        await prisma.lead.create({ data: lead });
-    }
-
-    console.log("✅ Comprehensive Dummy Data seeded successfully!");
+    console.log("✅ 50 Dummy Profiles seeded successfully!");
 }
 
 main()

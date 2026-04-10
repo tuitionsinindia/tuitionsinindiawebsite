@@ -173,3 +173,25 @@ body {
 .smooth-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #cbd5e1;
 }
+
+/* Scroll Snapping Protocols */
+.snap-container {
+  @apply snap-y snap-mandatory h-screen overflow-y-auto scroll-smooth;
+}
+
+.snap-section {
+  @apply snap-start snap-always min-h-screen flex flex-col justify-center relative overflow-hidden;
+}
+
+/* Standardized Typography & Depth */
+.text-gradient-primary {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600;
+}
+
+.glass-card {
+  @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-xl;
+}
+
+.dark-glass-card {
+  @apply bg-gray-900/80 backdrop-blur-md border border-white/5 shadow-2xl;
+}

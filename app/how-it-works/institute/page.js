@@ -7,43 +7,44 @@ import {
     Users, 
     BarChart3, 
     ArrowRight,
-    Star,
-    Globe
+    Globe,
+    Zap,
+    Lock
 } from "lucide-react";
 
 export default function InstituteHowItWorks() {
     const steps = [
         {
-            step: "1",
+            step: "01",
             title: "Register Your Institute",
-            desc: "Create a detailed profile for your coaching centre, academy, or school. Add your subjects, branches, and team of tutors.",
+            desc: "Onboard your coaching centre or academy. Deploy a master profile highlighting your faculty strength, infrastructure, and subjects.",
             icon: Building2,
             color: "text-blue-600",
-            bg: "bg-blue-50"
+            bg: "bg-blue-50/50"
         },
         {
-            step: "2",
-            title: "Get Verified",
-            desc: "Submit your institution's registration certificate and address proof. Our team reviews it and grants the trusted 'Verified Institute' badge.",
+            step: "02",
+            title: "Institutional Audit",
+            desc: "Submit registration credentials for verification. Earn the trusted 'Verified Institute' seal for high-fidelity discovery.",
             icon: ShieldCheck,
-            color: "text-green-600",
-            bg: "bg-green-50"
+            color: "text-emerald-600",
+            bg: "bg-emerald-50/50"
         },
         {
-            step: "3",
-            title: "Attract Students",
-            desc: "Students and parents in your area will discover your institute when they search. Your verified listing ranks higher in local search results.",
-            icon: Users,
-            color: "text-purple-600",
-            bg: "bg-purple-50"
+            step: "03",
+            title: "Market Capture",
+            desc: "Appear at the top of local search hierarchies. Our engine prioritizes verified institutions for student distribution.",
+            icon: Globe,
+            color: "text-indigo-600",
+            bg: "bg-indigo-50/50"
         },
         {
-            step: "4",
-            title: "Manage & Grow",
-            desc: "Use your dashboard to manage enquiries, track profile views, and measure your online visibility. Scale your enrolments effortlessly.",
+            step: "04",
+            title: "Efficiency Analytics",
+            desc: "Monitor enquiry pipelines and profile performance. Scale your student intake with data-driven pedagogical insights.",
             icon: BarChart3,
             color: "text-blue-600",
-            bg: "bg-blue-50"
+            bg: "bg-blue-50/50"
         }
     ];
 
@@ -54,115 +55,124 @@ export default function InstituteHowItWorks() {
     ];
 
     return (
-        <div className="min-h-screen bg-gray-50 font-sans text-gray-900 antialiased pt-32 pb-24 selection:bg-blue-200">
+        <div className="snap-container bg-white text-gray-900 antialiased selection:bg-blue-200">
+            
             {/* Hero Section */}
-            <section className="px-6 relative text-center max-w-5xl mx-auto mb-24">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-blue-100/50 blur-[120px] rounded-full -z-10"></div>
+            <section className="snap-section px-6 relative text-center">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-sky-100/30 blur-[120px] rounded-full -z-10 animate-pulse"></div>
                 
-                <span className="bg-blue-100 text-blue-700 text-sm font-bold px-4 py-2 rounded-full uppercase tracking-wider mb-6 inline-block">
-                    For Coaching Centres & Academies
-                </span>
-                
-                <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-8">
-                    Fill Your Classrooms <br />
-                    <span className="text-blue-600">With Eager Students.</span>
-                </h1>
-                
-                <p className="text-xl text-gray-600 font-medium max-w-2xl mx-auto mb-10 leading-relaxed">
-                    List your institute on India's fastest-growing tuition marketplace. Let parents and students find you organically through verified search.
-                </p>
-                
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                    <Link href="/register/institute" className="px-8 py-4 bg-blue-600 text-white rounded-xl font-bold shadow-lg shadow-blue-600/30 hover:bg-blue-700 active:scale-95 transition-all flex items-center justify-center gap-2">
-                        Register Your Institute <ArrowRight size={18} />
-                    </Link>
-                </div>
-            </section>
-
-            {/* Core Workflow */}
-            <section className="max-w-6xl mx-auto px-6 mb-32">
-                <div className="text-center mb-16">
-                    <h2 className="text-3xl font-bold mb-4">How It Works</h2>
-                    <p className="text-gray-500 font-medium">Four simple steps to boost your institute's enrolments.</p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                    {steps.map((item, i) => (
-                        <div key={i} className="relative bg-white rounded-3xl p-8 border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex flex-col items-center text-center group">
-                            <div className="absolute -top-5 -left-5 w-12 h-12 bg-white rounded-2xl border border-gray-100 shadow-sm flex items-center justify-center font-black text-gray-900 text-xl z-10">
-                                {item.step}
-                            </div>
-                            
-                            <div className={`w-20 h-20 rounded-2xl ${item.bg} ${item.color} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
-                                <item.icon size={36} strokeWidth={2.5} />
-                            </div>
-                            
-                            <h3 className="text-xl font-bold mb-3">{item.title}</h3>
-                            <p className="text-sm font-medium text-gray-500 leading-relaxed">{item.desc}</p>
-                        </div>
-                    ))}
-                </div>
-            </section>
-
-            {/* Value Proposition */}
-            <section className="max-w-6xl mx-auto px-6 mb-32">
-                <div className="bg-white rounded-[3rem] p-10 md:p-16 border border-gray-200 flex flex-col lg:flex-row gap-16 items-center shadow-xl">
-                    <div className="lg:w-1/2 space-y-8">
-                        <h2 className="text-3xl md:text-4xl font-bold leading-tight">
-                            Why List Your <br />
-                            <span className="text-blue-600">Institute Here?</span>
-                        </h2>
-                        
-                        <p className="text-gray-600 font-medium text-lg leading-relaxed">
-                            Parents today search online before choosing a coaching centre. Make sure your academy shows up when they do.
-                        </p>
-
-                        <ul className="space-y-6">
-                            {[
-                                { title: "Local SEO Visibility", desc: "Appear in search results when parents search for coaching in your area.", icon: Globe },
-                                { title: "Verified Trust Badge", desc: "Gain parent confidence with our institutional verification seal.", icon: ShieldCheck },
-                                { title: "Student Reviews", desc: "Collect real reviews and ratings to build your online reputation.", icon: Star }
-                            ].map((feature, i) => (
-                                <li key={i} className="flex gap-4">
-                                    <div className="w-12 h-12 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center text-blue-600 shrink-0">
-                                        <feature.icon size={24} />
-                                    </div>
-                                    <div>
-                                        <p className="font-bold text-gray-900 text-lg">{feature.title}</p>
-                                        <p className="text-sm text-gray-500 font-medium">{feature.desc}</p>
-                                    </div>
-                                </li>
-                            ))}
-                        </ul>
+                <div className="max-w-4xl mx-auto">
+                    <div className="inline-flex items-center gap-3 px-4 py-2 bg-blue-50 rounded-full border border-blue-100 mb-8">
+                        <Users size={14} className="text-blue-600" />
+                        <span className="text-blue-700 text-[10px] font-black uppercase tracking-[0.3em]">Institutional Scaling Protocol</span>
                     </div>
                     
-                    {/* Visual Asset */}
-                    <div className="lg:w-1/2 relative w-full">
-                        <div className="aspect-square rounded-[3rem] overflow-hidden border border-gray-200 shadow-lg relative bg-gray-100 flex items-center justify-center">
-                            <Building2 size={120} className="text-blue-200 absolute" />
-                            <div className="w-full h-full bg-[url('https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=800&q=80')] bg-cover bg-center opacity-80 mix-blend-overlay"></div>
+                    <h1 className="text-5xl md:text-8xl font-black tracking-tighter mb-10 leading-[0.9] uppercase italic text-gray-900">
+                        Maximize <br />
+                        <span className="text-blue-600 font-serif lowercase tracking-normal not-italic px-4">enrolment</span> infrastructure.
+                    </h1>
+                    
+                    <p className="text-lg md:text-xl text-gray-500 font-medium max-w-2xl mx-auto mb-12 leading-relaxed italic">
+                        Deploy your academy's presence on India's most trusted academic directory. Fill your classrooms with precision-matched students.
+                    </p>
+                    
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                        <Link href="/register/institute" className="px-10 py-5 bg-blue-600 text-white rounded-2xl font-black shadow-2xl shadow-blue-600/30 hover:bg-black active:scale-95 transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-xs">
+                            Initialize Institute <ArrowRight size={20} />
+                        </Link>
+                    </div>
+                </div>
+                
+                <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce opacity-20">
+                    <div className="w-px h-12 bg-gray-400"></div>
+                </div>
+            </section>
+
+            {/* Steps - Procedural Layout */}
+            {steps.map((item, i) => (
+                <section key={i} className="snap-section px-6">
+                    <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
+                        <div className={i % 2 === 0 ? "lg:order-1" : "lg:order-2"}>
+                            <div className="flex items-center gap-4 mb-8">
+                                <div className="size-16 rounded-3xl bg-gray-900 text-white flex items-center justify-center font-black text-2xl shadow-xl">
+                                    {item.step}
+                                </div>
+                                <div className="h-px w-12 bg-gray-200"></div>
+                            </div>
+                            
+                            <h2 className="text-4xl md:text-6xl font-black text-gray-900 tracking-tighter uppercase italic mb-6 leading-none">
+                                {item.title.split(' ')[0]} <br />
+                                <span className="text-blue-600">{item.title.split(' ').slice(1).join(' ')}</span>
+                            </h2>
+                            
+                            <p className="text-xl text-gray-500 font-medium leading-relaxed mb-10 italic">
+                                {item.desc}
+                            </p>
                         </div>
+                        
+                        <div className={`relative ${i % 2 === 0 ? "lg:order-2" : "lg:order-1"}`}>
+                            <div className={`aspect-square rounded-[3rem] ${item.bg} flex items-center justify-center transition-transform hover:scale-105 duration-700 border-2 border-gray-50`}>
+                                <item.icon size={120} strokeWidth={1} className={item.color} />
+                            </div>
+                            <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-blue-50 blur-3xl opacity-30 rounded-full"></div>
+                        </div>
+                    </div>
+                </section>
+            ))}
+
+            {/* Scale Section */}
+            <section className="snap-section px-6">
+                <div className="max-w-5xl mx-auto bg-gray-900 rounded-[4rem] p-12 md:p-24 text-center relative overflow-hidden shadow-4xl text-white">
+                    <div className="absolute top-0 right-0 p-20 opacity-5 -z-10 rotate-12">
+                        <Building2 size={400} />
+                    </div>
+                    
+                    <h2 className="text-4xl md:text-7xl font-black tracking-tighter uppercase italic mb-10 leading-none">
+                        Global <span className="text-blue-500 font-serif lowercase tracking-normal not-italic px-4">reach</span> Local Presence.
+                    </h2>
+                    
+                    <p className="text-xl text-gray-400 font-medium mb-12 italic max-w-2xl mx-auto">
+                        We connect your physical branches with digital intent. Be the first choice for parents in your geographic and academic domain.
+                    </p>
+                    
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-8 text-left border-t border-white/10 pt-12">
+                        {[
+                            { label: "Market Dominance", val: "#1", sub: "Category Lead" },
+                            { label: "Branch Support", val: "Unlimited", sub: "Scalable Hubs" },
+                            { label: "Discovery Rate", val: "High", sub: "Verified Boost" }
+                        ].map((stat, i) => (
+                            <div key={i} className="space-y-1">
+                                <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">{stat.label}</p>
+                                <p className="text-3xl font-black text-white">{stat.val}</p>
+                                <p className="text-[10px] font-bold text-blue-500 italic uppercase">{stat.sub}</p>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </section>
 
-            {/* FAQ */}
-            <section className="max-w-3xl mx-auto px-6">
-                <div className="text-center mb-12">
-                    <h2 className="text-3xl font-bold mb-4">Frequently Asked Questions</h2>
+            {/* FAQ Area */}
+            <section className="snap-section px-6 bg-gray-50">
+                <div className="max-w-4xl mx-auto">
+                    <div className="text-center mb-16">
+                        <h2 className="text-4xl font-black tracking-tighter uppercase italic text-gray-900">Institutional <span className="text-blue-600">FAQ</span></h2>
+                    </div>
+                    
+                    <div className="grid gap-6">
+                        {faqs.map((faq, i) => (
+                            <div key={i} className="bg-white border border-gray-100 rounded-3xl p-8 shadow-sm group hover:shadow-xl transition-all hover:border-blue-100">
+                                <h3 className="font-black text-gray-900 text-xl mb-4 italic flex items-center gap-4">
+                                    <span className="text-blue-600 font-serif text-2xl lowercase">q.</span> {faq.q}
+                                </h3>
+                                <p className="text-gray-500 font-medium leading-relaxed pl-12 italic">
+                                    {faq.a}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
                 </div>
-                
-                <div className="space-y-4">
-                    {faqs.map((faq, i) => (
-                        <div key={i} className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-                            <h3 className="font-bold text-gray-900 text-lg mb-3 flex items-center gap-3">
-                                <span className="text-blue-600">Q.</span> {faq.q}
-                            </h3>
-                            <p className="text-gray-600 font-medium leading-relaxed pl-8">
-                                <span className="text-gray-400 font-bold mr-2">A.</span> {faq.a}
-                            </p>
-                        </div>
-                    ))}
+                <div className="mt-20 text-center flex items-center justify-center gap-2 text-[10px] font-black text-gray-300 uppercase tracking-[0.5em]">
+                    <Lock size={12} strokeWidth={3} /> Standard Security Protocols Active
                 </div>
             </section>
         </div>

@@ -1,8 +1,33 @@
 import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import ChatInitiator from "@/app/components/chat/ChatInitiator";
 
 export const dynamic = 'force-dynamic';
+
+export async function generateMetadata({ params }) {
+    const id = params.id;
+    const tutor = await prisma.user.findUnique({
+        where: { id },
+        include: { tutorListing: true }
+    });
+
+    if (!tutor) return { title: "Tutor Profile | TuitionsInIndia" };
+
+    const name = tutor.name || "Expert Faculty";
+    const subject = tutor.tutorListing?.subjects?.[0] || "Academics";
+    const location = tutor.tutorListing?.locations?.[0] || "India";
+
+    return {
+        title: `Best ${subject} Tutor in ${location} | ${name} | TuitionsInIndia`,
+        description: `Connect with ${name}, a premier ${subject} specialist in ${location}. View verified credentials, academic affinity scores, and pedagogical approach. Initiate secure scholarly synchronization today.`,
+        openGraph: {
+            title: `${name} - Professional ${subject} Educator`,
+            description: `Verify the Match Score for ${name} in ${location}. Strategic academic outcomes and high-fidelity tutoring.`,
+            images: [tutor.image || "/logo.png"]
+        }
+    };
+}
 
 export default async function TutorProfile({ params, searchParams }) {
     const id = params.id;
@@ -12,7 +37,15 @@ export default async function TutorProfile({ params, searchParams }) {
     const tutor = await prisma.user.findUnique({
         where: { id },
         include: {
-            tutorListing: true
+            tutorListing: true,
+            reviewsReceived: {
+                include: {
+                    author: {
+                        select: { name: true, image: true }
+                    }
+                },
+                orderBy: { createdAt: 'desc' }
+            }
         }
     });
 
@@ -78,13 +111,31 @@ export default async function TutorProfile({ params, searchParams }) {
                                     <span className="px-4 py-1.5 bg-primary/5 text-primary rounded-full text-[10px] font-black uppercase tracking-[0.2em] border border-primary/10">
                                         {tutor.subscriptionTier === 'ELITE' ? "ELITE PARTNER" : "VERIFIED EXPERT"}
                                     </span>
-                                    <div className="flex items-center gap-1.5 text-amber-500 font-black">
-                                        <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                                        <span className="text-xs uppercase tracking-tighter">{listing.rating > 0 ? listing.rating : "NEW"}</span>
+                                    <div className="flex items-center gap-1 text-amber-500 font-black">
+                                        {[...Array(5)].map((_, i) => (
+                                            <span 
+                                                key={i} 
+                                                className="material-symbols-outlined text-sm" 
+                                                style={{ fontVariationSettings: `'FILL' ${i < Math.floor(listing.rating || 4.5) ? 1 : 0}` }}
+                                            >
+                                                star
+                                            </span>
+                                        ))}
+                                        <span className="text-xs uppercase tracking-tighter ml-1">
+                                            {listing.rating > 0 ? listing.rating.toFixed(1) : "NEW"}
+                                        </span>
                                     </div>
                                 </div>
                                 <h1 className="text-6xl md:text-8xl font-headline font-black tracking-tighter mb-4 uppercase italic leading-[0.85]">
-                                    {tutor.name.split(' ')[0]} <br/> <span className="text-primary not-italic lowercase font-serif font-light">{tutor.name.split(' ').slice(1).join(' ')}</span>
+                                    {tutor.role === "INSTITUTE" 
+                                        ? "Premium Institute" 
+                                        : (tutor.name?.split(' ')[0] || "Expert")} 
+                                    <br/> 
+                                    <span className="text-primary not-italic lowercase font-serif font-light">
+                                        {tutor.role === "INSTITUTE" 
+                                            ? "Education Partner" 
+                                            : (tutor.name?.split(' ').slice(1).join(' ') || "Tutor")}
+                                    </span>
                                 </h1>
                                 <p className="text-2xl text-on-surface-variant font-medium max-w-xl leading-snug">
                                     {listing.title || `Specialist in ${listing.subjects?.[0] || 'Modern Education'}`}
@@ -164,6 +215,53 @@ export default async function TutorProfile({ params, searchParams }) {
                                     ))}
                                 </div>
                             </section>
+
+                            {/* Reputation Terminal */}
+                            <section id="reviews">
+                                <div className="flex items-center gap-6 mb-12">
+                                    <h2 className="text-4xl font-headline font-black uppercase italic tracking-tighter">Reputation <span className="text-primary not-italic lowercase font-serif font-light">terminal</span></h2>
+                                    <div className="flex-1 h-px bg-outline-variant/10"></div>
+                                </div>
+                                
+                                <div className="space-y-6">
+                                    {tutor.reviewsReceived?.length > 0 ? tutor.reviewsReceived.map((review, i) => (
+                                        <div key={review.id} className="p-10 rounded-[3rem] bg-surface-container-low/40 backdrop-blur-md border border-outline-variant/5 group hover:border-primary/20 transition-all duration-500 relative overflow-hidden">
+                                            <div className="flex flex-col md:flex-row justify-between gap-8 relative z-10">
+                                                <div className="flex gap-6">
+                                                    <div className="size-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-black text-xl italic shrink-0">
+                                                        {review.author?.name?.[0] || "S"}
+                                                    </div>
+                                                    <div>
+                                                        <div className="flex items-center gap-3 mb-2">
+                                                            <h4 className="font-bold text-lg uppercase italic tracking-tight">{review.author?.name || "STUDENT_VERIFIED"}</h4>
+                                                            <span className="text-[9px] font-black text-on-surface-variant/20 uppercase tracking-widest">• {new Date(review.createdAt).toLocaleDateString()}</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-1 text-amber-500 mb-6">
+                                                            {[...Array(5)].map((_, i) => (
+                                                                <span key={i} className="material-symbols-outlined text-xs" style={{ fontVariationSettings: `'FILL' ${i < review.rating ? 1 : 0}` }}>star</span>
+                                                            ))}
+                                                        </div>
+                                                        <p className="text-lg text-on-surface-variant leading-relaxed font-medium italic opacity-80">
+                                                            "{review.comment || "NO_COMMENT_LOGGED"}"
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div className="md:text-right shrink-0">
+                                                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/5 text-emerald-500 border border-emerald-500/10 text-[9px] font-black uppercase tracking-widest">
+                                                        <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                                        VERIFIED_FEEDBACK
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="absolute -bottom-6 -right-6 size-32 bg-primary/2 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                        </div>
+                                    )) : (
+                                        <div className="p-20 rounded-[4rem] border-4 border-dashed border-outline-variant/10 text-center">
+                                            <p className="text-on-surface-variant/20 italic font-black text-xs uppercase tracking-[0.4em]">Establishing Reputation Ledger...</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </section>
                         </div>
                     </div>
 
@@ -188,18 +286,27 @@ export default async function TutorProfile({ params, searchParams }) {
                                             href={`/post-requirement?tutorId=${id}`}
                                             className="w-full bg-primary text-on-primary py-8 rounded-[2rem] font-black text-[11px] tracking-[0.4em] uppercase shadow-2xl shadow-primary/30 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-4 group/btn"
                                         >
-                                            <span className="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">bolt</span>
-                                            REQUEST DEMO
+                                            <span className="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">lock_open</span>
+                                            Unlock Contact Details
                                         </Link>
 
                                         {canContactProactively ? (
-                                            <button className="w-full bg-surface-container-high py-6 rounded-[1.5rem] font-black text-[10px] tracking-widest uppercase flex items-center justify-center gap-3 hover:bg-primary hover:text-on-primary transition-all">
-                                                <span className="material-symbols-outlined text-lg">chat_bubble</span>
-                                                DIRECT MESSAGE
-                                            </button>
+                                            <ChatInitiator 
+                                                studentId={viewerId} 
+                                                tutorId={id} 
+                                                recipientRole="TUTOR" 
+                                                label="SECURE CHAT ACTIVE" 
+                                            />
+                                        ) : viewerId ? (
+                                            <ChatInitiator 
+                                                studentId={viewerId} 
+                                                tutorId={id} 
+                                                recipientRole="TUTOR" 
+                                                label="START SECURE DIALOGUE" 
+                                            />
                                         ) : (
                                             <Link 
-                                                href={`/dashboard/student?tutorId=${viewerId}`}
+                                                href={`/dashboard/student?tutorId=${id}`}
                                                 className="w-full bg-amber-50 text-amber-600 border border-amber-500/10 py-6 rounded-[1.5rem] font-black text-[10px] tracking-widest uppercase flex items-center justify-center gap-3 hover:bg-amber-100 transition-all text-center"
                                             >
                                                 <span className="material-symbols-outlined text-lg">workspace_premium</span>

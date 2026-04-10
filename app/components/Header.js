@@ -19,6 +19,7 @@ import {
     ShieldCheck,
     Zap
 } from "lucide-react";
+import Logo from "./Logo";
 
 export default function Header() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -42,6 +43,20 @@ export default function Header() {
     useEffect(() => {
         setMobileMenuOpen(false);
     }, [pathname]);
+
+    // Contextual Registration Helper
+    const getContextualRegisterLink = () => {
+        if (!pathname?.startsWith("/search")) return "/register";
+        
+        // On search page, try to detect role from URL
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            const role = params.get("role")?.toUpperCase();
+            if (role === "STUDENT") return "/register/tutor";
+            if (role === "TUTOR" || role === "INSTITUTE") return "/register/student";
+        }
+        return "/register";
+    };
 
     if (!isMounted) return null;
 
@@ -77,19 +92,7 @@ export default function Header() {
         >
             <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
                 {/* Brand Identity */}
-                <Link href="/" className="flex items-center gap-2 group relative z-10 hover:opacity-90 transition-opacity">
-                    <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
-                        <Zap size={20} className="text-white fill-white" />
-                    </div>
-                    <div className="flex flex-col">
-                        <span className={`text-xl font-bold tracking-tight leading-none ${scrolled ? 'text-gray-900' : 'text-white'}`}>
-                            TuitionsInIndia
-                        </span>
-                        <span className={`text-[10px] font-bold uppercase tracking-widest mt-1 ${scrolled ? 'text-blue-600' : 'text-blue-300'}`}>
-                            Marketplace
-                        </span>
-                    </div>
-                </Link>
+                <Logo light={!scrolled} />
 
                 {/* Desktop Navigation */}
                 <nav className="hidden lg:flex items-center gap-8">
@@ -154,7 +157,7 @@ export default function Header() {
                         Log In
                     </Link>
                     <Link
-                        href="/register"
+                        href={getContextualRegisterLink()}
                         className={`px-5 py-2.5 font-bold text-sm rounded-xl transition-all shadow-md active:scale-95 ${scrolled ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-white text-blue-700 hover:bg-blue-50'}`}
                     >
                         Sign Up
@@ -180,8 +183,7 @@ export default function Header() {
                 <div className={`absolute top-0 right-0 h-full w-full max-w-sm bg-white shadow-2xl transition-transform duration-300 flex flex-col ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
                     <div className="p-6 flex items-center justify-between border-b border-gray-100">
                         <div className="flex items-center gap-2">
-                            <Zap size={20} className="text-blue-600 fill-blue-600" />
-                            <span className="text-lg font-bold text-gray-900">Menu</span>
+                            <Logo className="scale-75 origin-left" />
                         </div>
                         <button 
                             onClick={() => setMobileMenuOpen(false)} 
@@ -233,7 +235,7 @@ export default function Header() {
                         <Link href="/login" className="flex items-center justify-center gap-2 w-full py-4 rounded-xl font-bold text-sm bg-gray-100 text-gray-900 border border-transparent hover:bg-gray-200 transition-colors">
                             Log In
                         </Link>
-                        <Link href="/register" className="flex items-center justify-center gap-2 w-full py-4 rounded-xl font-bold text-sm bg-blue-600 text-white shadow-md hover:bg-blue-700 transition-colors">
+                        <Link href={getContextualRegisterLink()} className="flex items-center justify-center gap-2 w-full py-4 rounded-xl font-bold text-sm bg-blue-600 text-white shadow-md hover:bg-blue-700 transition-colors">
                             Sign Up
                         </Link>
                     </div>

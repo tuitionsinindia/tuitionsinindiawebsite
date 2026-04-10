@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { calculateMatchScore } from "@/lib/matchEngine";
 
 export async function GET(request) {
     const { searchParams } = new URL(request.url);
@@ -7,29 +8,49 @@ export async function GET(request) {
     const location = searchParams.get("location");
     const grade = searchParams.get("grade");
     const minRate = parseInt(searchParams.get("minRate")) || 0;
-    const maxRate = parseInt(searchParams.get("maxRate")) || 10000;
-    const sortBy = searchParams.get("sortBy") || "relevance"; // relevance, price_low, price_high, rating, distance
-    const isVerified = searchParams.get("verified") === "true";
+    const maxRate = parseInt(searchParams.get("maxRate")) || 100000;
+    const sortBy = searchParams.get("sortBy") || "relevance";
     
     const lat = parseFloat(searchParams.get("lat"));
     const lng = parseFloat(searchParams.get("lng"));
-    const radius = parseFloat(searchParams.get("radius") || "50"); // Default 50km
+    const radius = parseFloat(searchParams.get("radius") || "50");
 
     const role = (searchParams.get("role") || "TUTOR").toUpperCase();
+    const gender = searchParams.get("gender");
+    const experience = parseInt(searchParams.get("experience")) || 0;
+    const teachingMode = searchParams.get("teachingMode");
+    const board = searchParams.get("board");
+    const timing = searchParams.get("timing");
 
     try {
         if (role === "STUDENT") {
             let where = { status: 'OPEN' }; 
-            if (subject) where.subject = { contains: subject, mode: "insensitive" };
-            if (location && !lat) where.location = { contains: location, mode: "insensitive" };
-            if (grade) where.grade = { contains: grade, mode: "insensitive" };
+            
+            // Array-based intersection logic for Leads (Students)
+            if (subject) {
+                where.subjects = { hasSome: [subject, subject.toUpperCase(), subject.toLowerCase(), "Maths", "Mathematics"] };
+            }
+            if (grade) {
+                where.grades = { hasSome: [grade, grade.toUpperCase()] };
+            }
+            if (location && !lat) {
+                where.locations = { hasSome: [location, location.toUpperCase()] };
+            }
+            if (board) {
+                where.boards = { hasSome: [board] };
+            }
+            if (timing) {
+                where.timings = { hasSome: [timing] };
+            }
+            if (gender) {
+                where.genderPreference = { in: [gender, "ANY"] };
+            }
 
             let leads = await prisma.lead.findMany({
                 where,
                 include: { student: true },
                 orderBy: [
                     { isPremium: 'desc' },
-                    { premiumTier: 'desc' },
                     { createdAt: 'desc' }
                 ],
                 take: 100
@@ -43,69 +64,87 @@ export async function GET(request) {
                 .filter(l => l.distance <= radius);
             }
 
-            // Sorting for leads
-            leads.sort((a, b) => {
-                if (sortBy === "distance" && lat && lng) return a.distance - b.distance;
-                if (a.isPremium !== b.isPremium) return b.isPremium ? 1 : -1;
-                return new Date(b.createdAt) - new Date(a.createdAt);
-            });
+            return NextResponse.json(leads.map(l => {
+                const searchCriterion = { 
+                    subjects: subject ? [subject] : [], 
+                    grades: grade ? [grade] : [], 
+                    locations: location ? [location] : [],
+                    lat, lng
+                };
+                const match = calculateMatchScore(searchCriterion, { 
+                    subjects: l.subjects, 
+                    grades: l.grades, 
+                    locations: l.locations, 
+                    lat: l.lat, lng: l.lng 
+                });
 
-            return NextResponse.json(leads.map(l => ({
-                id: l.id,
-                name: "Student Requirement",
-                subject: l.subject,
-                grade: l.grade,
-                location: l.location,
-                distance: l.distance,
-                rate: l.budget,
-                bio: l.description,
-                isPremium: l.isPremium,
-                premiumTier: l.premiumTier,
-                createdAt: l.createdAt
-            })));
+                return {
+                    id: l.id,
+                    name: "Student Requirement",
+                    subjects: l.subjects,
+                    grades: l.grades,
+                    locations: l.locations,
+                    distance: l.distance,
+                    rate: l.budget,
+                    bio: l.description,
+                    isPremium: l.isPremium,
+                    createdAt: l.createdAt,
+                    matchScore: match.score,
+                    matchLabel: match.label,
+                    matchFactors: match.factors
+                };
+            }));
         }
 
-        // TUTOR SEARCH
+        // TUTOR / INSTITUTE SEARCH
         let where = { 
-            role: "TUTOR",
+            role: { in: role === "INSTITUTE" ? ["INSTITUTE"] : ["TUTOR", "INSTITUTE"] },
             tutorListing: {
-                is: {
-                    isActive: true,
-                    hourlyRate: { gte: minRate, lte: maxRate }
-                }
+                isActive: true,
+                hourlyRate: { gte: minRate, lte: maxRate }
             }
         };
 
-        if (isVerified) where.isVerified = true;
-
         if (subject) {
-            const normalizedSubject = subject.charAt(0).toUpperCase() + subject.slice(1).toLowerCase();
-            where.tutorListing.is.subjects = {
-                hasSome: [subject, normalizedSubject, subject.toUpperCase(), subject.toLowerCase()]
+            where.tutorListing.subjects = {
+                hasSome: [subject, subject.toUpperCase(), subject.toLowerCase(), "Maths", "Mathematics"]
             };
         }
 
         if (grade) {
-            where.tutorListing.is.grades = {
-                hasSome: [grade]
-            };
+            where.tutorListing.grades = { hasSome: [grade, grade.toUpperCase()] };
         }
 
         if (location && !lat) {
-            where.tutorListing.is.locations = {
-                has: location
-            };
+            where.tutorListing.locations = { hasSome: [location, location.toUpperCase()] };
+        }
+
+        if (gender) {
+            where.tutorListing.gender = gender;
+        }
+
+        if (experience) {
+            where.tutorListing.experience = { gte: experience };
+        }
+
+        if (teachingMode) {
+            where.tutorListing.teachingModes = { hasSome: [teachingMode] };
+        }
+
+        if (board) {
+            where.tutorListing.boards = { hasSome: [board] };
+        }
+
+        if (timing) {
+            where.tutorListing.timings = { hasSome: [timing] };
         }
 
         let tutors = await prisma.user.findMany({
             where,
-            include: {
-                tutorListing: true
-            },
+            include: { tutorListing: true },
             take: 100
         });
 
-        // Map and sort with safety checks
         tutors = tutors
             .map(tutor => {
                 const distance = (tutor.lat && tutor.lng) ? calculateDistance(lat, lng, tutor.lat, tutor.lng) : 9999;
@@ -117,79 +156,69 @@ export async function GET(request) {
             if (sortBy === "price_low") return (a.tutorListing?.hourlyRate || 0) - (b.tutorListing?.hourlyRate || 0);
             if (sortBy === "price_high") return (b.tutorListing?.hourlyRate || 0) - (a.tutorListing?.hourlyRate || 0);
             if (sortBy === "distance" && lat && lng) return a.distance - b.distance;
-            if (sortBy === "rating") return (b.tutorListing?.rating || 0) - (a.tutorListing?.rating || 0);
-
-            // Default: relevance (Tier > Verification > Proximity)
+            
+            // Relevance Score (Subscription > Verified > Newest)
             const tierScore = { 'ELITE': 3, 'PRO': 2, 'FREE': 1 };
-            const aScore = tierScore[a.subscriptionTier] || 0;
-            const bScore = tierScore[b.subscriptionTier] || 0;
+            const aScore = (tierScore[a.subscriptionTier] || 0) + (a.isVerified ? 1 : 0);
+            const bScore = (tierScore[b.subscriptionTier] || 0) + (b.isVerified ? 1 : 0);
 
             if (aScore !== bScore) return bScore - aScore;
-            if (a.isVerified !== b.isVerified) return b.isVerified ? 1 : -1;
-            if (lat && lng) return a.distance - b.distance;
-
             return new Date(b.createdAt) - new Date(a.createdAt);
         });
 
-        // FINAL MAPPING WITH EXTREME SAFETY
         return NextResponse.json(tutors.map(t => {
-            try {
-                return {
-                    id: t.id,
-                    name: t.name || "Anonymous User",
-                    image: t.image,
-                    location: t.location || "Location not specified",
-                    distance: t.distance,
-                    grade: t.tutorListing?.grades?.[0] || "General", 
-                    grades: t.tutorListing?.grades || [],
-                    subject: t.tutorListing?.subjects?.[0] || "Expert Tutor",
-                    subjects: t.tutorListing?.subjects || [],
-                    rate: t.tutorListing?.hourlyRate || 0,
-                    bio: t.tutorListing?.bio || "No bio available.",
-                    isInstitute: t.role === "INSTITUTE",
-                    isVerified: t.isVerified || false,
-                    subscriptionTier: t.subscriptionTier || 'FREE',
-                    rating: t.tutorListing?.rating || 0,
-                    reviewCount: t.tutorListing?.reviewCount || 0
-                };
-            } catch (cardErr) {
-                console.error("Error mapping tutor card:", cardErr);
-                return null;
-            }
-        }).filter(Boolean));
+            const searchCriterion = { 
+                subjects: subject ? [subject] : [], 
+                grades: grade ? [grade] : [], 
+                locations: location ? [location] : [],
+                lat, lng,
+                timings: timing ? [timing] : [],
+                boards: board ? [board] : []
+            };
+            const match = calculateMatchScore(searchCriterion, { 
+                subjects: t.tutorListing?.subjects || [], 
+                grades: t.tutorListing?.grades || [], 
+                locations: t.tutorListing?.locations || [], 
+                lat: t.lat, lng: t.lng,
+                timings: t.tutorListing?.timings || [],
+                boards: t.tutorListing?.boards || [],
+                isVerified: t.isVerified,
+                subscriptionTier: t.subscriptionTier
+            });
+
+            return {
+                id: t.id,
+                name: t.name || (t.role === "INSTITUTE" ? "Institute Member" : "Anonymous Expert"),
+                image: t.image,
+                location: t.tutorListing?.locations?.[0] || "Multiple Locations",
+                distance: t.distance,
+                subjects: t.tutorListing?.subjects || [],
+                grades: t.tutorListing?.grades || [],
+                rate: t.tutorListing?.hourlyRate || 0,
+                bio: t.tutorListing?.bio || "Professional Educator",
+                isInstitute: t.role === "INSTITUTE",
+                isVerified: t.isVerified || false,
+                subscriptionTier: t.subscriptionTier || 'FREE',
+                rating: t.tutorListing?.rating || 0,
+                experience: t.tutorListing?.experience || 0,
+                gender: t.tutorListing?.gender,
+                teachingModes: t.tutorListing?.teachingModes || [],
+                timings: t.tutorListing?.timings || [],
+                boards: t.tutorListing?.boards || [],
+                matchScore: match.score,
+                matchLabel: match.label,
+                matchFactors: match.factors
+            };
+        }));
+
     } catch (err) {
         console.error("SEARCH_API_ERROR:", err);
-        
-        const errorMessage = err.message || "";
-        
-        // Specifically check for Prisma Proxy 'fetch failed'
-        if (errorMessage.includes("fetch failed") || errorMessage.includes("Cannot fetch data from service")) {
-            return NextResponse.json({ 
-                error: "Database service unreachable.",
-                details: "Your local Prisma Postgres proxy is not running. Please run 'npx prisma dev' and keep it open.",
-                action: "npx prisma dev"
-            }, { status: 503 });
-        }
-
-        // Specifically check if 'grades' column is missing
-        if (errorMessage.includes('column "grades" does not exist')) {
-            return NextResponse.json({ 
-                error: "Database schema out of sync.",
-                details: "The 'grades' column is missing. Please run 'npx prisma db push'.",
-                action: "npx prisma db push"
-            }, { status: 500 });
-        }
-
-        return NextResponse.json({ 
-            error: "Search failed", 
-            details: errorMessage 
-        }, { status: 500 });
+        return NextResponse.json({ error: "Search failed", details: err.message }, { status: 500 });
     }
 }
 
-// Haversine formula
 function calculateDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371; // Earth radius in km
+    const R = 6371; 
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
     const a =

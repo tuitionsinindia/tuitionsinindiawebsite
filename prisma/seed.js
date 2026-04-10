@@ -19,9 +19,9 @@ async function main() {
             role: "TUTOR",
             isVerified: true,
             listing: {
-                title: "Expert Mathematics & Physics Tutor",
-                bio: "15+ years experience teaching CBSE and ICSE Mathematics. Ex-HOD at top Mumbai school.",
-                subjects: ["Mathematics", "Physics"],
+                title: "Expert Maths & Physics Tutor",
+                bio: "15+ years experience teaching CBSE and ICSE Maths. Ex-HOD at top Mumbai school.",
+                subjects: ["Maths", "Physics"],
                 locations: ["Mumbai", "Online"],
                 hourlyRate: 800,
                 rating: 4.9,
@@ -97,7 +97,7 @@ async function main() {
     const lead = await prisma.lead.create({
         data: {
             studentId: student.id,
-            subject: "Mathematics",
+            subject: "Maths",
             location: "Mumbai",
             budget: "₹500-₹800/hr",
             description: "Need help with Class 12 Calculus and Trigonometry for Board Exams.",

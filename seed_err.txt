@@ -1,0 +1,81 @@
+🌱 Creating 50+ Comprehensive Dummy Data...
+🧹 Cleaning up old '@example.com' users...
+PrismaClientValidationError: 
+Invalid `prisma.user.create()` invocation in
+/Users/abhishekjohn/Documents/Business/tuitionsinindia.com/Tuitions in india Website/prisma/seed_comprehensive.js:65:40
+
+  62 const randomCat = catKeys[Math.floor(Math.random() * catKeys.length)];
+  63 const subjects = [SUBJECTS_BY_CAT[randomCat][Math.floor(Math.random() * SUBJECTS_BY_CAT[randomCat].length)]];
+  64 
+→ 65 const user = await prisma.user.create({
+       data: {
+         name: "Rajesh Kumar",
+         email: "test_user_0@example.com",
+         phone: "9000000100",
+         role: "TUTOR",
+         lat: 19.051638517322782,
+         lng: 72.89140829559976,
+         isVerified: false,
+         subscriptionTier: "ELITE",
+         listing: {
+         ~~~~~~~
+           create: {
+             title: "Rajesh Kumar - CAT Specialist",
+             bio: "Professional educator with years of experience helping students excel in CAT and related areas.",
+             subjects: [
+               "CAT"
+             ],
+             grades: [
+               "High School (9-10)"
+             ],
+             locations: [
+               "Mumbai",
+               "Online"
+             ],
+             hourlyRate: 1118,
+             rating: 4.9216773639840925,
+             reviewCount: 7,
+             experience: 12,
+             boards: [
+               "CBSE",
+               "ICSE",
+               "State Board"
+             ],
+             teachingModes: [
+               "Online",
+               "Home Tuition"
+             ]
+           }
+         },
+     ?   id?: String,
+     ?   emailVerified?: DateTime | Null,
+     ?   image?: String | Null,
+     ?   isIdVerified?: Boolean,
+     ?   credits?: Int,
+     ?   subscriptionStatus?: SubscriptionStatus,
+     ?   subscriptionId?: String | Null,
+     ?   createdAt?: DateTime,
+     ?   updatedAt?: DateTime,
+     ?   ads?: AdSlotCreateNestedManyWithoutUserInput,
+     ?   studentChats?: ChatSessionCreateNestedManyWithoutStudentInput,
+     ?   tutorChats?: ChatSessionCreateNestedManyWithoutTutorInput,
+     ?   courses?: CourseCreateNestedManyWithoutInstituteInput,
+     ?   leadsPosted?: LeadCreateNestedManyWithoutStudentInput,
+     ?   leadsUnlocked?: LeadUnlockCreateNestedManyWithoutTutorInput,
+     ?   tutorListing?: ListingCreateNestedOneWithoutTutorInput,
+     ?   messagesSent?: MessageCreateNestedManyWithoutSenderInput,
+     ?   reviewsGiven?: ReviewCreateNestedManyWithoutAuthorInput,
+     ?   reviewsReceived?: ReviewCreateNestedManyWithoutTargetInput,
+     ?   transactions?: TransactionCreateNestedManyWithoutUserInput
+       }
+     })
+
+Unknown argument `listing`. Available options are marked with ?.
+    at Nn (/Users/abhishekjohn/Documents/Business/tuitionsinindia.com/Tuitions in india Website/node_modules/@prisma/client/runtime/library.js:29:1363)
+    at ei.handleRequestError (/Users/abhishekjohn/Documents/Business/tuitionsinindia.com/Tuitions in india Website/node_modules/@prisma/client/runtime/library.js:121:6911)
+    at ei.handleAndLogRequestError (/Users/abhishekjohn/Documents/Business/tuitionsinindia.com/Tuitions in india Website/node_modules/@prisma/client/runtime/library.js:121:6593)
+    at ei.request (/Users/abhishekjohn/Documents/Business/tuitionsinindia.com/Tuitions in india Website/node_modules/@prisma/client/runtime/library.js:121:6300)
+    at async a (/Users/abhishekjohn/Documents/Business/tuitionsinindia.com/Tuitions in india Website/node_modules/@prisma/client/runtime/library.js:130:9551)
+    at async main (/Users/abhishekjohn/Documents/Business/tuitionsinindia.com/Tuitions in india Website/prisma/seed_comprehensive.js:65:22) {
+  clientVersion: '6.19.3'
+}

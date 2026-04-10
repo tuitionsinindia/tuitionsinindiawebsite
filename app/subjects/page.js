@@ -20,21 +20,21 @@ import {
 
 const GRADE_SUBJECT_MAPPING = {
     "Primary (1-5)": [
-        "Mathematics", "EVS (Science)", "English", "Hindi", "Moral Science", 
+        "Maths", "EVS (Science)", "English", "Hindi", "Moral Science", 
         "Arts & Craft", "Vocal Music", "Abacus", "Vedic Maths"
     ],
     "Middle (6-8)": [
-        "Mathematics", "Physics", "Chemistry", "Biology", "History", "Geography", 
+        "Maths", "Physics", "Chemistry", "Biology", "History", "Geography", 
         "Civics", "English", "Hindi", "French", "German", "Computer Science", 
         "Coding", "Music", "Dance", "Yoga"
     ],
     "High School (9-10)": [
-        "Mathematics", "Physics", "Chemistry", "Biology", "History", "Geography", 
+        "Maths", "Physics", "Chemistry", "Biology", "History", "Geography", 
         "Economics", "Civics", "English", "Hindi", "Sanskrit", "Computer Applications", 
         "Spanish", "German", "French"
     ],
     "Higher Secondary (11-12)": [
-        "Mathematics", "Physics", "Chemistry", "Biology", "Economics", "Accountancy", 
+        "Maths", "Physics", "Chemistry", "Biology", "Economics", "Accountancy", 
         "Business Studies", "History", "Psychology", "Sociology", "Political Science", 
         "Computer Science", "Informatics Practices", "English Core"
     ],

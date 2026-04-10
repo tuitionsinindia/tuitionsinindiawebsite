@@ -6,60 +6,85 @@ export const dynamic = 'force-dynamic';
 export async function POST(request) {
     try {
         const body = await request.json();
-        const { tutorId, name, phone, title, bio, subjects, locations, hourlyRate, grades } = body;
+        const { 
+            userId, 
+            tutorId, 
+            name, 
+            phone, 
+            title, 
+            bio, 
+            subjects, 
+            locations, 
+            hourlyRate, 
+            grades, 
+            isInstitute, 
+            instituteName, 
+            contactPerson, 
+            experience,
+            teachingModes,
+            timings,
+            boards,
+            languages,
+            expertiseLevel,
+            gender
+        } = body;
 
-        if (!tutorId) {
-            return NextResponse.json({ success: false, error: "Missing Tutor ID" }, { status: 400 });
+        const targetId = userId || tutorId;
+
+        if (!targetId) {
+            return NextResponse.json({ success: false, error: "Missing Target ID" }, { status: 400 });
         }
 
         // 1. Update User basic info
         await prisma.user.update({
-            where: { id: tutorId },
+            where: { id: targetId },
             data: {
-                name,
-                phone
+                name: contactPerson || name || undefined,
+                phone,
+                isProfileComplete: true
             }
         });
 
-        // 2. Process comma separated lists (if they are strings)
-        const subjectList = Array.isArray(subjects) ? subjects : subjects?.split(',').map(s => s.trim()).filter(s => s !== "") || [];
-        const locationList = Array.isArray(locations) ? locations : locations?.split(',').map(l => l.trim()).filter(l => l !== "") || [];
-        const gradeList = Array.isArray(grades) ? grades : grades?.split(',').map(g => g.trim()).filter(g => g !== "") || [];
+        // 2. Normalize inputs to arrays
+        const subjectList = Array.isArray(subjects) ? subjects : subjects?.split(',').map(s => s.trim().toUpperCase()).filter(Boolean) || [];
+        const locationList = Array.isArray(locations) ? locations : locations?.split(',').map(l => l.trim().toUpperCase()).filter(Boolean) || [];
+        const gradeList = Array.isArray(grades) ? grades : grades?.split(',').map(g => g.trim().toUpperCase()).filter(Boolean) || [];
+        const boardList = Array.isArray(boards) ? boards : boards?.split(',').map(b => b.trim().toUpperCase()).filter(Boolean) || [];
+        const timingList = Array.isArray(timings) ? timings : timings?.split(',').map(t => t.trim()).filter(Boolean) || [];
+        const languageList = Array.isArray(languages) ? languages : languages?.split(',').map(l => l.trim().toUpperCase()).filter(Boolean) || [];
 
-        // 3. Update or Create Listing
+        // 3. Prepare Listing Data
+        const finalTitle = isInstitute ? `INSTITUTE: ${instituteName || title}` : (title || "PROFESSIONAL TUTOR");
+
         const listingData = {
-            title: title || "Professional Tutor",
+            title: finalTitle,
             bio: bio || "",
             subjects: subjectList,
             grades: gradeList,
             locations: locationList,
             hourlyRate: parseInt(hourlyRate) || 0,
+            experience: parseInt(experience) || 0,
+            teachingModes: teachingModes || ["ONLINE"],
+            timings: timingList,
+            boards: boardList,
+            languages: languageList,
+            expertiseLevel,
+            gender
         };
 
-        const existingListing = await prisma.listing.findUnique({
-            where: { tutorId }
+        // 4. Upsert Listing
+        await prisma.listing.upsert({
+            where: { tutorId: targetId },
+            update: listingData,
+            create: {
+                tutorId: targetId,
+                ...listingData
+            }
         });
 
-        if (existingListing) {
-            await prisma.listing.update({
-                where: { tutorId },
-                data: listingData
-            });
-        } else {
-            await prisma.listing.create({
-                data: {
-                    tutorId,
-                    ...listingData
-                }
-            });
-        }
-
-        return NextResponse.json({ success: true, message: "Profile updated successfully" });
+        return NextResponse.json({ success: true, message: "Faculty Terminal Configured Successfully" });
     } catch (error) {
-        console.error("Error updating profile:", error);
-        return NextResponse.json(
-            { success: false, error: error.message || "Failed to update profile" },
-            { status: 500 }
-        );
+        console.error("Profile Update Error:", error);
+        return NextResponse.json({ success: false, error: error.message }, { status: 500 });
     }
 }
