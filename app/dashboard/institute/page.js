@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import DashboardHeader from "@/app/components/DashboardHeader";
 import FacultyChat from "@/app/components/chat/FacultyChat";
-import SettingsModule from "@/app/components/tutor/SettingsModule";
+import SettingsModule from "@/app/components/dashboard/SettingsModule";
 import BillingModule from "@/app/components/dashboard/BillingModule";
 import { 
     Building2, 
