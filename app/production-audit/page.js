@@ -14,9 +14,18 @@ import {
     Target,
     Loader2,
     CheckCircle2,
-    Users
+    Users,
+    Search,
+    BadgeCheck,
+    Phone,
+    MessageCircle,
+    Star
 } from "lucide-react";
 
+/**
+ * Production Audit Hub & Mission Control
+ * Definitively verify Matching (v3.1) and Messaging Protocols on the live server.
+ */
 export default function ProductionAuditHub() {
     const [phase, setPhase] = useState(0); // 0: Ready, 1: Free Seeded, 2: Pro Upgraded
     const [loading, setLoading] = useState(false);
@@ -35,7 +44,7 @@ export default function ProductionAuditHub() {
             const res = await fetch(`/api/admin/audit-seed?phase=${p}&key=academy_audit_2026`);
             const data = await res.json();
             
-            if (!res.ok) throw new Error(data.error || "U_AUTH_FAIL");
+            if (!res.ok) throw new Error(data.error || "UNAUTHORIZED_ACCESS");
 
             addLog(data.message, 'success');
             if (p === 1) {
@@ -55,105 +64,104 @@ export default function ProductionAuditHub() {
     };
 
     return (
-        <div className="min-h-screen bg-background-dark p-8 md:p-24 font-sans text-white">
-            <div className="max-w-6xl mx-auto space-y-12">
+        <div className="min-h-screen bg-[#050505] p-6 md:p-20 font-sans text-white selection:bg-blue-500/30">
+            <div className="max-w-6xl mx-auto space-y-10">
                 
-                {/* Header */}
-                <div className="flex flex-col md:flex-row justify-between items-end gap-12 border-b-2 border-border-dark pb-16">
-                    <div className="space-y-6">
-                        <div className="flex items-center gap-4">
-                            <div className="px-4 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded-full flex items-center gap-3">
-                                <Globe size={12} className="text-blue-500 animate-pulse" />
-                                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-500 italic">Production Node Sync</span>
-                            </div>
+                {/* Header Section */}
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-10 border-b border-white/10 pb-12">
+                    <div className="space-y-4">
+                        <div className="inline-flex items-center gap-3 px-3 py-1 bg-blue-500/10 border border-blue-500/20 rounded-full">
+                            <Globe size={10} className="text-blue-500 animate-pulse" />
+                            <span className="text-[9px] font-black uppercase tracking-[0.3em] text-blue-500">Live Production Sync</span>
                         </div>
-                        <h1 className="text-7xl font-black italic uppercase tracking-tighter leading-none">Marketplace <br/><span className="text-blue-500 underline decoration-blue-500/10">Audit Hub.</span></h1>
+                        <h1 className="text-6xl font-black italic uppercase tracking-tighter leading-none">
+                            Audit <span className="text-blue-500">Manifest.</span>
+                        </h1>
+                        <p className="text-xs font-medium text-white/40 uppercase tracking-widest italic">Operational Security Protocol (OPS-MKT-PROD)</p>
                     </div>
-                    <div className="flex gap-4">
-                        <button 
-                            onClick={() => triggerPhase(0)}
-                            className="p-6 bg-white/5 border-2 border-white/5 rounded-3xl hover:bg-red-500 hover:text-white transition-all group"
-                            title="Scrub Production Data"
-                        >
-                            <Trash2 size={24} className="opacity-40 group-hover:opacity-100" />
-                        </button>
-                    </div>
+                    
+                    <button 
+                        onClick={() => triggerPhase(0)}
+                        className="p-5 bg-white/5 border border-white/10 rounded-2xl hover:bg-red-500 hover:border-red-600 transition-all group"
+                        title="Scrub Production Data"
+                    >
+                        <Trash2 size={20} className="text-white/40 group-hover:text-white" />
+                    </button>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
                     
-                    {/* Control Core */}
+                    {/* Left Column: Mission Controls */}
                     <div className="space-y-8">
-                        
-                        <div className="bg-surface-dark border-2 border-border-dark rounded-[4rem] p-12 space-y-12 relative overflow-hidden border-b-8">
-                            <div className="flex items-center gap-4 border-b border-border-dark pb-8">
-                                <Cpu size={20} className="text-blue-500" />
-                                <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20 italic font-black leading-none">Mission Control System</h3>
+                        {/* Control Core */}
+                        <div className="bg-[#0A0A0A] border border-white/5 rounded-[3rem] p-10 space-y-10 shadow-2xl">
+                            <div className="flex items-center gap-3">
+                                <Cpu size={16} className="text-blue-500" />
+                                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20">Mission Control Core</span>
                             </div>
-                            
-                            <div className="grid grid-cols-1 gap-6">
-                                {/* PHASE 1: FREE SEED */}
+
+                            <div className="space-y-4">
                                 <button 
                                     onClick={() => triggerPhase(1)}
                                     disabled={loading || phase > 0}
-                                    className={`p-8 rounded-[2.5rem] border-2 flex flex-col items-start gap-4 transition-all text-left relative overflow-hidden group ${
-                                        phase >= 1 ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-white/5 border-white/5 hover:border-blue-500/40 hover:bg-blue-500/5'
+                                    className={`w-full p-8 rounded-3xl border text-left transition-all relative overflow-hidden group ${
+                                        phase >= 1 ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-white/5 border-white/5 hover:border-blue-500/40 hover:bg-blue-500/5'
                                     }`}
                                 >
-                                    <div className={`p-4 rounded-2xl ${phase >= 1 ? 'bg-emerald-500 text-white' : 'bg-white/10 text-white opacity-40'}`}>
-                                        <Users size={24} strokeWidth={3} />
+                                    <div className="flex items-center gap-6">
+                                        <div className={`size-14 rounded-2xl flex items-center justify-center ${phase >= 1 ? 'bg-emerald-500 text-white' : 'bg-white/10 text-white/40'}`}>
+                                            <Users size={20} strokeWidth={3} />
+                                        </div>
+                                        <div>
+                                            <p className="text-xl font-black uppercase italic leading-none mb-2">Phase_1: Node Seeding</p>
+                                            <p className="text-[9px] font-black uppercase tracking-widest text-white/20 italic">Initialize Triad: Student-Tutor-Institute.</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p className="text-2xl font-black italic uppercase leading-none mb-2">Phase_1: Node Injection</p>
-                                        <p className="text-[10px] font-black uppercase tracking-widest opacity-40 leading-relaxed italic">Seed Free Student, Tutor, and Institute Nodes into Production DB.</p>
-                                    </div>
-                                    {phase >= 1 && <CheckCircle2 className="absolute top-8 right-8 text-emerald-500" size={32} />}
+                                    {phase >= 1 && <CheckCircle2 className="absolute top-1/2 -translate-y-1/2 right-8 text-emerald-500" size={24} />}
                                 </button>
 
-                                {/* PHASE 2: PRO UPGRADE */}
                                 <button 
                                     onClick={() => triggerPhase(2)}
                                     disabled={loading || phase !== 1}
-                                    className={`p-8 rounded-[2.5rem] border-2 flex flex-col items-start gap-4 transition-all text-left relative overflow-hidden group ${
-                                        phase >= 2 ? 'bg-blue-500 border-blue-600' : 'bg-white/5 border-white/5'
+                                    className={`w-full p-8 rounded-3xl border text-left transition-all relative overflow-hidden group ${
+                                        phase >= 2 ? 'bg-blue-600 border-blue-700' : 'bg-white/5 border-white/5'
                                     } ${phase === 1 ? 'hover:border-blue-500' : 'opacity-20 grayscale'}`}
                                 >
-                                    <div className={`p-4 rounded-2xl ${phase >= 2 ? 'bg-white text-blue-500' : 'bg-white/10 text-white opacity-40'}`}>
-                                        <Zap size={24} strokeWidth={3} />
+                                    <div className="flex items-center gap-6">
+                                        <div className={`size-14 rounded-2xl flex items-center justify-center ${phase >= 2 ? 'bg-white text-blue-600' : 'bg-white/10 text-white/40'}`}>
+                                            <Zap size={20} strokeWidth={3} />
+                                        </div>
+                                        <div>
+                                            <p className="text-xl font-black uppercase italic leading-none mb-2 text-white">Phase_2: Elite Upgrade</p>
+                                            <p className="text-[9px] font-black uppercase tracking-widest text-white/40 italic">Elevate Nodes to PRO Subscription.</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p className="text-2xl font-black italic uppercase leading-none mb-2">Phase_2: Premium Upgrade</p>
-                                        <p className="text-[10px] font-black uppercase tracking-widest opacity-40 leading-relaxed italic">Elevate all Audit Nodes to PRO Tier for Messenger Verification.</p>
-                                    </div>
-                                    {phase >= 2 && <CheckCircle2 className="absolute top-8 right-8 text-white" size={32} />}
+                                    {phase >= 2 && <CheckCircle2 className="absolute top-1/2 -translate-y-1/2 right-8 text-white" size={24} />}
                                 </button>
                             </div>
                         </div>
 
-                        {/* Node Explorer */}
+                        {/* Node Navigator */}
                         {nodeData && (
-                            <div className="p-12 bg-surface-dark/40 border-2 border-border-dark rounded-[4rem] space-y-8 anim-fade-in border-b-8">
-                                <div className="flex items-center gap-4 border-b border-border-dark pb-8">
-                                    <Target size={20} className="text-amber-500" />
-                                    <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20 italic font-black leading-none">Aura Node Explorer</h3>
+                            <div className="bg-[#0A0A0A] border border-white/5 rounded-[3rem] p-10 space-y-8 animate-in fade-in duration-500">
+                                <div className="flex items-center gap-3">
+                                    <Target size={16} className="text-amber-500" />
+                                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20">Node Navigator</span>
                                 </div>
-                                <div className="space-y-4">
+                                <div className="space-y-3">
                                     {[
-                                        { label: "Aman (Student)", id: nodeData.studentId, path: 'student' },
-                                        { label: "Rajesh (Tutor)", id: nodeData.tutorId, path: 'tutor' },
-                                        { label: "Elite (Institute)", id: nodeData.instituteId, path: 'tutor' }
-                                    ].map((node, i) => (
+                                        { l: "Aman (Student)", id: nodeData.studentId, path: 'student' },
+                                        { l: "Rajesh (Tutor)", id: nodeData.tutorId, path: 'tutor' },
+                                        { l: "Elite Academy", id: nodeData.instituteId, path: 'tutor' }
+                                    ].map((n, i) => (
                                         <a 
                                             key={i}
-                                            href={`/dashboard/${node.path}?${node.path}Id=${node.id}`}
+                                            href={`/dashboard/${n.path}?${n.path}Id=${n.id}`}
                                             target="_blank"
-                                            className="flex items-center justify-between p-6 bg-background-dark/50 border border-white/5 rounded-2xl hover:bg-blue-500 group transition-all"
+                                            className="flex items-center justify-between p-5 bg-white/5 border border-white/5 rounded-2xl hover:bg-blue-600 group transition-all"
                                         >
-                                            <span className="text-[11px] font-black uppercase tracking-widest italic group-hover:text-white transition-colors">{node.label}</span>
-                                            <div className="flex items-center gap-4">
-                                                <span className="text-[9px] font-black uppercase tracking-widest text-white/20 group-hover:text-white/40">Open Dashboard</span>
-                                                <ExternalLink size={14} className="opacity-20 group-hover:opacity-100 group-hover:text-white" />
-                                            </div>
+                                            <span className="text-[10px] font-black uppercase tracking-widest italic">{n.l}</span>
+                                            <ExternalLink size={14} className="opacity-20 group-hover:opacity-100 transition-opacity" />
                                         </a>
                                     ))}
                                 </div>
@@ -161,42 +169,43 @@ export default function ProductionAuditHub() {
                         )}
                     </div>
 
-                    {/* Live Activity Matrix */}
-                    <div className="bg-surface-dark border-2 border-border-dark rounded-[4rem] p-12 flex flex-col h-[700px] shadow-2xl relative overflow-hidden border-b-8">
-                        <div className="flex items-center gap-4 mb-8 border-b border-border-dark pb-8">
-                            <Activity size={20} className="text-white/20" />
-                            <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20 italic font-black leading-none">System_Activity.log</h3>
-                        </div>
-                        <div className="flex-1 overflow-y-auto space-y-6 font-black text-[11px] uppercase tracking-[0.2em] italic pr-4 scrollbar-hide">
-                            {logs.length === 0 && <div className="text-white/10">Establishing Secure Telemetry Line...</div>}
-                            {logs.map((log, i) => (
-                                <div key={i} className={`flex gap-6 ${
-                                    log.type === 'success' ? 'text-emerald-500' : 
-                                    log.type === 'error' ? 'text-red-500' : 
-                                    log.type === 'system' ? 'text-blue-500' : 
-                                    'text-white/40'
-                                }`}>
-                                    <span className="opacity-20 shrink-0">[{log.time}]</span>
-                                    <span className="leading-relaxed">{log.msg}</span>
-                                </div>
-                            ))}
-                            {loading && <div className="flex items-center gap-4 text-blue-500 animate-pulse">
-                                <Loader2 className="animate-spin" size={14} />
-                                <span>>>> Communicating with Node_{phase}...</span>
-                            </div>}
+                    {/* Right Column: Signal Matrix Logs */}
+                    <div className="bg-[#0A0A0A] border border-white/5 rounded-[3rem] p-10 flex flex-col h-[650px] shadow-2xl relative overflow-hidden">
+                        <div className="flex items-center gap-3 mb-8 border-b border-white/5 pb-6">
+                            <Activity size={16} className="text-white/20" />
+                            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20">Signal_Matrix.log</span>
                         </div>
                         
-                        {/* Summary Card */}
-                        <div className="mt-12 p-8 bg-white/5 border border-white/5 rounded-[2.5rem] flex items-center gap-8">
-                            <div className={`size-16 rounded-2xl flex items-center justify-center border-2 ${phase > 0 ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-500' : 'bg-white/5 border-white/10 text-white/40'}`}>
-                                {phase === 0 ? <Lock size={24} /> : <Unlock size={24} />}
+                        <div className="flex-1 overflow-y-auto space-y-5 font-black text-[10px] uppercase tracking-[0.2em] italic scrollbar-hide pr-2">
+                            {logs.length === 0 && <div className="text-white/5">Awaiting Signal Ignition...</div>}
+                            {logs.map((l, i) => (
+                                <div key={i} className={`flex gap-5 ${
+                                    l.type === 'success' ? 'text-emerald-500' : 
+                                    l.type === 'error' ? 'text-red-500' : 
+                                    l.type === 'system' ? 'text-blue-500' : 
+                                    'text-white/30'
+                                }`}>
+                                    <span className="opacity-20">[{l.time}]</span>
+                                    <span>{l.msg}</span>
+                                </div>
+                            ))}
+                            {loading && (
+                                <div className="flex items-center gap-3 text-blue-500 animate-pulse">
+                                    <Loader2 className="animate-spin" size={12} />
+                                    <span>>>> Establishing Peer Encryption...</span>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Status Guard */}
+                        <div className="mt-10 p-6 bg-white/5 border border-white/10 rounded-3xl flex items-center gap-6">
+                            <div className={`size-12 rounded-xl flex items-center justify-center ${phase > 0 ? 'bg-emerald-500 text-white' : 'bg-white/5 text-white/20'}`}>
+                                {phase === 0 ? <Lock size={18} /> : <ShieldCheck size={18} />}
                             </div>
                             <div>
-                                <p className="text-[9px] font-black uppercase tracking-widest text-white/20 mb-1 leading-none italic">Protocol Status</p>
-                                <p className="text-2xl font-black italic uppercase leading-none tracking-tighter">
-                                    {phase === 0 ? 'Marketplace_Locked' : 
-                                     phase === 1 ? 'Discovery_Active' : 
-                                     'Communication_Full'}
+                                <p className="text-[8px] font-black uppercase tracking-widest text-white/20 leading-none mb-1 text-center">Protocol Integrity</p>
+                                <p className="text-xl font-black uppercase italic tracking-tighter leading-none text-center">
+                                    {phase === 0 ? 'LOCKED_MKT' : phase === 1 ? 'FREE_NODES' : 'ELITE_COMM'}
                                 </p>
                             </div>
                         </div>
@@ -204,11 +213,12 @@ export default function ProductionAuditHub() {
 
                 </div>
 
-                <div className="text-center py-12 border-t-2 border-border-dark flex flex-col items-center gap-6">
-                    <p className="text-[9px] font-black uppercase tracking-[0.6em] text-white/10 italic leading-none">Operational Security Protocol (OPS-MKT-PROD) | TII_PLATFORM_VER_3.1</p>
-                    <div className="flex items-center gap-3">
-                        <div className="size-2 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
-                        <span className="text-[9px] font-black uppercase tracking-[0.3em] text-emerald-500/60 italic">Production Link Synchronized</span>
+                {/* Footer Info */}
+                <div className="flex flex-col items-center gap-4 text-center py-10 opacity-20 group hover:opacity-100 transition-opacity">
+                    <p className="text-[9px] font-black uppercase tracking-[0.6em] italic leading-none">TuitionsInIndia Academy Intelligence Operations</p>
+                    <div className="flex items-center gap-2">
+                        <div className="size-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
+                        <span className="text-[8px] font-black uppercase tracking-[0.2em]">Live Connection Encrypted</span>
                     </div>
                 </div>
 
