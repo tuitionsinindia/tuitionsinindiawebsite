@@ -19,10 +19,16 @@ rsync -avz --delete \
 echo "📦 Step 2: Rebuilding Containers on VPS..."
 ssh -o StrictHostKeyChecking=no ${VPS_USER}@${VPS_HOST} "bash -s" << 'EOF'
 cd /root/tuitionsinindia
-echo "🐳 Pulling and rebuilding with Docker Compose (V2)..."
-docker compose up --build -d
+echo "🐳 Rebuilding Containers with CACHE-BUSTING (Force Clean)..."
+docker compose build --build-arg CACHE_BUST=$(date +%s)
+docker compose up -d
+
+echo "🗄️ Step 3: Synchronizing Database Schema..."
+docker exec tuitionsinindia-web npx prisma db push --accept-data-loss
+
 echo "🧹 Pruning old images..."
 docker image prune -f
+
 echo "✅ Deployment complete! Monitoring logs..."
-docker logs --tail 20 tuitionsinindia-web
+docker logs --tail 50 tuitionsinindia-web
 EOF
