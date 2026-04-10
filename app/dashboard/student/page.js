@@ -49,6 +49,7 @@ function StudentDashboardContent() {
     const [loading, setLoading] = useState(true);
     const [studentData, setStudentData] = useState(null);
     const [unlockedTutors, setUnlockedTutors] = useState([]);
+    const [potentialMatches, setPotentialMatches] = useState([]);
     const [activeLeads, setActiveLeads] = useState([]);
     const [transactions, setTransactions] = useState([]);
     const [showSuccess, setShowSuccess] = useState(searchParams.get("success") === "true");
@@ -66,6 +67,7 @@ function StudentDashboardContent() {
         if (studentId) {
             fetchStudentData();
             fetchUnlockedTutors();
+            fetchPotentialMatches();
             fetchActiveLeads();
             fetchChatSessions();
             fetchTransactions();
@@ -88,6 +90,17 @@ function StudentDashboardContent() {
             if (res.ok) {
                 const data = await res.json();
                 setUnlockedTutors(data);
+            }
+        } catch (err) { console.error(err); }
+    };
+
+    const fetchPotentialMatches = async () => {
+        setLoading(true);
+        try {
+            const res = await fetch(`/api/matching/matches?id=${studentId}&role=STUDENT`);
+            if (res.ok) {
+                const data = await res.json();
+                setPotentialMatches(data);
             }
         } catch (err) { console.error(err); } finally { setLoading(false); }
     };
@@ -385,53 +398,96 @@ function StudentDashboardContent() {
                             <div className="space-y-12 animate-in fade-in duration-700">
                                 <h2 className="text-4xl font-black text-white uppercase italic tracking-tighter">Faculty <span className="text-emerald-500 underline decoration-emerald-500/20">Discovery.</span></h2>
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                                    {unlockedTutors.length > 0 ? unlockedTutors.map((t) => (
-                                        <div key={t.id} className="bg-surface-dark p-12 rounded-[3.5rem] border-2 border-border-dark hover:border-emerald-500/30 transition-all text-center group relative overflow-hidden border-b-8">
-                                             <div className="absolute top-0 right-0 p-8 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <div className="size-10 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center"><CheckCircle2 size={20} /></div>
+                                    {(potentialMatches.length > 0) ? potentialMatches.map((listing) => {
+                                        const isUnlocked = unlockedTutors.some(ut => ut.id === listing.tutorId);
+                                        const tutor = listing.tutor;
+                                        
+                                        return (
+                                            <div key={listing.id} className="bg-surface-dark p-12 rounded-[3.5rem] border-2 border-border-dark hover:border-emerald-500/30 transition-all text-center group relative overflow-hidden border-b-8">
+                                                <div className="absolute top-0 right-0 p-8 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <div className={`size-10 rounded-xl ${isUnlocked ? "bg-emerald-500/10 text-emerald-500" : "bg-white/5 text-white/20"} flex items-center justify-center`}>
+                                                        {isUnlocked ? <CheckCircle2 size={20} /> : <Lock size={20} />}
+                                                    </div>
+                                                </div>
+                                                
+                                                <div className={`size-24 rounded-[2.5rem] bg-gradient-to-br ${isUnlocked ? 'from-emerald-500 to-emerald-800' : 'from-surface-dark to-background-dark border border-white/5'} text-white flex items-center justify-center font-black text-4xl italic mx-auto mb-10 shadow-2xl relative transition-all`}>
+                                                    {tutor?.name?.[0] || "?"}
+                                                </div>
+                                                <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter mb-2 leading-none">{tutor?.name || "ANONYMOUS"}</h3>
+                                                <p className="text-[10px] font-black text-emerald-500/60 uppercase tracking-[0.2em] mb-12 italic leading-none">{listing.subjects?.[0] || "Academic Professional"}</p>
+                                                
+                                                <div className="flex gap-3">
+                                                    {isUnlocked ? (
+                                                        <>
+                                                            <button 
+                                                                onClick={() => {
+                                                                    setSelectedTutorForReview(tutor);
+                                                                    setIsReviewOpen(true);
+                                                                }}
+                                                                className="flex-1 py-5 bg-white/5 border border-white/5 rounded-2xl flex items-center justify-center gap-3 text-[10px] font-black text-white hover:bg-white hover:text-black transition-all uppercase tracking-widest leading-none italic"
+                                                            >
+                                                                Rate Performance <StarIcon size={14} className="fill-emerald-500 text-emerald-500" />
+                                                            </button>
+                                                            <button 
+                                                                onClick={async () => {
+                                                                    setLoadingChat(true);
+                                                                    try {
+                                                                        const res = await fetch("/api/chat/session", {
+                                                                            method: "POST",
+                                                                            headers: { "Content-Type": "application/json" },
+                                                                            body: JSON.stringify({ 
+                                                                                studentId, 
+                                                                                tutorId: listing.tutorId,
+                                                                                initiatorId: studentId
+                                                                            })
+                                                                        });
+                                                                        if (res.ok) {
+                                                                            await fetchChatSessions();
+                                                                            setActiveTab("CHAT");
+                                                                        }
+                                                                    } catch (err) { console.error(err); } finally { setLoadingChat(false); }
+                                                                }}
+                                                                className="size-14 bg-emerald-500 text-white rounded-2xl flex items-center justify-center hover:bg-white hover:text-emerald-500 transition-all active:scale-95 shadow-xl shadow-emerald-500/10"
+                                                            >
+                                                                {loadingChat ? <Loader2 className="animate-spin" size={20} /> : <MessageCircle size={20} className="font-black" strokeWidth={3} />}
+                                                            </button>
+                                                        </>
+                                                    ) : (
+                                                        <button 
+                                                            onClick={async () => {
+                                                                // For students, unlocking is usually free or uses student credits
+                                                                // But for the audit, we want to simulate the "Handshake"
+                                                                // We'll call the chat session creation directly which implicitly "connects" them
+                                                                setLoadingChat(true);
+                                                                try {
+                                                                    const res = await fetch("/api/chat/session", {
+                                                                        method: "POST",
+                                                                        headers: { "Content-Type": "application/json" },
+                                                                        body: JSON.stringify({ 
+                                                                            studentId, 
+                                                                            tutorId: listing.tutorId,
+                                                                            initiatorId: studentId
+                                                                        })
+                                                                    });
+                                                                    if (res.ok) {
+                                                                        await fetchUnlockedTutors();
+                                                                        await fetchChatSessions();
+                                                                        setActiveTab("CHAT");
+                                                                    } else {
+                                                                        const err = await res.json();
+                                                                        alert(err.error || "CREDIT_PROTOCOL_LOCKED");
+                                                                    }
+                                                                } catch (err) { console.error(err); } finally { setLoadingChat(false); }
+                                                            }}
+                                                            className="w-full py-5 bg-amber-500 text-white rounded-2xl flex items-center justify-center gap-3 text-[10px] font-black hover:bg-white hover:text-amber-500 transition-all uppercase tracking-widest leading-none italic shadow-xl shadow-amber-500/10"
+                                                        >
+                                                            <Zap size={14} fill="currentColor" /> INITIATE_SESSION
+                                                        </button>
+                                                    )}
+                                                </div>
                                             </div>
-                                            
-                                            <div className="size-24 rounded-[2.5rem] bg-gradient-to-br from-emerald-500 to-emerald-800 text-white flex items-center justify-center font-black text-4xl italic mx-auto mb-10 shadow-2xl relative">
-                                                {t.name?.[0]}
-                                            </div>
-                                            <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter mb-2 leading-none">{t.name}</h3>
-                                            <p className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.2em] mb-12 italic leading-none">{t.tutorListing?.subjects?.[0] || "Academic Professional"}</p>
-                                            <div className="flex gap-3">
-                                                <button 
-                                                    onClick={() => {
-                                                        setSelectedTutorForReview(t);
-                                                        setIsReviewOpen(true);
-                                                    }}
-                                                    className="flex-1 py-5 bg-white/5 border border-white/5 rounded-2xl flex items-center justify-center gap-3 text-[10px] font-black text-white hover:bg-white hover:text-black transition-all uppercase tracking-widest leading-none italic"
-                                                >
-                                                    Rate Performance <StarIcon size={14} className="fill-emerald-500 text-emerald-500" />
-                                                </button>
-                                                <button 
-                                                    onClick={async () => {
-                                                        setLoadingChat(true);
-                                                        try {
-                                                            const res = await fetch("/api/chat/session", {
-                                                                method: "POST",
-                                                                headers: { "Content-Type": "application/json" },
-                                                                body: JSON.stringify({ 
-                                                                    studentId, 
-                                                                    tutorId: t.id,
-                                                                    initiatorId: studentId // Explicit initiator
-                                                                })
-                                                            });
-                                                            if (res.ok) {
-                                                                await fetchChatSessions();
-                                                                setActiveTab("CHAT");
-                                                            }
-                                                        } catch (err) { console.error(err); } finally { setLoadingChat(false); }
-                                                    }}
-                                                    className="size-14 bg-emerald-500 text-white rounded-2xl flex items-center justify-center hover:bg-white hover:text-emerald-500 transition-all active:scale-95 shadow-xl shadow-emerald-500/10"
-                                                >
-                                                    {loadingChat ? <Loader2 className="animate-spin" size={20} /> : <MessageCircle size={20} className="font-black" strokeWidth={3} />}
-                                                </button>
-                                            </div>
-                                        </div>
-                                    )) : (
+                                        );
+                                    }) : (
                                         <div className="col-span-full py-40 text-center opacity-30 italic font-black uppercase tracking-[0.4em] border-2 border-dashed border-border-dark rounded-[4rem] text-white">Establishing Match Pipeline...</div>
                                     )}
                                 </div>
