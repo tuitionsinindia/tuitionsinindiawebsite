@@ -7,35 +7,24 @@ import DashboardHeader from "@/app/components/DashboardHeader";
 import FacultyChat from "@/app/components/chat/FacultyChat";
 import SettingsModule from "@/app/components/dashboard/SettingsModule";
 import BillingModule from "@/app/components/dashboard/BillingModule";
-import { 
-    Building2, 
-    LayoutDashboard, 
-    BookOpen, 
-    Megaphone, 
-    Users, 
-    CreditCard, 
-    ShieldCheck, 
-    PlusCircle, 
-    ArrowRight, 
-    CheckCircle2, 
-    Search, 
-    Lock, 
-    Trash2, 
-    X, 
-    Zap, 
-    TrendingUp, 
-    Award,
-    BadgeCheck,
-    Globe,
-    Target,
+import {
+    Building2,
+    LayoutDashboard,
+    BookOpen,
+    Megaphone,
+    Users,
+    CreditCard,
+    PlusCircle,
+    ArrowRight,
+    Lock,
+    Zap,
     MessageCircle,
     Loader2,
     LogOut,
-    Clock,
     Settings,
     UserPlus,
-    Activity,
-    Box
+    Target,
+    Award
 } from "lucide-react";
 
 function InstituteDashboardContent() {
@@ -48,14 +37,12 @@ function InstituteDashboardContent() {
     const [ads, setAds] = useState([]);
     const [loading, setLoading] = useState(true);
     const [instituteData, setInstituteData] = useState(null);
-    const [activeTab, setActiveTab] = useState("leads"); // leads, recruitment, courses, ads, settings, billing, chat
-    
-    // Chat States
+    const [activeTab, setActiveTab] = useState("leads");
+
     const [chatSessions, setChatSessions] = useState([]);
     const [selectedSession, setSelectedSession] = useState(null);
     const [loadingChat, setLoadingChat] = useState(false);
 
-    // Course Form State
     const [showCourseForm, setShowCourseForm] = useState(false);
 
     useEffect(() => {
@@ -81,7 +68,6 @@ function InstituteDashboardContent() {
     const fetchRecruitmentLeads = async () => {
         setLoading(true);
         try {
-            // Fetch tutors looking for work (role: TUTOR)
             const res = await fetch(`/api/search?role=TUTOR`);
             const data = await res.json();
             setRecruitmentLeads(data.results || []);
@@ -128,7 +114,7 @@ function InstituteDashboardContent() {
     };
 
     const handleUnlock = async (leadId) => {
-        if (!confirm("UNLOCK_MANDATE: Spend 1 credit to synchronize with this student?")) return;
+        if (!confirm("Unlock this student? This will spend 1 credit.")) return;
         try {
             const res = await fetch("/api/lead/unlock", {
                 method: "POST",
@@ -140,194 +126,122 @@ function InstituteDashboardContent() {
                 fetchInstituteData();
             } else {
                 const err = await res.json();
-                alert(err.error || "PROTOCOL_SYNC_FAILED");
+                alert(err.error || "Failed to unlock. Please try again.");
             }
         } catch (err) { console.error(err); }
     };
 
     if (!instituteId) {
         return (
-            <div className="flex items-center justify-center min-h-screen bg-background-dark p-4 font-sans relative overflow-hidden text-white italic">
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-[600px] bg-indigo-500/10 rounded-full blur-[120px] -z-10 animate-pulse"></div>
-                <div className="bg-surface-dark/40 backdrop-blur-3xl p-10 rounded-[2.5rem] shadow-2xl border border-border-dark max-w-md w-full relative z-10 text-center">
-                    <div className="size-20 rounded-3xl bg-indigo-500/10 flex items-center justify-center text-indigo-500 mx-auto mb-8 border border-indigo-500/20">
-                        <Building2 size={40} strokeWidth={1.5} />
+            <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-10 max-w-md w-full text-center">
+                    <div className="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center mx-auto mb-6">
+                        <Building2 size={32} className="text-blue-600" />
                     </div>
-                    <h2 className="text-3xl font-black mb-3 tracking-tighter uppercase">Institutional Portal.</h2>
-                    <p className="text-on-surface-dark/40 mb-10 text-[11px] font-black uppercase tracking-widest leading-relaxed italic">Verification required to access the academic command center.</p>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Institute Dashboard</h2>
+                    <p className="text-gray-500 text-sm mb-8">Enter your Institute ID to access your dashboard.</p>
                     <input
                         type="text"
-                        placeholder="ENTER INSTITUTE PROTOCOL ID"
-                        className="w-full bg-background-dark/50 border border-border-dark rounded-2xl p-5 text-white font-black text-xs uppercase tracking-widest focus:ring-2 focus:ring-indigo-500 outline-none transition-all placeholder:text-white/10 mb-6 italic"
+                        placeholder="Enter your Institute ID"
+                        className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 outline-none focus:border-blue-500 mb-4"
                         onKeyDown={(e) => { if (e.key === 'Enter') setInstituteId(e.target.value); }}
                         id="instInput"
                     />
                     <button
-                        className="w-full bg-indigo-600 text-white font-black py-5 rounded-2xl hover:bg-white hover:text-indigo-600 shadow-xl transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-xs active:scale-95 leading-none"
-                        onClick={() => setInstituteId(document.getElementById('instInput').value)}>
-                        AUTHORIZE ACCESS <ArrowRight size={16} strokeWidth={3} />
+                        className="w-full bg-blue-600 text-white font-semibold py-3 rounded-xl hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                        onClick={() => setInstituteId(document.getElementById('instInput').value)}
+                    >
+                        Access Dashboard <ArrowRight size={16} />
                     </button>
-                    <Link href="/" className="inline-block mt-8 text-[10px] font-black uppercase tracking-[0.3em] text-white/20 hover:text-indigo-500 transition-colors italic">Bypass Terminal</Link>
+                    <Link href="/" className="inline-block mt-6 text-sm text-gray-400 hover:text-blue-600 transition-colors">← Back to Home</Link>
                 </div>
             </div>
         );
     }
 
+    const navItems = [
+        { id: "leads", label: "Student Leads", icon: Target },
+        { id: "recruitment", label: "Find Tutors", icon: UserPlus },
+        { id: "chat", label: "Messages", icon: MessageCircle },
+        { id: "courses", label: "Courses", icon: BookOpen },
+        { id: "ads", label: "Ads", icon: Megaphone },
+        { id: "billing", label: "Billing", icon: CreditCard },
+        { id: "settings", label: "Settings", icon: Settings },
+    ];
+
     return (
-        <div className="relative flex min-h-screen flex-col bg-background-dark font-sans text-on-background-dark antialiased selection:bg-indigo-500/30">
-            <DashboardHeader 
-                user={instituteData} 
-                role="INSTITUTE" 
-                credits={instituteData?.credits || 0} 
+        <div className="flex min-h-screen flex-col bg-gray-50">
+            <DashboardHeader
+                user={instituteData}
+                role="INSTITUTE"
+                credits={instituteData?.credits || 0}
                 onLogout={() => router.push("/")}
             />
 
-            <div className="flex flex-1">
-                <aside className="fixed left-0 top-[85px] bottom-0 w-24 md:w-80 bg-surface-dark/20 backdrop-blur-3xl border-r border-border-dark flex flex-col items-center md:items-stretch py-8 px-4 md:px-10 z-50">
-                    <div className="mb-12 hidden md:block px-6">
-                        <h4 className="text-[10px] font-black text-on-surface-dark/20 uppercase tracking-[0.4em] mb-8 italic">Academy Command</h4>
-                    </div>
-
-                    <nav className="space-y-4 w-full">
-                        {[
-                            { id: "leads", label: "ADMISSIONS_LEADS", icon: Target },
-                            { id: "recruitment", label: "FACULTY_RECRUIT", icon: UserPlus },
-                            { id: "chat", label: "MESSAGING_HUB", icon: MessageCircle },
-                            { id: "courses", label: "BATCH_MANAGER", icon: Box },
-                            { id: "ads", label: "CAMPAIGNS", icon: Megaphone },
-                            { id: "billing", label: "BILLING_LEDGER", icon: CreditCard },
-                            { id: "settings", label: "SYNC_SETTINGS", icon: Settings }
-                        ].map((item) => (
+            <div className="flex flex-1 pt-16">
+                <aside className="fixed left-0 top-16 bottom-0 w-16 md:w-64 bg-white border-r border-gray-200 flex flex-col py-6 px-3 md:px-4 z-40">
+                    <nav className="flex-1 space-y-1">
+                        {navItems.map((item) => (
                             <button
                                 key={item.id}
                                 onClick={() => setActiveTab(item.id)}
-                                className={`w-full flex items-center gap-4 px-4 md:px-6 py-4 rounded-2xl font-black text-[11px] tracking-widest transition-all group relative overflow-hidden ${
-                                    activeTab === item.id 
-                                    ? "bg-indigo-600 text-white shadow-xl shadow-indigo-600/20" 
-                                    : "text-on-surface-dark/40 hover:bg-surface-dark hover:text-indigo-500 border border-transparent hover:border-border-dark"
+                                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                                    activeTab === item.id
+                                        ? "bg-blue-600 text-white"
+                                        : "text-gray-600 hover:bg-gray-100"
                                 }`}
                             >
-                                <item.icon size={20} strokeWidth={2.5} className={activeTab === item.id ? "opacity-100 font-black" : "opacity-40"} />
+                                <item.icon size={18} />
                                 <span className="hidden md:block">{item.label}</span>
-                                {activeTab === item.id && <div className="absolute right-0 top-0 bottom-0 w-1.5 bg-white md:hidden"></div>}
                             </button>
                         ))}
                     </nav>
-
-                    <button 
+                    <button
                         onClick={() => router.push("/")}
-                        className="mt-auto flex items-center justify-center md:justify-start gap-4 px-6 md:px-6 py-4 text-red-500/40 hover:text-red-500 text-[10px] font-black uppercase tracking-[0.3em] transition-colors"
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-red-500 hover:bg-red-50 transition-colors"
                     >
-                        <LogOut size={16} strokeWidth={3} />
-                        <span className="hidden md:block">EXIT HUB</span>
+                        <LogOut size={18} />
+                        <span className="hidden md:block">Logout</span>
                     </button>
                 </aside>
 
-                <main className="flex-1 ml-24 md:ml-80 p-6 md:p-12 lg:p-16">
-                    <div className="max-w-7xl mx-auto">
-                        
-                        {(activeTab !== "chat" && activeTab !== "settings" && activeTab !== "billing") && (
-                            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-12 mb-24">
-                                <div className="max-w-2xl relative">
-                                    <div className="absolute -left-12 top-0 text-[180px] font-black text-white/5 leading-none tracking-tighter italic select-none pointer-events-none uppercase">HUB</div>
-                                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500/5 rounded-full border border-indigo-500/10 mb-8">
-                                        <Activity size={14} className="animate-pulse text-indigo-500" />
-                                        <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest italic tracking-[0.2em]">Institutional Command Active</span>
-                                    </div>
-                                    <h1 className="text-6xl md:text-8xl font-black tracking-tighter mb-8 uppercase italic leading-[0.85] text-white">
-                                        Strategic <br/><span className="text-indigo-500 underline decoration-indigo-500/20 decoration-8 underline-offset-8">Output.</span>
-                                    </h1>
-                                    <p className="text-xl text-on-surface-dark/60 font-medium leading-relaxed max-w-xl italic">
-                                        Monitoring <span className="text-white font-black italic">{instituteData?.name || "Corporate Hub"}</span>. {activeTab.toUpperCase()}_SCAN active.
-                                    </p>
+                <main className="flex-1 ml-16 md:ml-64 p-6">
+                    <div className="max-w-5xl mx-auto">
+
+                        {activeTab === "settings" && <SettingsModule user={instituteData} onUpdate={fetchInstituteData} />}
+                        {activeTab === "billing" && <BillingModule user={instituteData} />}
+
+                        {activeTab === "leads" && (
+                            <div className="space-y-6">
+                                <div>
+                                    <h1 className="text-2xl font-bold text-gray-900">Student Leads</h1>
+                                    <p className="text-gray-500 text-sm mt-1">Students looking for courses at institutes like yours.</p>
                                 </div>
-                            </div>
-                        )}
-
-                        <div className="animate-in fade-in slide-in-from-bottom-8 duration-700">
-                            {activeTab === "settings" && <SettingsModule user={instituteData} onUpdate={fetchInstituteData} />}
-                            {activeTab === "billing" && <BillingModule user={instituteData} />}
-
-                            {activeTab === "chat" && (
-                                <div className="h-[75vh] grid grid-cols-1 lg:grid-cols-12 gap-10">
-                                    <div className="lg:col-span-4 bg-surface-dark/20 backdrop-blur-3xl rounded-[3rem] border border-border-dark overflow-hidden flex flex-col">
-                                        <div className="p-8 border-b border-border-dark flex items-center justify-between">
-                                            <h3 className="text-[10px] font-black text-white/40 uppercase tracking-[0.5em] italic">Secure Directory</h3>
-                                            <div className="size-8 rounded-lg bg-indigo-500/10 text-indigo-500 flex items-center justify-center font-black text-xs">{chatSessions.length}</div>
-                                        </div>
-                                        <div className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-hide">
-                                            {loadingChat ? (
-                                                <div className="flex flex-col items-center justify-center py-20 gap-4 opacity-20 italic font-black uppercase text-[10px] tracking-widest">
-                                                    <Loader2 className="animate-spin" size={24} />
-                                                    Syncing Nodes...
-                                                </div>
-                                            ) : chatSessions.length > 0 ? chatSessions.map((session) => {
-                                                const recipient = session.tutorId === instituteId ? session.student : session.tutor;
-                                                const isActive = selectedSession?.id === session.id;
-                                                return (
-                                                    <button
-                                                        key={session.id}
-                                                        onClick={() => setSelectedSession(session)}
-                                                        className={`w-full p-6 rounded-[2rem] flex items-center gap-4 transition-all border border-transparent hover:scale-[1.02] active:scale-95 group overflow-hidden relative ${
-                                                            isActive ? "bg-indigo-600 border-indigo-600 shadow-xl shadow-indigo-600/20 text-white" : "bg-white/5 hover:bg-white/10 text-white"
-                                                        }`}
-                                                    >
-                                                        <div className={`size-12 rounded-2xl flex items-center justify-center font-black text-lg italic shadow-xl transition-all ${isActive ? "bg-white text-indigo-600" : "bg-indigo-600 text-white"}`}>
-                                                            {recipient?.name?.[0] || "?"}
-                                                        </div>
-                                                        <div className="flex-1 text-left min-w-0">
-                                                            <p className="text-[10px] font-black uppercase tracking-tight truncate italic leading-none mb-2">{recipient?.name}</p>
-                                                            <p className={`text-[9px] font-medium tracking-wide truncate italic opacity-40 leading-none ${isActive ? "text-white" : "text-white/60"}`}>FACULTY SYNCHRONIZATION ACTIVE</p>
-                                                        </div>
-                                                    </button>
-                                                )
-                                            }) : (
-                                                <div className="py-20 text-center opacity-20 italic font-black uppercase tracking-[0.3em] text-[10px] px-10 text-white leading-relaxed">No scholarly nodes detected.</div>
-                                            )}
-                                        </div>
+                                {loading ? (
+                                    <div className="flex items-center justify-center py-20 text-gray-400">
+                                        <Loader2 className="animate-spin mr-2" size={20} /> Loading leads...
                                     </div>
-                                    <div className="lg:col-span-8 overflow-hidden">
-                                        {selectedSession ? (
-                                            <FacultyChat 
-                                                sessionId={selectedSession.id} 
-                                                currentUser={{ id: instituteId, name: instituteData?.name }} 
-                                                recipientName={selectedSession.tutorId === instituteId ? selectedSession.student?.name : selectedSession.tutor?.name}
-                                            />
-                                        ) : (
-                                            <div className="h-full flex flex-col items-center justify-center space-y-8 bg-surface-dark/10 rounded-[4rem] border-4 border-dashed border-border-dark/50 p-20 text-center text-white italic">
-                                                <MessageCircle size={64} className="text-indigo-500/20" />
-                                                <h2 className="text-4xl font-black uppercase tracking-tighter">Secure <span className="text-indigo-500">Dialogue.</span></h2>
-                                                <p className="text-white/20 max-w-sm mx-auto font-black text-[10px] tracking-widest uppercase">Select an active neural link to initiate synchronization protocol.</p>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
-
-                            {activeTab === "leads" && (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-10 pb-24">
-                                    {loading ? (
-                                        <div className="col-span-2 py-40 flex flex-col items-center justify-center opacity-50 bg-surface-dark/20 rounded-[4rem] border border-border-dark text-white italic">
-                                            <Loader2 className="animate-spin mb-10" size={48} strokeWidth={3} />
-                                            <p className="font-black text-[12px] uppercase tracking-[0.6em] italic">Synthesizing Admission Demand Grid...</p>
-                                        </div>
-                                    ) : leads.length > 0 ? leads.map((lead) => (
-                                        <div key={lead.id} className="group relative bg-surface-dark/40 border border-border-dark rounded-[3.5rem] p-12 hover:border-indigo-500/30 transition-all duration-700 overflow-hidden border-b-8 flex flex-col text-white">
-                                            <div className="relative z-10">
-                                                <div className="flex justify-between items-center mb-10 italic">
-                                                    <span className="px-6 py-2.5 bg-indigo-500/10 text-indigo-500 rounded-xl text-[10px] font-black uppercase tracking-widest border border-indigo-500/20 leading-none">{lead.subjects?.[0] || 'ADMISSIONS'}</span>
-                                                    <div className="flex items-center gap-2 px-3 py-1 bg-background-dark/80 rounded-lg text-emerald-500/60 text-[9px] font-black uppercase tracking-widest leading-none border border-emerald-500/10 italic">ACTIVE_ENROLLMENT</div>
+                                ) : leads.length > 0 ? (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {leads.map((lead) => (
+                                            <div key={lead.id} className="bg-white rounded-xl border border-gray-200 p-6">
+                                                <div className="flex items-center justify-between mb-3">
+                                                    <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-semibold">
+                                                        {lead.subjects?.[0] || 'General'}
+                                                    </span>
+                                                    <span className="text-xs text-emerald-600 font-medium">Active</span>
                                                 </div>
-                                                <h3 className="text-4xl font-black text-white mb-10 leading-[1.05] tracking-tighter uppercase italic group-hover:text-indigo-400 transition-colors">"{lead.description}"</h3>
-                                                
+                                                <p className="text-gray-700 font-medium mb-4 line-clamp-2">"{lead.description}"</p>
                                                 {lead.isUnlocked ? (
-                                                    <div className="p-8 bg-background-dark/80 rounded-[2.5rem] border border-border-dark flex items-center gap-8 border-b-4 border-emerald-500/20 overflow-hidden">
-                                                        <div className="size-16 rounded-2xl bg-emerald-500 text-white flex items-center justify-center font-black text-2xl italic shadow-xl">{lead.student?.name?.[0]}</div>
-                                                        <div className="flex-1 min-w-0">
-                                                            <h4 className="text-xl font-black uppercase italic text-white truncate">{lead.student?.name}</h4>
-                                                            <p className="text-[9px] font-black text-emerald-500/60 uppercase tracking-widest leading-none mt-1">SECURE_SYNC_LOCKED</p>
+                                                    <div className="flex items-center gap-3 p-3 bg-emerald-50 rounded-lg border border-emerald-100">
+                                                        <div className="w-10 h-10 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-lg">
+                                                            {lead.student?.name?.[0]}
                                                         </div>
-                                                        <button 
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="font-semibold text-gray-900 text-sm">{lead.student?.name}</p>
+                                                            <p className="text-xs text-emerald-600">Contact unlocked</p>
+                                                        </div>
+                                                        <button
                                                             onClick={async () => {
                                                                 const res = await fetch("/api/chat/session", {
                                                                     method: "POST",
@@ -336,93 +250,198 @@ function InstituteDashboardContent() {
                                                                 });
                                                                 if (res.ok) { await fetchChatSessions(); setActiveTab("chat"); }
                                                             }}
-                                                            className="size-14 bg-emerald-500 text-white rounded-2xl flex items-center justify-center hover:bg-white hover:text-emerald-500 transition-all active:scale-95 shadow-xl"
+                                                            className="px-3 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors flex items-center gap-1"
                                                         >
-                                                            <MessageCircle size={20} strokeWidth={3} />
+                                                            <MessageCircle size={14} /> Chat
                                                         </button>
                                                     </div>
                                                 ) : (
-                                                    <button onClick={() => handleUnlock(lead.id)} className="w-full bg-indigo-600 text-white font-black py-8 rounded-[2.5rem] flex items-center justify-center gap-4 text-[12px] tracking-[0.4em] uppercase transition-all shadow-2xl hover:bg-white hover:text-indigo-600 active:scale-95 leading-none italic">
-                                                        <Lock size={18} strokeWidth={3} className="opacity-40" />
-                                                        ENROLL STUDENT
+                                                    <button
+                                                        onClick={() => handleUnlock(lead.id)}
+                                                        className="w-full py-2.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                                                    >
+                                                        <Lock size={14} /> Unlock Student (1 credit)
                                                     </button>
                                                 )}
                                             </div>
-                                        </div>
-                                    )) : (
-                                        <div className="col-span-2 py-40 text-center opacity-20 italic font-black uppercase tracking-[0.8em] text-white">Market Consensus: Zero Demand</div>
-                                    )}
-                                </div>
-                            )}
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-20 text-gray-400">
+                                        <Target size={40} className="mx-auto mb-3 opacity-30" />
+                                        <p className="font-medium">No student leads yet.</p>
+                                        <p className="text-sm mt-1">Complete your profile to start receiving leads.</p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
 
-                            {activeTab === "recruitment" && (
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-24">
-                                    {loading ? (
-                                        <div className="col-span-3 py-40 flex flex-col items-center justify-center opacity-50 italic text-white font-black uppercase tracking-[0.5em]">
-                                            <Loader2 size={48} className="animate-spin mb-6" />
-                                            Scanning Faculty Directory...
+                        {activeTab === "recruitment" && (
+                            <div className="space-y-6">
+                                <div>
+                                    <h1 className="text-2xl font-bold text-gray-900">Find Tutors</h1>
+                                    <p className="text-gray-500 text-sm mt-1">Browse tutors available for hire at your institute.</p>
+                                </div>
+                                {loading ? (
+                                    <div className="flex items-center justify-center py-20 text-gray-400">
+                                        <Loader2 className="animate-spin mr-2" size={20} /> Searching tutors...
+                                    </div>
+                                ) : recruitmentLeads.length > 0 ? (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        {recruitmentLeads.map((tutor) => (
+                                            <div key={tutor.id} className="bg-white rounded-xl border border-gray-200 p-6">
+                                                <div className="flex items-center gap-3 mb-4">
+                                                    <div className="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xl">
+                                                        {tutor.tutor?.name?.[0]}
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="font-semibold text-gray-900">{tutor.tutor?.name}</h3>
+                                                        <div className="flex items-center gap-1 text-amber-500 text-xs mt-0.5">
+                                                            <Award size={12} /> Expert Tutor
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="flex flex-wrap gap-1.5 mb-4">
+                                                    {tutor.subjects?.slice(0, 3).map(s => (
+                                                        <span key={s} className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">{s}</span>
+                                                    ))}
+                                                </div>
+                                                <button
+                                                    onClick={() => router.push(`/search/${tutor.id}`)}
+                                                    className="w-full py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                                                >
+                                                    View Profile
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-20 text-gray-400">
+                                        <UserPlus size={40} className="mx-auto mb-3 opacity-30" />
+                                        <p className="font-medium">No tutors found.</p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {activeTab === "chat" && (
+                            <div className="space-y-4">
+                                <h1 className="text-2xl font-bold text-gray-900">Messages</h1>
+                                <div className="flex h-[calc(100vh-220px)] bg-white rounded-xl border border-gray-200 overflow-hidden">
+                                    <div className="w-72 border-r border-gray-200 flex flex-col">
+                                        <div className="p-4 border-b border-gray-100">
+                                            <h3 className="font-semibold text-gray-900 text-sm">Conversations</h3>
+                                            <p className="text-xs text-gray-500 mt-0.5">{chatSessions.length} active</p>
                                         </div>
-                                    ) : recruitmentLeads.length > 0 ? recruitmentLeads.map((tutor) => (
-                                        <div key={tutor.id} className="bg-surface-dark/40 border border-border-dark rounded-[2.5rem] p-8 hover:border-indigo-500/30 transition-all flex flex-col gap-6 text-white group relative overflow-hidden">
-                                            <div className="flex items-center gap-6">
-                                                <div className="size-20 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-black text-3xl italic shadow-xl shadow-indigo-600/20">{tutor.tutor?.name?.[0]}</div>
-                                                <div className="flex-1 min-w-0">
-                                                    <h3 className="font-black uppercase italic tracking-tighter text-xl truncate group-hover:text-indigo-400">{tutor.tutor?.name}</h3>
-                                                    <div className="flex items-center gap-1.5 text-amber-500 text-[10px] font-black uppercase tracking-widest mt-1">
-                                                        <Award size={12} fill="currentColor" /> EXPERT_FACULTY
+                                        <div className="flex-1 overflow-y-auto">
+                                            {loadingChat ? (
+                                                <div className="flex items-center justify-center py-10 text-gray-400">
+                                                    <Loader2 className="animate-spin mr-2" size={16} /> Loading...
+                                                </div>
+                                            ) : chatSessions.length > 0 ? chatSessions.map((session) => {
+                                                const recipient = session.tutorId === instituteId ? session.student : session.tutor;
+                                                return (
+                                                    <button
+                                                        key={session.id}
+                                                        onClick={() => setSelectedSession(session)}
+                                                        className={`w-full p-4 text-left flex items-center gap-3 transition-colors border-b border-gray-50 ${
+                                                            selectedSession?.id === session.id ? "bg-blue-50" : "hover:bg-gray-50"
+                                                        }`}
+                                                    >
+                                                        <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold text-sm shrink-0">
+                                                            {recipient?.name?.[0] || "?"}
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="font-medium text-gray-900 text-sm truncate">{recipient?.name || "Unknown"}</p>
+                                                        </div>
+                                                    </button>
+                                                );
+                                            }) : (
+                                                <div className="p-6 text-center text-gray-400 text-sm">No conversations yet.</div>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className="flex-1">
+                                        {selectedSession ? (
+                                            <FacultyChat
+                                                sessionId={selectedSession.id}
+                                                currentUser={{ id: instituteId, name: instituteData?.name }}
+                                                recipientName={selectedSession.tutorId === instituteId ? selectedSession.student?.name : selectedSession.tutor?.name}
+                                            />
+                                        ) : (
+                                            <div className="h-full flex flex-col items-center justify-center text-gray-400">
+                                                <MessageCircle size={48} className="mb-3 opacity-30" />
+                                                <p className="font-medium">Select a conversation</p>
+                                                <p className="text-sm mt-1">Choose a chat from the left to start messaging.</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === "courses" && (
+                            <div className="space-y-6">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <h1 className="text-2xl font-bold text-gray-900">Courses</h1>
+                                        <p className="text-gray-500 text-sm mt-1">Manage your course offerings.</p>
+                                    </div>
+                                    <button
+                                        onClick={() => setShowCourseForm(true)}
+                                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                                    >
+                                        <PlusCircle size={16} /> Add Course
+                                    </button>
+                                </div>
+                                {courses.length > 0 ? (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {courses.map((course) => (
+                                            <div key={course.id} className="bg-white rounded-xl border border-gray-200 p-6">
+                                                <div className="flex justify-between items-start mb-3">
+                                                    <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">{course.category}</span>
+                                                    <span className="text-xl font-bold text-gray-900">₹{course.price}</span>
+                                                </div>
+                                                <h3 className="font-semibold text-gray-900 mb-4">{course.title}</h3>
+                                                <div className="grid grid-cols-2 gap-4 pt-3 border-t border-gray-100 text-sm">
+                                                    <div>
+                                                        <p className="text-gray-400 text-xs">Seats</p>
+                                                        <p className="font-semibold text-gray-900">{course.enrolledCount} / {course.maxSeats}</p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-gray-400 text-xs">Status</p>
+                                                        <p className={`font-semibold ${course.isActive ? 'text-emerald-600' : 'text-gray-400'}`}>
+                                                            {course.isActive ? 'Active' : 'Inactive'}
+                                                        </p>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div className="flex flex-wrap gap-2 py-4 border-y border-white/5 italic">
-                                                {tutor.subjects?.slice(0, 3).map(s => (
-                                                    <span key={s} className="px-3 py-1 bg-white/5 rounded-lg text-[8px] font-black uppercase tracking-widest text-white/40">{s}</span>
-                                                ))}
-                                            </div>
-                                            <button 
-                                                className="w-full py-5 bg-white text-indigo-600 rounded-2xl font-black text-[10px] tracking-widest uppercase hover:bg-indigo-600 hover:text-white transition-all active:scale-95 italic"
-                                                onClick={() => router.push(`/search/${tutor.id}`)}
-                                            >
-                                                RECRUIT_PROFILE
-                                            </button>
-                                        </div>
-                                    )) : (
-                                        <div className="col-span-3 py-40 text-center opacity-20 italic font-black uppercase tracking-[0.8em] text-white">Faculty Sync: 0 Active Tutors</div>
-                                    )}
-                                </div>
-                            )}
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-20 text-gray-400">
+                                        <BookOpen size={40} className="mx-auto mb-3 opacity-30" />
+                                        <p className="font-medium">No courses added yet.</p>
+                                        <p className="text-sm mt-1">Add your first course to start enrolling students.</p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
 
-                            {activeTab === "courses" && (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-10 pb-24">
-                                    {courses.length > 0 ? courses.map((course) => (
-                                        <div key={course.id} className="bg-surface-dark/40 border border-border-dark rounded-[3rem] p-10 flex flex-col gap-8 text-white group hover:border-indigo-500/20 transition-all">
-                                            <div className="flex justify-between items-start">
-                                                <div className="px-5 py-2 bg-indigo-500/10 text-indigo-500 rounded-xl text-[9px] font-black uppercase tracking-widest italic border border-indigo-500/10">{course.category}</div>
-                                                <div className="flex flex-col items-end">
-                                                    <span className="text-3xl font-black italic tracking-tighter text-white">₹{course.price}</span>
-                                                    <span className="text-[8px] font-black text-white/20 uppercase tracking-widest italic">PER_SEAT_INDEX</span>
-                                                </div>
-                                            </div>
-                                            <h3 className="text-3xl font-black uppercase italic tracking-tighter group-hover:text-indigo-400 transition-all leading-none">{course.title}</h3>
-                                            <div className="grid grid-cols-2 gap-4 py-8 border-y border-white/5 italic">
-                                                <div>
-                                                    <p className="text-[8px] font-black text-white/20 uppercase tracking-widest mb-2 leading-none">Occupancy</p>
-                                                    <p className="font-black text-xs text-indigo-400 italic leading-none">{course.enrolledCount} / {course.maxSeats} SEATS</p>
-                                                </div>
-                                                <div>
-                                                    <p className="text-[8px] font-black text-white/20 uppercase tracking-widest mb-2 leading-none">Status</p>
-                                                    <p className="font-black text-xs text-emerald-500 italic leading-none">{course.isActive ? 'OPERATIONAL' : 'DEACTIVATED'}</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )) : (
-                                        <div className="col-span-2 py-40 flex flex-col items-center justify-center bg-white/5 rounded-[4rem] border border-dashed border-white/10 italic text-white/20">
-                                            <Box size={48} className="mb-6 opacity-20" />
-                                            <p className="font-black text-[10px] uppercase tracking-[0.5em]">Inventory Empty: Deploy Batches</p>
-                                        </div>
-                                    )}
+                        {activeTab === "ads" && (
+                            <div className="space-y-6">
+                                <div>
+                                    <h1 className="text-2xl font-bold text-gray-900">Ads</h1>
+                                    <p className="text-gray-500 text-sm mt-1">Promote your institute to students.</p>
                                 </div>
-                            )}
-                        </div>
+                                <div className="bg-white rounded-xl border border-gray-200 p-12 text-center text-gray-400">
+                                    <Megaphone size={40} className="mx-auto mb-3 opacity-30" />
+                                    <p className="font-medium">Ads feature coming soon.</p>
+                                    <p className="text-sm mt-1">You'll be able to run targeted campaigns for students in your area.</p>
+                                </div>
+                            </div>
+                        )}
+
                     </div>
                 </main>
             </div>
@@ -433,13 +452,11 @@ function InstituteDashboardContent() {
 export default function InstituteDashboard() {
     return (
         <Suspense fallback={
-            <div className="flex items-center justify-center min-h-screen bg-background-dark font-sans overflow-hidden text-indigo-500 italic">
-                 <div className="flex flex-col items-center gap-10">
-                    <div className="size-24 rounded-[3.5rem] bg-indigo-500/10 border-2 border-indigo-500/20 flex items-center justify-center animate-spin-slow shadow-[0_0_50px_rgba(79,70,229,0.2)]">
-                        <Building2 size={32} className="animate-pulse" strokeWidth={3} />
-                    </div>
-                    <p className="text-[11px] font-black uppercase tracking-[0.8em] animate-pulse">Initializing Corporate Terminal...</p>
-                 </div>
+            <div className="flex items-center justify-center min-h-screen bg-gray-50">
+                <div className="flex flex-col items-center gap-3 text-gray-400">
+                    <Loader2 size={32} className="animate-spin text-blue-600" />
+                    <p className="text-sm">Loading dashboard...</p>
+                </div>
             </div>
         }>
             <InstituteDashboardContent />
