@@ -1,42 +1,39 @@
 @import "tailwindcss";
 @config "../tailwind.config.js";
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&display=swap');
 
-:root {
-  --primary: #0d40a5;
-  --primary-hover: #0a358a;
-  --accent: #f59e0b;
-  --bg-dark: #0f172a;
-  --border-dark: #1e293b;
-}
-
 @theme {
-  --color-primary: var(--primary);
-  --color-accent: var(--accent);
-  --color-bg-dark: var(--bg-dark);
-  --color-border-dark: var(--border-dark);
   --radius-3xl: 2rem;
   --radius-4xl: 3rem;
-  --shadow-4xl: 0 50px 100px -20px rgba(0, 0, 0, 0.4);
 }
 
 body {
-  font-family: 'Inter', sans-serif;
   scroll-behavior: smooth;
 }
 
-h1, h2, h3, h4, .font-heading {
-  font-family: 'Outfit', sans-serif;
-}
-
 @layer components {
-    @apply text-sm font-bold text-slate-500 hover:text-primary transition-all flex items-center gap-1 relative;
+  /* Stitch Custom Utilities */
+  .glass-search {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(20px);
+  }
+  .asymmetric-grid {
+    grid-template-columns: 1.2fr 0.8fr;
+  }
+
+  /* Legacy Utilities preserved for fallback */
+  .nav-link {
+    @apply text-sm font-bold text-slate-500 transition-all flex items-center gap-1 relative;
+  }
+  
+  .nav-link:hover {
+    color: var(--color-primary);
   }
   
   .nav-link::after {
     content: '';
-    @apply absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300;
+    @apply absolute -bottom-1 left-0 w-0 h-0.5 transition-all duration-300;
+    background-color: var(--color-primary);
   }
   
   .nav-link:hover::after {
@@ -56,7 +53,7 @@ h1, h2, h3, h4, .font-heading {
   }
   
   .premium-card {
-    @apply bg-white border border-slate-100 rounded-[2.5rem] p-10 shadow-sm transition-all duration-500 hover:shadow-2xl hover:shadow-slate-200/50 hover:border-primary/10 hover:-translate-y-1;
+    @apply bg-white border border-slate-100 rounded-[2.5rem] p-10 shadow-sm transition-all duration-500 hover:shadow-2xl hover:shadow-slate-200/50 border-primary/10 hover:-translate-y-1;
   }
   
   .text-glow {
@@ -128,4 +125,73 @@ h1, h2, h3, h4, .font-heading {
 /* Layout Utilities */
 .container-premium {
   @apply max-w-7xl mx-auto px-6 lg:px-12;
+}
+
+.header-offset {
+  @apply pt-24;
+}
+
+/* Missing Animation Keyframes */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleUp {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+.animate-scale-up {
+  animation: scaleUp 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Smooth scrollbar for sidebars */
+.smooth-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.smooth-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.smooth-scrollbar::-webkit-scrollbar-thumb {
+  background: #e2e8f0;
+  border-radius: 2px;
+}
+.smooth-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #cbd5e1;
+}
+
+/* Scroll Snapping Protocols */
+.snap-container {
+  @apply snap-y snap-mandatory h-screen overflow-y-auto scroll-smooth;
+}
+
+.snap-section {
+  @apply snap-start snap-always min-h-screen flex flex-col justify-center relative overflow-hidden;
+}
+
+/* Standardized Typography & Depth */
+.text-gradient-primary {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600;
+}
+
+.glass-card {
+  @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-xl;
+}
+
+.dark-glass-card {
+  @apply bg-gray-900/80 backdrop-blur-md border border-white/5 shadow-2xl;
 }
