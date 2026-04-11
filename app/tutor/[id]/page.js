@@ -2,6 +2,25 @@ import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import ChatInitiator from "@/app/components/chat/ChatInitiator";
+import {
+    Star,
+    ShieldCheck,
+    Award,
+    Clock,
+    Users,
+    ArrowLeft,
+    MapPin,
+    Briefcase,
+    CheckCircle2,
+    MessageCircle,
+    Lock,
+    BookOpen,
+    Monitor,
+    Home,
+    Building2,
+    GraduationCap,
+    IndianRupee
+} from "lucide-react";
 
 export const dynamic = 'force-dynamic';
 
@@ -14,35 +33,66 @@ export async function generateMetadata({ params }) {
 
     if (!tutor) return { title: "Tutor Profile | TuitionsInIndia" };
 
-    const name = tutor.name || "Expert Faculty";
-    const subject = tutor.tutorListing?.subjects?.[0] || "Academics";
+    const name = tutor.name || "Tutor";
+    const subject = tutor.tutorListing?.subjects?.[0] || "All Subjects";
     const location = tutor.tutorListing?.locations?.[0] || "India";
 
     return {
-        title: `Best ${subject} Tutor in ${location} | ${name} | TuitionsInIndia`,
-        description: `Connect with ${name}, a premier ${subject} specialist in ${location}. View verified credentials, academic affinity scores, and pedagogical approach. Initiate secure scholarly synchronization today.`,
+        title: `${name} - ${subject} Tutor in ${location} | TuitionsInIndia`,
+        description: `Book ${name} for ${subject} tuition in ${location}. Verified tutor with ${tutor.tutorListing?.experience || 0} years experience.`,
         openGraph: {
-            title: `${name} - Professional ${subject} Educator`,
-            description: `Verify the Match Score for ${name} in ${location}. Strategic academic outcomes and high-fidelity tutoring.`,
+            title: `${name} - ${subject} Tutor`,
+            description: `Verified tutor in ${location}. Book a session today.`,
             images: [tutor.image || "/logo.png"]
         }
     };
 }
 
+const modeLabels = {
+    ONLINE: "Online",
+    STUDENT_HOME: "At Student's Home",
+    TUTOR_HOME: "At Tutor's Home",
+    CENTRE: "At Centre",
+    // Already human-readable forms
+    "Online": "Online",
+    "At Student's Home": "At Student's Home",
+    "At Tutor's Home": "At Tutor's Home",
+    "At Centre": "At Centre",
+};
+
+const modeIconMap = {
+    ONLINE: Monitor,
+    Online: Monitor,
+    STUDENT_HOME: Home,
+    "At Student's Home": Home,
+    TUTOR_HOME: Home,
+    "At Tutor's Home": Home,
+    CENTRE: Building2,
+    "At Centre": Building2,
+};
+
+const getModeLabel = (mode) => modeLabels[mode] || mode;
+const getModeIcon = (mode) => modeIconMap[mode] || BookOpen;
+
 export default async function TutorProfile({ params, searchParams }) {
     const id = params.id;
     const viewerId = searchParams.viewerId;
 
-    // Fetch tutor and listing data
     const tutor = await prisma.user.findUnique({
         where: { id },
-        include: {
+        select: {
+            id: true,
+            name: true,
+            image: true,
+            role: true,
+            isVerified: true,
+            isIdVerified: true,
+            subscriptionTier: true,
+            createdAt: true,
             tutorListing: true,
             reviewsReceived: {
                 include: {
-                    author: {
-                        select: { name: true, image: true }
-                    }
+                    author: { select: { name: true, image: true } }
                 },
                 orderBy: { createdAt: 'desc' }
             }
@@ -53,9 +103,12 @@ export default async function TutorProfile({ params, searchParams }) {
         notFound();
     }
 
-    const listing = tutor.tutorListing || { bio: "", subjects: [], experience: 0, hourlyRate: 0, rating: 0, reviewCount: 0 };
+    const listing = tutor.tutorListing || {
+        bio: "", subjects: [], grades: [], locations: [],
+        teachingModes: [], boards: [], experience: 0, hourlyRate: 0,
+        rating: 0, reviewCount: 0, title: "", gender: ""
+    };
 
-    // Fetch viewer data for paywall check
     let viewer = null;
     if (viewerId) {
         viewer = await prisma.user.findUnique({
@@ -64,303 +117,368 @@ export default async function TutorProfile({ params, searchParams }) {
         });
     }
 
-    const canContactProactively = viewer ? (viewer.role === 'ADMIN' || viewer.subscriptionTier !== 'FREE') : false;
+    const canContact = viewer
+        ? (viewer.role === 'ADMIN' || viewer.subscriptionTier !== 'FREE')
+        : false;
+
+    const memberSince = new Date(tutor.createdAt).getFullYear();
+    const initials = (tutor.name || "T").split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
 
     return (
-        <div className="min-h-screen bg-surface font-body text-on-surface antialiased pt-28 pb-32">
-            {/* Ambient Background Strategy */}
-            <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-                <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] bg-primary/5 rounded-full blur-[160px] animate-pulse"></div>
-                <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-500/5 rounded-full blur-[140px]"></div>
-            </div>
+        <div className="min-h-screen bg-gray-50 pt-24 pb-20">
+            <main className="max-w-6xl mx-auto px-4 md:px-6">
 
-            <main className="max-w-7xl mx-auto px-6 relative z-10">
-                {/* Strategic Backlink */}
-                <div className="mb-12">
-                    <Link href="/tutors" className="inline-flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] text-on-surface-variant/40 hover:text-primary transition-all group">
-                        <span className="material-symbols-outlined text-lg group-hover:-translate-x-1 transition-transform">west</span> 
-                        GLOBAL DIRECTORY
-                    </Link>
-                </div>
+                {/* Back */}
+                <Link
+                    href="/search?role=TUTOR"
+                    className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-gray-700 transition-colors mb-8"
+                >
+                    <ArrowLeft size={16} /> Back to search
+                </Link>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
-                    {/* Left Column: Intelligence Profile */}
-                    <div className="lg:col-span-8">
-                        <section className="relative">
-                            <div className="relative h-[500px] md:h-[650px] w-full rounded-[4rem] overflow-hidden mb-12 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.1)] border border-outline-variant/5 bg-surface-container-low group">
-                                {tutor.image ? (
-                                    <img 
-                                        src={tutor.image} 
-                                        alt={tutor.name} 
-                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" 
-                                    />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-9xl font-headline font-black text-on-surface-variant/10 uppercase bg-gradient-to-br from-surface-container-low to-surface-container-high italic">
-                                        {(tutor.name || "U")[0]}
-                                    </div>
-                                )}
-                                
-                                <div className="absolute top-10 right-10 flex items-center gap-3 bg-white/40 dark:bg-slate-900/40 backdrop-blur-2xl px-6 py-3 rounded-full border border-white/20 shadow-2xl">
-                                    <span className="size-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                                    <span className="text-[10px] font-black uppercase tracking-widest">ACTIVE PARTNER</span>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+                    {/* ── Left / Main column ── */}
+                    <div className="lg:col-span-2 space-y-6">
+
+                        {/* Profile card */}
+                        <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8">
+                            <div className="flex flex-col sm:flex-row gap-6">
+
+                                {/* Avatar */}
+                                <div className="shrink-0">
+                                    {tutor.image ? (
+                                        <img
+                                            src={tutor.image}
+                                            alt={tutor.name}
+                                            className="w-24 h-24 rounded-2xl object-cover border border-gray-100"
+                                        />
+                                    ) : (
+                                        <div className="w-24 h-24 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 text-2xl font-bold">
+                                            {initials}
+                                        </div>
+                                    )}
                                 </div>
-                            </div>
 
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-4 mb-4">
-                                    <span className="px-4 py-1.5 bg-primary/5 text-primary rounded-full text-[10px] font-black uppercase tracking-[0.2em] border border-primary/10">
-                                        {tutor.subscriptionTier === 'ELITE' ? "ELITE PARTNER" : "VERIFIED EXPERT"}
-                                    </span>
-                                    <div className="flex items-center gap-1 text-amber-500 font-black">
-                                        {[...Array(5)].map((_, i) => (
-                                            <span 
-                                                key={i} 
-                                                className="material-symbols-outlined text-sm" 
-                                                style={{ fontVariationSettings: `'FILL' ${i < Math.floor(listing.rating || 4.5) ? 1 : 0}` }}
-                                            >
-                                                star
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex flex-wrap items-center gap-2 mb-1">
+                                        <h1 className="text-2xl font-bold text-gray-900">{tutor.name || "Tutor"}</h1>
+                                        {tutor.isVerified && (
+                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-700 rounded-full text-xs font-medium border border-blue-100">
+                                                <ShieldCheck size={12} /> Verified
                                             </span>
-                                        ))}
-                                        <span className="text-xs uppercase tracking-tighter ml-1">
-                                            {listing.rating > 0 ? listing.rating.toFixed(1) : "NEW"}
+                                        )}
+                                    </div>
+
+                                    {listing.title && (
+                                        <p className="text-gray-600 text-sm mb-3">{listing.title}</p>
+                                    )}
+
+                                    {/* Quick stats row */}
+                                    <div className="flex flex-wrap gap-4 text-sm text-gray-500">
+                                        {listing.experience > 0 && (
+                                            <span className="flex items-center gap-1.5">
+                                                <Briefcase size={14} /> {listing.experience} yr{listing.experience !== 1 ? "s" : ""} experience
+                                            </span>
+                                        )}
+                                        {listing.locations?.[0] && (
+                                            <span className="flex items-center gap-1.5">
+                                                <MapPin size={14} /> {listing.locations[0]}
+                                            </span>
+                                        )}
+                                        {listing.rating > 0 && (
+                                            <span className="flex items-center gap-1.5 text-amber-500 font-medium">
+                                                <Star size={14} fill="currentColor" strokeWidth={0} />
+                                                {listing.rating.toFixed(1)} ({listing.reviewCount} reviews)
+                                            </span>
+                                        )}
+                                        <span className="flex items-center gap-1.5">
+                                            <Clock size={14} /> Member since {memberSince}
                                         </span>
                                     </div>
                                 </div>
-                                <h1 className="text-6xl md:text-8xl font-headline font-black tracking-tighter mb-4 uppercase italic leading-[0.85]">
-                                    {tutor.role === "INSTITUTE" 
-                                        ? "Premium Institute" 
-                                        : (tutor.name?.split(' ')[0] || "Expert")} 
-                                    <br/> 
-                                    <span className="text-primary not-italic lowercase font-serif font-light">
-                                        {tutor.role === "INSTITUTE" 
-                                            ? "Education Partner" 
-                                            : (tutor.name?.split(' ').slice(1).join(' ') || "Tutor")}
-                                    </span>
-                                </h1>
-                                <p className="text-2xl text-on-surface-variant font-medium max-w-xl leading-snug">
-                                    {listing.title || `Specialist in ${listing.subjects?.[0] || 'Modern Education'}`}
-                                </p>
-                            </div>
-                        </section>
-
-                        {/* Performance Intelligence */}
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-20 mb-20 bg-surface-container-low/50 backdrop-blur-md p-10 rounded-[3rem] border border-outline-variant/5">
-                            <div className="space-y-1">
-                                <p className="text-[9px] font-black text-on-surface-variant/40 uppercase tracking-widest">Experience</p>
-                                <p className="text-3xl font-headline font-black">{listing.experience || 0} Yrs</p>
-                            </div>
-                            <div className="space-y-1">
-                                <p className="text-[9px] font-black text-on-surface-variant/40 uppercase tracking-widest">Impact</p>
-                                <p className="text-3xl font-headline font-black">{listing.reviewCount || 0}+</p>
-                            </div>
-                            <div className="space-y-1">
-                                <p className="text-[9px] font-black text-on-surface-variant/40 uppercase tracking-widest">Hourly Rate</p>
-                                <p className="text-3xl font-headline font-black text-primary">₹{listing.hourlyRate || "TBD"}</p>
-                            </div>
-                            <div className="space-y-1">
-                                <p className="text-[9px] font-black text-on-surface-variant/40 uppercase tracking-widest">Status</p>
-                                <p className="text-3xl font-headline font-black flex items-center gap-2">
-                                    <span className="size-3 rounded-full bg-emerald-500"></span>
-                                    ONLINE
-                                </p>
                             </div>
                         </div>
 
-                        {/* Narrative Sections */}
-                        <div className="space-y-24">
-                            <section>
-                                <div className="flex items-center gap-6 mb-12">
-                                    <h2 className="text-4xl font-headline font-black uppercase italic tracking-tighter">Strategic <span className="text-primary not-italic lowercase font-serif font-light">approach</span></h2>
-                                    <div className="flex-1 h-px bg-outline-variant/10"></div>
+                        {/* Stats strip */}
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                            {[
+                                { label: "Experience", value: listing.experience ? `${listing.experience} yrs` : "—", icon: Briefcase, color: "bg-blue-50 text-blue-600" },
+                                { label: "Students taught", value: `${listing.reviewCount || 0}+`, icon: Users, color: "bg-green-50 text-green-600" },
+                                { label: "Hourly rate", value: listing.hourlyRate ? `₹${listing.hourlyRate}` : "Contact", icon: IndianRupee, color: "bg-amber-50 text-amber-600" },
+                                { label: "Rating", value: listing.rating > 0 ? listing.rating.toFixed(1) : "New", icon: Star, color: "bg-purple-50 text-purple-600" },
+                            ].map((s, i) => (
+                                <div key={i} className="bg-white rounded-xl border border-gray-200 p-4 flex items-center gap-3">
+                                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${s.color}`}>
+                                        <s.icon size={16} />
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-gray-400">{s.label}</p>
+                                        <p className="font-semibold text-gray-900 text-sm">{s.value}</p>
+                                    </div>
                                 </div>
-                                <p className="text-xl text-on-surface-variant leading-relaxed max-w-3xl whitespace-pre-line font-medium opacity-80">
-                                    {listing.bio || "This partner maintains a strictly confidential pedagogical framework focused on high-performance academic outcomes."}
-                                </p>
-                            </section>
+                            ))}
+                        </div>
 
-                            <section>
-                                <div className="flex items-center gap-6 mb-12">
-                                    <h2 className="text-4xl font-headline font-black uppercase italic tracking-tighter">Specialized <span className="text-primary not-italic lowercase font-serif font-light">domains</span></h2>
-                                    <div className="flex-1 h-px bg-outline-variant/10"></div>
-                                </div>
-                                <div className="flex flex-wrap gap-4">
-                                    {listing.subjects?.map(sub => (
-                                        <span key={sub} className="px-8 py-4 bg-white dark:bg-slate-900 border border-outline-variant/10 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                                            {sub}
-                                        </span>
-                                    )) || <p className="text-on-surface-variant/40 italic font-black text-xs uppercase tracking-widest">GENERAL INTELLIGENCE</p>}
-                                </div>
-                            </section>
+                        {/* About */}
+                        {listing.bio && (
+                            <div className="bg-white rounded-2xl border border-gray-200 p-6">
+                                <h2 className="font-semibold text-gray-900 mb-3">About</h2>
+                                <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">{listing.bio}</p>
+                            </div>
+                        )}
 
-                            {/* Verification Cloud */}
-                            <section className="p-16 rounded-[4rem] bg-gradient-to-br from-primary to-blue-900 text-on-primary relative overflow-hidden group">
-                                <div className="absolute top-0 right-0 size-96 bg-white/5 rounded-full -mr-32 -mt-32 blur-3xl group-hover:bg-white/10 transition-colors duration-1000"></div>
-                                <h3 className="text-4xl font-headline font-black mb-12 uppercase italic leading-none">Institutional <br/> <span className="lowercase font-serif font-light not-italic text-blue-200">Verification.</span></h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                                    {[
-                                        { label: "Identity Matrix", status: "AUTHENTICATED", icon: "verified_user" },
-                                        { label: "Academic Credentials", status: "VERIFIED", icon: "school" },
-                                        { label: "Background Protocol", status: "CLEARED", icon: "shield_moon" },
-                                        { label: "Platform Tenure", status: "PARTNER SINCE 2024", icon: "history_edu" }
-                                    ].map((item, i) => (
-                                        <div key={i} className="flex gap-6 group/item">
-                                            <div className="size-16 rounded-2xl bg-white/10 backdrop-blur-xl flex items-center justify-center group-hover/item:bg-white group-hover/item:text-primary transition-all duration-500">
-                                                <span className="material-symbols-outlined text-2xl">{item.icon}</span>
-                                            </div>
-                                            <div>
-                                                <h4 className="font-bold text-lg mb-1">{item.label}</h4>
-                                                <p className="text-[9px] font-black uppercase tracking-[0.2em] opacity-40">{item.status}</p>
+                        {/* Subjects & Grades */}
+                        {(listing.subjects?.length > 0 || listing.grades?.length > 0) && (
+                            <div className="bg-white rounded-2xl border border-gray-200 p-6">
+                                <h2 className="font-semibold text-gray-900 mb-4">Subjects & Classes</h2>
+                                {listing.subjects?.length > 0 && (
+                                    <div className="mb-4">
+                                        <p className="text-xs text-gray-400 uppercase tracking-wide mb-2">Subjects</p>
+                                        <div className="flex flex-wrap gap-2">
+                                            {listing.subjects.map(s => (
+                                                <span key={s} className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium border border-blue-100">{s}</span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                                {listing.grades?.length > 0 && (
+                                    <div className="mb-4">
+                                        <p className="text-xs text-gray-400 uppercase tracking-wide mb-2">Classes / Grades</p>
+                                        <div className="flex flex-wrap gap-2">
+                                            {listing.grades.map(g => (
+                                                <span key={g} className="px-3 py-1.5 bg-gray-50 text-gray-700 rounded-lg text-sm font-medium border border-gray-200">{g}</span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                                {listing.boards?.length > 0 && (
+                                    <div>
+                                        <p className="text-xs text-gray-400 uppercase tracking-wide mb-2">Boards</p>
+                                        <div className="flex flex-wrap gap-2">
+                                            {listing.boards.map(b => (
+                                                <span key={b} className="px-3 py-1.5 bg-gray-50 text-gray-700 rounded-lg text-sm font-medium border border-gray-200">{b}</span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Teaching modes & locations */}
+                        {(listing.teachingModes?.length > 0 || listing.locations?.length > 0) && (
+                            <div className="bg-white rounded-2xl border border-gray-200 p-6">
+                                <h2 className="font-semibold text-gray-900 mb-4">How & Where</h2>
+                                {listing.teachingModes?.length > 0 && (
+                                    <div className="mb-4">
+                                        <p className="text-xs text-gray-400 uppercase tracking-wide mb-2">Teaching Mode</p>
+                                        <div className="flex flex-wrap gap-2">
+                                            {listing.teachingModes.map(m => {
+                                                const Icon = getModeIcon(m);
+                                                return (
+                                                    <span key={m} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 text-gray-700 rounded-lg text-sm font-medium border border-gray-200">
+                                                        <Icon size={13} /> {getModeLabel(m)}
+                                                    </span>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                )}
+                                {listing.locations?.length > 0 && (
+                                    <div>
+                                        <p className="text-xs text-gray-400 uppercase tracking-wide mb-2">Locations</p>
+                                        <div className="flex flex-wrap gap-2">
+                                            {listing.locations.map(l => (
+                                                <span key={l} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 text-gray-700 rounded-lg text-sm font-medium border border-gray-200">
+                                                    <MapPin size={13} /> {l}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Verifications */}
+                        <div className="bg-white rounded-2xl border border-gray-200 p-6">
+                            <h2 className="font-semibold text-gray-900 mb-4">Verifications</h2>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                {[
+                                    { label: "Identity verified", done: tutor.isIdVerified, icon: ShieldCheck },
+                                    { label: "Profile approved", done: tutor.isVerified, icon: CheckCircle2 },
+                                    { label: "Phone number verified", done: true, icon: CheckCircle2 },
+                                    { label: "Member since " + memberSince, done: true, icon: Clock },
+                                ].map((v, i) => (
+                                    <div key={i} className="flex items-center gap-3 text-sm">
+                                        <v.icon size={16} className={v.done ? "text-green-500" : "text-gray-300"} />
+                                        <span className={v.done ? "text-gray-700" : "text-gray-400"}>{v.label}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Reviews */}
+                        <div className="bg-white rounded-2xl border border-gray-200 p-6" id="reviews">
+                            <h2 className="font-semibold text-gray-900 mb-4">
+                                Reviews {listing.reviewCount > 0 && <span className="text-gray-400 font-normal text-sm">({listing.reviewCount})</span>}
+                            </h2>
+
+                            {tutor.reviewsReceived?.length > 0 ? (
+                                <div className="space-y-5">
+                                    {tutor.reviewsReceived.map(review => (
+                                        <div key={review.id} className="border-b border-gray-100 last:border-0 pb-5 last:pb-0">
+                                            <div className="flex items-start gap-3">
+                                                <div className="w-9 h-9 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-semibold text-sm shrink-0">
+                                                    {(review.author?.name || "S")[0].toUpperCase()}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <span className="font-medium text-sm text-gray-900">{review.author?.name || "Student"}</span>
+                                                        <span className="text-xs text-gray-400">{new Date(review.createdAt).toLocaleDateString("en-IN", { month: "short", year: "numeric" })}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-0.5 mb-2">
+                                                        {[...Array(5)].map((_, i) => (
+                                                            <Star key={i} size={12} fill={i < review.rating ? "#f59e0b" : "none"} stroke={i < review.rating ? "none" : "#d1d5db"} />
+                                                        ))}
+                                                    </div>
+                                                    {review.comment && (
+                                                        <p className="text-sm text-gray-600 leading-relaxed">{review.comment}</p>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
                                     ))}
                                 </div>
-                            </section>
-
-                            {/* Reputation Terminal */}
-                            <section id="reviews">
-                                <div className="flex items-center gap-6 mb-12">
-                                    <h2 className="text-4xl font-headline font-black uppercase italic tracking-tighter">Reputation <span className="text-primary not-italic lowercase font-serif font-light">terminal</span></h2>
-                                    <div className="flex-1 h-px bg-outline-variant/10"></div>
+                            ) : (
+                                <div className="text-center py-10">
+                                    <MessageCircle size={32} className="text-gray-200 mx-auto mb-3" />
+                                    <p className="text-sm text-gray-400">No reviews yet</p>
                                 </div>
-                                
-                                <div className="space-y-6">
-                                    {tutor.reviewsReceived?.length > 0 ? tutor.reviewsReceived.map((review, i) => (
-                                        <div key={review.id} className="p-10 rounded-[3rem] bg-surface-container-low/40 backdrop-blur-md border border-outline-variant/5 group hover:border-primary/20 transition-all duration-500 relative overflow-hidden">
-                                            <div className="flex flex-col md:flex-row justify-between gap-8 relative z-10">
-                                                <div className="flex gap-6">
-                                                    <div className="size-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-black text-xl italic shrink-0">
-                                                        {review.author?.name?.[0] || "S"}
-                                                    </div>
-                                                    <div>
-                                                        <div className="flex items-center gap-3 mb-2">
-                                                            <h4 className="font-bold text-lg uppercase italic tracking-tight">{review.author?.name || "STUDENT_VERIFIED"}</h4>
-                                                            <span className="text-[9px] font-black text-on-surface-variant/20 uppercase tracking-widest">• {new Date(review.createdAt).toLocaleDateString()}</span>
-                                                        </div>
-                                                        <div className="flex items-center gap-1 text-amber-500 mb-6">
-                                                            {[...Array(5)].map((_, i) => (
-                                                                <span key={i} className="material-symbols-outlined text-xs" style={{ fontVariationSettings: `'FILL' ${i < review.rating ? 1 : 0}` }}>star</span>
-                                                            ))}
-                                                        </div>
-                                                        <p className="text-lg text-on-surface-variant leading-relaxed font-medium italic opacity-80">
-                                                            "{review.comment || "NO_COMMENT_LOGGED"}"
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                                <div className="md:text-right shrink-0">
-                                                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/5 text-emerald-500 border border-emerald-500/10 text-[9px] font-black uppercase tracking-widest">
-                                                        <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                                        VERIFIED_FEEDBACK
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="absolute -bottom-6 -right-6 size-32 bg-primary/2 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                        </div>
-                                    )) : (
-                                        <div className="p-20 rounded-[4rem] border-4 border-dashed border-outline-variant/10 text-center">
-                                            <p className="text-on-surface-variant/20 italic font-black text-xs uppercase tracking-[0.4em]">Establishing Reputation Ledger...</p>
-                                        </div>
-                                    )}
-                                </div>
-                            </section>
+                            )}
                         </div>
+
                     </div>
 
-                    {/* Right Column: Acquisition Hub */}
-                    <aside className="lg:col-span-4">
-                        <div className="sticky top-32">
-                            <div className="bg-white dark:bg-slate-950 rounded-[3.5rem] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.15)] p-12 md:p-14 border border-outline-variant/10 relative overflow-hidden group">
-                                {/* Match Indicator Overlay */}
-                                <div className="absolute top-0 right-0 p-8">
-                                    <div className="size-16 rounded-full border border-primary/10 flex flex-col items-center justify-center group-hover:bg-primary group-hover:text-on-primary transition-all duration-700">
-                                        <span className="text-[8px] font-black uppercase leading-none opacity-40 group-hover:opacity-100 mb-0.5">High</span>
-                                        <span className="text-lg font-headline font-black leading-none italic">A+</span>
-                                    </div>
-                                </div>
+                    {/* ── Right / Sidebar ── */}
+                    <aside className="lg:col-span-1">
+                        <div className="sticky top-28 space-y-4">
 
-                                <div className="relative z-10">
-                                    <h3 className="text-3xl font-headline font-black mb-4 uppercase italic tracking-tight">Initiate <br/> <span className="text-primary not-italic lowercase font-serif font-light">Engagement.</span></h3>
-                                    <p className="text-on-surface-variant font-medium mb-12 opacity-60 leading-relaxed">Secure a 30-minute diagnostic session to assess academic affinity.</p>
-                                    
-                                    <div className="space-y-6">
-                                        <Link 
-                                            href={`/post-requirement?tutorId=${id}`}
-                                            className="w-full bg-primary text-on-primary py-8 rounded-[2rem] font-black text-[11px] tracking-[0.4em] uppercase shadow-2xl shadow-primary/30 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-4 group/btn"
-                                        >
-                                            <span className="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">lock_open</span>
-                                            Unlock Contact Details
-                                        </Link>
-
-                                        {canContactProactively ? (
-                                            <ChatInitiator 
-                                                studentId={viewerId} 
-                                                tutorId={id} 
-                                                recipientRole="TUTOR" 
-                                                label="SECURE CHAT ACTIVE" 
-                                            />
-                                        ) : viewerId ? (
-                                            <ChatInitiator 
-                                                studentId={viewerId} 
-                                                tutorId={id} 
-                                                recipientRole="TUTOR" 
-                                                label="START SECURE DIALOGUE" 
-                                            />
-                                        ) : (
-                                            <Link 
-                                                href={`/dashboard/student?tutorId=${id}`}
-                                                className="w-full bg-amber-50 text-amber-600 border border-amber-500/10 py-6 rounded-[1.5rem] font-black text-[10px] tracking-widest uppercase flex items-center justify-center gap-3 hover:bg-amber-100 transition-all text-center"
-                                            >
-                                                <span className="material-symbols-outlined text-lg">workspace_premium</span>
-                                                UPGRADE TO ACCESS
-                                            </Link>
-                                        )}
-
-                                        <div className="pt-10 border-t border-outline-variant/10 text-center">
-                                            <div className="flex items-center justify-center -space-x-3 mb-4">
-                                                {[1,2,3,4].map(i => (
-                                                    <div key={i} className="size-10 rounded-full border-2 border-white dark:border-slate-950 bg-surface-container-high flex items-center justify-center font-black text-[10px]">
-                                                        {String.fromCharCode(64 + i)}
-                                                    </div>
-                                                ))}
-                                                <div className="size-10 rounded-full border-2 border-white dark:border-slate-950 bg-primary text-on-primary flex items-center justify-center font-black text-[8px]">
-                                                    +82
-                                                </div>
+                            {/* Contact card */}
+                            <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+                                <div className="flex items-baseline justify-between mb-4">
+                                    <div>
+                                        {listing.hourlyRate ? (
+                                            <div className="flex items-baseline gap-1">
+                                                <span className="text-2xl font-bold text-gray-900">₹{listing.hourlyRate}</span>
+                                                <span className="text-sm text-gray-400">/ hour</span>
                                             </div>
-                                            <p className="text-[10px] font-black uppercase tracking-widest opacity-30">Active students this month</p>
-                                        </div>
+                                        ) : (
+                                            <span className="text-gray-500 text-sm">Rate on request</span>
+                                        )}
                                     </div>
+                                    {listing.rating > 0 && (
+                                        <span className="flex items-center gap-1 text-sm text-amber-500 font-medium">
+                                            <Star size={14} fill="currentColor" strokeWidth={0} />
+                                            {listing.rating.toFixed(1)}
+                                        </span>
+                                    )}
+                                </div>
+
+                                <Link
+                                    href={`/register/student?tutorId=${id}&subject=${listing.subjects?.[0] || ""}&intent=unlock`}
+                                    className="block w-full bg-blue-600 text-white text-center py-3 rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors mb-3"
+                                >
+                                    Contact Tutor
+                                </Link>
+
+                                {canContact ? (
+                                    <ChatInitiator
+                                        studentId={viewerId}
+                                        tutorId={id}
+                                        recipientRole="TUTOR"
+                                        label="Send Message"
+                                    />
+                                ) : viewerId ? (
+                                    <ChatInitiator
+                                        studentId={viewerId}
+                                        tutorId={id}
+                                        recipientRole="TUTOR"
+                                        label="Send Message"
+                                    />
+                                ) : (
+                                    <Link
+                                        href={`/login?next=/tutor/${id}`}
+                                        className="block w-full border border-gray-200 text-gray-700 text-center py-3 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors"
+                                    >
+                                        Log in to message
+                                    </Link>
+                                )}
+
+                                <p className="text-xs text-gray-400 text-center mt-3">Free to contact · No charges until you hire</p>
+                            </div>
+
+                            {/* Quick info */}
+                            <div className="bg-white rounded-2xl border border-gray-200 p-5">
+                                <h3 className="text-sm font-semibold text-gray-900 mb-3">Quick Info</h3>
+                                <ul className="space-y-2.5 text-sm">
+                                    {listing.gender && (
+                                        <li className="flex justify-between">
+                                            <span className="text-gray-400">Gender</span>
+                                            <span className="text-gray-700 font-medium">{listing.gender}</span>
+                                        </li>
+                                    )}
+                                    {listing.experience > 0 && (
+                                        <li className="flex justify-between">
+                                            <span className="text-gray-400">Experience</span>
+                                            <span className="text-gray-700 font-medium">{listing.experience} years</span>
+                                        </li>
+                                    )}
+                                    {listing.teachingModes?.length > 0 && (
+                                        <li className="flex justify-between">
+                                            <span className="text-gray-400">Mode</span>
+                                            <span className="text-gray-700 font-medium text-right">{listing.teachingModes.slice(0, 2).map(getModeLabel).join(", ")}</span>
+                                        </li>
+                                    )}
+                                    {listing.locations?.length > 0 && (
+                                        <li className="flex justify-between">
+                                            <span className="text-gray-400">Location</span>
+                                            <span className="text-gray-700 font-medium">{listing.locations[0]}</span>
+                                        </li>
+                                    )}
+                                </ul>
+                            </div>
+
+                            {/* Trust badge */}
+                            <div className="bg-green-50 rounded-2xl border border-green-100 p-4 flex items-start gap-3">
+                                <ShieldCheck size={18} className="text-green-600 shrink-0 mt-0.5" />
+                                <div>
+                                    <p className="text-sm font-medium text-green-800">Safe to contact</p>
+                                    <p className="text-xs text-green-600 mt-0.5">All tutors are verified before listing on TuitionsInIndia.</p>
                                 </div>
                             </div>
 
-                            {/* Performance Guarantee */}
-                            <div className="mt-10 p-10 bg-emerald-50 dark:bg-emerald-950/20 rounded-[2.5rem] border border-emerald-100 dark:border-emerald-800/30 flex items-start gap-6 group hover:border-emerald-500 transition-all duration-500">
-                                <div className="size-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:rotate-12 transition-transform shrink-0">
-                                    <span className="material-symbols-outlined">verified</span>
-                                </div>
-                                <div>
-                                    <h4 className="font-bold text-emerald-900 dark:text-emerald-400 mb-1">Elite Standard</h4>
-                                    <p className="text-xs text-emerald-800/60 dark:text-emerald-300/40 leading-relaxed font-medium">This partner adheres to the Global Learning Protocol for verifiable growth.</p>
-                                </div>
-                            </div>
                         </div>
                     </aside>
                 </div>
             </main>
 
-            {/* SEO & Graph Intelligence */}
+            {/* JSON-LD */}
             <script type="application/ld+json" dangerouslySetInnerHTML={{
                 __html: JSON.stringify({
                     "@context": "https://schema.org",
                     "@type": "Person",
                     "name": tutor.name,
                     "description": listing.bio,
-                    "jobTitle": "High-Performance Tutor",
+                    "jobTitle": `${listing.subjects?.[0] || "Academic"} Tutor`,
                     "url": `https://tuitionsinindia.com/tutor/${tutor.id}`,
-                    "image": tutor.image || "https://tuitionsinindia.com/default-avatar.png",
-                    "aggregateRating": listing.rating > 0 ? {
-                        "@type": "AggregateRating",
-                        "ratingValue": listing.rating,
-                        "reviewCount": listing.reviewCount
-                    } : undefined,
+                    "image": tutor.image || "https://tuitionsinindia.com/logo.png",
+                    ...(listing.rating > 0 && {
+                        "aggregateRating": {
+                            "@type": "AggregateRating",
+                            "ratingValue": listing.rating,
+                            "reviewCount": listing.reviewCount
+                        }
+                    })
                 })
             }} />
         </div>
