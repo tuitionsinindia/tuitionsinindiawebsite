@@ -91,23 +91,22 @@ function StudentDashboardContent() {
                 unlocked = await resUnlocked.json();
             }
 
-            // 2. If student is premium, fetch all high-fidelity matches from engine
-            const isPremium = ['PRO', 'ELITE'].includes(studentData?.subscriptionTier);
-            if (isPremium) {
-                const resMatches = await fetch(`/api/matching/matches?id=${studentId}&role=STUDENT`);
-                if (resMatches.ok) {
-                    const matches = await resMatches.json();
-                    // Merge and deduplicate
-                    const combined = [...unlocked, ...matches];
-                    const unique = Array.from(new Map(combined.map(t => [t.id, t])).values());
-                    setUnlockedTutors(unique);
-                } else {
-                    setUnlockedTutors(unlocked);
-                }
+            // 2. Fetch all high-fidelity matches from engine for the student
+            const resMatches = await fetch(`/api/matching/matches?id=${studentId}&role=STUDENT`);
+            if (resMatches.ok) {
+                const matches = await resMatches.json();
+                // Merge and deduplicate based on tutor ID
+                const combined = [...unlocked, ...matches];
+                const unique = Array.from(new Map(combined.map(t => [t.id, t])).values());
+                setUnlockedTutors(unique);
             } else {
                 setUnlockedTutors(unlocked);
             }
-        } catch (err) { console.error(err); } finally { setLoading(false); }
+        } catch (err) { 
+            console.error("Match synchronization error:", err); 
+        } finally { 
+            setLoading(false); 
+        }
     };
 
     const fetchActiveLeads = async () => {
