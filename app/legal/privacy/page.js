@@ -1,64 +1,90 @@
 "use client";
 
-import { ShieldCheck, Lock, ScrollText, CheckCircle2 } from "lucide-react";
+import Link from "next/link";
+import { ShieldCheck, Lock, ArrowLeft, FileText, ScrollText, CheckCircle2 } from "lucide-react";
 
 export default function PrivacyPolicy() {
     return (
-        <div className="min-h-screen bg-background-dark font-sans text-on-background-dark antialiased pt-32 selection:bg-primary/30">
-            
-            <main className="px-6 md:px-12 lg:px-24 pb-32 pt-10">
-                <div className="max-w-4xl mx-auto bg-surface-dark p-12 md:p-24 rounded-[4rem] border border-border-dark shadow-4xl relative overflow-hidden group">
-                    <div className="absolute top-0 left-0 w-full h-1 bg-primary/20"></div>
-                    <div className="absolute -right-32 -top-32 size-[500px] bg-primary/5 rounded-full blur-[120px] -z-10"></div>
+        <div className="min-h-screen bg-white text-gray-900 font-sans selection:bg-blue-600/10 selection:text-blue-600 pb-32 pt-10">
+            {/* Minimal Header */}
+            <div className="max-w-7xl mx-auto px-6 py-12 flex items-center justify-between border-b border-gray-50 mb-24">
+                <Link href="/" className="flex items-center gap-4 text-xs font-black uppercase tracking-[0.4em] text-gray-400 hover:text-blue-600 transition-all hover:-translate-x-2">
+                    <ArrowLeft size={16} /> Return to Grid
+                </Link>
+                <div className="flex items-center gap-4 text-blue-600">
+                    <ShieldCheck size={28} strokeWidth={1.5} />
+                    <span className="text-xs font-black uppercase tracking-[0.2em] italic">Institutional Privacy Protocol</span>
+                </div>
+            </div>
 
-                    <div className="space-y-12 relative z-10">
-                        <section className="space-y-4">
-                            <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary rounded-full border border-primary/20 mb-4">
-                                <ShieldCheck size={14} />
-                                <span className="text-[9px] font-black uppercase tracking-[0.2em]">Institutional Governance</span>
-                            </div>
-                            <h1 className="text-4xl md:text-6xl font-black uppercase italic tracking-tighter leading-none text-white">Privacy <span className="text-primary font-serif lowercase tracking-normal not-italic">protocol</span>.</h1>
-                            <p className="text-on-surface-dark/40 font-medium italic text-sm">Last Audit: March 24, 2026</p>
-                        </section>
+            <main className="max-w-4xl mx-auto px-6 lg:px-12">
+                {/* Hero Header */}
+                <div className="mb-28">
+                    <div className="inline-flex items-center gap-3 px-5 py-2 bg-blue-50 text-blue-600 rounded-full border border-blue-100 mb-10">
+                         <div className="size-2 bg-blue-600 rounded-full animate-pulse"></div>
+                         <span className="text-xs font-black uppercase tracking-[0.3em] italic">Standard v5.2 Active</span>
+                    </div>
+                    <h1 className="text-6xl md:text-8xl lg:text-9xl font-black text-gray-900 tracking-tighter uppercase italic leading-[0.8] mb-12">
+                        Privacy <br /> <span className="text-blue-600 underline decoration-blue-600/10 decoration-[16px] underline-offset-8">Protocol.</span>
+                    </h1>
+                    <p className="text-xl md:text-2xl text-gray-400 font-medium italic leading-relaxed max-w-2xl opacity-80">
+                        This dynamic framework outlines the operational and cryptographic standards for all matchmaking within the pedagogical discovery network. Last Audit: April 2026.
+                    </p>
+                </div>
 
-                        <div className="space-y-16 text-on-surface-dark/60 font-medium leading-[1.8] italic text-lg">
-                            <section className="space-y-6">
-                                <div className="flex items-center gap-4 mb-2">
-                                    <Lock className="text-primary size-5" />
-                                    <h2 className="text-2xl font-black text-white uppercase italic tracking-tight underline decoration-primary/20 decoration-4 underline-offset-4">01. Data Acquisition</h2>
-                                </div>
-                                <p>TuitionsInIndia acquires personal identifiers (Identity, Academic Credentials, Digital Contact points) strictly for the purpose of architecting learning matches. Every data point is treated as a high-security academic asset.</p>
-                            </section>
-
-                            <section className="space-y-6">
-                                <div className="flex items-center gap-4 mb-2">
-                                    <ScrollText className="text-primary size-5" />
-                                    <h2 className="text-2xl font-black text-white uppercase italic tracking-tight underline decoration-primary/20 decoration-4 underline-offset-4">02. Functional Application</h2>
-                                </div>
-                                <p>Your data facilitates the connection between ambition and expertise. We utilize telecommunication vectors (OTP, SMS, WhatsApp) solely for critical verification and service-level notifications.</p>
-                            </section>
-
-                            <section className="space-y-6">
-                                <div className="flex items-center gap-4 mb-2">
-                                    <CheckCircle2 className="text-primary size-5" />
-                                    <h2 className="text-2xl font-black text-white uppercase italic tracking-tight underline decoration-primary/20 decoration-4 underline-offset-4">03. Transparency in Sharing</h2>
-                                </div>
-                                <p>Learning requirements are distributed to verified faculty only. Explicit contact details remain encrypted until a formal 'Lead Unlock' protocol is initiated by a verified educator using the platform's credits.</p>
-                            </section>
-
-                            <section className="space-y-6">
-                                <div className="flex items-center gap-4 mb-2">
-                                    <ShieldCheck className="text-primary size-5" />
-                                    <h2 className="text-2xl font-black text-white uppercase italic tracking-tight underline decoration-primary/20 decoration-4 underline-offset-4">04. Encryption Standards</h2>
-                                </div>
-                                <p>We deploy institutional-grade encryption to safeguard your academic legacy. While we maintain the highest standards of digital fortification, we remind our members that no digital vector is 100% impenetrable.</p>
-                            </section>
-
-                            <section className="space-y-6">
-                                <h2 className="text-2xl font-black text-white uppercase italic tracking-tight underline decoration-primary/20 decoration-4 underline-offset-4">05. Support Matrix</h2>
-                                <p>For inquiries regarding data sovereignty or our privacy architecture, please contact our Legal Counsel at <span className="text-primary border-b border-primary/20">privacy@tuitionsinindia.com</span>.</p>
-                            </section>
+                {/* Protocol Matrix */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-24 mb-32">
+                    <div className="space-y-8 flex flex-col items-start group">
+                        <div className="size-20 rounded-3xl bg-gray-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-inner border border-gray-100">
+                            <Lock size={32} strokeWidth={1} />
                         </div>
+                        <h2 className="text-2xl font-black text-gray-900 uppercase italic tracking-tighter underline decoration-blue-600/10 decoration-8 underline-offset-4">01. Neural Security</h2>
+                        <p className="text-gray-500 leading-relaxed font-medium italic text-lg">
+                            Every digital identifier acquisition is architectural. We deployment end-to-end encryption layers to ensure institutional matching remaining strictly private.
+                        </p>
+                    </div>
+
+                    <div className="space-y-8 flex flex-col items-start group">
+                        <div className="size-20 rounded-3xl bg-gray-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-inner border border-gray-100">
+                            <ScrollText size={32} strokeWidth={1} />
+                        </div>
+                        <h2 className="text-2xl font-black text-gray-900 uppercase italic tracking-tighter underline decoration-blue-600/10 decoration-8 underline-offset-4">02. Acquisition Audit</h2>
+                        <p className="text-gray-500 leading-relaxed font-medium italic text-lg">
+                            We acquire identifiers (Identity, Credentials, Contact Vectors) solely for node verification. Academic histories are audited via multi-staged pipelines.
+                        </p>
+                    </div>
+
+                    <div className="space-y-8 flex flex-col items-start group">
+                        <div className="size-20 rounded-3xl bg-gray-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-inner border border-gray-100">
+                            <CheckCircle2 size={32} strokeWidth={1} />
+                        </div>
+                        <h2 className="text-2xl font-black text-gray-900 uppercase italic tracking-tighter underline decoration-blue-600/10 decoration-8 underline-offset-4">03. Protocol Visibility</h2>
+                        <p className="text-gray-500 leading-relaxed font-medium italic text-lg">
+                            Explicit contact fields remain encrypted until a formal link protocol is initialized. TuitionsInIndia does not participate in financial tolls or store payment assets.
+                        </p>
+                    </div>
+
+                    <div className="space-y-8 flex flex-col items-start group">
+                        <div className="size-20 rounded-3xl bg-gray-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-inner border border-gray-100">
+                            <ShieldCheck size={32} strokeWidth={1} />
+                        </div>
+                        <h2 className="text-2xl font-black text-gray-900 uppercase italic tracking-tighter underline decoration-blue-600/10 decoration-8 underline-offset-4">04. Sovereignty Rights</h2>
+                        <p className="text-gray-500 leading-relaxed font-medium italic text-lg">
+                            Matchmaking profiles (nodes) are user-governed. You maintain 100% control over profile deactivation and discovery status within the live network grid.
+                        </p>
+                    </div>
+                </div>
+
+                {/* Tactical Support Node */}
+                <div className="p-16 md:p-24 bg-gray-50/50 rounded-[4rem] border border-gray-100 flex flex-col lg:flex-row items-center justify-between gap-16 group transition-all hover:border-blue-600/20 hover:bg-white relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-2 h-full bg-blue-600 opacity-10"></div>
+                    <div className="space-y-6 relative z-10 max-w-xl">
+                        <h3 className="text-xs font-black uppercase tracking-[0.5em] text-blue-600/40 group-hover:text-blue-600 transition-colors italic">Data Sovereignty Console</h3>
+                        <p className="text-3xl md:text-5xl font-black text-gray-900 uppercase italic tracking-tighter leading-none mb-6">Direct Legal <br /> Relay Protocol.</p>
+                        <p className="text-gray-400 font-medium italic text-lg leading-relaxed">For protocol inquiries or data sovereignty audits, contact the network counsel at <span className="text-blue-600 font-bold border-b border-blue-600/10 pb-1">privacy@tuitionsinindia.com</span></p>
+                    </div>
+                    <div className="size-32 md:size-40 rounded-[3rem] bg-white border border-gray-100 flex items-center justify-center text-blue-600 shadow-2xl group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 shrink-0">
+                        <ShieldCheck size={56} strokeWidth={0.5} />
                     </div>
                 </div>
             </main>

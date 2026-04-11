@@ -58,9 +58,9 @@ export async function POST(request) {
         const lead = await prisma.lead.create({
             data: {
                 studentId: user.id,
-                subject: subject,
-                grade: grade,
-                location: location,
+                subjects: subject ? [subject] : [],
+                grades: grade ? [grade] : [],
+                locations: location ? [location] : [],
                 budget: budget,
                 description: description,
                 status: 'OPEN',

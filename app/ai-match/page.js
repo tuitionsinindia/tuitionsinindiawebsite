@@ -84,7 +84,7 @@ export default function AIMatchingFlow() {
                 <div className="text-center mb-16 space-y-6">
                     <div className="inline-flex items-center gap-3 px-4 py-2 bg-primary/10 rounded-full border border-primary/20 mb-6">
                         <Sparkles size={14} className="text-primary" />
-                        <span className="text-primary text-[10px] font-black uppercase tracking-[0.3em]">AI-Powered Matching Engine</span>
+                        <span className="text-primary text-xs font-black uppercase tracking-[0.3em]">AI-Powered Matching Engine</span>
                     </div>
 
                     {step < 4 ? (
@@ -144,7 +144,7 @@ export default function AIMatchingFlow() {
                                             <opt.icon size={32} />
                                         </div>
                                         <h3 className="text-xl font-black text-white uppercase italic tracking-tight mb-2">{opt.title}</h3>
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-on-surface-dark/40">{opt.desc}</p>
+                                        <p className="text-xs font-black uppercase tracking-widest text-on-surface-dark/40">{opt.desc}</p>
                                     </button>
                                 ))}
                             </div>
@@ -161,7 +161,7 @@ export default function AIMatchingFlow() {
 
                             <div className="space-y-10">
                                 <div className="space-y-4">
-                                    <label className="text-[10px] font-black text-primary uppercase tracking-[0.3em] ml-6 italic">Target Subject / Domain</label>
+                                    <label className="text-xs font-black text-primary uppercase tracking-[0.3em] ml-6 italic">Target Subject / Domain</label>
                                     <input
                                         type="text"
                                         value={subject}
@@ -172,13 +172,13 @@ export default function AIMatchingFlow() {
                                 </div>
 
                                 <div className="space-y-4">
-                                    <label className="text-[10px] font-black text-primary uppercase tracking-[0.3em] ml-6 italic">Academic Protocol Level</label>
+                                    <label className="text-xs font-black text-primary uppercase tracking-[0.3em] ml-6 italic">Academic Protocol Level</label>
                                     <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                                         {['Primary', 'Middle', 'High School', 'College', 'Elite'].map(lvl => (
                                             <button
                                                 key={lvl}
                                                 onClick={() => setGradeLevel(lvl)}
-                                                className={`py-5 px-4 rounded-2xl border transition-all text-[10px] font-black uppercase tracking-widest ${gradeLevel === lvl ? 'bg-primary text-white border-primary shadow-xl shadow-primary/20 z-10 scale-105' : 'bg-background-dark text-on-surface-dark/20 border-border-dark hover:border-primary/20'}`}
+                                                className={`py-5 px-4 rounded-2xl border transition-all text-xs font-black uppercase tracking-widest ${gradeLevel === lvl ? 'bg-primary text-white border-primary shadow-xl shadow-primary/20 z-10 scale-105' : 'bg-background-dark text-on-surface-dark/20 border-border-dark hover:border-primary/20'}`}
                                             >
                                                 {lvl}
                                             </button>
@@ -188,11 +188,11 @@ export default function AIMatchingFlow() {
                             </div>
 
                             <div className="flex gap-6 pt-10 border-t border-border-dark">
-                                <button onClick={handleBack} className="px-10 py-6 rounded-2xl font-black text-on-surface-dark/20 hover:text-white transition-colors uppercase tracking-[0.3em] text-[10px]">Back</button>
+                                <button onClick={handleBack} className="px-10 py-6 rounded-2xl font-black text-on-surface-dark/20 hover:text-white transition-colors uppercase tracking-[0.3em] text-xs">Back</button>
                                 <button
                                     onClick={handleNext}
                                     disabled={!subject || !gradeLevel}
-                                    className={`flex-1 rounded-2xl font-black py-6 transition-all uppercase tracking-[0.3em] text-[10px] ${subject && gradeLevel ? 'bg-primary text-white shadow-2xl shadow-primary/20 hover:scale-[1.02] active:scale-95' : 'bg-border-dark text-on-surface-dark/10 cursor-not-allowed'}`}
+                                    className={`flex-1 rounded-2xl font-black py-6 transition-all uppercase tracking-[0.3em] text-xs ${subject && gradeLevel ? 'bg-primary text-white shadow-2xl shadow-primary/20 hover:scale-[1.02] active:scale-95' : 'bg-border-dark text-on-surface-dark/10 cursor-not-allowed'}`}
                                 >
                                     Continue Analysis
                                 </button>
@@ -221,7 +221,7 @@ export default function AIMatchingFlow() {
                                         </div>
                                         <div className="flex-1">
                                             <h4 className="font-black text-white uppercase italic tracking-tight text-lg mb-1">{style.title}</h4>
-                                            <p className="text-[10px] text-on-surface-dark/40 font-black uppercase tracking-widest">{style.desc}</p>
+                                            <p className="text-xs text-on-surface-dark/40 font-black uppercase tracking-widest">{style.desc}</p>
                                         </div>
                                         <input
                                             type="radio"
@@ -235,11 +235,11 @@ export default function AIMatchingFlow() {
                             </div>
 
                             <div className="flex gap-6 pt-10 border-t border-border-dark">
-                                <button onClick={handleBack} className="px-10 py-6 rounded-2xl font-black text-on-surface-dark/20 hover:text-white transition-colors uppercase tracking-[0.3em] text-[10px]">Back</button>
+                                <button onClick={handleBack} className="px-10 py-6 rounded-2xl font-black text-on-surface-dark/20 hover:text-white transition-colors uppercase tracking-[0.3em] text-xs">Back</button>
                                 <button
                                     onClick={handleAnalyze}
                                     disabled={!learningStyle}
-                                    className={`flex-1 rounded-2xl font-black py-6 flex items-center justify-center gap-4 transition-all uppercase tracking-[0.3em] text-[10px] ${learningStyle ? 'bg-primary text-white shadow-2xl shadow-primary/20 hover:scale-[1.02] active:scale-95' : 'bg-border-dark text-on-surface-dark/10 cursor-not-allowed'}`}
+                                    className={`flex-1 rounded-2xl font-black py-6 flex items-center justify-center gap-4 transition-all uppercase tracking-[0.3em] text-xs ${learningStyle ? 'bg-primary text-white shadow-2xl shadow-primary/20 hover:scale-[1.02] active:scale-95' : 'bg-border-dark text-on-surface-dark/10 cursor-not-allowed'}`}
                                 >
                                     <Cpu size={16} strokeWidth={3} />
                                     Synchronize Matches
@@ -267,7 +267,7 @@ export default function AIMatchingFlow() {
                                     { label: "Cross-referencing domain expertise", done: true },
                                     { label: "Validating pedagogical alignment", done: false }
                                 ].map((item, i) => (
-                                    <div key={i} className={`flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.4em] ${item.done ? 'text-primary' : 'text-on-surface-dark/10 animate-pulse'}`}>
+                                    <div key={i} className={`flex items-center gap-4 text-xs font-black uppercase tracking-[0.4em] ${item.done ? 'text-primary' : 'text-on-surface-dark/10 animate-pulse'}`}>
                                         {item.done ? <CheckCircle2 size={16} /> : <div className="size-4 border-2 border-border-dark border-t-primary rounded-full animate-spin"></div>}
                                         {item.label}
                                     </div>
@@ -281,13 +281,13 @@ export default function AIMatchingFlow() {
                         <div className="animate-fade-in-up space-y-12">
                             {aiResults && aiResults.length > 0 ? (
                                 <div className="space-y-10">
-                                    <div className="inline-flex items-center gap-3 bg-emerald-400/10 px-6 py-2 rounded-full border border-emerald-400/20 text-emerald-400 font-black uppercase tracking-[0.3em] text-[10px]">
+                                    <div className="inline-flex items-center gap-3 bg-emerald-400/10 px-6 py-2 rounded-full border border-emerald-400/20 text-emerald-400 font-black uppercase tracking-[0.3em] text-xs">
                                         <UserCheck size={14} strokeWidth={3} /> Neural Match Score: {aiResults[0].matchScore}%
                                     </div>
 
                                     {/* Top Match Card */}
                                     <div className="bg-background-dark border-4 border-primary rounded-[4rem] p-12 md:p-16 shadow-4xl relative group overflow-hidden">
-                                        <div className="absolute top-0 right-10 bg-primary text-white text-[10px] font-black uppercase tracking-[0.3em] px-8 py-3 rounded-b-2xl shadow-xl shadow-primary/20">
+                                        <div className="absolute top-0 right-10 bg-primary text-white text-xs font-black uppercase tracking-[0.3em] px-8 py-3 rounded-b-2xl shadow-xl shadow-primary/20">
                                             Institutional Recommendation
                                         </div>
 
@@ -298,7 +298,7 @@ export default function AIMatchingFlow() {
                                                 </div>
                                                 <div className="px-6 py-3 bg-white/5 rounded-2xl border border-white/10">
                                                     <p className="text-2xl font-black text-white italic tracking-tight">₹{aiResults[0].hourlyRate}</p>
-                                                    <p className="text-[9px] font-black uppercase tracking-widest text-on-surface-dark/20">Hourly Valuation</p>
+                                                    <p className="text-xs font-black uppercase tracking-widest text-on-surface-dark/20">Hourly Valuation</p>
                                                 </div>
                                             </div>
 
@@ -311,7 +311,7 @@ export default function AIMatchingFlow() {
                                                 </div>
 
                                                 <div className="bg-surface-dark p-10 rounded-[3rem] border border-border-dark">
-                                                    <h4 className="text-[10px] font-black text-primary uppercase tracking-[0.3em] mb-6 flex items-center gap-3">
+                                                    <h4 className="text-xs font-black text-primary uppercase tracking-[0.3em] mb-6 flex items-center gap-3">
                                                         <Cpu size={14} />
                                                         Recommendation Matrix Basis
                                                     </h4>

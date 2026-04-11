@@ -18,7 +18,7 @@ export default function WelcomeScreen() {
                         <View>
                             <View className="flex-row items-center gap-2 mb-0.5">
                                 <View className="size-2 bg-primary rounded-full animate-pulse" />
-                                <Text className="text-primary text-[10px] font-black uppercase tracking-[0.25em]">Global Intelligence</Text>
+                                <Text className="text-primary text-xs font-black uppercase tracking-[0.25em]">Global Intelligence</Text>
                             </View>
                             <Text className="text-white text-2xl font-black tracking-tighter">TuitionsInIndia</Text>
                         </View>
@@ -32,7 +32,7 @@ export default function WelcomeScreen() {
 
                     <View className="flex-row items-center gap-2 mb-4">
                         <ShieldCheck size={14} color="#0066ff" />
-                        <Text className="text-[#6c757d] text-[10px] font-black uppercase tracking-widest">Verified Academic Platform</Text>
+                        <Text className="text-[#6c757d] text-xs font-black uppercase tracking-widest">Verified Academic Platform</Text>
                     </View>
 
                     <Text className="text-white text-3xl font-black leading-[1.2] mb-5 tracking-tight">
@@ -63,7 +63,7 @@ export default function WelcomeScreen() {
                         <View className="bg-primary/10 p-4 rounded-[1.5rem] mb-4">
                             <Search size={26} color="#0066ff" />
                         </View>
-                        <Text className="text-white font-black text-[10px] uppercase tracking-widest text-center">Find Experts</Text>
+                        <Text className="text-white font-black text-xs uppercase tracking-widest text-center">Find Experts</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
@@ -73,7 +73,7 @@ export default function WelcomeScreen() {
                         <View className="bg-success-green/10 p-4 rounded-[1.5rem] mb-4">
                             <MessageSquare size={26} color="#34c759" />
                         </View>
-                        <Text className="text-white font-black text-[10px] uppercase tracking-widest text-center">Chat Room</Text>
+                        <Text className="text-white font-black text-xs uppercase tracking-widest text-center">Chat Room</Text>
                     </TouchableOpacity>
                 </View>
 
@@ -91,7 +91,7 @@ export default function WelcomeScreen() {
                         onPress={() => router.push('/login')}
                         className="py-8 items-center group"
                     >
-                        <Text className="text-[#6c757d] font-black text-[10px] uppercase tracking-[0.25em]">
+                        <Text className="text-[#6c757d] font-black text-xs uppercase tracking-[0.25em]">
                             Existing User? <Text className="text-white">Admin / User Login</Text>
                         </Text>
                     </TouchableOpacity>

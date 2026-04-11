@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { calculateMatchScore } from "@/lib/matchEngine";
 
 export const dynamic = 'force-dynamic';
 
@@ -77,21 +78,50 @@ export async function GET(request) {
             },
         });
 
-        // Fetch tutor info for premium check
-        const requester = tutorId ? await prisma.user.findUnique({ where: { id: tutorId }, select: { subscriptionTier: true } }) : null;
+        // Fetch tutor info for premium check and match calculation
+        const requester = tutorId ? await prisma.user.findUnique({ 
+            where: { id: tutorId }, 
+            include: { tutorListing: true } 
+        }) : null;
+        
         const isPremiumTutor = ['PRO', 'ELITE', 'INSTITUTE'].includes(requester?.subscriptionTier);
 
-        // Sanitize leads
+        const requesterCriterion = requester?.tutorListing ? {
+            subjects: requester.tutorListing.subjects,
+            grades: requester.tutorListing.grades,
+            locations: requester.tutorListing.locations,
+            lat: requester.lat,
+            lng: requester.lng
+        } : null;
+
+        // Sanitize leads and inject match scores
         const sanitizedLeads = leads.map(lead => {
             const isUnlockedByCredit = lead.unlockedBy.length > 0;
             const isUnlocked = isUnlockedByCredit || isPremiumTutor;
             
+            let match = { score: 0, label: "Analyzing...", factors: [] };
+            if (requesterCriterion) {
+                match = calculateMatchScore(requesterCriterion, {
+                    subjects: lead.subjects,
+                    grades: lead.grades,
+                    locations: lead.locations,
+                    lat: lead.lat,
+                    lng: lead.lng
+                });
+            }
+
             return {
                 ...lead,
                 student: isUnlocked ? lead.student : { name: "Hidden", phone: "Hidden", email: "Hidden" },
                 isUnlocked,
+                matchScore: match.score,
+                matchLabel: match.label,
+                matchFactors: match.factors
             };
         });
+
+        // Sort by matchScore descending
+        sanitizedLeads.sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
 
         return NextResponse.json(sanitizedLeads);
     } catch (error) {

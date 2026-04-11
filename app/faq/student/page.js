@@ -38,7 +38,7 @@ export default function StudentFAQ() {
                 <div className="max-w-4xl mx-auto">
                     <div className="inline-flex items-center gap-3 px-4 py-2 bg-blue-50 rounded-full border border-blue-100 mb-8">
                         <ShieldCheck size={14} className="text-blue-600" />
-                        <span className="text-blue-700 text-[10px] font-black uppercase tracking-[0.3em]">Institutional Support Matrix</span>
+                        <span className="text-blue-700 text-xs font-black uppercase tracking-[0.3em]">Institutional Support Matrix</span>
                     </div>
                     
                     <h1 className="text-5xl md:text-8xl font-black tracking-tighter mb-10 leading-[0.9] uppercase italic text-gray-900">
@@ -96,7 +96,7 @@ export default function StudentFAQ() {
                         </button>
                     </div>
 
-                    <div className="mt-20 flex items-center justify-center gap-2 text-[10px] font-black text-gray-500 uppercase tracking-[0.5em]">
+                    <div className="mt-20 flex items-center justify-center gap-2 text-xs font-black text-gray-500 uppercase tracking-[0.5em]">
                         <Lock size={12} strokeWidth={3} /> Standard Security Protocols Active
                     </div>
                 </div>

@@ -102,7 +102,7 @@ function SelectLevelContent() {
                                             <ChevronRight size={16} className="text-gray-300 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                                         </div>
                                         {!loading && (
-                                            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-[10px] font-black uppercase tracking-wider group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                                            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-black uppercase tracking-wider group-hover:bg-blue-600 group-hover:text-white transition-colors">
                                                 <Users size={12} /> {count} 
                                             </span>
                                         )}
@@ -119,7 +119,7 @@ function SelectLevelContent() {
                     <div className="space-y-2">
                         <div className="flex items-center gap-2 justify-center md:justify-start">
                             <Target size={18} className="text-amber-500" />
-                            <span className="text-amber-600 font-bold uppercase text-[10px] tracking-widest">Need more precision?</span>
+                            <span className="text-amber-600 font-bold uppercase text-xs tracking-widest">Need more precision?</span>
                         </div>
                         <h4 className="text-xl font-bold text-gray-900">Get a tailored search</h4>
                         <p className="text-gray-500 text-sm font-medium">Post your specific requirements and let tutors reach out to you.</p>

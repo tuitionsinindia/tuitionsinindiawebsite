@@ -32,8 +32,8 @@ ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Install Prisma CLI globally for migrations
-RUN npm install -g prisma@6.19.2
+# Install Prisma CLI globally for migrations (as root before switching user)
+RUN npm install -g prisma@6.19.2 --unsafe-perm
 
 COPY --from=builder /app/public ./public
 

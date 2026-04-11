@@ -62,7 +62,7 @@ export default function TutorProfile() {
                 </TouchableOpacity>
                 <View className="items-center">
                     <Text className="text-white text-lg font-black tracking-tight">Expert Analytics</Text>
-                    <Text className="text-primary text-[10px] font-black uppercase tracking-widest">Profile Authenticated</Text>
+                    <Text className="text-primary text-xs font-black uppercase tracking-widest">Profile Authenticated</Text>
                 </View>
                 <View className="w-12" />
             </View>
@@ -90,7 +90,7 @@ export default function TutorProfile() {
                         <View className="size-1.5 rounded-full bg-border-dark mx-5" />
                         <View className="flex-row items-center gap-2">
                             <MapPin size={14} color="#6c757d" />
-                            <Text className="text-[#6c757d] font-black text-[10px] uppercase tracking-[0.2em]">{tutor.city || 'Verified Remote'}</Text>
+                            <Text className="text-[#6c757d] font-black text-xs uppercase tracking-[0.2em]">{tutor.city || 'Verified Remote'}</Text>
                         </View>
                     </View>
                 </View>
@@ -98,17 +98,17 @@ export default function TutorProfile() {
                 {/* Performance Bento Grid */}
                 <View className="flex-row justify-between mt-14 gap-5">
                     <View className="flex-1 bg-surface-dark p-8 rounded-[3rem] border border-border-dark items-center shadow-lg">
-                        <Text className="text-[#6c757d] text-[10px] font-black uppercase tracking-widest mb-3">Rate / Session</Text>
+                        <Text className="text-[#6c757d] text-xs font-black uppercase tracking-widest mb-3">Rate / Session</Text>
                         <View className="flex-row items-end">
                             <Text className="text-white text-3xl font-black tracking-tighter">₹{tutor.hourlyRate}</Text>
-                            <Text className="text-[#6c757d] text-[10px] font-black ml-1 mb-1.5 uppercase">Net</Text>
+                            <Text className="text-[#6c757d] text-xs font-black ml-1 mb-1.5 uppercase">Net</Text>
                         </View>
                     </View>
                     <View className="flex-1 bg-surface-dark p-8 rounded-[3rem] border border-border-dark items-center shadow-lg">
-                        <Text className="text-[#6c757d] text-[10px] font-black uppercase tracking-widest mb-3">Excellence</Text>
+                        <Text className="text-[#6c757d] text-xs font-black uppercase tracking-widest mb-3">Excellence</Text>
                         <View className="flex-row items-end">
                             <Text className="text-white text-3xl font-black tracking-tighter">{tutor.experience || '15+'}</Text>
-                            <Text className="text-[#6c757d] text-[10px] font-black ml-1.5 mb-1.5 uppercase">Years</Text>
+                            <Text className="text-[#6c757d] text-xs font-black ml-1.5 mb-1.5 uppercase">Years</Text>
                         </View>
                     </View>
                 </View>
@@ -131,7 +131,7 @@ export default function TutorProfile() {
 
                 {/* Verified Domains */}
                 <View className="mt-12">
-                    <Text className="text-[#6c757d] text-[10px] font-black uppercase tracking-[0.25em] mb-6">Authenticated Domains of Expertise</Text>
+                    <Text className="text-[#6c757d] text-xs font-black uppercase tracking-[0.25em] mb-6">Authenticated Domains of Expertise</Text>
                     <View className="flex-row flex-wrap gap-4">
                         {tutor.subjects?.map((s) => (
                             <View key={s} className="bg-primary/5 px-8 py-4 rounded-[1.5rem] border border-primary/20 shadow-sm shadow-primary/5">
@@ -155,7 +155,7 @@ export default function TutorProfile() {
                 <TouchableOpacity className="flex-1 bg-primary p-7 rounded-[2rem] items-center justify-center shadow-2xl shadow-primary/40 active:scale-95 transition-transform">
                     <View className="flex-row items-center gap-4">
                         <Calendar size={20} color="white" strokeWidth={3} />
-                        <Text className="text-white font-black uppercase tracking-[0.2em] text-[10px]">Secure Mentorship</Text>
+                        <Text className="text-white font-black uppercase tracking-[0.2em] text-xs">Secure Mentorship</Text>
                     </View>
                 </TouchableOpacity>
             </View>

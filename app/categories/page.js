@@ -92,15 +92,15 @@ export default function CategoriesPage() {
                                         <div>
                                             <p className="font-bold">{cat.name}</p>
                                             <div className="flex items-center gap-2">
-                                                <p className={`text-[10px] uppercase font-black tracking-widest ${
+                                                <p className={`text-xs uppercase font-black tracking-widest ${
                                                     selectedCategory?.id === cat.id ? "text-blue-200" : "text-gray-400"
                                                 }`}>
                                                     {cat.subjects.length} Subjects
                                                 </p>
                                                 {!loading && (
                                                     <>
-                                                        <span className="text-[10px] text-gray-300">•</span>
-                                                        <span className={`text-[10px] font-bold ${
+                                                        <span className="text-xs text-gray-300">•</span>
+                                                        <span className={`text-xs font-bold ${
                                                             selectedCategory?.id === cat.id ? "text-white" : "text-blue-600"
                                                         }`}>
                                                             {count} Tutors
@@ -146,7 +146,7 @@ export default function CategoriesPage() {
                                         >
                                             <div className="flex flex-col">
                                                 <span className="font-bold text-gray-800 group-hover:text-white transition-colors">{subject}</span>
-                                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 group-hover:text-blue-200 transition-colors mt-1">
+                                                <span className="text-xs font-black uppercase tracking-widest text-gray-400 group-hover:text-blue-200 transition-colors mt-1">
                                                     {subjectCounts[subject] || 0} Tutors
                                                 </span>
                                             </div>

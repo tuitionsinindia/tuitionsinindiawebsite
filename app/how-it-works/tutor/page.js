@@ -65,7 +65,7 @@ export default function TutorHowItWorks() {
                 <div className="max-w-4xl mx-auto">
                     <div className="inline-flex items-center gap-3 px-4 py-2 bg-blue-50 rounded-full border border-blue-100 mb-8">
                         <Zap size={14} className="text-blue-600" />
-                        <span className="text-blue-700 text-[10px] font-black uppercase tracking-[0.3em]">Independent Faculty Protocol</span>
+                        <span className="text-blue-700 text-xs font-black uppercase tracking-[0.3em]">Independent Faculty Protocol</span>
                     </div>
                     
                     <h1 className="text-5xl md:text-8xl font-black tracking-tighter mb-10 leading-[0.9] uppercase italic text-gray-900">
@@ -143,9 +143,9 @@ export default function TutorHowItWorks() {
                             { label: "Revenue Share", val: "100%", sub: "Zero Margin" }
                         ].map((stat, i) => (
                             <div key={i} className="space-y-1">
-                                <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">{stat.label}</p>
+                                <p className="text-xs font-black uppercase tracking-widest text-gray-500">{stat.label}</p>
                                 <p className="text-3xl font-black text-white">{stat.val}</p>
-                                <p className="text-[10px] font-bold text-blue-500 italic uppercase">{stat.sub}</p>
+                                <p className="text-xs font-bold text-blue-500 italic uppercase">{stat.sub}</p>
                             </div>
                         ))}
                     </div>
@@ -172,7 +172,7 @@ export default function TutorHowItWorks() {
                         ))}
                     </div>
                 </div>
-                <div className="mt-20 text-center flex items-center justify-center gap-2 text-[10px] font-black text-gray-300 uppercase tracking-[0.5em]">
+                <div className="mt-20 text-center flex items-center justify-center gap-2 text-xs font-black text-gray-300 uppercase tracking-[0.5em]">
                     <Lock size={12} strokeWidth={3} /> Standard Security Protocols Active
                 </div>
             </section>

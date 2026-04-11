@@ -63,7 +63,7 @@ export default function AIMatchmaker() {
                 </TouchableOpacity>
                 <View className="ml-5">
                     <Text className="text-white text-xl font-black tracking-tight">AI Matchmaker</Text>
-                    <Text className="text-primary text-[10px] font-black uppercase tracking-widest">Decision Intelligence</Text>
+                    <Text className="text-primary text-xs font-black uppercase tracking-widest">Decision Intelligence</Text>
                 </View>
             </View>
 
@@ -94,7 +94,7 @@ export default function AIMatchmaker() {
                                     <Text className="text-white text-lg font-black tracking-tight">{g.label}</Text>
                                     <View className="flex-row items-center gap-1.5 mt-1">
                                         <View className="size-1 bg-[#34c759] rounded-full" />
-                                        <Text className="text-[#6c757d] text-[10px] font-black uppercase tracking-widest">Active Channel</Text>
+                                        <Text className="text-[#6c757d] text-xs font-black uppercase tracking-widest">Active Channel</Text>
                                     </View>
                                 </View>
                             </TouchableOpacity>
@@ -106,7 +106,7 @@ export default function AIMatchmaker() {
                     <View>
                         <Text className="text-white text-3xl font-black mb-10 tracking-tight">Subject &{"\n"}<Text className="text-primary">Proficiency</Text></Text>
 
-                        <Text className="text-primary font-black text-[10px] uppercase tracking-widest mb-4 px-1">Specific Discipline</Text>
+                        <Text className="text-primary font-black text-xs uppercase tracking-widest mb-4 px-1">Specific Discipline</Text>
                         <TextInput
                             value={formData.subject}
                             onChangeText={(t) => setFormData({ ...formData, subject: t })}
@@ -115,7 +115,7 @@ export default function AIMatchmaker() {
                             className="bg-surface-dark text-white p-7 rounded-3xl border border-border-dark mb-12 font-black text-lg shadow-inner"
                         />
 
-                        <Text className="text-primary font-black text-[10px] uppercase tracking-widest mb-5 px-1">Engagement Level</Text>
+                        <Text className="text-primary font-black text-xs uppercase tracking-widest mb-5 px-1">Engagement Level</Text>
                         <View className="flex-row flex-wrap justify-between">
                             {['Beginner', 'Intermediate', 'Advanced'].map((l) => (
                                 <TouchableOpacity
@@ -123,7 +123,7 @@ export default function AIMatchmaker() {
                                     onPress={() => setFormData({ ...formData, level: l })}
                                     className={`w-[48%] py-6 rounded-2xl mb-4 border-2 items-center transition-all ${formData.level === l ? 'bg-primary border-primary shadow-2xl shadow-primary/40 scale-105' : 'bg-surface-dark border-border-dark'}`}
                                 >
-                                    <Text className={`font-black text-[10px] uppercase tracking-widest ${formData.level === l ? 'text-white' : 'text-[#6c757d]'}`}>{l}</Text>
+                                    <Text className={`font-black text-xs uppercase tracking-widest ${formData.level === l ? 'text-white' : 'text-[#6c757d]'}`}>{l}</Text>
                                 </TouchableOpacity>
                             ))}
                         </View>
@@ -184,7 +184,7 @@ export default function AIMatchmaker() {
                                 <View className="bg-primary/10 self-center px-8 py-3 rounded-full mb-12 border border-primary/20">
                                     <View className="flex-row items-center gap-2">
                                         <ShieldCheck size={14} color="#0066ff" />
-                                        <Text className="text-primary font-black uppercase tracking-[0.2em] text-[10px]">Optimal Match Authenticated</Text>
+                                        <Text className="text-primary font-black uppercase tracking-[0.2em] text-xs">Optimal Match Authenticated</Text>
                                     </View>
                                 </View>
 
@@ -203,7 +203,7 @@ export default function AIMatchmaker() {
                                     </View>
 
                                     <View className="bg-background-dark/50 p-8 rounded-[2rem] mb-12 border border-border-dark shadow-inner">
-                                        <Text className="text-primary font-black text-[10px] uppercase tracking-widest mb-6">Match Intelligence Reasoning</Text>
+                                        <Text className="text-primary font-black text-xs uppercase tracking-widest mb-6">Match Intelligence Reasoning</Text>
                                         {results.matches?.[0]?.aiReasoning?.map((reason, i) => (
                                             <View key={i} className="flex-row items-center gap-4 mb-4">
                                                 <View className="size-2 rounded-full bg-[#34c759] shadow-sm shadow-[#34c759]" />
@@ -221,7 +221,7 @@ export default function AIMatchmaker() {
                                     onPress={() => setStep(1)}
                                     className="mt-12 items-center"
                                 >
-                                    <Text className="text-[#6c757d] font-black uppercase tracking-widest text-[10px]">Back to Decision Engine</Text>
+                                    <Text className="text-[#6c757d] font-black uppercase tracking-widest text-xs">Back to Decision Engine</Text>
                                 </TouchableOpacity>
                             </View>
                         )}

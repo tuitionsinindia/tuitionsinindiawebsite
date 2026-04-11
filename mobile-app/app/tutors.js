@@ -55,11 +55,11 @@ export default function TutorsDirectory() {
                         <Bookmark size={20} color="#1a2333" />
                     </View>
                     
-                    <Text className="text-primary font-black text-[10px] uppercase tracking-[0.15em] mb-3">{item.subjects?.join(' • ')}</Text>
+                    <Text className="text-primary font-black text-xs uppercase tracking-[0.15em] mb-3">{item.subjects?.join(' • ')}</Text>
                     
                     <View className="flex-row items-center">
                         <MapPin size={12} color="#6c757d" />
-                        <Text className="text-[#6c757d] text-[10px] font-black ml-1.5 uppercase tracking-widest">{item.city || 'Remote Collaboration'}</Text>
+                        <Text className="text-[#6c757d] text-xs font-black ml-1.5 uppercase tracking-widest">{item.city || 'Remote Collaboration'}</Text>
                     </View>
                 </View>
             </View>
@@ -69,11 +69,11 @@ export default function TutorsDirectory() {
                     <Star size={14} color="#ff9500" fill="#ff9500" />
                     <Text className="text-white font-black ml-2 text-xs">{item.rating || '4.9'}</Text>
                     <View className="size-1 bg-[#4a5568] rounded-full mx-2" />
-                    <Text className="text-[#6c757d] text-[10px] font-black uppercase tracking-widest">Verified</Text>
+                    <Text className="text-[#6c757d] text-xs font-black uppercase tracking-widest">Verified</Text>
                 </View>
                 <View className="flex-row items-end">
                     <Text className="text-white font-black text-xl">₹{item.hourlyRate}</Text>
-                    <Text className="text-[#6c757d] font-black text-[10px] mb-1.5 ml-1.5 uppercase tracking-tighter">/ Session</Text>
+                    <Text className="text-[#6c757d] font-black text-xs mb-1.5 ml-1.5 uppercase tracking-tighter">/ Session</Text>
                 </View>
             </View>
         </TouchableOpacity >
@@ -89,7 +89,7 @@ export default function TutorsDirectory() {
                 </TouchableOpacity>
                 <View className="items-center">
                     <Text className="text-white text-xl font-black tracking-tight">Institutional Specialists</Text>
-                    <Text className="text-primary text-[10px] font-black uppercase tracking-widest">Verified Active Profiles</Text>
+                    <Text className="text-primary text-xs font-black uppercase tracking-widest">Verified Active Profiles</Text>
                 </View>
                 <TouchableOpacity className="p-3 bg-surface-dark rounded-2xl border border-border-dark">
                     <SlidersHorizontal size={20} color="white" />

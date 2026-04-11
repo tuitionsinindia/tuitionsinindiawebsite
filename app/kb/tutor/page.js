@@ -46,7 +46,7 @@ export default function TutorKB() {
                 <div className="text-center mb-24 space-y-6">
                     <div className="inline-flex items-center gap-3 px-4 py-2 bg-primary/10 rounded-full border border-primary/20 mb-8">
                         <Briefcase size={14} className="text-primary" />
-                        <span className="text-primary text-[10px] font-black uppercase tracking-[0.3em]">Educator Success Matrix</span>
+                        <span className="text-primary text-xs font-black uppercase tracking-[0.3em]">Educator Success Matrix</span>
                     </div>
                     <h1 className="text-6xl md:text-8xl font-black text-white italic tracking-tighter leading-none uppercase">
                         Expert <br />
@@ -87,7 +87,7 @@ export default function TutorKB() {
                         <PlayCircle size={48} className="mx-auto mb-8 text-primary" />
                         <h2 className="text-4xl md:text-6xl font-black uppercase italic tracking-tighter leading-none"> Ready to double your <span className="text-primary font-serif lowercase tracking-normal not-italic px-4">leads?</span></h2>
                         <p className="text-xl text-on-background-dark/40 font-medium italic leading-relaxed">Our exclusive tutor masterclass reveals the secrets to profile architecture and student conversion protocols.</p>
-                        <button className="bg-primary text-white font-black px-12 py-5 rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-xl shadow-primary/20 uppercase tracking-[0.3em] text-[10px]">
+                        <button className="bg-primary text-white font-black px-12 py-5 rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-xl shadow-primary/20 uppercase tracking-[0.3em] text-xs">
                             Watch Masterclass
                         </button>
                     </div>

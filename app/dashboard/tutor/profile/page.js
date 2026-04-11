@@ -99,7 +99,7 @@ function ProfileEditorContent() {
                     <h1 className="text-2xl font-headline font-black uppercase italic">Control <span className="text-primary not-italic lowercase font-serif font-light">Center.</span></h1>
                 </div>
                 <div className="flex items-center gap-4">
-                    <Link href={`/tutor/${tutorId}?viewerId=${tutorId}`} target="_blank" className="hidden sm:flex items-center gap-2 px-6 py-2.5 bg-white border border-outline-variant/20 rounded-xl font-black text-[10px] tracking-widest hover:shadow-lg transition-all">
+                    <Link href={`/tutor/${tutorId}?viewerId=${tutorId}`} target="_blank" className="hidden sm:flex items-center gap-2 px-6 py-2.5 bg-white border border-outline-variant/20 rounded-xl font-black text-xs tracking-widest hover:shadow-lg transition-all">
                         <span className="material-symbols-outlined text-sm">visibility</span>
                         PREVIEW PUBLIC PROFILE
                     </Link>
@@ -110,7 +110,7 @@ function ProfileEditorContent() {
                 {loading ? (
                     <div className="py-32 flex flex-col items-center justify-center opacity-50">
                         <div className="size-16 rounded-full border-[6px] border-primary/10 border-t-primary animate-spin mb-8"></div>
-                        <p className="font-black text-[10px] uppercase tracking-[0.4em]">Loading Configuration...</p>
+                        <p className="font-black text-xs uppercase tracking-[0.4em]">Loading Configuration...</p>
                     </div>
                 ) : (
                     <form onSubmit={handleSave} className="space-y-12">
@@ -120,7 +120,7 @@ function ProfileEditorContent() {
                             
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                                 <div className="space-y-3">
-                                    <label className="text-[10px] font-black uppercase tracking-widest opacity-40 ml-2">Full Legal Name</label>
+                                    <label className="text-xs font-black uppercase tracking-widest opacity-40 ml-2">Full Legal Name</label>
                                     <input 
                                         type="text" 
                                         value={formData.name}
@@ -131,7 +131,7 @@ function ProfileEditorContent() {
                                     />
                                 </div>
                                 <div className="space-y-3">
-                                    <label className="text-[10px] font-black uppercase tracking-widest opacity-40 ml-2">Contact Intelligence (Phone)</label>
+                                    <label className="text-xs font-black uppercase tracking-widest opacity-40 ml-2">Contact Intelligence (Phone)</label>
                                     <input 
                                         type="tel" 
                                         value={formData.phone}
@@ -142,7 +142,7 @@ function ProfileEditorContent() {
                                     />
                                 </div>
                                 <div className="md:col-span-2 space-y-3">
-                                    <label className="text-[10px] font-black uppercase tracking-widest opacity-40 ml-2">Professional Headline</label>
+                                    <label className="text-xs font-black uppercase tracking-widest opacity-40 ml-2">Professional Headline</label>
                                     <input 
                                         type="text" 
                                         value={formData.title}
@@ -161,7 +161,7 @@ function ProfileEditorContent() {
                             
                             <div className="space-y-10">
                                 <div className="space-y-3">
-                                    <label className="text-[10px] font-black uppercase tracking-widest opacity-40 ml-2">Subjects (Comma Separated)</label>
+                                    <label className="text-xs font-black uppercase tracking-widest opacity-40 ml-2">Subjects (Comma Separated)</label>
                                     <textarea 
                                         rows="2"
                                         value={formData.subjects}
@@ -172,7 +172,7 @@ function ProfileEditorContent() {
                                     />
                                 </div>
                                 <div className="space-y-3">
-                                    <label className="text-[10px] font-black uppercase tracking-widest opacity-40 ml-2">Serviceable Locations</label>
+                                    <label className="text-xs font-black uppercase tracking-widest opacity-40 ml-2">Serviceable Locations</label>
                                     <input 
                                         type="text" 
                                         value={formData.locations}
@@ -183,7 +183,7 @@ function ProfileEditorContent() {
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                                     <div className="space-y-3">
-                                        <label className="text-[10px] font-black uppercase tracking-widest opacity-40 ml-2">Hourly Strategy Rate (₹)</label>
+                                        <label className="text-xs font-black uppercase tracking-widest opacity-40 ml-2">Hourly Strategy Rate (₹)</label>
                                         <input 
                                             type="number" 
                                             value={formData.hourlyRate}
@@ -193,7 +193,7 @@ function ProfileEditorContent() {
                                         />
                                     </div>
                                     <div className="space-y-3">
-                                        <label className="text-[10px] font-black uppercase tracking-widest opacity-40 ml-2">Target Academic Grades</label>
+                                        <label className="text-xs font-black uppercase tracking-widest opacity-40 ml-2">Target Academic Grades</label>
                                         <input 
                                             type="text" 
                                             value={formData.grades}
@@ -211,7 +211,7 @@ function ProfileEditorContent() {
                             <h2 className="text-3xl font-headline font-black mb-10 uppercase italic tracking-tight">Strategy & <span className="text-primary not-italic font-serif lowercase font-light">philosophy</span></h2>
                             
                             <div className="space-y-3">
-                                <label className="text-[10px] font-black uppercase tracking-widest opacity-40 ml-2">Detailed Professional Biography</label>
+                                <label className="text-xs font-black uppercase tracking-widest opacity-40 ml-2">Detailed Professional Biography</label>
                                 <textarea 
                                     rows="8"
                                     value={formData.bio}
@@ -228,7 +228,7 @@ function ProfileEditorContent() {
                             <button 
                                 type="submit"
                                 disabled={saving}
-                                className="flex-1 bg-primary text-on-primary py-8 rounded-[2rem] font-black text-[11px] tracking-[0.4em] uppercase transition-all flex items-center justify-center gap-4 shadow-2xl shadow-primary/30 hover:scale-[1.02] active:scale-95 disabled:opacity-50"
+                                className="flex-1 bg-primary text-on-primary py-8 rounded-[2rem] font-black text-xs tracking-[0.4em] uppercase transition-all flex items-center justify-center gap-4 shadow-2xl shadow-primary/30 hover:scale-[1.02] active:scale-95 disabled:opacity-50"
                             >
                                 {saving ? (
                                     <>
@@ -244,7 +244,7 @@ function ProfileEditorContent() {
                             </button>
                             <Link 
                                 href={`/dashboard/tutor?tutorId=${tutorId}`}
-                                className="sm:w-1/3 py-8 rounded-[2rem] border border-outline-variant/20 font-black text-[11px] tracking-[0.4em] uppercase transition-all flex items-center justify-center gap-4 hover:bg-surface-container-high"
+                                className="sm:w-1/3 py-8 rounded-[2rem] border border-outline-variant/20 font-black text-xs tracking-[0.4em] uppercase transition-all flex items-center justify-center gap-4 hover:bg-surface-container-high"
                             >
                                 ABORT
                             </Link>

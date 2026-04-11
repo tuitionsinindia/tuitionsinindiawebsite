@@ -83,7 +83,7 @@ export default function SubjectsPage() {
                         <div className="max-w-3xl">
                             <div className="flex items-center gap-3 mb-6 animate-fade-in">
                                 <div className="size-2 bg-primary rounded-full animate-pulse"></div>
-                                <span className="text-primary font-black uppercase tracking-[0.3em] text-[10px]">Academic Intelligence Hub</span>
+                                <span className="text-primary font-black uppercase tracking-[0.3em] text-xs">Academic Intelligence Hub</span>
                             </div>
                             <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-none mb-8">
                                 Browse <span className="text-primary italic font-serif lowercase tracking-normal">expert</span> <br/>
@@ -99,7 +99,7 @@ export default function SubjectsPage() {
                                     <TrendingUp size={24} className="text-primary" />
                                 </div>
                                 <div>
-                                    <p className="text-[10px] font-black uppercase tracking-widest text-primary">Live Demand</p>
+                                    <p className="text-xs font-black uppercase tracking-widest text-primary">Live Demand</p>
                                     <p className="text-white font-black">STEM Subjects +12%</p>
                                 </div>
                             </div>
@@ -151,7 +151,7 @@ export default function SubjectsPage() {
                                 </div>
                                 <span className={`font-black uppercase tracking-widest text-xs mb-2 block ${selectedGrade === grade ? "text-white" : "text-primary"}`}>Level Category</span>
                                 <h3 className="text-xl font-black leading-tight tracking-tight mb-4">{grade}</h3>
-                                <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${selectedGrade === grade ? "text-white/80" : "text-on-surface-dark/40"}`}>
+                                <p className={`text-xs font-black uppercase tracking-[0.2em] ${selectedGrade === grade ? "text-white/80" : "text-on-surface-dark/40"}`}>
                                     {GRADE_SUBJECT_MAPPING[grade].length} Verified Domains
                                 </p>
                             </button>
@@ -190,10 +190,10 @@ export default function SubjectsPage() {
                                         </div>
                                     </div>
                                     <h3 className="text-2xl font-black text-white group-hover:text-primary transition-colors tracking-tighter mb-2 uppercase italic">{subject}</h3>
-                                    <p className="text-on-background-dark/40 text-[10px] font-black uppercase tracking-[0.2em]">Verified Asset Directory</p>
+                                    <p className="text-on-background-dark/40 text-xs font-black uppercase tracking-[0.2em]">Verified Asset Directory</p>
                                     
                                     <div className="mt-8 pt-6 border-t border-border-dark flex items-center justify-between">
-                                        <span className="text-primary font-black uppercase tracking-widest text-[9px]">Explore Academy</span>
+                                        <span className="text-primary font-black uppercase tracking-widest text-xs">Explore Academy</span>
                                         <ArrowRight size={16} className="text-primary group-hover:translate-x-2 transition-transform" />
                                     </div>
                                 </button>
@@ -209,7 +209,7 @@ export default function SubjectsPage() {
                         <div className="relative z-10">
                             <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md px-6 py-2 rounded-full border border-white/30 mb-10">
                                 <ShieldCheck size={16} className="text-white" />
-                                <span className="text-white text-[10px] font-black uppercase tracking-widest">Requirement Protocols</span>
+                                <span className="text-white text-xs font-black uppercase tracking-widest">Requirement Protocols</span>
                             </div>
                             <h2 className="text-4xl md:text-6xl font-black text-white italic tracking-tighter leading-tight mb-8">
                                 Domain not found in <br className="hidden md:block" /> the <span className="underline decoration-white/30 decoration-8 underline-offset-8">Primary Inventory</span>?

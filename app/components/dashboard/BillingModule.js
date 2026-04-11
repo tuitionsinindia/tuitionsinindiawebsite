@@ -1,101 +1,125 @@
 "use client";
 
-import { Zap, CreditCard, History, ArrowUpRight, BadgeCheck, AlertCircle } from "lucide-react";
+import { Zap, CreditCard, History, ArrowUpRight, BadgeCheck, AlertCircle, Wallet } from "lucide-react";
 
 export default function BillingModule({ userData, transactions = [] }) {
     return (
         <div className="space-y-12 animate-in fade-in duration-700">
-            <div className="flex items-center justify-between">
-                <h2 className="text-4xl font-black text-white uppercase italic tracking-tighter">Finance <span className="text-amber-500 underline decoration-amber-500/20">Ledger.</span></h2>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <h2 className="text-4xl font-black text-gray-900 uppercase italic tracking-tighter">Financial <span className="text-blue-600 underline decoration-blue-600/10">Ledger.</span></h2>
                 <div className="flex gap-4">
-                     <span className={`px-5 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest border border-emerald-500/20 italic ${
-                        userData?.subscriptionTier === 'ELITE' ? 'bg-emerald-500 text-white shadow-xl shadow-emerald-500/20' : 'bg-emerald-500/10 text-emerald-500'
+                     <span className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border italic shadow-sm ${
+                        userData?.subscriptionTier === 'ELITE' ? 'bg-blue-600 text-white border-blue-600 shadow-blue-600/20' : 'bg-white border-gray-100 text-blue-600'
                      }`}>
-                        Tier: {userData?.subscriptionTier || 'FREE_SIGNAL'}
+                        Tier Status: {userData?.subscriptionTier || 'Standard Discoverer'}
                     </span>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                {/* Credit Balance Card */}
-                <div className="p-10 rounded-[3rem] bg-amber-500 text-white shadow-2xl shadow-amber-500/20 relative overflow-hidden group border-b-8 border-amber-600">
-                    <Zap size={100} className="absolute -right-4 -top-4 opacity-10 group-hover:scale-110 transition-transform duration-700" />
+                {/* Credit Asset Balance */}
+                <div className="p-12 rounded-[3.5rem] bg-blue-600 text-white shadow-4xl shadow-blue-600/30 relative overflow-hidden group border-b-8 border-blue-800">
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none"></div>
+                    <Zap size={110} className="absolute -right-6 -top-6 opacity-10 group-hover:scale-110 transition-transform duration-700 font-black" strokeWidth={3} />
                     <div className="relative z-10">
-                        <p className="text-[10px] font-black uppercase tracking-[0.4em] mb-4 opacity-60 italic leading-none">Neural Credits Available</p>
+                        <p className="text-[10px] font-black uppercase tracking-[0.5em] mb-4 opacity-70 italic leading-none">Global Credit Assets</p>
                         <p className="text-7xl font-black italic tracking-tighter leading-none mb-10">{userData?.credits || 0}</p>
-                        <button className="w-full py-4 bg-white/20 backdrop-blur-md rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] border border-white/30 hover:bg-white hover:text-amber-500 transition-all italic">
-                            RECHARGE_RESOURCES
+                        <button className="w-full py-5 bg-white text-blue-600 rounded-2xl text-[10px] font-black uppercase tracking-[0.4em] hover:bg-gray-900 hover:text-white transition-all italic shadow-xl">
+                            Recharge Reserves
                         </button>
                     </div>
                 </div>
 
-                {/* Subscription Card */}
-                <div className="p-10 rounded-[4rem] bg-surface-dark/40 border border-border-dark flex flex-col justify-between border-b-8 group">
-                    <div className="space-y-4">
-                        <div className="size-12 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center">
-                            <BadgeCheck size={24} strokeWidth={2.5} />
+                {/* Subscription Status Card */}
+                <div className="p-12 rounded-[3.5rem] bg-white border border-gray-100 flex flex-col justify-between shadow-4xl shadow-blue-900/[0.02] border-b-8 group">
+                    <div className="space-y-6">
+                        <div className="size-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100 shadow-inner">
+                            <BadgeCheck size={28} strokeWidth={2.5} />
                         </div>
-                        <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40 italic">Subscription Logic</h4>
-                        <p className="text-3xl font-black text-white italic tracking-tight">{userData?.subscriptionStatus || 'INACTIVE'}</p>
+                        <div>
+                            <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-300 italic mb-2">Institutional Tier</h4>
+                            <p className="text-3xl font-black text-gray-900 italic tracking-tight uppercase">{userData?.subscriptionStatus || 'PROVISIONAL'}</p>
+                        </div>
                     </div>
-                    <p className="text-[8px] font-black text-white/20 uppercase tracking-[0.3em] mt-8 italic">Next Cycle: UNSET</p>
+                    <div className="flex items-center justify-between mt-10 pt-6 border-t border-gray-50">
+                        <p className="text-[10px] font-black text-gray-300 uppercase tracking-[0.3em] italic">Next Registry Update</p>
+                        <p className="text-[10px] font-black text-blue-600 uppercase italic">PENDING</p>
+                    </div>
                 </div>
 
-                {/* Activity Card */}
-                <div className="p-10 rounded-[4rem] bg-surface-dark/40 border border-border-dark flex flex-col justify-between border-b-8">
-                    <div className="space-y-4">
-                        <div className="size-12 rounded-2xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center">
-                            <History size={24} strokeWidth={2.5} />
+                {/* Sync Logs Frequency */}
+                <div className="p-12 rounded-[3.5rem] bg-white border border-gray-100 flex flex-col justify-between shadow-4xl shadow-blue-900/[0.02] border-b-8">
+                    <div className="space-y-6">
+                        <div className="size-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100 shadow-inner">
+                            <History size={28} strokeWidth={2.5} />
                         </div>
-                        <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40 italic">Market Velocity</h4>
-                        <p className="text-3xl font-black text-white italic tracking-tight">{transactions.length} SYNC_LOGS</p>
+                        <div>
+                            <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-300 italic mb-2">Synchronization Density</h4>
+                            <p className="text-3xl font-black text-gray-900 italic tracking-tight uppercase">{transactions.length} Total Logs</p>
+                        </div>
                     </div>
-                    <p className="text-[8px] font-black text-white/20 uppercase tracking-[0.3em] mt-8 italic text-right">LEDGER_SYNCHRONIZED</p>
+                    <div className="flex items-center justify-between mt-10 pt-6 border-t border-gray-50">
+                        <p className="text-[10px] font-black text-gray-300 uppercase tracking-[0.3em] italic">Ledger Status</p>
+                        <p className="text-[10px] font-black text-emerald-600 uppercase italic">SYNCHRONIZED</p>
+                    </div>
                 </div>
             </div>
 
-            {/* Transaction Terminal */}
-            <div className="space-y-8">
-                <div className="flex items-center gap-6">
-                    <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter">Transaction <span className="text-white/20">Ledger.</span></h3>
-                    <div className="flex-1 h-px bg-border-dark"></div>
+            {/* Detailed Transaction Registry */}
+            <div className="space-y-10">
+                <div className="flex items-center gap-8">
+                    <h3 className="text-2xl font-black text-gray-900 uppercase italic tracking-tighter">Asset Synchronization <span className="text-gray-200">Ledger.</span></h3>
+                    <div className="flex-1 h-px bg-gray-100"></div>
                 </div>
 
-                <div className="bg-surface-dark/20 backdrop-blur-3xl border border-border-dark rounded-[3rem] overflow-hidden shadow-2xl border-b-8">
+                <div className="bg-white border border-gray-100 rounded-[3.5rem] overflow-hidden shadow-4xl shadow-blue-900/[0.03] border-b-8">
                     {transactions.length > 0 ? (
-                        <table className="w-full text-left">
-                            <thead>
-                                <tr className="border-b border-border-dark bg-background-dark/30">
-                                    <th className="px-10 py-10 text-[9px] font-black uppercase tracking-[0.5em] text-white/20 italic">Ledger Entry</th>
-                                    <th className="px-10 py-10 text-[9px] font-black uppercase tracking-[0.5em] text-white/20 italic">Asset Value</th>
-                                    <th className="px-10 py-10 text-[9px] font-black uppercase tracking-[0.5em] text-white/20 italic">Status Protocol</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-border-dark/50">
-                                {transactions.map((tx) => (
-                                    <tr key={tx.id} className="group hover:bg-white/5 transition-colors font-black text-white italic tracking-tighter">
-                                        <td className="px-10 py-10">
-                                            <p className="text-sm uppercase leading-none mb-2">{tx.description || 'RESOURCE_RECHARGE'}</p>
-                                            <p className="text-[9px] text-white/20 uppercase tracking-widest">{new Date(tx.createdAt).toLocaleDateString()}</p>
-                                        </td>
-                                        <td className="px-10 py-10 text-emerald-500">
-                                            ₹{tx.amount}
-                                        </td>
-                                        <td className="px-10 py-10">
-                                            <span className={`px-4 py-1.5 rounded-full text-[8px] uppercase tracking-widest border italic ${
-                                                tx.status === 'SUCCESS' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-amber-500/10 text-amber-500 border-amber-500/20'
-                                            }`}>
-                                                {tx.status}
-                                            </span>
-                                        </td>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse">
+                                <thead>
+                                    <tr className="border-b border-gray-50 bg-gray-50/50">
+                                        <th className="px-12 py-10 text-[10px] font-black uppercase tracking-[0.6em] text-gray-300 italic">Financial Narrative</th>
+                                        <th className="px-12 py-10 text-[10px] font-black uppercase tracking-[0.6em] text-gray-300 italic">Institutional Value</th>
+                                        <th className="px-12 py-10 text-[10px] font-black uppercase tracking-[0.6em] text-gray-300 italic">Registry Status</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody className="divide-y divide-gray-50">
+                                    {transactions.map((tx) => (
+                                        <tr key={tx.id} className="group hover:bg-blue-50/30 transition-all font-black text-gray-900 italic tracking-tighter">
+                                            <td className="px-12 py-10">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="size-10 rounded-xl bg-gray-50 text-gray-400 flex items-center justify-center border border-gray-100 group-hover:bg-white group-hover:text-blue-600 transition-colors shadow-sm">
+                                                        <Wallet size={16} strokeWidth={3} />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-xs lg:text-sm uppercase leading-none mb-2">{tx.description || 'CREDIT_RESERVE_RECAPTURE'}</p>
+                                                        <p className="text-[10px] text-gray-300 uppercase tracking-widest leading-none font-medium italic">{new Date(tx.createdAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-12 py-10 text-xl text-blue-600 font-serif font-light">
+                                                <span className="font-sans font-black mr-1 text-gray-900 not-italic">₹</span>{tx.amount}
+                                            </td>
+                                            <td className="px-12 py-10">
+                                                <span className={`px-5 py-2 rounded-full text-[10px] uppercase tracking-widest border italic shadow-sm flex items-center gap-2 w-fit ${
+                                                    tx.status === 'SUCCESS' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-amber-50 text-amber-600 border-amber-100'
+                                                }`}>
+                                                    <div className={`size-1.5 rounded-full ${tx.status === 'SUCCESS' ? 'bg-emerald-500' : 'bg-amber-500'} animate-pulse`}></div>
+                                                    {tx.status}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     ) : (
-                        <div className="py-24 text-center opacity-20 flex flex-col items-center gap-6 italic">
-                             <AlertCircle size={40} className="text-white/20" />
-                             <p className="text-[10px] font-black uppercase tracking-[0.5em]">No financial sync logs discovered in the terminal directory.</p>
+                        <div className="py-32 text-center flex flex-col items-center justify-center gap-8 opacity-20">
+                             <div className="relative">
+                                <AlertCircle size={80} className="text-gray-300" strokeWidth={1} />
+                                <div className="absolute inset-0 bg-blue-600/10 blur-3xl rounded-full"></div>
+                             </div>
+                             <p className="text-[10px] font-black uppercase tracking-[0.6em] max-w-xs mx-auto leading-relaxed">Financial history directory is currently void of institutional logs.</p>
                         </div>
                     )}
                 </div>

@@ -13,11 +13,14 @@ import {
     Languages,
     Clock,
     MapPin,
-    MonitorCheck,
+    Monitor,
     Home,
     ShieldCheck,
     Lock,
-    Zap
+    Zap,
+    CircleDollarSign,
+    Building2,
+    Users
 } from "lucide-react";
 
 export default function TutorListingForm({ user, onComplete }) {
@@ -80,12 +83,12 @@ export default function TutorListingForm({ user, onComplete }) {
     if (success) {
         return (
             <div className="w-full max-w-sm mx-auto py-20 text-center space-y-10 animate-in zoom-in-95 duration-700">
-                <div className="size-24 rounded-[2.5rem] bg-indigo-500 text-white flex items-center justify-center mx-auto shadow-4xl shadow-indigo-500/30 animate-bounce">
+                <div className="size-24 rounded-[2.5rem] bg-blue-600 text-white flex items-center justify-center mx-auto shadow-4xl shadow-blue-900/20 animate-bounce">
                     <CheckCircle2 size={48} strokeWidth={3} />
                 </div>
                 <div>
-                    <h2 className="text-4xl font-black text-gray-900 tracking-tighter uppercase italic mb-2">Protocol Verified.</h2>
-                    <p className="text-gray-400 font-bold text-xs uppercase tracking-widest">Your expert terminal is now active and broadcasting.</p>
+                    <h2 className="text-4xl font-black text-gray-900 tracking-tighter uppercase italic mb-2 leading-none">Profile Calibrated.</h2>
+                    <p className="text-gray-400 font-bold text-[10px] uppercase tracking-widest leading-none">Your expert faculty terminal is now active and synchronized.</p>
                 </div>
             </div>
         );
@@ -93,27 +96,27 @@ export default function TutorListingForm({ user, onComplete }) {
 
     return (
         <div className="w-full max-w-2xl mx-auto">
-            <div className="bg-white rounded-[3rem] p-8 md:p-12 border border-gray-100 shadow-4xl shadow-indigo-100/40 relative overflow-hidden">
+            <div className="bg-white rounded-[3rem] p-8 md:p-12 border border-gray-100 shadow-4xl shadow-blue-900/10 relative overflow-hidden">
                 
                 {/* Visual Progress Map */}
                 <div className="absolute top-0 left-0 w-full h-2 bg-gray-50 flex">
-                    <div className={`h-full bg-indigo-600 transition-all duration-1000 ${step === 1 ? "w-1/3" : step === 2 ? "w-2/3" : "w-full"}`}></div>
+                    <div className={`h-full bg-blue-600 transition-all duration-1000 ${step === 1 ? "w-1/3" : step === 2 ? "w-2/3" : "w-full"}`}></div>
                 </div>
 
                 {/* Header Section */}
                 <div className="mb-12 flex justify-between items-start">
                     <div>
-                        <div className="flex items-center gap-2 text-indigo-600 font-black text-[10px] uppercase tracking-[0.4em] mb-4 leading-none">
-                            <Star size={14} className="animate-pulse" /> Faculty Protocol: Step 0{step + 2}
+                        <div className="flex items-center gap-2 text-blue-600 font-black text-[10px] uppercase tracking-[0.4em] mb-4 leading-none">
+                            <Star size={14} className="animate-pulse" /> Faculty Calibration: Phase 0{step}
                         </div>
                         <h2 className="text-4xl font-black text-gray-900 tracking-tighter uppercase italic leading-[0.9]">
-                            {step === 1 && "Identity <br/><span className='text-indigo-600'>Branding.</span>"}
-                            {step === 2 && "Pedagogical <br/><span className='text-indigo-600'>Coverage.</span>"}
-                            {step === 3 && "Operational <br/><span className='text-indigo-600'>Capacity.</span>"}
+                            {step === 1 && "Identity <br/><span className='text-blue-600'>Branding.</span>"}
+                            {step === 2 && "Academic <br/><span className='text-blue-600'>Coverage.</span>"}
+                            {step === 3 && "Operational <br/><span className='text-blue-600'>Capacity.</span>"}
                         </h2>
                     </div>
                     {step > 1 && (
-                        <button onClick={() => setStep(step - 1)} className="size-12 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-400 hover:text-indigo-600 transition-all active:scale-95">
+                        <button onClick={() => setStep(step - 1)} className="size-12 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-300 hover:text-blue-600 transition-all active:scale-95">
                             <ArrowLeft size={24} strokeWidth={3} />
                         </button>
                     )}
@@ -123,35 +126,35 @@ export default function TutorListingForm({ user, onComplete }) {
                 {step === 1 && (
                     <div className="space-y-8 animate-in fade-in slide-in-from-right-8 duration-700">
                         <div className="space-y-3">
-                            <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2">Professional Headline</label>
+                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-300 ml-2">Professional Headline</label>
                             <input 
                                 required
                                 value={form.title}
                                 onChange={(e) => setForm({...form, title: e.target.value.toUpperCase()})}
-                                className="w-full px-6 py-5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-indigo-600 focus:ring-8 focus:ring-indigo-100 transition-all outline-none font-black text-sm uppercase italic tracking-tight"
+                                className="w-full px-8 py-6 bg-gray-50 border-2 border-transparent rounded-[2rem] focus:bg-white focus:border-blue-600 transition-all outline-none font-black text-sm uppercase italic tracking-tight placeholder:text-gray-200"
                                 placeholder="E.G. SENIOR IIT-JEE MATHEMATICS SPECIALIST"
                             />
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div className="space-y-3">
-                                <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2">Years of Pedigree (Exp)</label>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-300 ml-2">Experience (Years)</label>
                                 <div className="relative group">
-                                    <Briefcase className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-indigo-600 transition-all" size={20} />
+                                    <Briefcase className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-200 group-focus-within:text-blue-600 transition-all" size={20} />
                                     <input 
                                         type="number"
                                         value={form.experience}
                                         onChange={(e) => setForm({...form, experience: parseInt(e.target.value)})}
-                                        className="w-full pl-14 pr-4 py-5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-indigo-600 transition-all outline-none font-black text-xl text-indigo-600"
+                                        className="w-full pl-16 pr-6 py-6 bg-gray-50 border-2 border-transparent rounded-[2rem] focus:bg-white focus:border-blue-600 transition-all outline-none font-black text-2xl text-blue-600"
                                     />
                                 </div>
                             </div>
                             <div className="space-y-3">
-                                <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2">Expertise Proficiency</label>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-300 ml-2">Expertise Proficiency</label>
                                 <select 
                                     value={form.expertiseLevel}
                                     onChange={(e) => setForm({...form, expertiseLevel: e.target.value})}
-                                    className="w-full px-6 py-5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-indigo-600 transition-all outline-none font-black text-xs uppercase tracking-widest appearance-none cursor-pointer"
+                                    className="w-full px-8 py-6 bg-gray-50 border-2 border-transparent rounded-[2rem] focus:bg-white focus:border-blue-600 transition-all outline-none font-black text-[10px] uppercase tracking-widest appearance-none cursor-pointer text-gray-900"
                                 >
                                     <option value="PRIMARY">PRIMARY (K-5)</option>
                                     <option value="SECONDARY">SECONDARY (6-10)</option>
@@ -162,15 +165,15 @@ export default function TutorListingForm({ user, onComplete }) {
                         </div>
 
                         <div className="space-y-3">
-                            <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2">Linguistic Capability</label>
+                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-300 ml-2">Linguistic Capability</label>
                             <div className="flex flex-wrap gap-2">
                                 {["ENGLISH", "HINDI", "MARATHI", "BENGALI", "TAMIL", "FRENCH"].map(lang => (
                                     <button 
                                         key={lang}
                                         type="button"
                                         onClick={() => toggleItem('languages', lang)}
-                                        className={`px-4 py-3 rounded-xl border-2 font-black text-[9px] uppercase tracking-widest transition-all ${
-                                            form.languages.includes(lang) ? "bg-indigo-600 border-indigo-600 text-white shadow-xl" : "bg-gray-50 border-transparent text-gray-400"
+                                        className={`px-5 py-3 rounded-xl border-2 font-black text-[10px] uppercase tracking-widest transition-all ${
+                                            form.languages.includes(lang) ? "bg-blue-600 border-blue-600 text-white shadow-xl" : "bg-gray-50 border-transparent text-gray-300 hover:text-blue-600"
                                         }`}
                                     >
                                         {lang}
@@ -182,9 +185,9 @@ export default function TutorListingForm({ user, onComplete }) {
                         <button 
                             disabled={!form.title}
                             onClick={() => setStep(2)}
-                            className="w-full py-6 bg-gray-900 text-white rounded-[2rem] font-black text-[11px] uppercase tracking-[0.4em] flex items-center justify-center gap-4 shadow-4xl hover:bg-indigo-600 transition-all active:scale-95 disabled:opacity-30 group"
+                            className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.4em] flex items-center justify-center gap-4 shadow-2xl shadow-blue-900/20 hover:bg-gray-900 transition-all active:scale-95 disabled:opacity-30 group"
                         >
-                            Coverage Parameters <ArrowRight size={20} strokeWidth={3} className="group-hover:translate-x-2 transition-transform" />
+                            Next Step <ArrowRight size={20} strokeWidth={3} className="group-hover:translate-x-2 transition-transform" />
                         </button>
                     </div>
                 )}
@@ -193,11 +196,11 @@ export default function TutorListingForm({ user, onComplete }) {
                 {step === 2 && (
                     <div className="space-y-8 animate-in fade-in slide-in-from-right-8 duration-700">
                         <div className="space-y-4">
-                            <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2">Subjects (Area of Dominion)</label>
+                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-300 ml-2">Subject Specialization</label>
                             <div className="relative group">
-                                <GraduationCap className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-indigo-600 transition-all" size={20} />
+                                <GraduationCap className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-200 group-focus-within:text-blue-600 transition-all" size={20} />
                                 <input 
-                                    className="w-full pl-14 pr-4 py-5 bg-gray-50 border-2 border-transparent rounded-[1.8rem] focus:bg-white focus:border-indigo-600 transition-all outline-none font-black text-sm uppercase"
+                                    className="w-full pl-16 pr-6 py-6 bg-gray-50 border-2 border-transparent rounded-[2rem] focus:bg-white focus:border-blue-600 transition-all outline-none font-black text-sm uppercase italic"
                                     placeholder="TYPE SUBJECT & PRESS ENTER"
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter' && e.target.value) {
@@ -212,7 +215,7 @@ export default function TutorListingForm({ user, onComplete }) {
                             </div>
                             <div className="flex flex-wrap gap-2">
                                 {form.subjects.map(s => (
-                                    <button key={s} onClick={() => toggleItem('subjects', s)} className="px-5 py-2.5 bg-indigo-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-lg">
+                                    <button key={s} onClick={() => toggleItem('subjects', s)} className="px-5 py-2.5 bg-gray-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-lg">
                                         {s} <Lock size={10} />
                                     </button>
                                 ))}
@@ -221,15 +224,15 @@ export default function TutorListingForm({ user, onComplete }) {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div className="space-y-4">
-                                <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2">Grades Authorized</label>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-300 ml-2">Grades Authorized</label>
                                 <div className="flex flex-wrap gap-2">
                                     {["PRIMARY", "MIDDLE", "HIGH", "SENIOR", "GRADUATE"].map(lvl => (
                                         <button 
                                             key={lvl}
                                             type="button"
                                             onClick={() => toggleItem('grades', lvl)}
-                                            className={`px-4 py-3 rounded-xl border-2 font-black text-[9px] uppercase tracking-widest transition-all ${
-                                                form.grades.includes(lvl) ? "bg-gray-900 border-gray-900 text-white shadow-xl" : "bg-gray-50 border-transparent text-gray-400"
+                                            className={`px-5 py-3 rounded-xl border-2 font-black text-[10px] uppercase tracking-widest transition-all ${
+                                                form.grades.includes(lvl) ? "bg-gray-900 border-gray-900 text-white shadow-xl" : "bg-gray-50 border-transparent text-gray-300 hover:text-blue-600"
                                             }`}
                                         >
                                             {lvl}
@@ -238,15 +241,15 @@ export default function TutorListingForm({ user, onComplete }) {
                                 </div>
                             </div>
                             <div className="space-y-4">
-                                <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2">Board Specialization</label>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-300 ml-2">Board Expertise</label>
                                 <div className="flex flex-wrap gap-2">
                                     {BOARDS.map(b => (
                                         <button 
                                             key={b}
                                             type="button"
                                             onClick={() => toggleItem('boards', b)}
-                                            className={`px-4 py-3 rounded-xl border-2 font-black text-[9px] uppercase tracking-widest transition-all ${
-                                                form.boards.includes(b) ? "bg-indigo-600 border-indigo-600 text-white shadow-xl" : "bg-gray-50 border-transparent text-gray-400"
+                                            className={`px-5 py-3 rounded-xl border-2 font-black text-[10px] uppercase tracking-widest transition-all ${
+                                                form.boards.includes(b) ? "bg-blue-600 border-blue-600 text-white shadow-xl" : "bg-gray-50 border-transparent text-gray-300 hover:text-blue-600"
                                             }`}
                                         >
                                             {b}
@@ -259,9 +262,9 @@ export default function TutorListingForm({ user, onComplete }) {
                         <button 
                             disabled={form.subjects.length === 0}
                             onClick={() => setStep(3)}
-                            className="w-full py-6 bg-gray-900 text-white rounded-[2rem] font-black text-[11px] uppercase tracking-[0.4em] flex items-center justify-center gap-4 shadow-4xl hover:bg-indigo-600 transition-all active:scale-95 disabled:opacity-30 group"
+                            className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.4em] flex items-center justify-center gap-4 shadow-2xl shadow-blue-900/20 hover:bg-gray-900 transition-all active:scale-95 disabled:opacity-30 group"
                         >
-                            Final Protocol <ArrowRight size={20} strokeWidth={3} className="group-hover:translate-x-2 transition-transform" />
+                            Logistics Protocol <ArrowRight size={20} strokeWidth={3} className="group-hover:translate-x-2 transition-transform" />
                         </button>
                     </div>
                 )}
@@ -271,13 +274,13 @@ export default function TutorListingForm({ user, onComplete }) {
                     <div className="space-y-8 animate-in fade-in slide-in-from-right-8 duration-700">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-4">
-                                <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2 text-center block">Authorized Delivery Protocols (Location)</label>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-300 ml-2 text-center block">Delivery Modes</label>
                                 <div className="grid grid-cols-2 gap-4">
                                     {[
-                                        { id: "ONLINE", icon: MonitorCheck, label: "Digital Hub", desc: "Remote delivery" },
-                                        { id: "STUDENT_HOME", icon: Home, label: "Travel", desc: "I visit student" },
-                                        { id: "TUTOR_HOME", icon: MapPin, label: "In-House", desc: "Students visit me" },
-                                        { id: "CENTER", icon: Building2, label: "Facility", desc: "Teach at center" }
+                                        { id: "ONLINE", icon: Monitor, label: "Digital", desc: "Remote" },
+                                        { id: "STUDENT_HOME", icon: Home, label: "Travel", desc: "Visit student" },
+                                        { id: "TUTOR_HOME", icon: MapPin, label: "Studio", desc: "Student visits" },
+                                        { id: "CENTER", icon: Building2, label: "Facility", desc: "At center" }
                                     ].map((mode) => (
                                         <button
                                             key={mode.id}
@@ -285,14 +288,14 @@ export default function TutorListingForm({ user, onComplete }) {
                                             onClick={() => toggleItem('teachingModes', mode.id)}
                                             className={`py-8 px-4 rounded-[2rem] border-2 flex flex-col items-center gap-3 transition-all ${
                                                 form.teachingModes.includes(mode.id) 
-                                                ? "bg-indigo-600 border-indigo-600 text-white shadow-2xl scale-105" 
-                                                : "bg-gray-50 border-transparent text-gray-300 hover:border-indigo-200"
+                                                ? "bg-blue-600 border-blue-600 text-white shadow-2xl scale-105" 
+                                                : "bg-gray-50 border-transparent text-gray-200 hover:border-blue-100 hover:text-blue-600"
                                             }`}
                                         >
                                             <mode.icon size={32} strokeWidth={1} />
                                             <div className="text-center">
                                                 <p className="font-black text-[10px] uppercase tracking-widest leading-none mb-1">{mode.label}</p>
-                                                <p className="text-[8px] opacity-60 uppercase tracking-tighter leading-none">{mode.desc}</p>
+                                                <p className="text-[10px] opacity-60 uppercase tracking-tighter leading-none">{mode.desc}</p>
                                             </div>
                                         </button>
                                     ))}
@@ -300,17 +303,17 @@ export default function TutorListingForm({ user, onComplete }) {
                             </div>
 
                             <div className="space-y-4">
-                                <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2">Interaction Protocol</label>
-                                <div className="bg-indigo-50/50 border border-indigo-100 rounded-[2rem] p-8 space-y-6">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-300 ml-2">Cohort Protocol</label>
+                                <div className="bg-gray-50 border border-gray-100 rounded-[2rem] p-8 space-y-6">
                                      <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-3">
-                                            <Users size={20} className="text-indigo-600" />
+                                            <Users size={20} className="text-blue-600" />
                                             <div>
-                                                <p className="text-[10px] font-black uppercase tracking-widest text-gray-900 leading-none">Batch/Group Mode</p>
-                                                <p className="text-[9px] font-medium text-gray-400 uppercase tracking-tighter leading-none mt-1">Accept multiple enrollments</p>
+                                                <p className="text-[10px] font-black uppercase tracking-widest text-gray-900 leading-none">Batch Mode</p>
+                                                <p className="text-[10px] font-medium text-gray-400 uppercase tracking-tighter leading-none mt-1">Multi-scholar sync</p>
                                             </div>
                                         </div>
-                                        <label className={`w-14 h-8 rounded-full p-1 flex items-center transition-all cursor-pointer ${form.type === 'GROUP' ? 'bg-indigo-600' : 'bg-gray-200'}`}>
+                                        <label className={`w-14 h-8 rounded-full p-1 flex items-center transition-all cursor-pointer ${form.type === 'GROUP' ? 'bg-blue-600' : 'bg-gray-200'}`}>
                                             <div className={`size-6 bg-white rounded-full shadow-md transition-transform ${form.type === 'GROUP' ? 'translate-x-6' : 'translate-x-0'}`}></div>
                                             <input 
                                                 type="checkbox" 
@@ -321,13 +324,13 @@ export default function TutorListingForm({ user, onComplete }) {
                                         </label>
                                      </div>
                                      {form.type === 'GROUP' && (
-                                         <div className="pt-4 border-t border-indigo-100 space-y-4 animate-in slide-in-from-top-4 duration-500">
-                                             <label className="text-[9px] font-black uppercase tracking-widest text-indigo-400">Default Seat Capacity</label>
+                                         <div className="pt-4 border-t border-gray-100 space-y-4 animate-in slide-in-from-top-4 duration-500">
+                                             <label className="text-[10px] font-black uppercase tracking-widest text-blue-600">Seat Capacity</label>
                                              <input 
                                                 type="number"
                                                 value={form.maxSeats}
                                                 onChange={(e) => setForm({...form, maxSeats: parseInt(e.target.value)})}
-                                                className="w-full bg-white border border-indigo-100 rounded-xl p-4 text-sm font-black text-indigo-600 outline-none"
+                                                className="w-full bg-white border border-gray-100 rounded-xl p-4 text-sm font-black text-blue-600 outline-none shadow-inner"
                                              />
                                          </div>
                                      )}
@@ -336,11 +339,11 @@ export default function TutorListingForm({ user, onComplete }) {
                         </div>
 
                         <div className="space-y-3">
-                            <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2">Target Locations (Authorized Hubs)</label>
+                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-300 ml-2">Target Locations</label>
                             <div className="relative group">
-                                <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-indigo-600 transition-all" size={20} />
+                                <MapPin className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-200 group-focus-within:text-blue-600 transition-all" size={20} />
                                 <input 
-                                    className="w-full pl-14 pr-4 py-5 bg-gray-50 border-2 border-transparent rounded-[1.8rem] focus:bg-white focus:border-indigo-600 transition-all outline-none font-black text-xs uppercase italic tracking-widest"
+                                    className="w-full pl-16 pr-6 py-6 bg-gray-50 border-2 border-transparent rounded-[2rem] focus:bg-white focus:border-blue-600 transition-all outline-none font-black text-[10px] uppercase tracking-widest italic"
                                     placeholder="TYPE LOCATION & PRESS ENTER"
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter' && e.target.value) {
@@ -355,7 +358,7 @@ export default function TutorListingForm({ user, onComplete }) {
                             </div>
                             <div className="flex flex-wrap gap-2">
                                 {form.locations.map(l => (
-                                    <div key={l} className="px-5 py-2.5 bg-gray-900 text-white rounded-xl text-[9px] font-black uppercase tracking-widest shadow-md">
+                                    <div key={l} className="px-5 py-2.5 bg-gray-50 border border-gray-100 text-gray-900 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm">
                                         {l}
                                     </div>
                                 ))}
@@ -364,36 +367,36 @@ export default function TutorListingForm({ user, onComplete }) {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                              <div className="space-y-3">
-                                <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2">Hourly Rate (INR)</label>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-300 ml-2">Hourly Rate (INR)</label>
                                 <div className="relative group">
-                                    <CircleDollarSign className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-indigo-600 transition-all" size={24} />
+                                    <CircleDollarSign className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-200 group-focus-within:text-blue-600 transition-all font-black" size={24} />
                                     <input 
                                         type="number"
                                         value={form.hourlyRate}
                                         onChange={(e) => setForm({...form, hourlyRate: parseInt(e.target.value)})}
-                                        className="w-full pl-14 pr-4 py-5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-indigo-600 transition-all outline-none font-black text-xl text-indigo-600"
+                                        className="w-full pl-16 pr-6 py-6 bg-gray-50 border-2 border-transparent rounded-[2rem] focus:bg-white focus:border-blue-600 transition-all outline-none font-black text-2xl text-blue-600"
                                     />
                                 </div>
                             </div>
                             <div className="flex flex-col justify-end">
-                                <p className="text-[10px] font-black text-gray-300 uppercase leading-relaxed tracking-widest text-center">Protocol ensures market competitive rates for your specialized pedigree.</p>
+                                <p className="text-[10px] font-black text-gray-300 uppercase leading-relaxed tracking-widest text-center italic">Institutional protocol ensures market competitive alignment.</p>
                             </div>
                         </div>
 
                         <button 
-                            disabled={loading || form.timings.length === 0}
+                            disabled={loading}
                             onClick={handleSubmit}
-                            className="w-full py-8 bg-indigo-600 text-white rounded-[2.5rem] font-black text-xs uppercase tracking-[0.5em] shadow-4xl shadow-indigo-600/30 hover:bg-gray-900 transition-all flex items-center justify-center gap-6 active:scale-95 group"
+                            className="w-full py-8 bg-blue-600 text-white rounded-[2.5rem] font-black text-xs uppercase tracking-[0.5em] shadow-2xl shadow-blue-900/20 hover:bg-gray-900 transition-all flex items-center justify-center gap-6 active:scale-95 group leading-none"
                         >
                             {loading ? <Loader2 className="animate-spin" size={24} /> : (
-                                <>Deploy Expert Terminal <ArrowRight size={24} strokeWidth={3} className="group-hover:translate-x-4 transition-transform" /></>
+                                <>Verify Faculty Credentials <ArrowRight size={24} strokeWidth={3} className="group-hover:translate-x-4 transition-transform" /></>
                             )}
                         </button>
                     </div>
                 )}
                 
-                <div className="mt-12 text-center flex items-center justify-center gap-2 text-[10px] font-black text-gray-300 uppercase tracking-[0.7em]">
-                    <ShieldCheck size={14} strokeWidth={3} /> Identity Verified & Encrypted
+                <div className="mt-12 text-center flex items-center justify-center gap-2 text-[10px] font-black text-gray-300 uppercase tracking-[0.7em] italic">
+                    <ShieldCheck size={14} strokeWidth={3} className="text-blue-600" /> Identity Synchronization Secured
                 </div>
             </div>
         </div>

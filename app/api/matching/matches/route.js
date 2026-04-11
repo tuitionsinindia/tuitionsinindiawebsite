@@ -37,8 +37,8 @@ export async function GET(request) {
                             image: true,
                             role: true,
                             subscriptionTier: true,
-                            phone: true,
-                            email: true,
+                            isVerified: true
+                            // Phone and Email removed; use LeadUnlock for PII exchange
                         }
                     }
                 }

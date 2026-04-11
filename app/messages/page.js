@@ -87,7 +87,7 @@ export default function MessagesPage() {
                                     <div className="flex justify-between items-center">
                                         <p className={`text-sm truncate pr-4 ${contact.unread > 0 ? 'font-bold text-slate-800 dark:text-slate-200' : 'text-slate-500'}`}>{contact.lastMessage}</p>
                                         {contact.unread > 0 && (
-                                            <span className="bg-primary text-white text-[10px] font-bold size-5 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm shadow-primary/30">
+                                            <span className="bg-primary text-white text-xs font-bold size-5 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm shadow-primary/30">
                                                 {contact.unread}
                                             </span>
                                         )}
@@ -148,7 +148,7 @@ export default function MessagesPage() {
                                             `}>
                                                 <p className="text-[15px] leading-relaxed">{msg.text}</p>
                                             </div>
-                                            <span className="text-[11px] text-slate-400 mt-1.5 px-2 flex items-center gap-1 font-medium">
+                                            <span className="text-xs text-slate-400 mt-1.5 px-2 flex items-center gap-1 font-medium">
                                                 {msg.timestamp}
                                                 {isMe && <span className="material-symbols-outlined text-[14px] text-primary">done_all</span>}
                                             </span>

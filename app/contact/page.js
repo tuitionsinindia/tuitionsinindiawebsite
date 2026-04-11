@@ -39,7 +39,7 @@ export default function ContactPage() {
                     
                     <div className="inline-flex items-center gap-3 px-4 py-2 bg-primary/10 rounded-full border border-primary/20 mb-8">
                         <MessageSquare size={14} className="text-primary" />
-                        <span className="text-primary text-[10px] font-black uppercase tracking-[0.3em]">Academic Support Hub</span>
+                        <span className="text-primary text-xs font-black uppercase tracking-[0.3em]">Academic Support Hub</span>
                     </div>
 
                     <h1 className="text-6xl md:text-8xl font-black italic tracking-tighter leading-[0.9] text-white uppercase mb-12">
@@ -67,7 +67,7 @@ export default function ContactPage() {
                                 <p className="text-on-surface-dark/60 font-medium italic mb-12 text-lg">Our academic strategy counsel will contact you within 24 business hours.</p>
                                 <button 
                                     onClick={() => setFormState("IDLE")}
-                                    className="text-primary font-black uppercase text-[10px] tracking-[0.4em] border-b-2 border-primary/20 hover:border-primary transition-all pb-2"
+                                    className="text-primary font-black uppercase text-xs tracking-[0.4em] border-b-2 border-primary/20 hover:border-primary transition-all pb-2"
                                 >
                                     Initialize New Batch
                                 </button>
@@ -75,7 +75,7 @@ export default function ContactPage() {
                         ) : (
                             <form onSubmit={handleSubmit} className="relative z-10 space-y-10">
                                 <div className="space-y-4">
-                                    <label className="text-[10px] font-black uppercase tracking-[0.3em] text-on-surface-dark/20 ml-6 italic">Full Identity</label>
+                                    <label className="text-xs font-black uppercase tracking-[0.3em] text-on-surface-dark/20 ml-6 italic">Full Identity</label>
                                     <input 
                                         required
                                         type="text" 
@@ -85,7 +85,7 @@ export default function ContactPage() {
                                 </div>
                                 <div className="grid md:grid-cols-2 gap-8">
                                     <div className="space-y-4">
-                                        <label className="text-[10px] font-black uppercase tracking-[0.3em] text-on-surface-dark/20 ml-6 italic">Electronic Mail</label>
+                                        <label className="text-xs font-black uppercase tracking-[0.3em] text-on-surface-dark/20 ml-6 italic">Electronic Mail</label>
                                         <input 
                                             required
                                             type="email" 
@@ -94,7 +94,7 @@ export default function ContactPage() {
                                         />
                                     </div>
                                     <div className="space-y-4">
-                                        <label className="text-[10px] font-black uppercase tracking-[0.3em] text-on-surface-dark/20 ml-6 italic">Protocol Objective</label>
+                                        <label className="text-xs font-black uppercase tracking-[0.3em] text-on-surface-dark/20 ml-6 italic">Protocol Objective</label>
                                         <div className="relative">
                                             <select className="w-full bg-background-dark p-7 rounded-3xl border border-border-dark focus:border-primary transition-all font-medium italic outline-none appearance-none text-white text-lg">
                                                 <option>Institutional Membership</option>
@@ -109,7 +109,7 @@ export default function ContactPage() {
                                     </div>
                                 </div>
                                 <div className="space-y-4">
-                                    <label className="text-[10px] font-black uppercase tracking-[0.3em] text-on-surface-dark/20 ml-6 italic">Requirement Context</label>
+                                    <label className="text-xs font-black uppercase tracking-[0.3em] text-on-surface-dark/20 ml-6 italic">Requirement Context</label>
                                     <textarea 
                                         required
                                         rows="5"
@@ -119,7 +119,7 @@ export default function ContactPage() {
                                 </div>
                                 <button 
                                     disabled={formState === "SUBMITTING"}
-                                    className="w-full py-7 bg-primary text-white rounded-3xl font-black uppercase text-[10px] tracking-[0.4em] shadow-2xl shadow-primary/40 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-4"
+                                    className="w-full py-7 bg-primary text-white rounded-3xl font-black uppercase text-xs tracking-[0.4em] shadow-2xl shadow-primary/40 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-4"
                                 >
                                     {formState === "SUBMITTING" ? (
                                         <span className="animate-pulse italic">Synchronizing Batch...</span>
@@ -146,7 +146,7 @@ export default function ContactPage() {
                                             <info.icon size={28} />
                                         </div>
                                         <div className="pt-2">
-                                            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-on-surface-dark/20 mb-2 italic">{info.label}</p>
+                                            <p className="text-xs font-black uppercase tracking-[0.3em] text-on-surface-dark/20 mb-2 italic">{info.label}</p>
                                             <p className="text-2xl font-black italic text-white tracking-tight">{info.value}</p>
                                         </div>
                                     </div>

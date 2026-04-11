@@ -61,7 +61,7 @@ export default function StudentHowItWorks() {
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-100/30 blur-[120px] rounded-full -z-10 animate-pulse"></div>
                 
                 <div className="max-w-4xl mx-auto">
-                    <span className="bg-blue-100 text-blue-700 text-[10px] font-black px-4 py-2 rounded-full uppercase tracking-[0.3em] mb-8 inline-block">
+                    <span className="bg-blue-100 text-blue-700 text-xs font-black px-4 py-2 rounded-full uppercase tracking-[0.3em] mb-8 inline-block">
                         Student Mandate
                     </span>
                     
@@ -140,9 +140,9 @@ export default function StudentHowItWorks() {
                             { label: "Trust Score", val: "High", sub: "Algorithmic" }
                         ].map((stat, i) => (
                             <div key={i} className="space-y-1">
-                                <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">{stat.label}</p>
+                                <p className="text-xs font-black uppercase tracking-widest text-gray-500">{stat.label}</p>
                                 <p className="text-3xl font-black text-white">{stat.val}</p>
-                                <p className="text-[10px] font-bold text-blue-500 italic uppercase">{stat.sub}</p>
+                                <p className="text-xs font-bold text-blue-500 italic uppercase">{stat.sub}</p>
                             </div>
                         ))}
                     </div>
@@ -169,7 +169,7 @@ export default function StudentHowItWorks() {
                         ))}
                     </div>
                 </div>
-                <div className="mt-20 text-center flex items-center justify-center gap-2 text-[10px] font-black text-gray-300 uppercase tracking-[0.5em]">
+                <div className="mt-20 text-center flex items-center justify-center gap-2 text-xs font-black text-gray-300 uppercase tracking-[0.5em]">
                     <Lock size={12} strokeWidth={3} /> Standard Security Protocols Active
                 </div>
             </section>

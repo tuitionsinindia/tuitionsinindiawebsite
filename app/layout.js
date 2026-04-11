@@ -1,5 +1,6 @@
 import "./globals.css";
 import Header from "./components/Header";
+import Footer from "./components/Footer";
 import GoogleAnalytics from "./components/GoogleAnalytics";
 
 export const metadata = {
@@ -111,6 +112,7 @@ export default function RootLayout({ children }) {
         />
         <Header />
         {children}
+        <Footer />
       </body>
     </html>
   );

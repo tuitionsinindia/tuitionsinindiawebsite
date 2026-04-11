@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { 
     Building, 
+    Building2,
     Users, 
     ArrowRight,
     ArrowLeft,
@@ -12,7 +13,7 @@ import {
     ShieldCheck,
     Lock,
     MapPin,
-    MonitorCheck,
+    Monitor,
     Home,
     Clock,
     Zap,
@@ -79,40 +80,40 @@ export default function InstituteListingForm({ user, onComplete }) {
     if (success) {
         return (
             <div className="w-full max-w-sm mx-auto py-20 text-center space-y-10 animate-in zoom-in-95 duration-700">
-                <div className="size-24 rounded-[2.5rem] bg-indigo-500/10 text-indigo-500 flex items-center justify-center mx-auto shadow-inner border border-indigo-500/20 animate-bounce">
-                    <CheckCircle2 size={48} strokeWidth={1.5} />
+                <div className="size-24 rounded-[2.5rem] bg-blue-600 text-white flex items-center justify-center mx-auto shadow-4xl shadow-blue-500/30 animate-bounce">
+                    <CheckCircle2 size={48} strokeWidth={3} />
                 </div>
                 <div>
-                    <h2 className="text-4xl font-black text-white tracking-tighter uppercase italic mb-4 leading-none">Center Deployed.</h2>
-                    <p className="text-white/40 font-black text-[10px] uppercase tracking-widest leading-relaxed italic">Your institutional terminal is now active in the academy directory.</p>
+                    <h2 className="text-4xl font-black text-gray-900 tracking-tighter uppercase italic mb-2 leading-none">Center Deployed.</h2>
+                    <p className="text-gray-400 font-bold text-xs uppercase tracking-widest leading-relaxed">Your institutional terminal is now active in the academy directory.</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="w-full max-w-2xl mx-auto selection:bg-indigo-500/30">
-            <div className="bg-surface-dark/40 backdrop-blur-3xl rounded-[3rem] p-8 md:p-12 border border-border-dark shadow-2xl relative overflow-hidden">
+        <div className="w-full max-w-2xl mx-auto">
+            <div className="bg-white rounded-[3rem] p-8 md:p-12 border border-gray-100 shadow-4xl shadow-blue-100/40 relative overflow-hidden">
                 
-                {/* Tactical Progress Map */}
-                <div className="absolute top-0 left-0 w-full h-2 bg-background-dark/50 flex">
-                    <div className={`h-full bg-indigo-500 transition-all duration-1000 shadow-[0_0_15px_rgba(79,70,229,0.5)] ${step === 1 ? "w-1/3" : step === 2 ? "w-2/3" : "w-full"}`}></div>
+                {/* Visual Progress Map */}
+                <div className="absolute top-0 left-0 w-full h-2 bg-gray-50 flex">
+                    <div className={`h-full bg-blue-600 transition-all duration-1000 ${step === 1 ? "w-1/3" : step === 2 ? "w-2/3" : "w-full"}`}></div>
                 </div>
 
-                {/* Header Section */}
+                {/* Tactical Header */}
                 <div className="mb-12 flex justify-between items-start">
                     <div>
-                        <div className="flex items-center gap-2 text-white/20 font-black text-[10px] uppercase tracking-[0.4em] mb-4 leading-none italic">
-                            <Activity size={14} className="animate-pulse text-indigo-500" /> SYNC_STEP: 0{step + 1}
+                        <div className="flex items-center gap-2 text-blue-600 font-black text-xs uppercase tracking-[0.4em] mb-4 leading-none italic">
+                            <Activity size={14} className="animate-pulse" /> SYNC_STEP: 0{step + 1}
                         </div>
-                        <h2 className="text-4xl font-black text-white tracking-tighter uppercase italic leading-[0.9]">
-                            {step === 1 && "Campus <br/><span className='text-indigo-500'>Identity.</span>"}
-                            {step === 2 && "Syllabus <br/><span className='text-indigo-500'>Matrix.</span>"}
-                            {step === 3 && "Operational <br/><span className='text-indigo-500'>Capacity.</span>"}
+                        <h2 className="text-4xl font-black text-gray-900 tracking-tighter uppercase italic leading-[0.9]">
+                            {step === 1 && "Campus <br/><span className='text-blue-600'>Identity.</span>"}
+                            {step === 2 && "Syllabus <br/><span className='text-blue-600'>Matrix.</span>"}
+                            {step === 3 && "Operational <br/><span className='text-blue-600'>Capacity.</span>"}
                         </h2>
                     </div>
                     {step > 1 && (
-                        <button onClick={() => setStep(step - 1)} className="size-12 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center text-white/40 hover:text-white transition-all active:scale-95">
+                        <button onClick={() => setStep(step - 1)} className="size-12 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-400 hover:text-blue-600 transition-all active:scale-95">
                             <ArrowLeft size={24} strokeWidth={3} />
                         </button>
                     )}
@@ -122,38 +123,38 @@ export default function InstituteListingForm({ user, onComplete }) {
                 {step === 1 && (
                     <div className="space-y-8 animate-in fade-in slide-in-from-right-8 duration-700">
                         <div className="space-y-3">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-white/20 ml-2">Registered Center Name</label>
+                            <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2">Registered Center Name</label>
                             <input 
                                 required
                                 value={form.instituteName}
                                 onChange={(e) => setForm({...form, instituteName: e.target.value.toUpperCase()})}
-                                className="w-full px-6 py-5 bg-background-dark/50 border border-border-dark rounded-2xl focus:bg-background-dark focus:border-indigo-500 transition-all outline-none font-black text-sm uppercase italic tracking-tight text-white placeholder:text-white/5"
+                                className="w-full px-6 py-5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-blue-600 focus:ring-8 focus:ring-blue-100 transition-all outline-none font-black text-sm uppercase italic tracking-tight"
                                 placeholder="E.G. EXCELLENCE COACHING ACADEMY"
                             />
                         </div>
 
                         <div className="space-y-3">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-white/20 ml-2">Lead Administrator / POC</label>
+                            <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2">Lead Administrator / POC</label>
                             <div className="relative group">
-                                <Users className="absolute left-5 top-1/2 -translate-y-1/2 text-white/10 group-focus-within:text-indigo-500 transition-all" size={20} />
+                                <Users className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-blue-600 transition-all" size={20} />
                                 <input 
                                     required
                                     value={form.contactPerson}
                                     onChange={(e) => setForm({...form, contactPerson: e.target.value})}
-                                    className="w-full pl-14 pr-6 py-5 bg-background-dark/50 border border-border-dark rounded-2xl focus:bg-background-dark focus:border-indigo-500 transition-all outline-none font-black text-sm uppercase tracking-widest text-white placeholder:text-white/5"
+                                    className="w-full pl-14 pr-6 py-5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-blue-600 transition-all outline-none font-black text-sm uppercase tracking-widest"
                                     placeholder="CONTACT NAME"
                                 />
                             </div>
                         </div>
 
                         <div className="space-y-3">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-white/20 ml-2">Institutional Vision</label>
+                            <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2">Institutional Vision</label>
                             <textarea 
                                 required
                                 rows={3}
                                 value={form.bio}
                                 onChange={(e) => setForm({...form, bio: e.target.value})}
-                                className="w-full px-6 py-5 bg-background-dark/50 border border-border-dark rounded-2xl focus:bg-background-dark focus:border-indigo-500 transition-all outline-none font-medium text-sm text-white/80 placeholder:text-white/5 italic"
+                                className="w-full px-6 py-5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-blue-600 transition-all outline-none font-medium text-sm text-gray-600 italic"
                                 placeholder="State your center's teaching philosophy and highlights."
                             />
                         </div>
@@ -161,7 +162,7 @@ export default function InstituteListingForm({ user, onComplete }) {
                         <button 
                             disabled={!form.instituteName || !form.contactPerson}
                             onClick={() => setStep(2)}
-                            className="w-full py-6 bg-indigo-600 text-white rounded-[2rem] font-black text-[11px] uppercase tracking-[0.4em] flex items-center justify-center gap-4 shadow-xl hover:bg-white hover:text-indigo-600 transition-all active:scale-95 disabled:opacity-20 group italic leading-none"
+                            className="w-full py-6 bg-gray-900 text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.4em] flex items-center justify-center gap-4 shadow-4xl hover:bg-blue-600 transition-all active:scale-95 disabled:opacity-20 group italic leading-none"
                         >
                             COVERAGE_MATRIX <ArrowRight size={20} strokeWidth={3} className="group-hover:translate-x-2 transition-transform" />
                         </button>
@@ -172,11 +173,11 @@ export default function InstituteListingForm({ user, onComplete }) {
                 {step === 2 && (
                     <div className="space-y-8 animate-in fade-in slide-in-from-right-8 duration-700">
                         <div className="space-y-4">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-white/20 ml-2">Course Categories (Multiple)</label>
+                            <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2">Course Categories (Multiple)</label>
                             <div className="relative group">
-                                <BookOpen className="absolute left-5 top-1/2 -translate-y-1/2 text-white/10 group-focus-within:text-indigo-500 transition-all" size={20} />
+                                <BookOpen className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-blue-600 transition-all" size={20} />
                                 <input 
-                                    className="w-full pl-14 pr-6 py-5 bg-background-dark/50 border border-border-dark rounded-[2rem] focus:bg-background-dark focus:border-indigo-500 transition-all outline-none font-black text-sm uppercase text-white placeholder:text-white/5"
+                                    className="w-full pl-14 pr-6 py-5 bg-gray-50 border-2 border-transparent rounded-[2rem] focus:bg-white focus:border-blue-600 transition-all outline-none font-black text-sm uppercase"
                                     placeholder="TYPE COURSE & PRESS ENTER"
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter' && e.target.value) {
@@ -189,7 +190,7 @@ export default function InstituteListingForm({ user, onComplete }) {
                             </div>
                             <div className="flex flex-wrap gap-2">
                                 {form.subjects.map(s => (
-                                    <button key={s} onClick={() => toggleItem('subjects', s)} className="px-5 py-2.5 bg-white text-indigo-600 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-xl hover:bg-red-500 hover:text-white transition-all">
+                                    <button key={s} onClick={() => toggleItem('subjects', s)} className="px-5 py-2.5 bg-blue-600 text-white rounded-xl text-xs font-black uppercase tracking-widest flex items-center gap-2 shadow-lg hover:bg-gray-900 transition-all">
                                         {s} <Zap size={10} fill="currentColor" />
                                     </button>
                                 ))}
@@ -198,15 +199,15 @@ export default function InstituteListingForm({ user, onComplete }) {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div className="space-y-4">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-white/20 ml-2">Target Grade Tier</label>
+                                <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2">Target Grade Tier</label>
                                 <div className="flex flex-wrap gap-2">
                                     {["PRIMARY", "MIDDLE", "HIGH", "SENIOR", "GRADUATE"].map(lvl => (
                                         <button 
                                             key={lvl}
                                             type="button"
                                             onClick={() => toggleItem('grades', lvl)}
-                                            className={`px-4 py-3 rounded-xl border font-black text-[9px] uppercase tracking-widest transition-all ${
-                                                form.grades.includes(lvl) ? "bg-indigo-600 border-indigo-600 text-white shadow-lg" : "bg-white/5 border-white/5 text-white/20"
+                                            className={`px-4 py-3 rounded-xl border-2 font-black text-xs uppercase tracking-widest transition-all ${
+                                                form.grades.includes(lvl) ? "bg-gray-900 border-gray-900 text-white shadow-xl" : "bg-gray-50 border-transparent text-gray-400 hover:border-blue-200"
                                             }`}
                                         >
                                             {lvl}
@@ -215,15 +216,15 @@ export default function InstituteListingForm({ user, onComplete }) {
                                 </div>
                             </div>
                             <div className="space-y-4">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-white/20 ml-2">Academic Boards</label>
+                                <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2">Academic Boards</label>
                                 <div className="flex flex-wrap gap-2">
                                     {BOARDS.map(b => (
                                         <button 
                                             key={b}
                                             type="button"
                                             onClick={() => toggleItem('boards', b)}
-                                            className={`px-4 py-3 rounded-xl border font-black text-[9px] uppercase tracking-widest transition-all ${
-                                                form.boards.includes(b) ? "bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-600/20" : "bg-white/5 border-white/5 text-white/20"
+                                            className={`px-4 py-3 rounded-xl border-2 font-black text-xs uppercase tracking-widest transition-all ${
+                                                form.boards.includes(b) ? "bg-blue-600 border-blue-600 text-white shadow-xl" : "bg-gray-50 border-transparent text-gray-400 hover:border-blue-200"
                                             }`}
                                         >
                                             {b}
@@ -236,7 +237,7 @@ export default function InstituteListingForm({ user, onComplete }) {
                         <button 
                             disabled={form.subjects.length === 0}
                             onClick={() => setStep(3)}
-                            className="w-full py-6 bg-indigo-600 text-white rounded-[2rem] font-black text-[11px] uppercase tracking-[0.4em] flex items-center justify-center gap-4 shadow-xl hover:bg-white hover:text-indigo-600 transition-all active:scale-95 disabled:opacity-20 group italic leading-none"
+                            className="w-full py-6 bg-gray-900 text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.4em] flex items-center justify-center gap-4 shadow-4xl hover:bg-blue-600 transition-all active:scale-95 disabled:opacity-20 group italic leading-none"
                         >
                             FINAL_PROTOCOL <ArrowRight size={20} strokeWidth={3} className="group-hover:translate-x-2 transition-transform" />
                         </button>
@@ -248,39 +249,39 @@ export default function InstituteListingForm({ user, onComplete }) {
                     <div className="space-y-8 animate-in fade-in slide-in-from-right-8 duration-700">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div className="space-y-4">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-white/20 ml-2 text-center block">Authorized Delivery</label>
-                                <div className="grid grid-cols-2 gap-3">
+                                <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2 text-center block">Authorized Delivery</label>
+                                <div className="grid grid-cols-2 gap-4">
                                     {[
                                         { id: "OFFLINE", icon: Building, label: "Campus" },
-                                        { id: "ONLINE", icon: MonitorCheck, label: "Digital" }
+                                        { id: "ONLINE", icon: Monitor, label: "Digital" }
                                     ].map((mode) => (
                                         <button
                                             key={mode.id}
                                             type="button"
                                             onClick={() => toggleItem('teachingModes', mode.id)}
-                                            className={`py-8 px-4 rounded-[2rem] border transition-all flex flex-col items-center gap-4 ${
+                                            className={`py-8 px-4 rounded-[2rem] border-2 transition-all flex flex-col items-center gap-4 ${
                                                 form.teachingModes.includes(mode.id) 
-                                                ? "bg-indigo-600 border-indigo-600 text-white shadow-xl scale-[1.05]" 
-                                                : "bg-white/5 border-white/5 text-white/10 hover:border-white/20"
+                                                ? "bg-blue-600 border-blue-600 text-white shadow-2xl scale-[1.05]" 
+                                                : "bg-gray-50 border-transparent text-gray-300 hover:border-blue-200"
                                             }`}
                                         >
                                             <mode.icon size={32} strokeWidth={1} />
-                                            <span className="font-black text-[9px] uppercase tracking-[0.2em] leading-none">{mode.label}</span>
+                                            <span className="font-black text-xs uppercase tracking-[0.2em] leading-none">{mode.label}</span>
                                         </button>
                                     ))}
                                 </div>
                             </div>
 
                             <div className="space-y-4">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-white/20 ml-2">Batch Sync Slots</label>
+                                <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2">Batch Sync Slots</label>
                                 <div className="flex flex-wrap gap-2">
                                     {TIMING_SLOTS.map(t => (
                                         <button 
                                             key={t}
                                             type="button"
                                             onClick={() => toggleItem('timings', t)}
-                                            className={`px-4 py-3 rounded-xl border font-black text-[8px] uppercase tracking-widest transition-all ${
-                                                form.timings.includes(t) ? "bg-amber-500 border-amber-500 text-white shadow-lg shadow-amber-500/20" : "bg-white/5 border-white/5 text-white/20"
+                                            className={`px-4 py-3 rounded-xl border-2 font-black text-xs uppercase tracking-widest transition-all ${
+                                                form.timings.includes(t) ? "bg-amber-500 border-amber-500 text-white shadow-xl" : "bg-gray-50 border-transparent text-gray-400 hover:border-blue-200"
                                             }`}
                                         >
                                             {t}
@@ -291,11 +292,11 @@ export default function InstituteListingForm({ user, onComplete }) {
                         </div>
 
                         <div className="space-y-3">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-white/20 ml-2 text-center block leading-none mb-1">Catchment Area (Direct Proximity)</label>
+                            <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2 block leading-none">Catchment Area (Direct Proximity)</label>
                             <div className="relative group">
-                                <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 text-white/10 group-focus-within:text-indigo-500 transition-all" size={20} />
+                                <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-blue-600 transition-all" size={20} />
                                 <input 
-                                    className="w-full pl-14 pr-6 py-5 bg-background-dark/50 border border-border-dark rounded-[2rem] focus:bg-background-dark focus:border-indigo-500 transition-all outline-none font-black text-xs uppercase italic tracking-widest text-white placeholder:text-white/5"
+                                    className="w-full pl-14 pr-6 py-5 bg-gray-50 border-2 border-transparent rounded-[2rem] focus:bg-white focus:border-blue-600 transition-all outline-none font-black text-xs uppercase italic tracking-widest"
                                     placeholder="TYPE REGION & PRESS ENTER"
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter' && e.target.value) {
@@ -308,7 +309,7 @@ export default function InstituteListingForm({ user, onComplete }) {
                             </div>
                             <div className="flex flex-wrap gap-2">
                                 {form.locations.map(l => (
-                                    <div key={l} className="px-5 py-2.5 bg-white/5 border border-white/5 text-white/40 rounded-xl text-[9px] font-black uppercase tracking-widest italic flex items-center gap-2">
+                                    <div key={l} className="px-5 py-2.5 bg-gray-900 text-white rounded-xl text-xs font-black uppercase tracking-widest italic flex items-center gap-2 shadow-md">
                                         <MapPin size={10} /> {l}
                                     </div>
                                 ))}
@@ -318,17 +319,17 @@ export default function InstituteListingForm({ user, onComplete }) {
                         <button 
                             disabled={loading || form.timings.length === 0}
                             onClick={handleSubmit}
-                            className="w-full py-8 bg-indigo-600 text-white rounded-[2.5rem] font-black text-xs uppercase tracking-[0.5em] shadow-2xl hover:bg-white hover:text-indigo-600 transition-all flex items-center justify-center gap-6 active:scale-95 group italic leading-none"
+                            className="w-full py-8 bg-blue-600 text-white rounded-[2.5rem] font-black text-xs uppercase tracking-[0.5em] shadow-4xl shadow-blue-600/30 hover:bg-gray-900 transition-all flex items-center justify-center gap-6 active:scale-95 group italic leading-none"
                         >
                             {loading ? <Loader2 className="animate-spin" size={24} /> : (
-                                <>DEPLOY_HUB <ArrowRight size={24} strokeWidth={3} className="group-hover:translate-x-4 transition-transform text-white/40" /></>
+                                <>DEPLOY_HUB <ArrowRight size={24} strokeWidth={3} className="group-hover:translate-x-4 transition-transform" /></>
                             )}
                         </button>
                     </div>
                 )}
                 
-                <div className="mt-12 text-center flex items-center justify-center gap-3 text-[10px] font-black text-white/10 uppercase tracking-[0.6em] italic leading-none">
-                    <ShieldCheck size={14} strokeWidth={3} className="text-indigo-500/40" /> INSTITUTIONAL_INTEGRITY_VERIFIED
+                <div className="mt-12 text-center flex items-center justify-center gap-3 text-xs font-black text-gray-300 uppercase tracking-[0.6em] italic leading-none">
+                    <ShieldCheck size={14} strokeWidth={3} className="text-blue-600" /> INSTITUTIONAL_INTEGRITY_VERIFIED
                 </div>
             </div>
         </div>

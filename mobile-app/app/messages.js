@@ -25,7 +25,7 @@ export default function MessagesHub() {
             <View className="flex-1 ml-6 justify-center">
                 <View className="flex-row justify-between mb-1">
                     <Text className="text-white text-lg font-black tracking-tight">{item.name}</Text>
-                    <Text className="text-[#6c757d] text-[10px] font-black uppercase tracking-widest">{item.time}</Text>
+                    <Text className="text-[#6c757d] text-xs font-black uppercase tracking-widest">{item.time}</Text>
                 </View>
                 <Text className={`text-xs tracking-tight ${item.unread > 0 ? 'text-white font-black' : 'text-[#6c757d] font-bold'}`} numberOfLines={1}>
                     {item.lastMsg}
@@ -33,7 +33,7 @@ export default function MessagesHub() {
             </View>
             {item.unread > 0 && (
                 <View className="bg-primary px-3 py-1.5 rounded-full ml-4 items-center justify-center shadow-2xl shadow-primary/40 border border-primary/20">
-                    <Text className="text-white text-[10px] font-black">{item.unread}</Text>
+                    <Text className="text-white text-xs font-black">{item.unread}</Text>
                 </View>
             )}
         </TouchableOpacity>
@@ -52,7 +52,7 @@ export default function MessagesHub() {
                         <Text className="text-white text-xl font-black tracking-tight">Communications Hub</Text>
                         <View className="flex-row items-center gap-1.5">
                             <Lock size={10} color="#0066ff" />
-                            <Text className="text-primary text-[10px] font-black uppercase tracking-widest">End-to-End Encrypted</Text>
+                            <Text className="text-primary text-xs font-black uppercase tracking-widest">End-to-End Encrypted</Text>
                         </View>
                     </View>
                 </View>
@@ -75,7 +75,7 @@ export default function MessagesHub() {
                             </View>
                             <View className="ml-5 flex-1">
                                 <Text className="text-white font-black text-xs uppercase tracking-widest mb-1">Direct Verification</Text>
-                                <Text className="text-[#6c757d] font-bold text-[10px] tracking-tight">Secure communication with verified institutional specialists.</Text>
+                                <Text className="text-[#6c757d] font-bold text-xs tracking-tight">Secure communication with verified institutional specialists.</Text>
                             </View>
                         </View>
                     </View>
@@ -86,7 +86,7 @@ export default function MessagesHub() {
                             <MessageCircle size={64} color="#1a2333" />
                         </View>
                         <Text className="text-[#6c757d] text-base font-black uppercase tracking-[0.2em]">Silence Observed</Text>
-                        <Text className="text-[#4a5568] text-[10px] font-black uppercase mt-2">No active communications found</Text>
+                        <Text className="text-[#4a5568] text-xs font-black uppercase mt-2">No active communications found</Text>
                     </View>
                 }
             />

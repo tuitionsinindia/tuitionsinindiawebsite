@@ -123,7 +123,7 @@ function SubscriptionContent() {
                 {plans.filter(p => p.tier === 'PRO').map(plan => (
                     <div key={plan.id} className="bg-slate-900 rounded-[2.5rem] p-10 border-4 border-primary shadow-2xl shadow-primary/20 flex flex-col relative overflow-hidden transform scale-105">
                         <div className="absolute top-0 right-0 p-6">
-                            <span className="bg-primary text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">Most Popular</span>
+                            <span className="bg-primary text-white text-xs font-black px-3 py-1 rounded-full uppercase tracking-widest">Most Popular</span>
                         </div>
                         <h3 className="text-xl font-bold mb-2 text-white">{plan.name}</h3>
                         <div className="text-3xl font-black mb-6 text-white italic">₹{plan.price} <span className="text-sm text-white/50 font-medium">/ {plan.interval}</span></div>

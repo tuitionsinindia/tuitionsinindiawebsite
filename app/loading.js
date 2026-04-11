@@ -42,8 +42,8 @@ export default function Loading() {
                 {/* Progress Bar Group */}
                 <div className="w-64">
                     <div className="flex items-center justify-between mb-4 px-2">
-                        <span className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">Matching Engine</span>
-                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-on-surface-dark/40 italic">In Progress</span>
+                        <span className="text-xs font-black uppercase tracking-[0.4em] text-primary">Matching Engine</span>
+                        <span className="text-xs font-black uppercase tracking-[0.2em] text-on-surface-dark/40 italic">In Progress</span>
                     </div>
                     
                     <div className="h-1.5 w-full bg-surface-dark rounded-full overflow-hidden border border-border-dark">
@@ -51,7 +51,7 @@ export default function Loading() {
                     </div>
                     
                     <div className="mt-8 text-center">
-                        <p className="text-[11px] font-black text-white/40 uppercase tracking-[0.2em] italic">Deploying Academic Assets...</p>
+                        <p className="text-xs font-black text-white/40 uppercase tracking-[0.2em] italic">Deploying Academic Assets...</p>
                     </div>
                 </div>
             </div>
@@ -59,7 +59,7 @@ export default function Loading() {
             {/* Bottom Brand Marker */}
             <div className="absolute bottom-20 left-1/2 -translate-x-1/2 flex items-center gap-3">
                 <div className="size-1.5 bg-primary rounded-full animate-pulse"></div>
-                <span className="text-[9px] font-black uppercase tracking-[0.5em] text-on-surface-dark/20 cursor-default">Tuitions In India Intelligence</span>
+                <span className="text-xs font-black uppercase tracking-[0.5em] text-on-surface-dark/20 cursor-default">Tuitions In India Intelligence</span>
                 <div className="size-1.5 bg-primary rounded-full animate-pulse"></div>
             </div>
         </div>

@@ -73,7 +73,7 @@ export default function GetStarted() {
                     </Link>
                     
                     {searchParams.get('intent') === 'unlock' && (
-                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-full text-[10px] font-black uppercase tracking-widest mb-6 animate-bounce shadow-lg shadow-blue-600/20">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-full text-xs font-black uppercase tracking-widest mb-6 animate-bounce shadow-lg shadow-blue-600/20">
                             <Star size={14} fill="currentColor" /> One step closer to unlocking your tutor
                         </div>
                     )}

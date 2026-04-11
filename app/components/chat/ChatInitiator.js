@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { MessageSquare, Loader2, Lock, Zap, ArrowRight } from "lucide-react";
+import { MessageSquare, Loader2, Lock, Zap, ArrowRight, MessageCircle } from "lucide-react";
 
 export default function ChatInitiator({ studentId, tutorId, currentUser, recipientRole, label = "DIRECT MESSAGE" }) {
     const router = useRouter();
@@ -40,14 +40,14 @@ export default function ChatInitiator({ studentId, tutorId, currentUser, recipie
                 router.push(redirectPath);
             } else if (res.status === 403) {
                 const data = await res.json();
-                alert(`ACADEMY_PROTOCOL_RESTRICTION: ${data.details}`);
+                alert(`Institutional Protocol Restriction: ${data.details}`);
             } else {
                 const data = await res.json();
-                alert(`SYSTEM_ERROR: ${data.error || "CONNECTION_FAILED"}`);
+                alert(`System Error: ${data.error || "Connection failed."}`);
             }
         } catch (err) {
             console.error("Failed to initiate chat:", err);
-            alert("NETWORK_STABILITY_FAILURE: RE-INITIALIZE_LINK");
+            alert("Network Protocol Failure: Please re-synchronize.");
         } finally {
             setLoading(false);
         }
@@ -55,14 +55,21 @@ export default function ChatInitiator({ studentId, tutorId, currentUser, recipie
 
     if (!canInitiate) {
         return (
-            <button 
-                onClick={handleInitiate}
-                className="w-full bg-white/5 border border-white/10 py-6 rounded-[1.5rem] font-black text-[10px] tracking-[0.3em] uppercase flex items-center justify-center gap-4 text-white/40 hover:bg-indigo-600 hover:text-white transition-all group italic"
-            >
-                <Lock size={16} strokeWidth={3} className="text-indigo-500" />
-                UPGRADE_TO_UNLOCK_MESSAGING
-                <ArrowRight size={14} className="opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
-            </button>
+            <div className="space-y-4">
+                <button 
+                    onClick={handleInitiate}
+                    className="w-full bg-white border border-gray-100 py-7 rounded-[2rem] font-black text-[10px] tracking-[0.4em] uppercase flex items-center justify-center gap-4 text-gray-300 hover:text-blue-600 hover:border-blue-600/20 transition-all group italic shadow-sm"
+                >
+                    <Lock size={16} strokeWidth={3} className="text-blue-600/30 group-hover:text-blue-600 transition-colors" />
+                    Unlock Expert Dialogue
+                    <ArrowRight size={14} className="opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                </button>
+                <div className="px-6 py-4 bg-blue-50/50 rounded-2xl border border-blue-100/50">
+                    <p className="text-[9px] font-black text-blue-600/60 uppercase tracking-widest text-center leading-relaxed italic">
+                        Proactive neural links require <br/> <span className="text-blue-600 underline">Premium Registry Access.</span>
+                    </p>
+                </div>
+            </div>
         );
     }
 
@@ -70,11 +77,11 @@ export default function ChatInitiator({ studentId, tutorId, currentUser, recipie
         <button 
             onClick={handleInitiate}
             disabled={loading}
-            className="w-full bg-indigo-600 border border-indigo-500 py-6 rounded-[1.5rem] font-black text-[10px] tracking-[0.4em] uppercase flex items-center justify-center gap-4 transition-all text-white hover:bg-white hover:text-indigo-600 hover:shadow-[0_0_30px_rgba(79,70,229,0.3)] shadow-2xl group disabled:opacity-50 italic"
+            className="w-full bg-blue-600 border border-blue-600 py-7 rounded-[2rem] font-black text-[10px] tracking-[0.4em] uppercase flex items-center justify-center gap-4 transition-all text-white hover:bg-gray-900 hover:border-gray-900 hover:shadow-4xl hover:shadow-blue-900/20 shadow-2xl shadow-blue-600/20 group disabled:opacity-50 italic active:scale-95"
         >
-            {loading ? <Loader2 className="animate-spin" size={18} /> : (
+            {loading ? <Loader2 className="animate-spin" size={20} /> : (
                 <>
-                    <Zap size={18} fill="currentColor" strokeWidth={0} className="group-hover:scale-110 transition-transform" />
+                    <MessageCircle size={20} strokeWidth={3} className="group-hover:rotate-12 transition-transform" />
                     {label}
                 </>
             )}

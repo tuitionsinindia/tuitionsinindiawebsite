@@ -41,7 +41,7 @@ export default function Blog() {
                     <div className="max-w-3xl mb-24">
                         <div className="flex items-center gap-3 mb-6">
                             <div className="size-2 bg-primary rounded-full"></div>
-                            <span className="text-primary font-black uppercase tracking-[0.3em] text-[10px]">Academic Intelligence Agency</span>
+                            <span className="text-primary font-black uppercase tracking-[0.3em] text-xs">Academic Intelligence Agency</span>
                         </div>
                         <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-none mb-8">
                             Academic <br/>
@@ -68,7 +68,7 @@ export default function Blog() {
                                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-70 group-hover:opacity-90" 
                                     />
                                     <div className="absolute top-8 left-8">
-                                        <div className="px-5 py-2 bg-primary text-white rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl">
+                                        <div className="px-5 py-2 bg-primary text-white rounded-full text-xs font-black uppercase tracking-widest shadow-xl">
                                             {post.category}
                                         </div>
                                     </div>
@@ -77,7 +77,7 @@ export default function Blog() {
                                 
                                 <div className={`p-12 flex-1 flex flex-col justify-between ${idx === 0 ? "lg:p-16" : ""}`}>
                                     <div>
-                                        <div className="flex items-center gap-4 text-on-surface-dark/40 text-[10px] font-black uppercase tracking-widest mb-8">
+                                        <div className="flex items-center gap-4 text-on-surface-dark/40 text-xs font-black uppercase tracking-widest mb-8">
                                             <div className="flex items-center gap-1.5">
                                                 <Calendar size={12} className="text-primary" />
                                                 <span>{post.date}</span>
@@ -105,7 +105,7 @@ export default function Blog() {
                                             </div>
                                             <div>
                                                 <p className="text-white font-black text-xs tracking-tight">{post.author}</p>
-                                                <p className="text-[10px] font-black uppercase tracking-widest text-primary">Senior Scholar</p>
+                                                <p className="text-xs font-black uppercase tracking-widest text-primary">Senior Scholar</p>
                                             </div>
                                         </div>
                                         <Link href="#" className="p-4 bg-background-dark border border-border-dark rounded-2xl text-primary group-hover:bg-primary group-hover:text-white transition-all shadow-lg active:scale-95">

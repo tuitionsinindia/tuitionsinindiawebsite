@@ -15,7 +15,7 @@ export default function TermsOfService() {
                         <section className="space-y-4">
                             <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary rounded-full border border-primary/20 mb-4">
                                 <Scale size={14} />
-                                <span className="text-[9px] font-black uppercase tracking-[0.2em]">Institutional Mandate</span>
+                                <span className="text-xs font-black uppercase tracking-[0.2em]">Institutional Mandate</span>
                             </div>
                             <h1 className="text-4xl md:text-6xl font-black uppercase italic tracking-tighter leading-none text-white">Terms of <span className="text-primary font-serif lowercase tracking-normal not-italic">engagement</span>.</h1>
                             <p className="text-on-surface-dark/40 font-medium italic text-sm">Last Audit: March 24, 2026</p>

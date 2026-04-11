@@ -117,11 +117,11 @@ function InstituteProfileEditorContent() {
                     </Link>
                     <div>
                         <h1 className="text-2xl font-black uppercase italic tracking-tighter text-white leading-none mb-1">Entity <span className="text-indigo-500 underline decoration-indigo-500/20 underline-offset-4 decoration-4">Config.</span></h1>
-                        <p className="text-[9px] font-black uppercase tracking-[0.4em] text-on-surface-dark/20 leading-none">Institutional Protocol 01</p>
+                        <p className="text-xs font-black uppercase tracking-[0.4em] text-on-surface-dark/20 leading-none">Institutional Protocol 01</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-4">
-                    <Link href={`/tutor/${instituteId}`} target="_blank" className="hidden sm:flex items-center gap-3 px-8 py-3.5 bg-surface-dark border border-border-dark rounded-xl font-black text-[10px] tracking-widest hover:bg-white hover:text-black transition-all active:scale-95 uppercase leading-none">
+                    <Link href={`/tutor/${instituteId}`} target="_blank" className="hidden sm:flex items-center gap-3 px-8 py-3.5 bg-surface-dark border border-border-dark rounded-xl font-black text-xs tracking-widest hover:bg-white hover:text-black transition-all active:scale-95 uppercase leading-none">
                         PREVIEW PUBLIC PRESENCE
                     </Link>
                 </div>
@@ -131,7 +131,7 @@ function InstituteProfileEditorContent() {
                 {loading ? (
                     <div className="py-40 flex flex-col items-center justify-center opacity-50">
                         <div className="size-20 rounded-[2rem] border-[8px] border-indigo-500/5 border-t-indigo-500 animate-spin mb-10 shadow-2xl"></div>
-                        <p className="font-black text-[11px] uppercase tracking-[0.6em] italic animate-pulse">Synchronizing Data Matrix...</p>
+                        <p className="font-black text-xs uppercase tracking-[0.6em] italic animate-pulse">Synchronizing Data Matrix...</p>
                     </div>
                 ) : (
                     <form onSubmit={handleSave} className="space-y-16">
@@ -146,7 +146,7 @@ function InstituteProfileEditorContent() {
                                 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                                     <div className="space-y-4">
-                                        <label className="text-[10px] font-black uppercase tracking-[0.4em] text-on-surface-dark/40 ml-2 italic">Institution Brand Name</label>
+                                        <label className="text-xs font-black uppercase tracking-[0.4em] text-on-surface-dark/40 ml-2 italic">Institution Brand Name</label>
                                         <div className="relative group/input">
                                             <input 
                                                 type="text" 
@@ -160,7 +160,7 @@ function InstituteProfileEditorContent() {
                                         </div>
                                     </div>
                                     <div className="space-y-4">
-                                        <label className="text-[10px] font-black uppercase tracking-[0.4em] text-on-surface-dark/40 ml-2 italic">Authorized Contact Person</label>
+                                        <label className="text-xs font-black uppercase tracking-[0.4em] text-on-surface-dark/40 ml-2 italic">Authorized Contact Person</label>
                                         <input 
                                             type="text" 
                                             value={formData.contactPerson}
@@ -171,7 +171,7 @@ function InstituteProfileEditorContent() {
                                         />
                                     </div>
                                     <div className="md:col-span-2 space-y-4">
-                                        <label className="text-[10px] font-black uppercase tracking-[0.4em] text-on-surface-dark/40 ml-2 italic">Institutional Contact Protocol (Phone)</label>
+                                        <label className="text-xs font-black uppercase tracking-[0.4em] text-on-surface-dark/40 ml-2 italic">Institutional Contact Protocol (Phone)</label>
                                         <input 
                                             type="tel" 
                                             value={formData.phone}
@@ -196,7 +196,7 @@ function InstituteProfileEditorContent() {
                                 
                                 <div className="space-y-12">
                                     <div className="space-y-4">
-                                        <label className="text-[10px] font-black uppercase tracking-[0.4em] text-on-surface-dark/40 ml-2 italic">Subjects & Batches (Comma Separated)</label>
+                                        <label className="text-xs font-black uppercase tracking-[0.4em] text-on-surface-dark/40 ml-2 italic">Subjects & Batches (Comma Separated)</label>
                                         <textarea 
                                             rows="3"
                                             value={formData.subjects}
@@ -208,7 +208,7 @@ function InstituteProfileEditorContent() {
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                                         <div className="space-y-4">
-                                            <label className="text-[10px] font-black uppercase tracking-[0.4em] text-on-surface-dark/40 ml-2 italic">Serviceable Regions</label>
+                                            <label className="text-xs font-black uppercase tracking-[0.4em] text-on-surface-dark/40 ml-2 italic">Serviceable Regions</label>
                                             <input 
                                                 type="text" 
                                                 value={formData.locations}
@@ -218,7 +218,7 @@ function InstituteProfileEditorContent() {
                                             />
                                         </div>
                                         <div className="space-y-4">
-                                            <label className="text-[10px] font-black uppercase tracking-[0.4em] text-on-surface-dark/40 ml-2 italic">Foundation Year / Experience</label>
+                                            <label className="text-xs font-black uppercase tracking-[0.4em] text-on-surface-dark/40 ml-2 italic">Foundation Year / Experience</label>
                                             <input 
                                                 type="number" 
                                                 value={formData.experience}
@@ -228,7 +228,7 @@ function InstituteProfileEditorContent() {
                                             />
                                         </div>
                                         <div className="space-y-4">
-                                            <label className="text-[10px] font-black uppercase tracking-[0.4em] text-on-surface-dark/40 ml-2 italic">Fee Structure (Average ₹/Course)</label>
+                                            <label className="text-xs font-black uppercase tracking-[0.4em] text-on-surface-dark/40 ml-2 italic">Fee Structure (Average ₹/Course)</label>
                                             <input 
                                                 type="number" 
                                                 value={formData.hourlyRate}
@@ -238,7 +238,7 @@ function InstituteProfileEditorContent() {
                                             />
                                         </div>
                                         <div className="space-y-4">
-                                            <label className="text-[10px] font-black uppercase tracking-[0.4em] text-on-surface-dark/40 ml-2 italic">Target Grade Matrices</label>
+                                            <label className="text-xs font-black uppercase tracking-[0.4em] text-on-surface-dark/40 ml-2 italic">Target Grade Matrices</label>
                                             <input 
                                                 type="text" 
                                                 value={formData.grades}
@@ -262,7 +262,7 @@ function InstituteProfileEditorContent() {
                                 <h2 className="text-4xl font-black mb-12 uppercase italic tracking-tighter text-white">Pedagogical <span className="text-indigo-500 not-italic font-serif font-light lowercase">philosophy.</span></h2>
                                 
                                 <div className="space-y-4">
-                                    <label className="text-[10px] font-black uppercase tracking-[0.4em] text-on-surface-dark/40 ml-2 italic">Institutional Biography & Methodology</label>
+                                    <label className="text-xs font-black uppercase tracking-[0.4em] text-on-surface-dark/40 ml-2 italic">Institutional Biography & Methodology</label>
                                     <textarea 
                                         rows="10"
                                         value={formData.bio}

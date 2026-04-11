@@ -52,7 +52,7 @@ export default function AboutPage() {
                     
                     <div className="inline-flex items-center gap-3 px-4 py-2 bg-primary/10 rounded-full border border-primary/20 mb-8">
                         <Zap size={14} className="text-primary" />
-                        <span className="text-primary text-[10px] font-black uppercase tracking-[0.3em]">Institutional DNA</span>
+                        <span className="text-primary text-xs font-black uppercase tracking-[0.3em]">Institutional DNA</span>
                     </div>
 
                     <h1 className="text-6xl md:text-8xl font-black italic tracking-tighter leading-none text-white uppercase">
@@ -73,7 +73,7 @@ export default function AboutPage() {
                                 <stat.icon size={24} />
                             </div>
                             <p className="text-5xl font-black text-white mb-2 tracking-tighter italic">{stat.value}</p>
-                            <p className="text-[9px] font-black text-on-surface-dark/40 uppercase tracking-[0.2em]">{stat.label}</p>
+                            <p className="text-xs font-black text-on-surface-dark/40 uppercase tracking-[0.2em]">{stat.label}</p>
                         </div>
                     ))}
                 </section>
@@ -91,10 +91,10 @@ export default function AboutPage() {
                             </p>
                         </div>
                         <div className="flex flex-wrap gap-6">
-                            <Link href="/register/tutor" className="px-10 py-5 bg-primary text-white rounded-2xl font-black text-[10px] tracking-[0.3em] uppercase shadow-2xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all">
+                            <Link href="/register/tutor" className="px-10 py-5 bg-primary text-white rounded-2xl font-black text-xs tracking-[0.3em] uppercase shadow-2xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all">
                                 Deploy Faculty
                             </Link>
-                            <Link href="/search" className="px-10 py-5 bg-surface-dark text-white rounded-2xl font-black text-[10px] tracking-[0.3em] uppercase border border-border-dark hover:border-primary/50 active:scale-95 transition-all">
+                            <Link href="/search" className="px-10 py-5 bg-surface-dark text-white rounded-2xl font-black text-xs tracking-[0.3em] uppercase border border-border-dark hover:border-primary/50 active:scale-95 transition-all">
                                 Discover Experts
                             </Link>
                         </div>
@@ -111,7 +111,7 @@ export default function AboutPage() {
                             <div className="absolute bottom-12 left-12 right-12 p-8 bg-surface-dark/80 backdrop-blur-xl rounded-3xl border border-border-dark flex items-center justify-between">
                                 <div>
                                     <p className="text-white font-black uppercase text-lg italic tracking-tight">Verified Elite</p>
-                                    <p className="text-primary text-[9px] font-black uppercase tracking-widest">Global Standards</p>
+                                    <p className="text-primary text-xs font-black uppercase tracking-widest">Global Standards</p>
                                 </div>
                                 <div className="size-12 rounded-full bg-primary text-white flex items-center justify-center font-black italic shadow-lg shadow-primary/20">
                                     99%

@@ -80,7 +80,7 @@ function EarningsContent() {
                                                     <td className="py-4 text-sm font-medium text-slate-500">{tx.description}</td>
                                                     <td className="py-4 text-sm font-bold">₹{tx.amount}</td>
                                                     <td className="py-4 text-right">
-                                                        <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${tx.status === 'SUCCESS' ? 'bg-emerald-100 text-emerald-600' : tx.status === 'PENDING' ? 'bg-amber-100 text-amber-600' : 'bg-red-100 text-red-600'}`}>
+                                                        <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${tx.status === 'SUCCESS' ? 'bg-emerald-100 text-emerald-600' : tx.status === 'PENDING' ? 'bg-amber-100 text-amber-600' : 'bg-red-100 text-red-600'}`}>
                                                             {tx.status}
                                                         </span>
                                                     </td>

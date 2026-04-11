@@ -45,7 +45,7 @@ export default function StudentKB() {
                 <div className="text-center mb-24 space-y-6">
                     <div className="inline-flex items-center gap-3 px-4 py-2 bg-primary/10 rounded-full border border-primary/20 mb-8">
                         <GraduationCap size={14} className="text-primary" />
-                        <span className="text-primary text-[10px] font-black uppercase tracking-[0.3em]">Student Intelligence Hub</span>
+                        <span className="text-primary text-xs font-black uppercase tracking-[0.3em]">Student Intelligence Hub</span>
                     </div>
                     <h1 className="text-6xl md:text-8xl font-black text-white italic tracking-tighter leading-none uppercase">
                         Knowledge <br />
@@ -86,7 +86,7 @@ export default function StudentKB() {
                         <Video size={48} className="mx-auto mb-8 text-white/50" />
                         <h2 className="text-4xl md:text-6xl font-black uppercase italic tracking-tighter leading-none"> Want specialized <span className="text-black font-serif lowercase tracking-normal not-italic px-4">advice?</span></h2>
                         <p className="text-xl text-white/80 font-medium italic leading-relaxed">Join our weekly student webinars to learn from Bharat's top-performing students and legendary educators.</p>
-                        <button className="bg-white text-primary font-black px-12 py-5 rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-xl shadow-black/20 uppercase tracking-[0.3em] text-[10px]">
+                        <button className="bg-white text-primary font-black px-12 py-5 rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-xl shadow-black/20 uppercase tracking-[0.3em] text-xs">
                             Register for Session
                         </button>
                     </div>

@@ -36,8 +36,8 @@ export async function GET(request) {
         const students = unlocks.map(u => ({
             ...u.lead.student,
             unlockedAt: u.unlockedAt,
-            subject: u.lead.subject,
-            location: u.lead.location
+            subject: u.lead.subjects?.[0], 
+            location: u.lead.locations?.[0]
         }));
 
         // Deduplicate in case a tutor unlocked multiple leads for the same student
