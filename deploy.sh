@@ -19,8 +19,8 @@ rsync -avz --delete \
 echo "📦 Step 2: Rebuilding Containers on VPS..."
 ssh -o StrictHostKeyChecking=no ${VPS_USER}@${VPS_HOST} "bash -s" << 'EOF'
 cd /root/tuitionsinindia
-echo "🐳 Rebuilding Containers with CACHE-BUSTING (Force Clean)..."
-docker compose build --build-arg CACHE_BUST=$(date +%s)
+echo "🐳 Rebuilding Containers with NO-CACHE (Force Clean Build)..."
+docker compose build --no-cache --build-arg CACHE_BUST=$(date +%s)
 docker compose up -d
 
 echo "🗄️ Step 3: Synchronizing Database Schema..."

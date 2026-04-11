@@ -9,6 +9,9 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        "primary": "#0d40a5",
+        "primary-hover": "#0a358a",
+        "accent": "#d4af37",
         "on-tertiary-container": "#009e47",
         "on-primary-container": "#708ab5",
         "on-primary": "#ffffff",
@@ -38,7 +41,6 @@ module.exports = {
         "secondary": "#735c00",
         "surface-container-high": "#e7e8e9",
         "on-secondary-container": "#745c00",
-        "primary": "#000a1e",
         "tertiary-fixed-dim": "#3de273",
         "secondary-container": "#fed65b",
         "on-error": "#ffffff",
@@ -64,6 +66,7 @@ module.exports = {
         "sans": ["var(--font-inter)", "sans-serif"],
       },
       borderRadius: {
+        "4xl": "3rem",
         "DEFAULT": "0.125rem",
         "lg": "0.25rem",
         "xl": "0.5rem",
@@ -71,6 +74,9 @@ module.exports = {
         "3xl": "1.5rem",
         "full": "9999px" 
       },
+      boxShadow: {
+        "4xl": "0 50px 100px -20px rgba(0, 0, 0, 0.4)",
+      }
     },
   },
   plugins: [],

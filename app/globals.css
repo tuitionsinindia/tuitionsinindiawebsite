@@ -1,5 +1,7 @@
-@import "tailwindcss";
-@config "../tailwind.config.js";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&display=swap');
 
@@ -11,19 +13,10 @@
   --border-dark: #1e293b;
 }
 
-@theme {
-  --color-primary: var(--primary);
-  --color-accent: var(--accent);
-  --color-bg-dark: var(--bg-dark);
-  --color-border-dark: var(--border-dark);
-  --radius-3xl: 2rem;
-  --radius-4xl: 3rem;
-  --shadow-4xl: 0 50px 100px -20px rgba(0, 0, 0, 0.4);
-}
-
 body {
   font-family: 'Inter', sans-serif;
   scroll-behavior: smooth;
+  @apply antialiased text-gray-800 bg-white;
 }
 
 h1, h2, h3, h4, .font-heading {
@@ -31,36 +24,23 @@ h1, h2, h3, h4, .font-heading {
 }
 
 @layer components {
-    @apply text-sm font-bold text-slate-500 hover:text-primary transition-all flex items-center gap-1 relative;
-  }
-  
-  .nav-link::after {
-    content: '';
-    @apply absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300;
-  }
-  
-  .nav-link:hover::after {
-    @apply w-full;
-  }
-
-  .btn-primary {
-    @apply bg-primary text-white font-black py-4 px-10 rounded-lg transition-all hover:shadow-2xl hover:shadow-blue-900/30 hover:-translate-y-0.5 active:scale-95 flex items-center justify-center gap-2 uppercase tracking-[0.2em] text-[11px] shadow-xl;
-  }
-
-  .btn-secondary {
-    @apply bg-white text-slate-900 border border-slate-200 font-bold py-4 px-10 rounded-lg transition-all hover:bg-slate-50 hover:border-slate-300 active:scale-95 flex items-center justify-center gap-2 uppercase tracking-[0.2em] text-[11px] shadow-sm;
+  .container-premium {
+    @apply max-w-7xl mx-auto px-6 lg:px-12;
   }
 
   .glass-premium {
-    @apply bg-white/70 backdrop-blur-2xl border border-white/40 shadow-2xl;
+    background-color: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.05);
   }
-  
-  .premium-card {
-    @apply bg-white border border-slate-100 rounded-[2.5rem] p-10 shadow-sm transition-all duration-500 hover:shadow-2xl hover:shadow-slate-200/50 hover:border-primary/10 hover:-translate-y-1;
-  }
-  
-  .text-glow {
-    text-shadow: 0 0 20px rgba(30, 75, 179, 0.3);
+
+  .glass-search {
+    background-color: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   .no-scrollbar::-webkit-scrollbar {
@@ -72,24 +52,20 @@ h1, h2, h3, h4, .font-heading {
   }
 }
 
-@keyframes slideUp {
+/* Luxury Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes heroScrollZoom {
-  from { transform: scale(1.1); }
-  to { transform: scale(1); }
-}
-
-@keyframes premiumTextGlow {
-  0%, 100% { text-shadow: 0 0 20px rgba(30, 75, 179, 0.3); }
-  50% { text-shadow: 0 0 40px rgba(30, 75, 179, 0.6), 0 0 10px rgba(30, 75, 179, 0.2); }
-}
-
-@keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes marquee {
@@ -97,35 +73,31 @@ h1, h2, h3, h4, .font-heading {
   100% { transform: translateX(-50%); }
 }
 
-.animate-premium-fade {
-  animation: slideUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+.animate-fade-in {
+  animation: fadeIn 0.8s ease-out forwards;
 }
 
-.animate-hero-zoom {
-  animation: heroScrollZoom 1.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+.animate-fade-in-up {
+  animation: fadeInUp 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-.animate-text-glow-premium {
-  animation: premiumTextGlow 4s ease-in-out infinite;
+.animate-slide-up {
+  animation: slideUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .animate-marquee {
   display: flex;
   width: fit-content;
-  animation: marquee 30s linear infinite;
+  animation: marquee 40s linear infinite;
 }
 
-/* Material Symbols Integration Improvements */
+.animate-premium-fade {
+  animation: slideUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Material Symbols Integration */
 .material-symbols-outlined {
   font-family: 'Material Symbols Outlined';
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-}
-
-.material-symbols-outlined.fill-1 {
-  font-variation-settings: 'FILL' 1;
-}
-
-/* Layout Utilities */
-.container-premium {
-  @apply max-w-7xl mx-auto px-6 lg:px-12;
+  vertical-align: middle;
 }
