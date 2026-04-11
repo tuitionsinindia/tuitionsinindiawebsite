@@ -22,7 +22,7 @@ export default function InstituteRegisterPage() {
     };
 
     const handleFinalize = () => {
-        router.push("/dashboard/institute");
+        router.push(`/dashboard/institute?instituteId=${user.id}&success=true`);
     };
 
     const stepLabels = [

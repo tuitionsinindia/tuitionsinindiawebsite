@@ -54,7 +54,7 @@ export async function POST(request) {
         const languageList = Array.isArray(languages) ? languages : languages?.split(',').map(l => l.trim().toUpperCase()).filter(Boolean) || [];
 
         // 3. Prepare Listing Data
-        const finalTitle = isInstitute ? `INSTITUTE: ${instituteName || title}` : (title || "PROFESSIONAL TUTOR");
+        const finalTitle = isInstitute ? (instituteName || title || "Institute") : (title || "Tutor");
 
         const listingData = {
             title: finalTitle,
@@ -82,7 +82,7 @@ export async function POST(request) {
             }
         });
 
-        return NextResponse.json({ success: true, message: "Faculty Terminal Configured Successfully" });
+        return NextResponse.json({ success: true, message: "Profile updated successfully" });
     } catch (error) {
         console.error("Profile Update Error:", error);
         return NextResponse.json({ success: false, error: error.message }, { status: 500 });
