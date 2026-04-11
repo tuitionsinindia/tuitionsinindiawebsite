@@ -16,7 +16,11 @@ export default function ChatInterface({ studentId, tutorId, currentUserType }) {
                 const res = await fetch("/api/chat/session", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ studentId, tutorId })
+                    body: JSON.stringify({
+                    studentId,
+                    tutorId,
+                    initiatorId: currentUserType === "STUDENT" ? studentId : tutorId
+                })
                 });
                 if (res.ok) {
                     const data = await res.json();
