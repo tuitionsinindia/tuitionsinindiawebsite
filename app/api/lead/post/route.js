@@ -9,6 +9,8 @@ export async function POST(request) {
     try {
         const body = await request.json();
         let { name, email, phone, subject, location, budget, description, grade } = body;
+        // Parse budget safely — form sends strings like "1000/hr", schema expects Int?
+        const budgetInt = budget ? parseInt(String(budget).replace(/\D/g, ''), 10) || null : null;
 
         // Validation
         if (!email || !name || !phone) {
@@ -58,10 +60,10 @@ export async function POST(request) {
         const lead = await prisma.lead.create({
             data: {
                 studentId: user.id,
-                subject: subject,
-                grade: grade,
-                location: location,
-                budget: budget,
+                subjects: subject ? [subject] : [],
+                grades: grade ? [grade] : [],
+                locations: location ? [location] : [],
+                budget: budgetInt,
                 description: description,
                 status: 'OPEN',
             },

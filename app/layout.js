@@ -79,10 +79,8 @@ export default function RootLayout({ children }) {
               "image": "https://tuitionsinindia.com/logo.png",
               "@id": "https://tuitionsinindia.com",
               "url": "https://tuitionsinindia.com",
-              "telephone": "+910000000000",
               "address": {
                 "@type": "PostalAddress",
-                "streetAddress": "Academic Hub",
                 "addressLocality": "Mumbai",
                 "addressRegion": "MH",
                 "postalCode": "400001",
