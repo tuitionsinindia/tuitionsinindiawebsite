@@ -39,6 +39,7 @@ function StudentDashboardContent() {
     const [activeLeads, setActiveLeads] = useState([]);
     const [transactions, setTransactions] = useState([]);
     const [showSuccess, setShowSuccess] = useState(searchParams.get("success") === "true");
+    const highlightTutorId = searchParams.get("highlightTutor") || "";
 
     const [chatSessions, setChatSessions] = useState([]);
     const [selectedSession, setSelectedSession] = useState(null);
@@ -213,7 +214,9 @@ function StudentDashboardContent() {
                                 <div className="flex-1">
                                     <p className="font-semibold text-emerald-800 text-sm">Requirement posted successfully!</p>
                                     <p className="text-emerald-600 text-xs mt-0.5">
-                                        Your request is now live. Tutors will contact you soon.
+                                        {highlightTutorId
+                                            ? "Your requirement is live. Check the My Tutors tab to connect with the tutor you were viewing."
+                                            : "Your request is live. Matching tutors will be shown in the My Tutors tab."}
                                     </p>
                                 </div>
                                 <button onClick={() => setShowSuccess(false)} className="text-emerald-400 hover:text-emerald-600 text-lg leading-none">×</button>
@@ -308,7 +311,7 @@ function StudentDashboardContent() {
                                 {unlockedTutors.length > 0 ? (
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                         {unlockedTutors.map((t) => (
-                                            <div key={t.id} className="bg-white rounded-xl border border-gray-200 p-6 text-center">
+                                            <div key={t.id} className={`bg-white rounded-xl border p-6 text-center ${t.id === highlightTutorId ? "border-blue-400 ring-2 ring-blue-100" : "border-gray-200"}`}>
                                                 <div className="w-16 h-16 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-2xl mx-auto mb-4">
                                                     {t.name?.[0]}
                                                 </div>

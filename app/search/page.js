@@ -121,6 +121,8 @@ function SearchResultsContent() {
         if (querySubject) params.set("subject", querySubject);
         if (grade) params.set("grade", grade);
         if (queryLocation) params.set("location", queryLocation);
+        const tutorId = tutor.id || tutor.userId || "";
+        if (tutorId) params.set("tutorId", tutorId);
         params.set("intent", "unlock");
         router.push(`${registerRoute}?${params.toString()}`);
     };

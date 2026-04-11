@@ -1,36 +1,32 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { 
-    BookOpen, 
-    MapPin, 
-    MonitorCheck, 
-    Home, 
+import { useState } from "react";
+import {
+    BookOpen,
+    MapPin,
+    Monitor,
+    Home,
     ArrowRight,
     ArrowLeft,
-    CheckCircle2,
     Loader2,
-    Clock,
     Navigation,
     CircleDollarSign,
-    ShieldCheck,
-    Phone,
     User,
     Lock,
     Users,
-    Layers,
-    Trophy
+    Building2,
+    X
 } from "lucide-react";
 
-export default function RequirementForm({ user, onComplete }) {
+export default function RequirementForm({ user, onComplete, initialData = {} }) {
     const [loading, setLoading] = useState(false);
     const [isDetecting, setIsDetecting] = useState(false);
-    const [step, setStep] = useState(1); // 1: Academic, 2: Preferences, 3: Finalize
-    
+    const [step, setStep] = useState(1); // 1: Subjects & Class, 2: Preferences, 3: Review
+
     const [form, setForm] = useState({
-        subjects: [],
-        grades: [],
-        locations: [],
+        subjects: initialData.subject ? [initialData.subject] : [],
+        grades: initialData.grade ? [initialData.grade] : [],
+        locations: initialData.location ? [initialData.location] : [],
         timings: [],
         budget: "",
         modes: ["ONLINE"],
@@ -40,23 +36,36 @@ export default function RequirementForm({ user, onComplete }) {
         description: ""
     });
 
-    const TIMING_SLOTS = [
-        "Morning (7 AM - 12 PM)",
-        "Afternoon (12 PM - 4 PM)",
-        "Evening (4 PM - 8 PM)",
-        "Late Night (8 PM+)",
-        "Weekends"
-    ];
+    const [subjectInput, setSubjectInput] = useState("");
+    const [locationInput, setLocationInput] = useState("");
 
+    const GRADES = ["Primary (1-5)", "Middle (6-8)", "High School (9-10)", "Higher Secondary (11-12)", "Undergraduate", "Competitive Exams"];
     const BOARDS = ["CBSE", "ICSE", "IB", "State Board", "IGCSE"];
+    const TIMING_SLOTS = ["Morning (7 AM – 12 PM)", "Afternoon (12 PM – 4 PM)", "Evening (4 PM – 8 PM)", "Late Night (8 PM+)", "Weekends"];
 
     const toggleItem = (field, item) => {
         setForm(f => ({
             ...f,
-            [field]: f[field].includes(item) 
-                ? f[field].filter(i => i !== item) 
+            [field]: f[field].includes(item)
+                ? f[field].filter(i => i !== item)
                 : [...f[field], item]
         }));
+    };
+
+    const addSubject = (val) => {
+        const s = val.trim();
+        if (s && !form.subjects.includes(s)) {
+            setForm(f => ({ ...f, subjects: [...f.subjects, s] }));
+        }
+        setSubjectInput("");
+    };
+
+    const addLocation = (val) => {
+        const l = val.trim();
+        if (l && !form.locations.includes(l)) {
+            setForm(f => ({ ...f, locations: [...f.locations, l] }));
+        }
+        setLocationInput("");
     };
 
     const detectLocation = () => {
@@ -89,8 +98,12 @@ export default function RequirementForm({ user, onComplete }) {
                     studentId: user.id,
                     ...form,
                     budget: parseInt(form.budget) || 0,
-                    groupPreference: form.groupPreference,
-                    description: `Preferences: ${form.genderPreference} Tutor | Interaction: ${form.groupPreference} | Boards: ${form.boards.join(', ')}\n\n${form.description}`
+                    description: [
+                        form.genderPreference !== "ANY" ? `Prefers ${form.genderPreference.toLowerCase()} tutor` : "",
+                        form.groupPreference === "PRIVATE" ? "Private sessions" : "Group sessions",
+                        form.boards.length ? `Boards: ${form.boards.join(", ")}` : "",
+                        form.description
+                    ].filter(Boolean).join(" · ")
                 })
             });
             if (res.ok) onComplete();
@@ -98,271 +111,360 @@ export default function RequirementForm({ user, onComplete }) {
     };
 
     return (
-        <div className="w-full max-w-2xl mx-auto">
-            <div className="bg-white rounded-[3rem] p-8 md:p-12 border border-gray-100 shadow-4xl shadow-blue-100/40 relative overflow-hidden">
-                
-                {/* Progress Hub */}
-                <div className="absolute top-0 left-0 w-full h-2 bg-gray-50 flex">
-                    <div className={`h-full bg-blue-600 transition-all duration-1000 ${step === 1 ? "w-1/3" : step === 2 ? "w-2/3" : "w-full"}`}></div>
-                </div>
+        <div className="w-full">
 
-                {/* Tactical Header */}
-                <div className="mb-12 flex justify-between items-start">
+            {/* Progress bar */}
+            <div className="w-full h-1 bg-gray-100 rounded-full mb-8 overflow-hidden">
+                <div className={`h-full bg-blue-600 rounded-full transition-all duration-500 ${step === 1 ? "w-1/3" : step === 2 ? "w-2/3" : "w-full"}`} />
+            </div>
+
+            {/* Step header */}
+            <div className="flex items-center justify-between mb-6">
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Step {step} of 3</p>
+                {step > 1 && (
+                    <button onClick={() => setStep(step - 1)} className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-blue-600 transition-colors">
+                        <ArrowLeft size={15} /> Back
+                    </button>
+                )}
+            </div>
+
+            {/* Step 1: Subject & Class */}
+            {step === 1 && (
+                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <div>
-                        <div className="flex items-center gap-2 text-blue-600 font-black text-[10px] uppercase tracking-[0.4em] mb-4 leading-none">
-                            <Zap size={14} className="animate-pulse" /> Alignment Step 0{step + 1}
-                        </div>
-                        <h2 className="text-4xl font-black text-gray-900 tracking-tighter uppercase italic leading-[0.9]">
-                            {step === 1 && "Academic <br/><span className='text-blue-600'>Mandate.</span>"}
-                            {step === 2 && "Logistics <br/><span className='text-blue-600'>Constraints.</span>"}
-                            {step === 3 && "Neural <br/><span className='text-blue-600'>Verification.</span>"}
-                        </h2>
+                        <h2 className="text-xl font-bold text-gray-900 mb-1">What do you need help with?</h2>
+                        <p className="text-sm text-gray-500">Enter the subjects and class level you're looking for.</p>
                     </div>
-                    {step > 1 && (
-                        <button onClick={() => setStep(step - 1)} className="size-12 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-400 hover:text-blue-600 transition-all active:scale-95">
-                            <ArrowLeft size={24} strokeWidth={3} />
-                        </button>
-                    )}
-                </div>
 
-                {/* Step 1: Academic Mandate */}
-                {step === 1 && (
-                    <div className="space-y-10 animate-in fade-in slide-in-from-right-8 duration-700">
-                        <div className="space-y-4">
-                            <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2">Subjects (Define Multiple)</label>
-                            <div className="relative group">
-                                <BookOpen className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-blue-600 transition-all" size={20} />
-                                <input 
-                                    className="w-full pl-14 pr-4 py-5 bg-gray-50 border-2 border-transparent rounded-[1.8rem] focus:bg-white focus:border-blue-600 focus:ring-8 focus:ring-blue-100 transition-all outline-none font-black text-sm uppercase"
-                                    placeholder="TYPE SUBJECT & PRESS ENTER"
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter' && e.target.value) {
-                                            e.preventDefault();
-                                            if (!form.subjects.includes(e.target.value.toUpperCase())) {
-                                                toggleItem('subjects', e.target.value.toUpperCase());
-                                            }
-                                            e.target.value = '';
-                                        }
-                                    }}
+                    {/* Subjects */}
+                    <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-gray-700">Subjects</label>
+                        <div className="flex gap-2">
+                            <div className="relative flex-1">
+                                <BookOpen className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                                <input
+                                    className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm text-gray-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                    placeholder="e.g. Maths, Physics"
+                                    value={subjectInput}
+                                    onChange={(e) => setSubjectInput(e.target.value)}
+                                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addSubject(subjectInput); } }}
                                 />
                             </div>
-                            <div className="flex flex-wrap gap-2">
+                            <button
+                                type="button"
+                                onClick={() => addSubject(subjectInput)}
+                                className="px-4 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                            >
+                                Add
+                            </button>
+                        </div>
+                        {form.subjects.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mt-2">
                                 {form.subjects.map(s => (
-                                    <button key={s} onClick={() => toggleItem('subjects', s)} className="px-5 py-2.5 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:bg-black transition-all">
-                                        {s} <Lock size={10} />
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div className="space-y-4">
-                                <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2">Class / Academic Levels</label>
-                                <div className="flex flex-wrap gap-2">
-                                    {["PRIMARY", "MIDDLE", "HIGH", "SENIOR", "COMPETITIVE"].map(lvl => (
-                                        <button 
-                                            key={lvl}
-                                            type="button"
-                                            onClick={() => toggleItem('grades', lvl)}
-                                            className={`px-4 py-3 rounded-xl border-2 font-black text-[9px] uppercase tracking-widest transition-all ${
-                                                form.grades.includes(lvl) ? "bg-gray-900 border-gray-900 text-white shadow-xl" : "bg-gray-50 border-transparent text-gray-400 hover:border-blue-200"
-                                            }`}
-                                        >
-                                            {lvl}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                            <div className="space-y-4">
-                                <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2">Curriculum Boards</label>
-                                <div className="flex flex-wrap gap-2">
-                                    {BOARDS.map(b => (
-                                        <button 
-                                            key={b}
-                                            type="button"
-                                            onClick={() => toggleItem('boards', b)}
-                                            className={`px-4 py-3 rounded-xl border-2 font-black text-[9px] uppercase tracking-widest transition-all ${
-                                                form.boards.includes(b) ? "bg-blue-600 border-blue-600 text-white shadow-xl" : "bg-gray-50 border-transparent text-gray-400 hover:border-blue-200"
-                                            }`}
-                                        >
-                                            {b}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-
-                        <button 
-                            disabled={form.subjects.length === 0}
-                            onClick={() => setStep(2)}
-                            className="w-full py-6 bg-gray-900 text-white rounded-[2rem] font-black text-[11px] uppercase tracking-[0.4em] flex items-center justify-center gap-4 shadow-4xl hover:bg-blue-600 transition-all active:scale-95 disabled:opacity-30 disabled:grayscale group"
-                        >
-                            Configure Logistics <ArrowRight size={20} strokeWidth={3} className="group-hover:translate-x-2 transition-transform" />
-                        </button>
-                    </div>
-                )}
-
-                {/* Step 2: Logistics Constraints */}
-                {step === 2 && (
-                    <div className="space-y-10 animate-in fade-in slide-in-from-right-8 duration-700">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div className="space-y-4">
-                                <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2 text-center block">Transmission Protocol (Location)</label>
-                                <div className="grid grid-cols-2 gap-4">
-                                    {[
-                                        { id: "ONLINE", icon: MonitorCheck, label: "Digital Hub", desc: "Remote learning" },
-                                        { id: "STUDENT_HOME", icon: Home, label: "My Location", desc: "Tutor travels to me" },
-                                        { id: "TUTOR_HOME", icon: MapPin, label: "Tutor Hub", desc: "I travel to tutor" },
-                                        { id: "CENTER", icon: Building2, label: "Academy", desc: "Institutional center" }
-                                    ].map((mode) => (
-                                        <button
-                                            key={mode.id}
-                                            type="button"
-                                            onClick={() => toggleItem('modes', mode.id)}
-                                            className={`py-6 px-4 rounded-[2rem] border-2 flex flex-col items-center gap-3 transition-all ${
-                                                form.modes.includes(mode.id) 
-                                                ? "bg-blue-600 border-blue-600 text-white shadow-2xl scale-105" 
-                                                : "bg-gray-50 border-transparent text-gray-300 hover:border-blue-200"
-                                            }`}
-                                        >
-                                            <mode.icon size={28} strokeWidth={1.5} />
-                                            <div className="text-center">
-                                                <p className="font-black text-[10px] uppercase tracking-widest leading-none mb-1">{mode.label}</p>
-                                                <p className="text-[8px] opacity-60 uppercase tracking-tighter leading-none">{mode.desc}</p>
-                                            </div>
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div className="space-y-4">
-                                <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2">Interaction Model</label>
-                                <div className="grid grid-cols-1 gap-3">
-                                    {[
-                                        { id: "PRIVATE", label: "Exclusive 1:1 Private", icon: User, desc: "Personalized attention" },
-                                        { id: "GROUP", label: "Small Group Batch", icon: Users, desc: "Cost-effective collaborative" }
-                                    ].map(pref => (
-                                        <button 
-                                            key={pref.id}
-                                            type="button"
-                                            onClick={() => setForm({...form, groupPreference: pref.id})}
-                                            className={`flex items-center gap-4 p-5 rounded-2xl border-2 transition-all ${
-                                                form.groupPreference === pref.id ? "bg-gray-900 border-gray-900 text-white shadow-xl" : "bg-gray-50 border-transparent text-gray-400"
-                                            }`}
-                                        >
-                                            <pref.icon size={18} />
-                                            <div className="text-left">
-                                                <p className="text-[10px] font-black uppercase tracking-widest leading-none mb-1">{pref.label}</p>
-                                                <p className="text-[8px] opacity-40 uppercase tracking-tighter leading-none">{pref.desc}</p>
-                                            </div>
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div className="space-y-4">
-                                <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2">Budget Allocation (INR)</label>
-                                <div className="relative group">
-                                    <CircleDollarSign className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-blue-600 transition-all" size={24} />
-                                    <input 
-                                        type="number"
-                                        value={form.budget}
-                                        onChange={(e) => setForm({...form, budget: e.target.value})}
-                                        className="w-full pl-16 pr-4 py-5 bg-gray-50 border-2 border-transparent rounded-[1.8rem] focus:bg-white focus:border-blue-600 focus:ring-8 focus:ring-blue-100 transition-all outline-none font-black text-2xl text-blue-600"
-                                        placeholder="5000"
-                                    />
-                                </div>
-                            </div>
-                            <div className="space-y-4">
-                                <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2">Faculty Gender Preference</label>
-                                <div className="grid grid-cols-3 gap-2">
-                                    {["MALE", "FEMALE", "ANY"].map(g => (
-                                        <button 
-                                            key={g}
-                                            type="button"
-                                            onClick={() => setForm({...form, genderPreference: g})}
-                                            className={`py-5 rounded-2xl border-2 font-black text-[10px] uppercase tracking-widest transition-all ${
-                                                form.genderPreference === g ? "bg-gray-900 border-gray-900 text-white" : "bg-gray-50 border-transparent text-gray-400"
-                                            }`}
-                                        >
-                                            {g}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-
-                        <button 
-                            disabled={form.modes.length === 0 || !form.budget}
-                            onClick={() => setStep(3)}
-                            className="w-full py-6 bg-gray-900 text-white rounded-[2rem] font-black text-[11px] uppercase tracking-[0.4em] flex items-center justify-center gap-4 shadow-4xl hover:bg-blue-600 transition-all active:scale-95 disabled:opacity-30 group"
-                        >
-                            Final Alignment <ArrowRight size={20} strokeWidth={3} className="group-hover:translate-x-2 transition-transform" />
-                        </button>
-                    </div>
-                )}
-
-                {/* Step 3: Neural Verification */}
-                {step === 3 && (
-                    <div className="space-y-10 animate-in zoom-in-95 duration-700">
-                        <div className="bg-blue-50/50 border-2 border-blue-100 rounded-[3.5rem] p-10 space-y-8 shadow-inner">
-                            <div className="flex flex-wrap gap-3">
-                                {form.subjects.map(s => (
-                                    <div key={s} className="px-6 py-3 bg-white border border-blue-100 rounded-2xl shadow-sm text-[10px] font-black text-gray-900 uppercase italic tracking-widest">
+                                    <span key={s} className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm font-medium border border-blue-100">
                                         {s}
-                                    </div>
+                                        <button onClick={() => toggleItem('subjects', s)} className="text-blue-400 hover:text-blue-700">
+                                            <X size={12} />
+                                        </button>
+                                    </span>
                                 ))}
                             </div>
-                            
-                            <div className="grid grid-cols-2 gap-y-6 gap-x-12 pt-8 border-t border-blue-100">
-                                <div className="space-y-1">
-                                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-400">Target Boards</p>
-                                    <p className="text-sm font-black text-gray-900">{form.boards.join(', ') || 'Global Curriculum'}</p>
-                                </div>
-                                <div className="space-y-1">
-                                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-400">Time Allocation</p>
-                                    <p className="text-sm font-black text-gray-900">{form.timings.length} Slots Locked</p>
-                                </div>
-                                <div className="space-y-1">
-                                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-400">Economic Cap</p>
-                                    <p className="text-sm font-black text-blue-600">₹{form.budget} / MON</p>
-                                </div>
-                                <div className="space-y-1">
-                                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-400">Gender Priority</p>
-                                    <p className="text-sm font-black text-gray-900">{form.genderPreference}</p>
-                                </div>
-                            </div>
-                        </div>
+                        )}
+                    </div>
 
-                        <div className="space-y-4">
-                            <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2">Neural Description (Brief)</label>
-                            <textarea 
-                                rows={3}
-                                value={form.description}
-                                onChange={(e) => setForm({...form, description: e.target.value})}
-                                className="w-full px-8 py-6 bg-gray-50 border-2 border-transparent rounded-[2rem] focus:bg-white focus:border-blue-600 focus:ring-8 focus:ring-blue-100 transition-all outline-none font-medium text-sm placeholder:text-gray-200 min-h-[140px]"
-                                placeholder="State any additional pedagogical requirements or constraints for the matched faculty..."
+                    {/* Grade / Level */}
+                    <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-gray-700">Class / Level</label>
+                        <div className="flex flex-wrap gap-2">
+                            {GRADES.map(g => (
+                                <button
+                                    key={g}
+                                    type="button"
+                                    onClick={() => toggleItem('grades', g)}
+                                    className={`px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors ${
+                                        form.grades.includes(g)
+                                            ? "bg-blue-600 border-blue-600 text-white"
+                                            : "bg-white border-gray-200 text-gray-600 hover:border-blue-300"
+                                    }`}
+                                >
+                                    {g}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Board */}
+                    <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-gray-700">Board (optional)</label>
+                        <div className="flex flex-wrap gap-2">
+                            {BOARDS.map(b => (
+                                <button
+                                    key={b}
+                                    type="button"
+                                    onClick={() => toggleItem('boards', b)}
+                                    className={`px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors ${
+                                        form.boards.includes(b)
+                                            ? "bg-gray-900 border-gray-900 text-white"
+                                            : "bg-white border-gray-200 text-gray-600 hover:border-gray-400"
+                                    }`}
+                                >
+                                    {b}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <button
+                        disabled={form.subjects.length === 0}
+                        onClick={() => setStep(2)}
+                        className="w-full py-3 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                        Next: Your Preferences <ArrowRight size={16} />
+                    </button>
+                </div>
+            )}
+
+            {/* Step 2: Preferences */}
+            {step === 2 && (
+                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <div>
+                        <h2 className="text-xl font-bold text-gray-900 mb-1">Your preferences</h2>
+                        <p className="text-sm text-gray-500">How and where would you like to learn?</p>
+                    </div>
+
+                    {/* Teaching Mode */}
+                    <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-gray-700">Teaching Mode</label>
+                        <div className="grid grid-cols-2 gap-2">
+                            {[
+                                { id: "ONLINE", icon: Monitor, label: "Online" },
+                                { id: "STUDENT_HOME", icon: Home, label: "At My Home" },
+                                { id: "TUTOR_HOME", icon: MapPin, label: "At Tutor's Home" },
+                                { id: "CENTER", icon: Building2, label: "At a Centre" }
+                            ].map((mode) => (
+                                <button
+                                    key={mode.id}
+                                    type="button"
+                                    onClick={() => toggleItem('modes', mode.id)}
+                                    className={`flex items-center gap-2.5 p-3 rounded-xl border text-sm font-medium transition-colors ${
+                                        form.modes.includes(mode.id)
+                                            ? "bg-blue-600 border-blue-600 text-white"
+                                            : "bg-white border-gray-200 text-gray-600 hover:border-blue-300"
+                                    }`}
+                                >
+                                    <mode.icon size={16} />
+                                    {mode.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Session Type */}
+                    <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-gray-700">Session Type</label>
+                        <div className="grid grid-cols-2 gap-2">
+                            {[
+                                { id: "PRIVATE", icon: User, label: "Private (1-on-1)" },
+                                { id: "GROUP", icon: Users, label: "Group / Batch" }
+                            ].map(pref => (
+                                <button
+                                    key={pref.id}
+                                    type="button"
+                                    onClick={() => setForm({ ...form, groupPreference: pref.id })}
+                                    className={`flex items-center gap-2.5 p-3 rounded-xl border text-sm font-medium transition-colors ${
+                                        form.groupPreference === pref.id
+                                            ? "bg-gray-900 border-gray-900 text-white"
+                                            : "bg-white border-gray-200 text-gray-600 hover:border-gray-400"
+                                    }`}
+                                >
+                                    <pref.icon size={16} />
+                                    {pref.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Budget */}
+                    <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-gray-700">Monthly Budget (₹)</label>
+                        <div className="relative">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">₹</span>
+                            <input
+                                type="number"
+                                value={form.budget}
+                                onChange={(e) => setForm({ ...form, budget: e.target.value })}
+                                className="w-full pl-7 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm text-gray-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                placeholder="e.g. 5000"
                             />
                         </div>
-
-                        <button 
-                            disabled={loading}
-                            onClick={handleSubmit}
-                            className="w-full py-8 bg-blue-600 text-white rounded-[2.5rem] font-black text-xs uppercase tracking-[0.5em] shadow-4xl shadow-blue-600/30 hover:bg-gray-900 transition-all flex items-center justify-center gap-6 active:scale-95 group"
-                        >
-                            {loading ? <Loader2 className="animate-spin" size={24} /> : (
-                                <>Initiate Scholarly Sync <ArrowRight size={24} strokeWidth={3} className="group-hover:translate-x-4 transition-transform" /></>
-                            )}
-                        </button>
+                        <p className="text-xs text-gray-400">Enter your expected monthly budget for tuition fees.</p>
                     </div>
-                )}
-                
-                <div className="mt-12 text-center flex items-center justify-center gap-2 text-[10px] font-black text-gray-300 uppercase tracking-[0.7em]">
-                    <Lock size={14} strokeWidth={3} /> Standard Security Protocols Active
+
+                    {/* Tutor Gender */}
+                    <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-gray-700">Tutor Gender</label>
+                        <div className="flex gap-2">
+                            {["ANY", "MALE", "FEMALE"].map(g => (
+                                <button
+                                    key={g}
+                                    type="button"
+                                    onClick={() => setForm({ ...form, genderPreference: g })}
+                                    className={`flex-1 py-2.5 rounded-xl border text-sm font-medium transition-colors capitalize ${
+                                        form.genderPreference === g
+                                            ? "bg-gray-900 border-gray-900 text-white"
+                                            : "bg-white border-gray-200 text-gray-600 hover:border-gray-400"
+                                    }`}
+                                >
+                                    {g === "ANY" ? "No preference" : g.charAt(0) + g.slice(1).toLowerCase()}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Location */}
+                    <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-gray-700">Your Area / City</label>
+                        <div className="flex gap-2">
+                            <div className="relative flex-1">
+                                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                                <input
+                                    className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm text-gray-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                    placeholder="e.g. Andheri, Mumbai"
+                                    value={locationInput}
+                                    onChange={(e) => setLocationInput(e.target.value)}
+                                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addLocation(locationInput); } }}
+                                />
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => addLocation(locationInput)}
+                                className="px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
+                            >
+                                Add
+                            </button>
+                            <button
+                                type="button"
+                                onClick={detectLocation}
+                                disabled={isDetecting}
+                                className="px-3 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                                title="Detect my location"
+                            >
+                                <Navigation size={16} className={isDetecting ? "animate-spin" : ""} />
+                            </button>
+                        </div>
+                        {form.locations.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mt-2">
+                                {form.locations.map(l => (
+                                    <span key={l} className="inline-flex items-center gap-1.5 px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">
+                                        <MapPin size={11} />
+                                        {l}
+                                        <button onClick={() => toggleItem('locations', l)} className="text-gray-400 hover:text-gray-700">
+                                            <X size={12} />
+                                        </button>
+                                    </span>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Timing */}
+                    <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-gray-700">Preferred Timing (optional)</label>
+                        <div className="flex flex-wrap gap-2">
+                            {TIMING_SLOTS.map(slot => (
+                                <button
+                                    key={slot}
+                                    type="button"
+                                    onClick={() => toggleItem('timings', slot)}
+                                    className={`px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors ${
+                                        form.timings.includes(slot)
+                                            ? "bg-blue-600 border-blue-600 text-white"
+                                            : "bg-white border-gray-200 text-gray-600 hover:border-blue-300"
+                                    }`}
+                                >
+                                    {slot}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <button
+                        disabled={form.modes.length === 0}
+                        onClick={() => setStep(3)}
+                        className="w-full py-3 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                        Review & Submit <ArrowRight size={16} />
+                    </button>
                 </div>
-            </div>
+            )}
+
+            {/* Step 3: Review & Submit */}
+            {step === 3 && (
+                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <div>
+                        <h2 className="text-xl font-bold text-gray-900 mb-1">Review your requirement</h2>
+                        <p className="text-sm text-gray-500">Check the details below before posting.</p>
+                    </div>
+
+                    <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 space-y-4">
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <p className="text-gray-400 text-xs font-medium mb-1">Subjects</p>
+                                <p className="font-semibold text-gray-900">{form.subjects.join(", ") || "—"}</p>
+                            </div>
+                            <div>
+                                <p className="text-gray-400 text-xs font-medium mb-1">Level</p>
+                                <p className="font-semibold text-gray-900">{form.grades.join(", ") || "—"}</p>
+                            </div>
+                            <div>
+                                <p className="text-gray-400 text-xs font-medium mb-1">Budget</p>
+                                <p className="font-semibold text-gray-900">{form.budget ? `₹${form.budget}/month` : "—"}</p>
+                            </div>
+                            <div>
+                                <p className="text-gray-400 text-xs font-medium mb-1">Mode</p>
+                                <p className="font-semibold text-gray-900">
+                                    {form.modes.map(m => ({
+                                        ONLINE: "Online", STUDENT_HOME: "At My Home",
+                                        TUTOR_HOME: "At Tutor's Home", CENTER: "At Centre"
+                                    }[m])).join(", ")}
+                                </p>
+                            </div>
+                            <div>
+                                <p className="text-gray-400 text-xs font-medium mb-1">Location</p>
+                                <p className="font-semibold text-gray-900">{form.locations.join(", ") || "—"}</p>
+                            </div>
+                            <div>
+                                <p className="text-gray-400 text-xs font-medium mb-1">Tutor Gender</p>
+                                <p className="font-semibold text-gray-900 capitalize">{form.genderPreference === "ANY" ? "No preference" : form.genderPreference.toLowerCase()}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Additional notes */}
+                    <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-gray-700">Additional notes (optional)</label>
+                        <textarea
+                            rows={3}
+                            value={form.description}
+                            onChange={(e) => setForm({ ...form, description: e.target.value })}
+                            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm text-gray-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 resize-none"
+                            placeholder="Any other details for the tutor — e.g. exam prep, weak areas, preferred timing..."
+                        />
+                    </div>
+
+                    <button
+                        disabled={loading}
+                        onClick={handleSubmit}
+                        className="w-full py-3 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                        {loading ? <><Loader2 className="animate-spin" size={16} /> Posting requirement...</> : <>Post My Requirement <ArrowRight size={16} /></>}
+                    </button>
+
+                    <p className="text-xs text-center text-gray-400 flex items-center justify-center gap-1.5">
+                        <Lock size={11} /> Your contact details are kept private until you choose to share them.
+                    </p>
+                </div>
+            )}
         </div>
     );
 }
