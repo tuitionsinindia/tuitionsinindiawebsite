@@ -84,9 +84,9 @@ export async function POST(req) {
             const isAuthorized = unlock || isPremium || initiator?.role === 'ADMIN';
 
             if (!isAuthorized) {
-                return NextResponse.json({ 
-                    error: "PROTOCOL_ACCESS_DENIED", 
-                    details: "Initiation requires a verified Lead Unlock or Premium Subscription." 
+                return NextResponse.json({
+                    error: "Upgrade required",
+                    details: "A premium subscription or lead unlock is required to start a conversation."
                 }, { status: 403 });
             }
 
