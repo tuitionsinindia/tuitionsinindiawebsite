@@ -207,18 +207,18 @@ export default function LoginPage() {
                 </div>
             </div>
 
-            <div className="max-w-4xl mx-auto container px-6 grid grid-cols-3 gap-12 text-center mb-20 opacity-30">
+            <div className="max-w-4xl mx-auto container px-6 grid grid-cols-3 gap-12 text-center mb-20 opacity-40">
                 <div className="space-y-3">
-                    <Award size={20} className="mx-auto text-slate-900" />
-                    <p className="text-[9px] font-black text-slate-900 uppercase tracking-widest italic">Tier-1 Market</p>
+                    <Award size={20} className="mx-auto text-slate-500" />
+                    <p className="text-xs text-slate-500">Verified Tutors</p>
                 </div>
                 <div className="space-y-3">
-                    <ShieldCheck size={20} className="mx-auto text-slate-900" />
-                    <p className="text-[9px] font-black text-slate-900 uppercase tracking-widest italic">Secure Endpoints</p>
+                    <ShieldCheck size={20} className="mx-auto text-slate-500" />
+                    <p className="text-xs text-slate-500">Secure Login</p>
                 </div>
                 <div className="space-y-3">
-                    <Check size={20} className="mx-auto text-slate-900" />
-                    <p className="text-[9px] font-black text-slate-900 uppercase tracking-widest italic">Verified Logs</p>
+                    <Check size={20} className="mx-auto text-slate-500" />
+                    <p className="text-xs text-slate-500">Trusted Platform</p>
                 </div>
             </div>
         </div>

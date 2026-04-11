@@ -3,33 +3,45 @@
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import DashboardHeader from "@/app/components/DashboardHeader";
-import FacultyChat from "@/app/components/chat/FacultyChat";
 import {
     LayoutDashboard,
+    Search,
     Wallet,
     TrendingUp,
     Settings,
     Zap,
+    Lock,
     ArrowRight,
     GraduationCap,
     MapPin,
+    Phone,
+    Mail,
     MessageCircle,
+    CheckCircle2,
     ShieldCheck,
+    Star,
+    Award,
     LogOut,
     Loader2,
     CreditCard,
     Box,
     PlusCircle,
-    Users
+    Activity,
+    Users,
+    FileText,
+    ArrowUpRight,
+    BookOpen
 } from "lucide-react";
+import DashboardHeader from "@/app/components/DashboardHeader";
+import FacultyChat from "@/app/components/chat/FacultyChat";
 import SettingsModule from "@/app/components/dashboard/SettingsModule";
 import BillingModule from "@/app/components/dashboard/BillingModule";
 
 function DashboardContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const [tutorId, setTutorId] = useState(searchParams.get("tutorId") || "");
+    const paramTutorId = searchParams.get("tutorId");
+    const [tutorId, setTutorId] = useState("");
     const [activeTab, setActiveTab] = useState("HOME");
     const [leads, setLeads] = useState([]);
     const [courses, setCourses] = useState([]);
@@ -40,15 +52,24 @@ function DashboardContent() {
     const [chatSessions, setChatSessions] = useState([]);
     const [selectedSession, setSelectedSession] = useState(null);
     const [loadingChat, setLoadingChat] = useState(false);
-
     const [showBatchForm, setShowBatchForm] = useState(false);
+
+    useEffect(() => {
+        const savedId = localStorage.getItem("ti_active_tutor_id");
+        if (paramTutorId) {
+            setTutorId(paramTutorId);
+            localStorage.setItem("ti_active_tutor_id", paramTutorId);
+        } else if (savedId) {
+            setTutorId(savedId);
+        }
+    }, [paramTutorId]);
 
     useEffect(() => {
         if (tutorId) {
             fetchTutorData();
             fetchChatSessions();
             fetchTransactions();
-            if (activeTab === "HOME" || activeTab === "PIPELINE") fetchLeads();
+            if (activeTab === "HOME" || activeTab === "LEADS") fetchLeads();
             if (activeTab === "BATCHES") fetchCourses();
         }
     }, [tutorId, activeTab]);
@@ -60,11 +81,7 @@ function DashboardContent() {
             const res = await fetch(`/api/lead/list?${params.toString()}`);
             const data = await res.json();
             setLeads(data);
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setLoading(false);
-        }
+        } catch (err) { console.error(err); } finally { setLoading(false); }
     };
 
     const fetchCourses = async () => {
@@ -78,7 +95,7 @@ function DashboardContent() {
 
     const fetchTutorData = async () => {
         try {
-            const res = await fetch(`/api/user/info?id=${tutorId}`);
+            const res = await fetch(`/api/user/info?id=${tutorId}&viewerId=${tutorId}`);
             if (res.ok) {
                 const data = await res.json();
                 setTutorData(data);
@@ -108,7 +125,7 @@ function DashboardContent() {
     };
 
     const handleUnlock = async (leadId) => {
-        if (!confirm("Unlock this student? This will spend 1 credit.")) return;
+        if (!confirm("Unlock this lead? 1 credit will be used.")) return;
         try {
             const res = await fetch("/api/lead/unlock", {
                 method: "POST",
@@ -120,7 +137,7 @@ function DashboardContent() {
                 fetchTutorData();
             } else {
                 const err = await res.json();
-                alert(err.error || "Failed to unlock. Please try again.");
+                alert(err.error || "Failed to unlock. Please check your credit balance.");
             }
         } catch (err) { console.error(err); }
     };
@@ -128,38 +145,40 @@ function DashboardContent() {
     if (!tutorId) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-10 max-w-md w-full text-center">
-                    <div className="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center mx-auto mb-6">
-                        <GraduationCap size={32} className="text-blue-600" />
+                <div className="bg-white border border-gray-200 p-10 rounded-2xl shadow-sm max-w-md w-full text-center">
+                    <div className="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 mx-auto mb-6">
+                        <GraduationCap size={32} />
                     </div>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Tutor Dashboard</h2>
+                    <h2 className="text-2xl font-bold mb-2 text-gray-900">Tutor Dashboard</h2>
                     <p className="text-gray-500 text-sm mb-8">Enter your Tutor ID to access your dashboard.</p>
                     <input
                         type="text"
                         placeholder="Enter your Tutor ID"
-                        className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 outline-none focus:border-blue-500 mb-4"
+                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 text-sm focus:border-blue-500 outline-none transition-colors mb-4"
                         onKeyDown={(e) => { if (e.key === 'Enter') setTutorId(e.target.value); }}
                         id="tutorInput"
                     />
                     <button
-                        className="w-full bg-blue-600 text-white font-semibold py-3 rounded-xl hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                        className="w-full bg-blue-600 text-white font-semibold py-3 rounded-xl hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-sm"
                         onClick={() => setTutorId(document.getElementById('tutorInput').value)}
                     >
                         Access Dashboard <ArrowRight size={16} />
                     </button>
-                    <Link href="/" className="inline-block mt-6 text-sm text-gray-400 hover:text-blue-600 transition-colors">← Back to Home</Link>
+                    <Link href="/" className="inline-block mt-6 text-sm text-gray-400 hover:text-blue-600 transition-colors">
+                        ← Back to Home
+                    </Link>
                 </div>
             </div>
         );
     }
 
     const navItems = [
-        { id: "HOME", label: "Overview", icon: LayoutDashboard },
-        { id: "PIPELINE", label: "Student Leads", icon: Users },
-        { id: "BATCHES", label: "My Batches", icon: Box },
+        { id: "HOME", label: "Home", icon: LayoutDashboard },
+        { id: "LEADS", label: "Student Leads", icon: Users },
+        { id: "BATCHES", label: "Batches", icon: BookOpen },
         { id: "CHAT", label: "Messages", icon: MessageCircle },
         { id: "REVENUE", label: "Revenue", icon: CreditCard },
-        { id: "SETTINGS", label: "Settings", icon: Settings },
+        { id: "SETTINGS", label: "Settings", icon: Settings }
     ];
 
     return (
@@ -168,11 +187,13 @@ function DashboardContent() {
                 user={tutorData}
                 role="TUTOR"
                 credits={tutorData?.credits || 0}
-                onLogout={() => router.push("/")}
+                onLogout={() => {
+                    localStorage.removeItem("ti_active_tutor_id");
+                    router.push("/");
+                }}
             />
 
             <div className="flex flex-1 pt-16">
-                {/* Sidebar */}
                 <aside className="fixed left-0 top-16 bottom-0 w-16 md:w-64 bg-white border-r border-gray-200 flex flex-col py-6 px-3 md:px-4 z-40">
                     <nav className="flex-1 space-y-1">
                         {navItems.map((item) => (
@@ -191,15 +212,17 @@ function DashboardContent() {
                         ))}
                     </nav>
                     <button
-                        onClick={() => router.push("/")}
+                        onClick={() => {
+                            localStorage.removeItem("ti_active_tutor_id");
+                            router.push("/");
+                        }}
                         className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-red-500 hover:bg-red-50 transition-colors"
                     >
                         <LogOut size={18} />
-                        <span className="hidden md:block">Logout</span>
+                        <span className="hidden md:block">Log Out</span>
                     </button>
                 </aside>
 
-                {/* Main Content */}
                 <main className="flex-1 ml-16 md:ml-64 p-6">
                     <div className="max-w-5xl mx-auto">
 
@@ -212,14 +235,14 @@ function DashboardContent() {
                                     <h1 className="text-2xl font-bold text-gray-900">
                                         Welcome back, {tutorData?.name || "Tutor"}
                                     </h1>
-                                    <p className="text-gray-500 text-sm mt-1">Here's an overview of your account.</p>
+                                    <p className="text-gray-500 text-sm mt-1">Manage your students and leads from here.</p>
                                 </div>
-                                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                     {[
-                                        { label: "Credits", val: tutorData?.credits || 0, icon: Wallet, color: "text-blue-600", bg: "bg-blue-50" },
-                                        { label: "Active Leads", val: leads.length, icon: Users, color: "text-emerald-600", bg: "bg-emerald-50" },
-                                        { label: "Trust Score", val: "99.1%", icon: ShieldCheck, color: "text-purple-600", bg: "bg-purple-50" },
-                                        { label: "Growth", val: "+14%", icon: TrendingUp, color: "text-amber-600", bg: "bg-amber-50" },
+                                        { label: "Credits", val: tutorData?.credits || 0, icon: Zap, color: "text-blue-600", bg: "bg-blue-50" },
+                                        { label: "Student Leads", val: leads.length, icon: Users, color: "text-indigo-600", bg: "bg-indigo-50" },
+                                        { label: "Total Earnings", val: `₹${(transactions || []).reduce((sum, t) => sum + (t.amount || 0), 0)}`, icon: Wallet, color: "text-emerald-600", bg: "bg-emerald-50" }
                                     ].map((stat, i) => (
                                         <div key={i} className="bg-white rounded-xl border border-gray-200 p-5">
                                             <div className={`w-10 h-10 rounded-lg ${stat.bg} flex items-center justify-center mb-3`}>
@@ -230,38 +253,102 @@ function DashboardContent() {
                                         </div>
                                     ))}
                                 </div>
+
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                    <div className="bg-white rounded-xl border border-gray-200 p-6">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <h3 className="font-semibold text-gray-900">New Student Leads</h3>
+                                            <button onClick={() => setActiveTab("LEADS")} className="text-xs text-blue-600 hover:underline font-medium">View All</button>
+                                        </div>
+                                        {leads.filter(l => !l.isUnlocked).length > 0 ? (
+                                            <div className="space-y-3">
+                                                {leads.filter(l => !l.isUnlocked).slice(0, 3).map(lead => (
+                                                    <div key={lead.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                                        <div>
+                                                            <p className="text-sm font-medium text-gray-900">{lead.subjects?.[0] || "General"}</p>
+                                                            <p className="text-xs text-gray-400">{lead.locations?.[0] || "Remote"}</p>
+                                                        </div>
+                                                        <button
+                                                            onClick={() => handleUnlock(lead.id)}
+                                                            className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-medium hover:bg-blue-700 transition-colors flex items-center gap-1.5"
+                                                        >
+                                                            <Zap size={12} /> Unlock
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <p className="text-sm text-gray-400 py-4 text-center">No new leads at the moment.</p>
+                                        )}
+                                    </div>
+
+                                    <div className="bg-white rounded-xl border border-gray-200 p-6">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <h3 className="font-semibold text-gray-900">Recent Messages</h3>
+                                            <button onClick={() => setActiveTab("CHAT")} className="text-xs text-blue-600 hover:underline font-medium">View All</button>
+                                        </div>
+                                        {chatSessions.length > 0 ? (
+                                            <div className="space-y-3">
+                                                {chatSessions.slice(0, 3).map(session => (
+                                                    <button
+                                                        key={session.id}
+                                                        onClick={() => { setSelectedSession(session); setActiveTab("CHAT"); }}
+                                                        className="w-full flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left"
+                                                    >
+                                                        <div className="w-9 h-9 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-semibold text-sm shrink-0">
+                                                            {session.student?.name?.[0] || "?"}
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="text-sm font-medium text-gray-900 truncate">{session.student?.name}</p>
+                                                            <p className="text-xs text-gray-400 truncate">{session.messages?.[0]?.content || "No messages yet"}</p>
+                                                        </div>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <p className="text-sm text-gray-400 py-4 text-center">No conversations yet.</p>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
                         )}
 
-                        {activeTab === "PIPELINE" && (
+                        {activeTab === "LEADS" && (
                             <div className="space-y-6">
                                 <div>
                                     <h1 className="text-2xl font-bold text-gray-900">Student Leads</h1>
-                                    <p className="text-gray-500 text-sm mt-1">Students looking for tutors like you.</p>
+                                    <p className="text-gray-500 text-sm mt-1">Tuition requests matching your profile. Unlock to see student contact details.</p>
                                 </div>
+
                                 {loading ? (
-                                    <div className="flex items-center justify-center py-20 text-gray-400">
-                                        <Loader2 className="animate-spin mr-2" size={20} /> Loading leads...
+                                    <div className="flex items-center justify-center py-20">
+                                        <Loader2 className="animate-spin text-blue-500" size={28} />
                                     </div>
                                 ) : leads.length > 0 ? (
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         {leads.map((lead) => (
-                                            <div key={lead.id} className="bg-white rounded-xl border border-gray-200 p-6">
-                                                <div className="flex items-center justify-between mb-3">
+                                            <div key={lead.id} className="bg-white rounded-xl border border-gray-200 p-6 flex flex-col gap-4">
+                                                <div className="flex items-center justify-between">
                                                     <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-semibold">
-                                                        {lead.subjects?.[0] || 'General'}
+                                                        {lead.subjects?.[0] || "General"}
                                                     </span>
-                                                    <span className="text-xs text-emerald-600 font-medium">Active</span>
+                                                    {lead.matchScore && (
+                                                        <span className="text-xs text-emerald-600 font-medium">{lead.matchScore}% match</span>
+                                                    )}
                                                 </div>
-                                                <p className="text-gray-700 font-medium mb-4 line-clamp-2">"{lead.description}"</p>
+
+                                                <p className="text-gray-700 text-sm line-clamp-3">"{lead.description}"</p>
+
                                                 {lead.isUnlocked ? (
-                                                    <div className="flex items-center gap-3 p-3 bg-emerald-50 rounded-lg border border-emerald-100">
-                                                        <div className="w-10 h-10 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-lg">
-                                                            {lead.student?.name?.[0]}
-                                                        </div>
-                                                        <div className="flex-1 min-w-0">
-                                                            <p className="font-semibold text-gray-900 text-sm">{lead.student?.name}</p>
-                                                            <p className="text-xs text-emerald-600">Contact unlocked</p>
+                                                    <div className="p-4 bg-blue-50 border border-blue-100 rounded-lg flex items-center justify-between">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-9 h-9 bg-blue-600 text-white rounded-full flex items-center justify-center font-semibold text-sm">
+                                                                {lead.student?.name?.[0]}
+                                                            </div>
+                                                            <div>
+                                                                <p className="font-semibold text-sm text-gray-900">{lead.student?.name}</p>
+                                                                <p className="text-xs text-gray-500">{lead.student?.phone}</p>
+                                                            </div>
                                                         </div>
                                                         <button
                                                             onClick={async () => {
@@ -270,11 +357,7 @@ function DashboardContent() {
                                                                     const res = await fetch("/api/chat/session", {
                                                                         method: "POST",
                                                                         headers: { "Content-Type": "application/json" },
-                                                                        body: JSON.stringify({
-                                                                            studentId: lead.studentId,
-                                                                            tutorId,
-                                                                            initiatorId: tutorId
-                                                                        })
+                                                                        body: JSON.stringify({ studentId: lead.studentId, tutorId, initiatorId: tutorId })
                                                                     });
                                                                     if (res.ok) {
                                                                         await fetchChatSessions();
@@ -282,22 +365,21 @@ function DashboardContent() {
                                                                     }
                                                                 } catch (err) { console.error(err); } finally { setLoadingChat(false); }
                                                             }}
-                                                            className="px-3 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors flex items-center gap-1"
+                                                            className="w-9 h-9 bg-blue-600 text-white rounded-lg flex items-center justify-center hover:bg-blue-700 transition-colors"
                                                         >
-                                                            {loadingChat ? <Loader2 className="animate-spin" size={14} /> : <MessageCircle size={14} />}
-                                                            Chat
+                                                            {loadingChat ? <Loader2 className="animate-spin" size={16} /> : <MessageCircle size={16} />}
                                                         </button>
                                                     </div>
                                                 ) : (
                                                     <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                                                         <div className="flex items-center gap-2 text-sm text-gray-500">
-                                                            <MapPin size={14} />
-                                                            {lead.locations?.[0] || 'Remote'}
+                                                            <MapPin size={14} className="text-gray-400" />
+                                                            {lead.locations?.[0] || "Remote"}
                                                         </div>
                                                         <button
                                                             onClick={() => handleUnlock(lead.id)}
-                                                            disabled={loading}
                                                             className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors flex items-center gap-2"
+                                                            disabled={loading}
                                                         >
                                                             <Zap size={14} /> Unlock (1 credit)
                                                         </button>
@@ -309,58 +391,8 @@ function DashboardContent() {
                                 ) : (
                                     <div className="text-center py-20 text-gray-400">
                                         <Users size={40} className="mx-auto mb-3 opacity-30" />
-                                        <p className="font-medium">No leads found yet.</p>
-                                        <p className="text-sm mt-1">Complete your profile to start receiving leads.</p>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-
-                        {activeTab === "BATCHES" && (
-                            <div className="space-y-6">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <h1 className="text-2xl font-bold text-gray-900">My Batches</h1>
-                                        <p className="text-gray-500 text-sm mt-1">Manage your course batches.</p>
-                                    </div>
-                                    <button
-                                        onClick={() => setShowBatchForm(true)}
-                                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
-                                    >
-                                        <PlusCircle size={16} /> New Batch
-                                    </button>
-                                </div>
-                                {courses.length > 0 ? (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {courses.map((course) => (
-                                            <div key={course.id} className="bg-white rounded-xl border border-gray-200 p-6">
-                                                <div className="flex justify-between items-start mb-3">
-                                                    <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">
-                                                        {course.category}
-                                                    </span>
-                                                    <span className="text-xl font-bold text-gray-900">₹{course.price}</span>
-                                                </div>
-                                                <h3 className="font-semibold text-gray-900 mb-4">{course.title}</h3>
-                                                <div className="grid grid-cols-2 gap-4 pt-3 border-t border-gray-100 text-sm">
-                                                    <div>
-                                                        <p className="text-gray-500 text-xs">Seats</p>
-                                                        <p className="font-semibold text-gray-900">{course.enrolledCount} / {course.maxSeats}</p>
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-gray-500 text-xs">Status</p>
-                                                        <p className={`font-semibold ${course.isActive ? 'text-emerald-600' : 'text-gray-400'}`}>
-                                                            {course.isActive ? 'Active' : 'Inactive'}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <div className="text-center py-20 text-gray-400">
-                                        <Box size={40} className="mx-auto mb-3 opacity-30" />
-                                        <p className="font-medium">No batches created yet.</p>
-                                        <p className="text-sm mt-1">Create your first batch to start enrolling students.</p>
+                                        <p className="font-medium">No student leads yet.</p>
+                                        <p className="text-sm mt-1">Leads matching your subjects and location will appear here.</p>
                                     </div>
                                 )}
                             </div>
@@ -385,16 +417,14 @@ function DashboardContent() {
                                                     key={session.id}
                                                     onClick={() => setSelectedSession(session)}
                                                     className={`w-full p-4 text-left flex items-center gap-3 transition-colors border-b border-gray-50 ${
-                                                        selectedSession?.id === session.id
-                                                            ? "bg-blue-50"
-                                                            : "hover:bg-gray-50"
+                                                        selectedSession?.id === session.id ? "bg-blue-50" : "hover:bg-gray-50"
                                                     }`}
                                                 >
-                                                    <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold text-sm shrink-0">
-                                                        {session.student?.name?.[0]}
+                                                    <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-semibold text-sm shrink-0">
+                                                        {session.student?.name?.[0] || "?"}
                                                     </div>
                                                     <div className="flex-1 min-w-0">
-                                                        <p className="font-medium text-gray-900 text-sm truncate">{session.student?.name}</p>
+                                                        <p className="font-medium text-gray-900 text-sm truncate">{session.student?.name || "Student"}</p>
                                                         <p className="text-xs text-gray-400 truncate">
                                                             {session.messages?.[0]?.content || "No messages yet"}
                                                         </p>
@@ -416,11 +446,67 @@ function DashboardContent() {
                                             <div className="h-full flex flex-col items-center justify-center text-gray-400">
                                                 <MessageCircle size={48} className="mb-3 opacity-30" />
                                                 <p className="font-medium">Select a conversation</p>
-                                                <p className="text-sm mt-1">Choose a conversation from the left to start chatting.</p>
+                                                <p className="text-sm mt-1">Choose a chat from the left to start messaging.</p>
                                             </div>
                                         )}
                                     </div>
                                 </div>
+                            </div>
+                        )}
+
+                        {activeTab === "BATCHES" && (
+                            <div className="space-y-6">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <h1 className="text-2xl font-bold text-gray-900">Batches</h1>
+                                        <p className="text-gray-500 text-sm mt-1">Manage your group classes and batch enrolments.</p>
+                                    </div>
+                                    <button
+                                        onClick={() => setShowBatchForm(true)}
+                                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                                    >
+                                        <PlusCircle size={16} /> New Batch
+                                    </button>
+                                </div>
+
+                                {loading ? (
+                                    <div className="flex items-center justify-center py-20">
+                                        <Loader2 className="animate-spin text-blue-500" size={28} />
+                                    </div>
+                                ) : courses.length > 0 ? (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {courses.map((course) => (
+                                            <div key={course.id} className="bg-white border border-gray-200 rounded-xl p-6 flex flex-col gap-4">
+                                                <div className="flex justify-between items-start">
+                                                    <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-semibold">{course.category}</span>
+                                                    <span className="text-lg font-bold text-gray-900">₹{course.price}</span>
+                                                </div>
+                                                <h3 className="font-semibold text-gray-900">{course.title}</h3>
+                                                <div className="grid grid-cols-2 gap-4 pt-3 border-t border-gray-100 text-sm">
+                                                    <div>
+                                                        <p className="text-gray-400 text-xs mb-1">Enrolled</p>
+                                                        <p className="font-medium text-gray-700">{course.enrolledCount} / {course.maxSeats} students</p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-gray-400 text-xs mb-1">Status</p>
+                                                        <span className={`text-xs font-medium ${course.isActive ? "text-emerald-600" : "text-gray-400"}`}>
+                                                            {course.isActive ? "Active" : "Inactive"}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <button className="w-full py-2 bg-gray-50 text-gray-600 hover:bg-gray-100 rounded-lg text-sm font-medium transition-colors border border-gray-200">
+                                                    Manage Batch
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-20 text-gray-400">
+                                        <BookOpen size={40} className="mx-auto mb-3 opacity-30" />
+                                        <p className="font-medium">No batches yet.</p>
+                                        <p className="text-sm mt-1">Create a batch to manage group classes.</p>
+                                    </div>
+                                )}
                             </div>
                         )}
 
