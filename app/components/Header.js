@@ -143,7 +143,7 @@ export default function Header() {
                     </Link>
                     <Link
                         href="/register"
-                        className={`px-8 py-3.5 font-black text-[10px] uppercase tracking-[0.2em] rounded-2xl transition-all shadow-xl active:scale-95 ${scrolled ? 'bg-blue-600 text-white hover:bg-gray-900 shadow-blue-600/20' : 'bg-white text-blue-700 hover:bg-blue-50 shadow-white/10'}`}
+                        className={`px-5 sm:px-8 py-3 sm:py-3.5 font-black text-[10px] uppercase tracking-[0.2em] rounded-2xl transition-all shadow-xl active:scale-95 whitespace-nowrap ${scrolled ? 'bg-blue-600 text-white hover:bg-gray-900 shadow-blue-600/20' : 'bg-white text-blue-700 hover:bg-blue-50 shadow-white/10'}`}
                     >
                         Sign Up Free
                     </Link>

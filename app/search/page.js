@@ -42,6 +42,7 @@ function SearchResultsContent() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [viewMode, setViewMode] = useState("list"); // list, map
+    const [filtersOpen, setFiltersOpen] = useState(false); // mobile filter drawer
 
     // Filter & Sort State
     const [grade, setGrade] = useState(searchParams.get("grade") || "");
@@ -153,20 +154,43 @@ function SearchResultsContent() {
     return (
         <div className="flex flex-col lg:flex-row min-h-screen bg-gray-50 font-sans pt-[85px]">
 
+            {/* Mobile filter overlay backdrop */}
+            {filtersOpen && (
+                <div
+                    className="fixed inset-0 bg-black/40 z-40 lg:hidden"
+                    onClick={() => setFiltersOpen(false)}
+                />
+            )}
+
             {/* LEFT SIDEBAR FILTERS */}
-            <aside className="w-full lg:w-72 xl:w-80 bg-white border-r border-gray-200 flex flex-col lg:sticky lg:top-[85px] lg:h-[calc(100vh-85px)] overflow-y-auto z-40">
+            <aside className={`
+                fixed lg:static inset-y-0 left-0 z-50 lg:z-40
+                w-80 lg:w-72 xl:w-80
+                bg-white border-r border-gray-200
+                flex flex-col
+                lg:sticky lg:top-[85px] lg:h-[calc(100vh-85px)]
+                overflow-y-auto
+                transition-transform duration-300
+                ${filtersOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full lg:translate-x-0"}
+            `}>
                 {/* Sidebar Header */}
                 <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         <Filter size={16} className="text-gray-500" />
                         <h2 className="font-semibold text-gray-700 text-sm">Filters</h2>
                     </div>
-                    <button
-                        onClick={resetFilters}
-                        className="text-xs text-blue-600 hover:text-blue-700 font-medium"
-                    >
-                        Reset all
-                    </button>
+                    <div className="flex items-center gap-3">
+                        <button onClick={resetFilters} className="text-xs text-blue-600 hover:text-blue-700 font-medium">
+                            Reset all
+                        </button>
+                        <button
+                            onClick={() => setFiltersOpen(false)}
+                            className="lg:hidden text-gray-400 hover:text-gray-700 p-1"
+                            aria-label="Close filters"
+                        >
+                            ✕
+                        </button>
+                    </div>
                 </div>
 
                 <div className="p-5 space-y-6">
@@ -300,6 +324,13 @@ function SearchResultsContent() {
                     </div>
 
                     <div className="flex items-center gap-3">
+                        {/* Mobile filter toggle */}
+                        <button
+                            onClick={() => setFiltersOpen(true)}
+                            className="lg:hidden flex items-center gap-1.5 px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+                        >
+                            <Filter size={14} /> Filters
+                        </button>
                         {/* Sort */}
                         <select
                             value={sortBy}

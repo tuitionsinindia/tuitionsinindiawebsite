@@ -237,7 +237,7 @@ function StudentDashboardContent() {
                                     </div>
                                     <Link
                                         href="/register/student?step=2"
-                                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors whitespace-nowrap shrink-0"
                                     >
                                         + Post New Request
                                     </Link>
