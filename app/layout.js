@@ -1,16 +1,17 @@
 import "./globals.css";
 import Header from "./components/Header";
+import Footer from "./components/Footer";
 import GoogleAnalytics from "./components/GoogleAnalytics";
 
 export const metadata = {
   title: {
-    default: "TuitionsInIndia | Premium Academic Matchmaking Engine",
+    default: "TuitionsInIndia — Find Home Tutors & Online Tutors Near You",
     template: "%s | TuitionsInIndia"
   },
-  description: "India's premier digital ivory tower for qualified faculty and verified academic requirements. Architecting learning matches with institutional-grade precision.",
-  keywords: ["Tutors in India", "Home Tuitions", "Online Tutors", "JEE Coaching", "NEET Tutors", "Verified Educators", "Academic Matchmaking"],
-  authors: [{ name: "TuitionsInIndia Ecosystem" }],
-  creator: "TuitionsInIndia Intelligence",
+  description: "Find the best home tutors and online tutors across India. Browse verified tutors for JEE, NEET, CBSE, ICSE, school subjects and competitive exams. Connect for free.",
+  keywords: ["home tutors in India", "online tutors India", "find tutor near me", "JEE coaching", "NEET tutors", "CBSE tutors", "home tuition", "private tutors", "maths tutor", "science tutor"],
+  authors: [{ name: "TuitionsInIndia" }],
+  creator: "TuitionsInIndia",
   publisher: "TuitionsInIndia",
   formatDetection: {
     email: false,
@@ -18,8 +19,8 @@ export const metadata = {
     telephone: false,
   },
   openGraph: {
-    title: "TuitionsInIndia | Premium Academic Matchmaking",
-    description: "Architecting the future of matched intelligence across the Indian academic landscape.",
+    title: "TuitionsInIndia — Find Home Tutors & Online Tutors Near You",
+    description: "Browse thousands of verified tutors across India for JEE, NEET, CBSE, ICSE and more. Free to search and contact.",
     url: "https://tuitionsinindia.com",
     siteName: "TuitionsInIndia",
     locale: "en_IN",
@@ -27,8 +28,8 @@ export const metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "TuitionsInIndia | Premium Academic Matchmaking",
-    description: "India's premier digital ivory tower for qualified faculty and verified academic requirements.",
+    title: "TuitionsInIndia — Find Home Tutors & Online Tutors Near You",
+    description: "Browse thousands of verified tutors across India for JEE, NEET, CBSE, ICSE and more.",
     creator: "@tuitionsinindia",
   },
   robots: {
@@ -111,6 +112,7 @@ export default function RootLayout({ children }) {
         />
         <Header />
         {children}
+        <Footer />
       </body>
     </html>
   );
