@@ -1,14 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { 
-    User, 
-    Phone, 
-    ChevronRight, 
-    Loader2, 
-    CheckCircle2, 
+import {
+    User,
+    Phone,
+    ChevronRight,
+    Loader2,
+    CheckCircle2,
     ArrowLeft,
-    ShieldCheck
+    ShieldCheck,
+    XCircle,
+    Lock
 } from "lucide-react";
 
 export default function LeadCaptureFlow({ initialRole = "STUDENT", onComplete }) {
@@ -80,10 +82,10 @@ export default function LeadCaptureFlow({ initialRole = "STUDENT", onComplete })
                 <div className="bg-white rounded-[2rem] p-6 md:p-8 border border-gray-100 shadow-2xl shadow-blue-100/50">
                     <div className="space-y-2 mb-6">
                         <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-[10px] font-black uppercase tracking-widest border border-blue-100">
-                            <ShieldCheck size={12} /> Identity Verification
+                            <ShieldCheck size={12} /> Secure Sign Up
                         </div>
-                        <h2 className="text-2xl font-black text-gray-900 tracking-tight">Quick Start</h2>
-                        <p className="text-gray-500 font-medium text-sm">Capture your interest and get verified in seconds.</p>
+                        <h2 className="text-2xl font-black text-gray-900 tracking-tight">Create your account</h2>
+                        <p className="text-gray-500 font-medium text-sm">Enter your name and mobile number — we'll verify with a quick OTP.</p>
                     </div>
 
                     <form onSubmit={handleSendOTP} className="space-y-4">
@@ -155,7 +157,7 @@ export default function LeadCaptureFlow({ initialRole = "STUDENT", onComplete })
                         <ShieldCheck size={32} strokeWidth={2.5} className="animate-pulse" />
                     </div>
 
-                    <h2 className="text-3xl font-black text-gray-900 tracking-tight mb-2">Security Hash</h2>
+                    <h2 className="text-3xl font-black text-gray-900 tracking-tight mb-2">Enter OTP</h2>
                     <p className="text-gray-500 font-bold text-xs mb-8 uppercase tracking-widest leading-relaxed">
                         SENT TO <span className="text-blue-600 border-b-2 border-blue-100">+91 {form.phone}</span>
                     </p>
@@ -186,18 +188,14 @@ export default function LeadCaptureFlow({ initialRole = "STUDENT", onComplete })
                             className="w-full py-5 bg-gray-900 text-white rounded-2xl font-black text-sm shadow-xl shadow-gray-200 hover:bg-blue-600 transition-all active:scale-[0.97] flex items-center justify-center gap-3 group"
                         >
                             {loading ? <Loader2 className="animate-spin" size={20} /> : (
-                                <>Authenticate Profile <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform" /></>
+                                <>Verify OTP <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform" /></>
                             )}
                         </button>
                     </form>
 
                     <div className="mt-10 pt-8 border-t border-gray-100 flex flex-col gap-2">
-                        <p className="text-gray-300 text-[10px] font-bold uppercase tracking-[0.2em]">Zero-Data Connection</p>
-                        <button className="text-blue-600 font-black text-[11px] uppercase tracking-widest hover:text-gray-900 transition-colors">Resend Passcode</button>
+                        <button className="text-blue-600 font-black text-[11px] uppercase tracking-widest hover:text-gray-900 transition-colors">Resend OTP</button>
                     </div>
-                </div>
-                <div className="mt-8 flex items-center justify-center gap-2 text-[10px] font-black text-gray-300 uppercase tracking-widest">
-                    <Lock size={12} strokeWidth={3} /> Standard Security Protocols Active
                 </div>
             </div>
         );

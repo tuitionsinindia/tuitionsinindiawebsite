@@ -139,7 +139,7 @@ export default function Header() {
                         href="/login" 
                         className={`hidden sm:inline-flex font-black text-[10px] uppercase tracking-[0.2em] px-6 py-3 rounded-2xl transition-all ${scrolled ? 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' : 'text-white/90 hover:bg-white/10 hover:text-white'}`}
                     >
-                        Terminal Log In
+                        Log In
                     </Link>
                     <Link
                         href="/register"
