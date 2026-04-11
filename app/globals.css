@@ -1,9 +1,6 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&display=swap');
+@import "tailwindcss";
 
 :root {
   --primary: #0d40a5;
@@ -13,14 +10,16 @@
   --border-dark: #1e293b;
 }
 
-body {
-  font-family: 'Inter', sans-serif;
-  scroll-behavior: smooth;
-  @apply antialiased text-gray-800 bg-white;
-}
+@layer base {
+  body {
+    font-family: 'Inter', sans-serif;
+    scroll-behavior: smooth;
+    @apply antialiased text-gray-800 bg-white;
+  }
 
-h1, h2, h3, h4, .font-heading {
-  font-family: 'Outfit', sans-serif;
+  h1, h2, h3, h4, .font-heading {
+    font-family: 'Outfit', sans-serif;
+  }
 }
 
 @layer components {

@@ -1,29 +1,39 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { otpStore } from "@/lib/otpStore";
 
 export async function POST(request) {
     try {
         const { userId, phone, otp } = await request.json();
 
-        if (!otp) {
-            return NextResponse.json({ error: "OTP is required" }, { status: 400 });
+        if (!otp || !phone) {
+            return NextResponse.json({ error: "Phone and OTP are required" }, { status: 400 });
         }
 
-        // Mock verification
-        if (otp !== "123456") {
-            return NextResponse.json({ error: "Invalid OTP" }, { status: 401 });
+        const storedData = otpStore.get(phone);
+
+        if (!storedData) {
+            return NextResponse.json({ error: "OTP has expired or was not sent to this number." }, { status: 400 });
         }
 
-        // Finalize User verification
+        if (Date.now() > storedData.expires) {
+            otpStore.delete(phone);
+            return NextResponse.json({ error: "OTP has expired. Please request a new one." }, { status: 400 });
+        }
+
+        if (storedData.code !== otp.toString()) {
+            return NextResponse.json({ error: "Invalid OTP code." }, { status: 401 });
+        }
+
+        otpStore.delete(phone);
+
+        // Find user - by userId if provided, otherwise by phone
+        const whereClause = userId ? { id: userId } : { phone: phone };
         const user = await prisma.user.update({
-            where: { id: userId },
-            data: { 
-                phoneVerified: true 
-            }
+            where: whereClause,
+            data: { phoneVerified: true }
         });
 
-        // In a real app, use NextAuth or a JWT here to establish session
-        // For now, return success and user context
         return NextResponse.json({
             success: true,
             user: {

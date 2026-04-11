@@ -21,89 +21,95 @@ export default function StudentRegisterPage() {
         router.push(`/dashboard/student?studentId=${user.id}&success=true`);
     };
 
+    const stepLabels = [
+        { id: 1, label: "Verify Your Number" },
+        { id: 2, label: "Tell Us What You Need" }
+    ];
+
     return (
-        <div className="h-screen overflow-y-auto snap-y snap-mandatory bg-background-dark text-on-background-dark antialiased font-sans selection:bg-primary/30 selection:text-white">
-            <section className="min-h-screen snap-start snap-always flex flex-col items-center justify-center py-12 px-4 relative overflow-hidden">
-                
-                {/* Tactical Backdrop */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-[800px] bg-primary/5 rounded-full blur-[140px] -z-0 animate-pulse"></div>
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
+        <div className="min-h-screen bg-white text-gray-900 antialiased">
+            <div className="max-w-2xl mx-auto px-4 py-12">
 
-                <div className="w-full max-w-4xl mx-auto flex flex-col items-center relative z-10">
-                    
-                    {/* Synchronized Header */}
-                    <div className="text-center mb-12 space-y-6">
-                        <Link href="/register" className="inline-flex items-center gap-3 text-[10px] font-black text-white/20 hover:text-primary transition-all mb-4 uppercase tracking-[0.4em] italic leading-none">
-                            <ArrowLeft size={16} strokeWidth={3} /> RECONFIGURE ENTITY LOGIC
-                        </Link>
-                        
-                        <div className="flex items-center justify-center">
-                            <div className="size-20 rounded-3xl bg-primary/10 text-primary flex items-center justify-center shadow-inner border border-primary/20 relative group">
-                                <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                <GraduationCap size={40} strokeWidth={1.5} className="relative z-10" />
-                            </div>
-                        </div>
+                {/* Back link */}
+                <Link
+                    href="/register"
+                    className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-gray-700 transition-colors mb-10"
+                >
+                    <ArrowLeft size={16} />
+                    Back
+                </Link>
 
-                        <h1 className="text-5xl md:text-7xl font-black text-white tracking-tighter uppercase italic leading-[0.85]">
-                            Scholarly <br/><span className="text-primary underline decoration-primary/20 underline-offset-8">Onboarding.</span>
-                        </h1>
-                        
-                        <p className="text-white/40 font-black text-[11px] max-w-lg mx-auto uppercase tracking-[0.2em] leading-relaxed italic">
-                            {step === 1 && "PROTOCOL_INITIALIZED: Authenticate profile via secure identity synchronization."}
-                            {step === 2 && "MANDATE_CONFIGURATION: Define your pedagogical constraints for the matching engine."}
-                        </p>
+                {/* Header */}
+                <div className="mb-10">
+                    <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center mb-5">
+                        <GraduationCap size={24} className="text-blue-600" />
                     </div>
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                        Find a Tutor
+                    </h1>
+                    <p className="text-gray-500 text-sm">
+                        {step === 1 && "Start by verifying your mobile number. We'll send you an OTP."}
+                        {step === 2 && "Let us know what subject and level you need help with."}
+                    </p>
+                </div>
 
-                    {/* Terminal Flow Interface */}
-                    <div className="w-full max-w-2xl bg-surface-dark/40 backdrop-blur-3xl border border-border-dark p-8 md:p-12 rounded-[3.5rem] shadow-2xl relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-full h-1.5 bg-background-dark/50">
-                            <div 
-                                className="h-full bg-primary transition-all duration-1000 ease-out shadow-[0_0_20px_rgba(var(--primary-rgb),0.5)]" 
-                                style={{ width: `${(step / 2) * 100}%` }}
-                            />
-                        </div>
-
-                        {step === 1 && (
-                            <div className="animate-in fade-in slide-in-from-bottom-8 duration-700">
-                                <LeadCaptureFlow initialRole="STUDENT" onComplete={handleLeadComplete} />
-                            </div>
-                        )}
-
-                        {step === 2 && (
-                            <div className="animate-in zoom-in-95 duration-700">
-                                <RequirementForm user={user} onComplete={handleRequirementComplete} />
-                            </div>
-                        )}
-                    </div>
-                
-                    {/* Progress Status Bar */}
-                    <div className="mt-16 flex items-center justify-center gap-12">
-                        {[
-                            { id: 1, label: "IDENTITY_SYNC" },
-                            { id: 2, label: "MANDATE_GRID" }
-                        ].map((s) => (
-                            <div key={s.id} className="flex flex-col items-center gap-3">
-                                <div 
-                                    className={`h-1 rounded-full transition-all duration-1000 ${
-                                        s.id === step 
-                                        ? "w-24 bg-primary shadow-[0_0_15px_rgba(var(--primary-rgb),0.5)]" 
-                                        : s.id < step ? "w-16 bg-white/40" : "w-6 bg-white/5"
+                {/* Step Indicator */}
+                <div className="flex items-center gap-3 mb-8">
+                    {stepLabels.map((s, i) => (
+                        <div key={s.id} className="flex items-center gap-3">
+                            <div className="flex items-center gap-2">
+                                <div
+                                    className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold transition-colors ${
+                                        s.id === step
+                                            ? "bg-blue-600 text-white"
+                                            : s.id < step
+                                            ? "bg-blue-100 text-blue-600"
+                                            : "bg-gray-100 text-gray-400"
                                     }`}
-                                />
-                                <span className={`text-[9px] font-black uppercase tracking-widest leading-none ${s.id === step ? "text-primary" : "text-white/20"}`}>
-                                    {s.label}
+                                >
+                                    {s.id < step ? "✓" : s.id}
+                                </div>
+                                <span
+                                    className={`text-sm hidden sm:inline transition-colors ${
+                                        s.id === step ? "text-gray-900 font-medium" : "text-gray-400"
+                                    }`}
+                                >
+                                    {s.id === step ? `Step ${s.id} of 2: ${s.label}` : ""}
                                 </span>
                             </div>
-                        ))}
-                    </div>
-
-                    {/* Operational Footer */}
-                    <div className="mt-16 flex items-center gap-4 px-6 py-3 bg-white/5 rounded-full border border-white/5 text-[9px] font-black text-white/20 uppercase tracking-[0.5em] italic">
-                        <Activity size={12} strokeWidth={3} className="animate-pulse text-primary" /> 
-                        SYSTEM_STATUS: ENCRYPTED_TRANSMISSION_ACTIVE
-                    </div>
+                            {i < stepLabels.length - 1 && (
+                                <div className={`h-px w-8 ${s.id < step ? "bg-blue-300" : "bg-gray-200"}`} />
+                            )}
+                        </div>
+                    ))}
                 </div>
-            </section>
+
+                {/* Progress bar */}
+                <div className="w-full h-1 bg-gray-100 rounded-full mb-8">
+                    <div
+                        className="h-full bg-blue-600 rounded-full transition-all duration-700"
+                        style={{ width: `${(step / 2) * 100}%` }}
+                    />
+                </div>
+
+                {/* Form Card */}
+                <div className="bg-white border border-gray-200 rounded-2xl p-6 md:p-10 shadow-sm">
+
+                    {step === 1 && (
+                        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                            <LeadCaptureFlow initialRole="STUDENT" onComplete={handleLeadComplete} />
+                        </div>
+                    )}
+
+                    {step === 2 && (
+                        <div className="animate-in fade-in duration-500">
+                            <RequirementForm user={user} onComplete={handleRequirementComplete} />
+                        </div>
+                    )}
+
+                </div>
+
+            </div>
         </div>
     );
 }

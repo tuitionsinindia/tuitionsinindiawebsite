@@ -3,73 +3,39 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { 
-    Search, 
-    Layers, 
-    MapPin, 
-    ChevronDown, 
-    Star, 
-    ShieldCheck, 
-    MessageSquare, 
-    ArrowRight, 
-    Navigation,
-    Rocket,
-    CheckCircle2,
-    Lock,
-    Zap,
-    GraduationCap,
-    School,
-    Activity,
-    Code,
-    Music,
-    Globe,
-    Calculator,
-    Atom
+import {
+    Search, MapPin, ChevronDown, Star, ShieldCheck,
+    MessageSquare, ArrowRight, CheckCircle2, Users,
+    GraduationCap, Zap, BookOpen, Phone
 } from "lucide-react";
-import { SUBJECT_CATEGORIES, ALL_SUBJECTS, POPULAR_SUBJECTS } from "../lib/subjects";
+import { ALL_SUBJECTS, POPULAR_SUBJECTS } from "../lib/subjects";
 
 export default function Home() {
-    const LOCAL_SUBJECTS = ALL_SUBJECTS;
     const [searchSubject, setSearchSubject] = useState("");
     const [searchGrade, setSearchGrade] = useState("");
     const [searchLocation, setSearchLocation] = useState("");
-    const [searchCoords, setSearchCoords] = useState(null); 
-    const [isDetecting, setIsDetecting] = useState(false);
-    
-    const [subjects, setSubjects] = useState(LOCAL_SUBJECTS);
     const [filteredSubjects, setFilteredSubjects] = useState([]);
     const [showSubjectSuggestions, setShowSubjectSuggestions] = useState(false);
-    
     const [showCityDropdown, setShowCityDropdown] = useState(false);
     const [showGradeDropdown, setShowGradeDropdown] = useState(false);
     const [activeTab, setActiveTab] = useState("TUTOR");
+    const [openFaq, setOpenFaq] = useState(null);
 
-    const majorCities = [
-        { name: "Mumbai", lat: 19.0760, lng: 72.8777 },
-        { name: "Delhi", lat: 28.6139, lng: 77.2090 },
-        { name: "Bangalore", lat: 12.9716, lng: 77.5946 },
-        { name: "Kolkata", lat: 22.5726, lng: 88.3639 },
-        { name: "Hyderabad", lat: 17.3850, lng: 78.4867 },
-        { name: "Chennai", lat: 13.0827, lng: 80.2707 }
-    ];
-
-    const gradesList = [
-        "Primary (1-5)", "Middle (6-8)", "High School (9-10)", 
-        "Higher Secondary (11-12)", "Competitive Exams"
-    ];
+    const majorCities = ["Mumbai", "Delhi", "Bangalore", "Kolkata", "Hyderabad", "Chennai", "Pune", "Ahmedabad"];
+    const gradesList = ["Class 1–5", "Class 6–8", "Class 9–10", "Class 11–12", "Competitive Exams", "College / University"];
 
     const router = useRouter();
 
     useEffect(() => {
         if (searchSubject.length >= 1) {
-            const query = searchSubject.toLowerCase().trim();
-            const filtered = subjects.filter(s => s.toLowerCase().includes(query));
+            const q = searchSubject.toLowerCase();
+            const filtered = ALL_SUBJECTS.filter(s => s.toLowerCase().includes(q));
             setFilteredSubjects(filtered);
             setShowSubjectSuggestions(filtered.length > 0);
         } else {
             setShowSubjectSuggestions(false);
         }
-    }, [searchSubject, subjects]);
+    }, [searchSubject]);
 
     const handleSearch = () => {
         const params = new URLSearchParams();
@@ -80,35 +46,34 @@ export default function Home() {
         router.push(`/search?${params.toString()}`);
     };
 
+    const faqs = [
+        { q: "Is it free to find a tutor?", a: "Yes, browsing and connecting with tutors is completely free for students. Tutors pay a small subscription to access student leads." },
+        { q: "How are tutors verified?", a: "All tutors go through a profile review. Premium tutors are ID-verified with qualification checks before getting a verified badge." },
+        { q: "Can I find online tutors too?", a: "Absolutely. You can filter by online or home tuition. We have tutors available across India for both modes." },
+        { q: "How do I contact a tutor?", a: "Once you find a match, you can message them directly or share your phone number to connect instantly." }
+    ];
+
     return (
-        <div className="bg-white text-gray-800 antialiased font-sans transition-all duration-700">
-            {/* HERO SECTION - REFINED MODERN TABBED INTERFACE */}
-            <section className="relative min-h-screen flex flex-col items-center justify-center pt-24 pb-32">
-                <div 
-                    className="absolute inset-0 z-0 bg-cover bg-center"
-                    style={{ backgroundImage: "url('/indian_hero.png')" }}
-                >
-                    <div className="absolute inset-0 bg-gradient-to-b from-gray-900/90 via-gray-900/70 to-gray-900/95"></div>
-                </div>
+        <div className="bg-white text-gray-800 font-sans">
 
-                <div className="relative z-10 w-full max-w-5xl mx-auto flex flex-col items-center px-4">
-                    <div className="mb-12 text-center space-y-8">
-                        <span className="bg-blue-600 text-white text-[10px] font-black px-5 py-2.5 rounded-full uppercase tracking-[0.4em] inline-block shadow-xl shadow-blue-600/20">
-                            India's Trusted Academic Matchmaker
-                        </span>
-                        <h1 className="text-5xl md:text-8xl font-black text-white tracking-tighter uppercase italic leading-[0.9]">
-                            What are you <br />
-                            <span className="text-blue-500 font-serif lowercase tracking-normal not-italic px-4 underline decoration-blue-500/20">looking</span> for?
-                        </h1>
-                        <p className="text-gray-300 text-lg md:text-xl font-medium max-w-2xl mx-auto leading-relaxed italic mt-8 opacity-80">
-                            Architecting precision connections between verified faculty, institutions, and high-priority learning requirements.
-                        </p>
-                    </div>
+            {/* ── HERO ── */}
+            <section className="relative bg-gradient-to-br from-blue-700 via-blue-600 to-blue-800 text-white pt-16 pb-8">
+                <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "url('/indian_hero.png')", backgroundSize: "cover", backgroundPosition: "center" }} />
+                <div className="relative max-w-5xl mx-auto px-4 text-center">
+                    <span className="inline-block bg-white/20 text-white text-xs font-semibold px-4 py-1.5 rounded-full mb-5 tracking-wide">
+                        India's #1 Tutor Marketplace
+                    </span>
+                    <h1 className="text-3xl md:text-5xl font-bold text-white mb-3 leading-tight">
+                        Find the Right Tutor, <span className="text-yellow-300">Near You</span>
+                    </h1>
+                    <p className="text-blue-100 text-sm md:text-base mb-6 max-w-xl mx-auto">
+                        Connect with verified tutors for home tuition, online classes, or coaching centres across India.
+                    </p>
 
-                    {/* SEARCH INTERFACE - HARVESTED FROM LATEST REFINEMENTS */}
-                    <div className="w-full max-w-4xl mx-auto shadow-[0_50px_100px_-20px_rgba(0,0,0,0.6)] rounded-[3rem] overflow-visible">
+                    {/* Search Box */}
+                    <div className="bg-white rounded-2xl shadow-xl overflow-visible">
                         {/* Tabs */}
-                        <div className="flex bg-white/5 backdrop-blur-3xl rounded-t-[3rem] overflow-hidden border-b border-white/10">
+                        <div className="flex border-b border-gray-100">
                             {[
                                 { id: "TUTOR", label: "Find Tutors" },
                                 { id: "STUDENT", label: "Find Students" },
@@ -117,36 +82,35 @@ export default function Home() {
                                 <button
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id)}
-                                    className={`flex-1 py-6 text-[10px] font-black uppercase tracking-[0.3em] transition-all relative ${
-                                        activeTab === tab.id 
-                                        ? "bg-white text-blue-700" 
-                                        : "text-white/60 hover:bg-white/10"
+                                    className={`flex-1 py-3 text-sm font-semibold transition-colors border-b-2 -mb-px ${
+                                        activeTab === tab.id
+                                            ? "border-blue-600 text-blue-600"
+                                            : "border-transparent text-gray-500 hover:text-gray-700"
                                     }`}
                                 >
-                                    {activeTab === tab.id && <div className="absolute top-0 left-0 w-full h-1.5 bg-blue-600"></div>}
                                     {tab.label}
                                 </button>
                             ))}
                         </div>
 
-                        {/* Search Bar */}
-                        <div className="bg-white p-4 md:p-6 flex flex-col md:flex-row items-center gap-4 rounded-b-[3rem] shadow-inner relative">
-                            {/* Subject field */}
-                            <div className="w-full md:w-1/3 relative border-2 border-slate-50 rounded-2xl flex flex-col px-6 py-3 bg-slate-50 focus-within:bg-white focus-within:border-blue-600 focus-within:ring-8 focus-within:ring-blue-100 transition-all">
-                                <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1 flex items-center gap-2">
-                                    <Search size={12} /> Domain / Subject
-                                </span>
-                                <input 
-                                    className="w-full bg-transparent border-none focus:ring-0 text-gray-900 placeholder:text-gray-300 font-black text-sm uppercase outline-none" 
-                                    placeholder="e.g. Mathematics" 
-                                    type="text"
-                                    value={searchSubject}
-                                    onChange={(e) => setSearchSubject(e.target.value)}
-                                />
+                        {/* Search inputs row */}
+                        <div className="p-3" style={{display:'grid', gridTemplateColumns:'1fr 160px 130px auto', gap:'8px'}}>
+                            {/* Subject */}
+                            <div className="relative">
+                                <div className="flex items-center gap-2 px-3 h-11 border border-gray-200 rounded-lg bg-gray-50 focus-within:border-blue-500 focus-within:bg-white transition-all">
+                                    <Search size={15} className="text-gray-400 shrink-0" />
+                                    <input
+                                        className="w-full bg-transparent text-sm text-gray-800 outline-none placeholder:text-gray-400"
+                                        placeholder="Subject (e.g. Maths)"
+                                        value={searchSubject}
+                                        onChange={e => setSearchSubject(e.target.value)}
+                                    />
+                                </div>
                                 {showSubjectSuggestions && (
-                                    <div className="absolute top-full mt-4 left-0 w-full min-w-[280px] bg-white border border-gray-100 rounded-[2rem] shadow-4xl z-[60] py-4 overflow-hidden">
-                                        {filteredSubjects.slice(0, 5).map((s, i) => (
-                                            <div key={i} onMouseDown={() => {setSearchSubject(s); setShowSubjectSuggestions(false);}} className="px-8 py-3.5 hover:bg-blue-50 cursor-pointer text-left font-black text-[10px] uppercase tracking-tight text-gray-600 hover:text-blue-700 transition-colors border-b border-gray-50 last:border-none">
+                                    <div className="absolute top-full mt-1 left-0 w-56 bg-white border border-gray-200 rounded-xl shadow-lg z-50 py-1 overflow-hidden">
+                                        {filteredSubjects.slice(0, 6).map((s, i) => (
+                                            <div key={i} onMouseDown={() => { setSearchSubject(s); setShowSubjectSuggestions(false); }}
+                                                className="px-4 py-2.5 hover:bg-blue-50 cursor-pointer text-sm text-gray-700 hover:text-blue-700">
                                                 {s}
                                             </div>
                                         ))}
@@ -154,226 +118,227 @@ export default function Home() {
                                 )}
                             </div>
 
-                            {/* Grade field */}
-                            <div className="w-full md:w-1/4 relative border-2 border-slate-50 rounded-2xl bg-slate-50 flex flex-col cursor-pointer hover:bg-white hover:border-blue-600 transition-all" onClick={() => setShowGradeDropdown(!showGradeDropdown)}>
-                                <div className="px-6 py-3">
-                                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1 flex items-center gap-2">
-                                        <Layers size={12} /> Academic Level
-                                    </span>
-                                    <div className="flex items-center justify-between">
-                                        <span className="font-black text-gray-900 text-[11px] uppercase tracking-tight truncate flex-1">{searchGrade || "Select Level"}</span>
-                                        <ChevronDown size={14} className="text-gray-400" />
-                                    </div>
+                            {/* Grade */}
+                            <div className="relative">
+                                <div className="flex items-center gap-1.5 px-3 h-11 border border-gray-200 rounded-lg bg-gray-50 cursor-pointer hover:border-blue-400 transition-all"
+                                    onClick={() => { setShowGradeDropdown(!showGradeDropdown); setShowCityDropdown(false); }}>
+                                    <GraduationCap size={14} className="text-gray-400 shrink-0" />
+                                    <span className="flex-1 text-sm text-gray-600 truncate">{searchGrade || "Class"}</span>
+                                    <ChevronDown size={13} className="text-gray-400 shrink-0" />
                                 </div>
                                 {showGradeDropdown && (
-                                    <div className="absolute top-full mt-4 left-0 w-full bg-white border border-gray-100 rounded-[2rem] shadow-4xl z-[60] py-4 overflow-hidden">
+                                    <div className="absolute top-full mt-1 left-0 w-52 bg-white border border-gray-200 rounded-xl shadow-lg z-50 py-1">
                                         {gradesList.map((g, i) => (
-                                            <div key={i} onClick={() => {setSearchGrade(g); setShowGradeDropdown(false);}} className="px-8 py-3.5 hover:bg-blue-50 cursor-pointer text-left font-black text-[10px] uppercase text-gray-600 hover:text-blue-700 border-b border-gray-50 last:border-none">{g}</div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Location field */}
-                            <div className="w-full md:w-1/4 relative border-2 border-slate-50 rounded-2xl bg-slate-50 flex flex-col cursor-pointer hover:bg-white hover:border-blue-600 transition-all" onClick={() => setShowCityDropdown(!showCityDropdown)}>
-                                <div className="px-6 py-3">
-                                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1 flex items-center gap-2">
-                                        <MapPin size={12} /> Geographic Zone
-                                    </span>
-                                    <div className="flex items-center justify-between">
-                                        <span className="font-black text-gray-900 text-[11px] uppercase tracking-tight truncate flex-1">{searchLocation || "Select City"}</span>
-                                        <ChevronDown size={14} className="text-gray-400" />
-                                    </div>
-                                </div>
-                                {showCityDropdown && (
-                                    <div className="absolute top-full mt-4 left-0 w-full bg-white border border-gray-100 rounded-[2rem] shadow-4xl z-[60] py-4 overflow-hidden">
-                                        {majorCities.map((city, i) => (
-                                            <div key={i} onClick={() => {setSearchLocation(city.name); setShowCityDropdown(false);}} className="px-8 py-3.5 hover:bg-blue-50 cursor-pointer text-left font-black text-[10px] uppercase text-gray-600 hover:text-blue-700 border-b border-gray-50 last:border-none flex items-center justify-between">
-                                                {city.name}
-                                                <Navigation size={10} className="opacity-20" />
+                                            <div key={i} onClick={() => { setSearchGrade(g); setShowGradeDropdown(false); }}
+                                                className="px-4 py-2.5 hover:bg-blue-50 cursor-pointer text-sm text-gray-700 hover:text-blue-700">
+                                                {g}
                                             </div>
                                         ))}
                                     </div>
                                 )}
                             </div>
 
-                            {/* Action Button */}
-                            <button 
-                                onClick={handleSearch} 
-                                className="w-full md:w-auto md:ml-auto px-10 py-5 bg-blue-600 text-white rounded-[1.5rem] font-black text-[10px] uppercase tracking-[0.3em] hover:bg-gray-900 active:scale-95 transition-all shadow-xl shadow-blue-600/30 flex items-center justify-center gap-4"
-                            >
-                                Initiate Discovery <ArrowRight size={18} />
+                            {/* City */}
+                            <div className="relative">
+                                <div className="flex items-center gap-1.5 px-3 h-11 border border-gray-200 rounded-lg bg-gray-50 cursor-pointer hover:border-blue-400 transition-all"
+                                    onClick={() => { setShowCityDropdown(!showCityDropdown); setShowGradeDropdown(false); }}>
+                                    <MapPin size={14} className="text-gray-400 shrink-0" />
+                                    <span className="flex-1 text-sm text-gray-600 truncate">{searchLocation || "City"}</span>
+                                    <ChevronDown size={13} className="text-gray-400 shrink-0" />
+                                </div>
+                                {showCityDropdown && (
+                                    <div className="absolute top-full mt-1 left-0 w-44 bg-white border border-gray-200 rounded-xl shadow-lg z-50 py-1">
+                                        {majorCities.map((city, i) => (
+                                            <div key={i} onClick={() => { setSearchLocation(city); setShowCityDropdown(false); }}
+                                                className="px-4 py-2.5 hover:bg-blue-50 cursor-pointer text-sm text-gray-700 hover:text-blue-700">
+                                                {city}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            <button onClick={handleSearch}
+                                className="h-11 px-5 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-blue-700 active:scale-95 transition-all flex items-center gap-2 whitespace-nowrap shadow-md">
+                                <Search size={15} /> Search
                             </button>
                         </div>
                     </div>
 
-                    <div className="mt-16 flex flex-wrap justify-center gap-16 text-white/30 text-[10px] font-black uppercase tracking-[0.4em]">
-                        <div className="flex items-center gap-3"><ShieldCheck size={14} className="text-blue-500" /> Verified Faculty</div>
-                        <div className="flex items-center gap-3"><Star size={14} className="text-blue-500" /> Top Rated</div>
-                        <div className="flex items-center gap-3"><MessageSquare size={14} className="text-blue-500" /> Direct Comms</div>
+                    {/* Trust bar */}
+                    <div className="mt-6 flex flex-wrap justify-center gap-6 text-blue-100 text-sm">
+                        <span className="flex items-center gap-1.5"><ShieldCheck size={14} className="text-yellow-300" /> Verified Tutors</span>
+                        <span className="flex items-center gap-1.5"><Star size={14} className="text-yellow-300" /> Top Rated</span>
+                        <span className="flex items-center gap-1.5"><MessageSquare size={14} className="text-yellow-300" /> Direct Contact</span>
                     </div>
                 </div>
             </section>
 
-            {/* MARKETING SECTION: WORKFLOW PROTOCOL */}
-            <section className="py-32 px-4 flex flex-col items-center justify-center bg-gray-50/50">
-                <div className="max-w-6xl mx-auto w-full">
-                    <div className="text-center mb-24">
-                        <span className="text-blue-600 text-[10px] font-black uppercase tracking-[0.5em] mb-4 inline-block">Methodology</span>
-                        <h2 className="text-4xl md:text-6xl font-black text-gray-900 tracking-tighter uppercase italic">How It <span className="text-blue-600">Calculates</span></h2>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+            {/* ── STATS STRIP ── */}
+            <section className="bg-white border-b border-gray-100 py-8">
+                <div className="max-w-5xl mx-auto px-4">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
                         {[
-                            { step: "01", title: "Discovery", desc: "Define your domain and geographic constraints for precision matching.", icon: Search },
-                            { step: "02", title: "Audit", desc: "Analyze verified credentials and historical performance benchmarks.", icon: ShieldCheck },
-                            { step: "03", title: "Connect", desc: "Establish direct pedagogical channels with zero hidden tolls.", icon: MessageSquare }
-                        ].map((item, i) => (
-                            <div key={i} className="flex flex-col items-center bg-white p-14 rounded-[4rem] shadow-sm border border-gray-100 hover:shadow-4xl transition-all group hover:-translate-y-4">
-                                <div className="w-24 h-24 rounded-[2rem] bg-gray-50 text-gray-300 flex items-center justify-center mb-10 relative group-hover:bg-blue-600 group-hover:text-white transition-all shadow-inner">
-                                    <item.icon size={44} strokeWidth={1} />
-                                    <span className="absolute -top-4 -right-4 bg-blue-600 text-white font-black text-xs w-10 h-10 rounded-2xl flex items-center justify-center border-4 border-white shadow-xl">{item.step}</span>
-                                </div>
-                                <h3 className="text-2xl font-black text-gray-900 mb-6 uppercase italic tracking-tight">{item.title}</h3>
-                                <p className="text-gray-500 font-medium italic leading-relaxed text-center">{item.desc}</p>
+                            { value: "50,000+", label: "Tutors Listed" },
+                            { value: "1 Lakh+", label: "Students Connected" },
+                            { value: "500+", label: "Cities Covered" },
+                            { value: "4.7 ★", label: "Average Rating" }
+                        ].map((s, i) => (
+                            <div key={i}>
+                                <div className="text-2xl font-bold text-blue-600">{s.value}</div>
+                                <div className="text-xs text-gray-500 mt-1 font-medium">{s.label}</div>
                             </div>
                         ))}
                     </div>
                 </div>
             </section>
 
-            {/* MARKETING SECTION: POPULAR CATEGORIES */}
-            <section className="py-32 px-4 flex flex-col items-center justify-center bg-white">
-                <div className="max-w-7xl mx-auto w-full">
-                    <div className="text-center mb-24">
-                        <span className="text-blue-600 text-[10px] font-black uppercase tracking-[0.5em] mb-4 inline-block">Domain Excellence</span>
-                        <h2 className="text-4xl md:text-6xl font-black text-gray-900 tracking-tighter uppercase italic">Master Any <span className="text-blue-600">Subject</span></h2>
+            {/* ── HOW IT WORKS ── */}
+            <section className="py-14 px-4 bg-gray-50">
+                <div className="max-w-5xl mx-auto">
+                    <div className="text-center mb-10">
+                        <h2 className="text-2xl md:text-3xl font-bold text-gray-900">How It Works</h2>
+                        <p className="text-gray-500 mt-2 text-sm">Get started in just 3 simple steps</p>
                     </div>
-                    
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {[
+                            { step: "1", title: "Search", desc: "Enter your subject, class level, and city to find matching tutors near you.", icon: Search },
+                            { step: "2", title: "Compare", desc: "View profiles, ratings, and fees. Shortlist tutors that match your requirements.", icon: ShieldCheck },
+                            { step: "3", title: "Connect", desc: "Contact the tutor directly — no middlemen, no commission charges.", icon: Phone }
+                        ].map((item, i) => (
+                            <div key={i} className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex gap-4">
+                                <div className="w-10 h-10 rounded-xl bg-blue-600 text-white font-bold text-lg flex items-center justify-center shrink-0">
+                                    {item.step}
+                                </div>
+                                <div>
+                                    <h3 className="font-semibold text-gray-900 mb-1">{item.title}</h3>
+                                    <p className="text-sm text-gray-500 leading-relaxed">{item.desc}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* ── POPULAR SUBJECTS ── */}
+            <section className="py-14 px-4 bg-white">
+                <div className="max-w-5xl mx-auto">
+                    <div className="text-center mb-10">
+                        <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Popular Subjects</h2>
+                        <p className="text-gray-500 mt-2 text-sm">Find expert tutors for any subject</p>
+                    </div>
+                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
                         {POPULAR_SUBJECTS.map((cat, i) => (
-                            <Link key={i} href={`/search?subject=${encodeURIComponent(cat.title)}&role=TUTOR`} className="bg-white p-10 rounded-[3.5rem] border border-gray-100 shadow-sm hover:shadow-4xl cursor-pointer flex flex-col items-center justify-center text-center group transition-all hover:scale-105">
-                                <div className="text-blue-600 mb-8 bg-blue-50 p-6 rounded-[2rem] group-hover:bg-blue-600 group-hover:text-white transition-all shadow-inner">
-                                    <cat.icon size={36} strokeWidth={1.5} />
+                            <Link key={i} href={`/search?subject=${encodeURIComponent(cat.title)}&role=TUTOR`}
+                                className="flex flex-col items-center gap-2 p-4 rounded-xl border border-gray-100 hover:border-blue-500 hover:bg-blue-50 cursor-pointer transition-all group text-center">
+                                <div className="text-blue-600 group-hover:text-blue-700">
+                                    <cat.icon size={24} strokeWidth={1.5} />
                                 </div>
-                                <h3 className="font-black text-gray-900 text-lg tracking-tighter italic uppercase">{cat.title}</h3>
-                                <p className="text-[10px] font-black text-blue-500/20 uppercase mt-2 tracking-widest group-hover:text-blue-600 transition-colors">Elite Match</p>
+                                <span className="text-xs font-semibold text-gray-700 group-hover:text-blue-700 leading-tight">{cat.title}</span>
                             </Link>
                         ))}
                     </div>
-
-                    <div className="mt-20 flex justify-center">
-                        <Link href="/subjects" className="px-12 py-5 bg-gray-900 text-white rounded-[2rem] font-black text-[10px] uppercase tracking-[0.4em] hover:bg-blue-600 transition-all shadow-2xl shadow-gray-900/10 flex items-center gap-4">
-                            Expose All Verticles <ArrowRight size={16} />
+                    <div className="mt-8 text-center">
+                        <Link href="/subjects" className="inline-flex items-center gap-2 text-blue-600 font-semibold text-sm hover:underline">
+                            View all subjects <ArrowRight size={14} />
                         </Link>
                     </div>
                 </div>
             </section>
 
-            {/* MARKETING SECTION: STATISTICS */}
-            <section className="py-32 bg-gray-900 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-1/2 h-full bg-blue-600/5 blur-[120px] rounded-full"></div>
-                <div className="max-w-7xl mx-auto px-6 relative z-10 text-center">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-12 lg:gap-24">
+            {/* ── WHY CHOOSE US ── */}
+            <section className="py-14 px-4 bg-blue-600 text-white">
+                <div className="max-w-5xl mx-auto">
+                    <div className="text-center mb-10">
+                        <h2 className="text-2xl md:text-3xl font-bold">Why Students & Tutors Trust Us</h2>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
                         {[
-                            { value: "450k+", label: "Verified Faculty", icon: GraduationCap },
-                            { value: "1.2M", label: "Learning Match", icon: Zap },
-                            { value: "50+", label: "Academic Hubs", icon: MapPin },
-                            { value: "100%", label: "Direct Comms", icon: MessageSquare }
-                        ].map((stat, i) => (
-                            <div key={i} className="space-y-4">
-                                <div className="size-16 rounded-2xl bg-white/5 mx-auto flex items-center justify-center text-blue-500 mb-6">
-                                    <stat.icon size={32} strokeWidth={1} />
-                                </div>
-                                <div className="text-4xl md:text-6xl font-black text-white italic tracking-tighter">{stat.value}</div>
-                                <div className="text-[10px] font-black text-gray-500 uppercase tracking-[0.5em]">{stat.label}</div>
+                            { icon: ShieldCheck, title: "Verified Tutors", desc: "Every tutor is profile-verified. Premium tutors are ID and qualification checked." },
+                            { icon: Users, title: "Wide Reach", desc: "500+ cities across India. Find tutors for home, online, or coaching centre." },
+                            { icon: BookOpen, title: "All Subjects", desc: "From school academics to competitive exams — NEET, JEE, UPSC, and more." },
+                            { icon: Zap, title: "Quick Match", desc: "Get matched with the right tutor in minutes, not days." }
+                        ].map((f, i) => (
+                            <div key={i} className="bg-white/10 rounded-xl p-5 text-center">
+                                <f.icon size={28} className="mx-auto mb-3 text-yellow-300" strokeWidth={1.5} />
+                                <h3 className="font-semibold text-white mb-1 text-sm">{f.title}</h3>
+                                <p className="text-blue-100 text-xs leading-relaxed">{f.desc}</p>
                             </div>
                         ))}
                     </div>
                 </div>
             </section>
 
-            {/* MARKETING SECTION: FAQ ACCORDION */}
-            <section className="py-32 bg-white">
-                <div className="max-w-4xl mx-auto px-4">
-                    <div className="text-center mb-24">
-                        <span className="text-blue-600 text-[10px] font-black uppercase tracking-[0.5em] mb-4 inline-block">Inquiry Hub</span>
-                        <h2 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tighter uppercase italic">Common <span className="text-blue-600">Questions</span></h2>
+            {/* ── FAQ ── */}
+            <section className="py-14 px-4 bg-white">
+                <div className="max-w-3xl mx-auto">
+                    <div className="text-center mb-10">
+                        <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Frequently Asked Questions</h2>
                     </div>
-
-                    <div className="space-y-6">
-                        {[
-                            { q: "How do I define my requirements?", a: "Simply use our segmented search interface. Define your subject, academic level, and location to immediately pulse our 450k+ faculty database." },
-                            { q: "Is there a toll on matching?", a: "No. Our matchmaking engine connects you directly. We do not participate in your financial transactions or academic tolls." },
-                            { q: "How are faculty credentials audited?", a: "Our system multi-stages verification including ID authentication and academic history validation for all elite listings." }
-                        ].map((item, i) => (
-                            <details key={i} className="group bg-gray-50 rounded-[2.5rem] border border-gray-100 open:bg-white open:shadow-4xl transition-all duration-300">
-                                <summary className="flex items-center justify-between p-8 md:p-10 cursor-pointer list-none">
-                                    <span className="text-lg font-black text-gray-900 uppercase italic tracking-tight">{item.q}</span>
-                                    <ChevronDown size={24} className="text-blue-600 transition-transform group-open:rotate-180" />
-                                </summary>
-                                <div className="px-10 pb-10 text-gray-500 font-medium italic leading-relaxed text-lg">
-                                    {item.a}
-                                </div>
-                            </details>
+                    <div className="space-y-3">
+                        {faqs.map((item, i) => (
+                            <div key={i} className="border border-gray-200 rounded-xl overflow-hidden">
+                                <button
+                                    className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors"
+                                    onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                                >
+                                    <span className="font-semibold text-gray-800 text-sm">{item.q}</span>
+                                    <ChevronDown size={16} className={`text-gray-400 transition-transform shrink-0 ml-3 ${openFaq === i ? "rotate-180" : ""}`} />
+                                </button>
+                                {openFaq === i && (
+                                    <div className="px-4 pb-4 text-sm text-gray-500 leading-relaxed border-t border-gray-100 pt-3">
+                                        {item.a}
+                                    </div>
+                                )}
+                            </div>
                         ))}
                     </div>
                 </div>
             </section>
 
-            {/* MARKETING SECTION: CTA */}
-            <section className="py-32 px-4 flex flex-col items-center justify-center bg-gray-900 text-white relative overflow-hidden">
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-blue-600/5 blur-[120px] rounded-full -z-0"></div>
-                <div className="max-w-4xl mx-auto w-full relative z-10 text-center">
-                    <div className="size-24 rounded-[2.5rem] bg-blue-600 text-white flex items-center justify-center mx-auto mb-12 shadow-2xl shadow-blue-600/40 animate-pulse">
-                        <Rocket size={48} strokeWidth={1} />
-                    </div>
-                    <h2 className="text-5xl md:text-8xl font-black text-white tracking-tighter uppercase italic mb-10 leading-[0.9]">
-                        Deploy your <br />
-                        <span className="text-blue-500 font-serif lowercase tracking-normal not-italic px-4 underline decoration-blue-500/20">academic</span> legacy.
-                    </h2>
-                    <p className="text-xl text-gray-400 font-medium mb-16 italic max-w-2xl mx-auto leading-relaxed opacity-70">
-                        Join India's most advanced educator matching network. Optimize your strategy; scale your legacy with institutional-grade precision.
+            {/* ── CTA BANNER ── */}
+            <section className="py-12 px-4 bg-gray-900 text-white">
+                <div className="max-w-3xl mx-auto text-center">
+                    <h2 className="text-2xl md:text-3xl font-bold mb-3">Are You a Tutor?</h2>
+                    <p className="text-gray-400 text-sm mb-6 max-w-lg mx-auto">
+                        Join thousands of tutors already growing their student base on TuitionsInIndia. Create your free profile today.
                     </p>
-                    
-                    <div className="flex flex-col sm:flex-row justify-center gap-8">
-                        <Link href="/register?role=TUTOR" className="px-14 py-7 bg-blue-600 text-white rounded-[2rem] font-black text-[10px] uppercase tracking-[0.4em] shadow-4xl shadow-blue-600/40 hover:bg-white hover:text-gray-900 transition-all active:scale-95 leading-none h-[80px] flex items-center justify-center">
-                            Register as Tutor
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                        <Link href="/register/tutor"
+                            className="px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 transition-all flex items-center justify-center gap-2">
+                            Register as Tutor <ArrowRight size={16} />
                         </Link>
-                        <Link href="/register?role=STUDENT" className="px-14 py-7 bg-transparent border-2 border-white/20 text-white rounded-[2rem] font-black text-[10px] uppercase tracking-[0.4em] hover:bg-white/5 transition-all active:scale-95 leading-none h-[80px] flex items-center justify-center">
-                            Find Verified Faculty
+                        <Link href="/search"
+                            className="px-6 py-3 bg-white/10 text-white rounded-xl font-semibold text-sm hover:bg-white/20 transition-all flex items-center justify-center gap-2">
+                            Find a Tutor
                         </Link>
-                    </div>
-
-                    <div className="mt-24 flex items-center justify-center gap-3 text-[10px] font-black text-gray-700 uppercase tracking-[0.6em]">
-                        <Lock size={14} strokeWidth={3} className="text-blue-500" /> Standard Security Protocols Active
                     </div>
                 </div>
             </section>
 
-            {/* INLINE FOOTER - RESTORED PREMIUM COMPACT VERSION */}
-            <footer className="bg-white border-t border-gray-100 py-16">
-                <div className="max-w-7xl mx-auto px-6">
-                    <div className="flex flex-col lg:flex-row items-center justify-between gap-12 pb-12 border-b border-gray-50">
-                        <div className="flex flex-col md:flex-row items-center gap-10 text-center md:text-left">
-                            <Link href="/">
-                                <img src="/logo_minimal.png" alt="Branding" className="h-12 w-auto grayscale contrast-125" />
-                            </Link>
-                            <p className="text-gray-400 text-[10px] font-black uppercase tracking-[0.3em] max-w-xs leading-relaxed">
-                                India's most advanced pedagogical matchmaking infrastructure. Precision matching for an elite academic legacy.
-                            </p>
-                        </div>
-                        <nav className="flex flex-wrap justify-center gap-x-10 gap-y-4">
-                            {["Find Tutors", "Student Leads", "Methodology", "Pricing", "Privacy"].map((link, i) => (
-                                <Link key={i} href="/" className="text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-blue-600 transition-colors">{link}</Link>
+            {/* ── FOOTER ── */}
+            <footer className="bg-white border-t border-gray-100 py-10">
+                <div className="max-w-5xl mx-auto px-4">
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
+                        <Link href="/">
+                            <img src="/logo_minimal.png" alt="TuitionsInIndia" className="h-9 w-auto" />
+                        </Link>
+                        <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2">
+                            {[
+                                { label: "Find Tutors", href: "/search" },
+                                { label: "For Tutors", href: "/register/tutor" },
+                                { label: "Pricing", href: "/pricing" },
+                                { label: "Blog", href: "/blog" },
+                                { label: "Privacy Policy", href: "/legal/privacy" },
+                                { label: "Contact", href: "/contact" }
+                            ].map((link, i) => (
+                                <Link key={i} href={link.href} className="text-xs text-gray-500 hover:text-blue-600 transition-colors font-medium">{link.label}</Link>
                             ))}
                         </nav>
                     </div>
-                    <div className="flex flex-col md:flex-row justify-between items-center gap-6 pt-12">
-                        <p className="text-gray-300 text-[9px] font-black uppercase tracking-[0.4em]">© 2026 TuitionsInIndia. Industrial Grade Integrity.</p>
-                        <div className="flex items-center gap-4 opacity-30 grayscale saturate-0">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/Razorpay_logo.svg" alt="Payments" className="h-4" />
-                        </div>
+                    <div className="border-t border-gray-100 pt-6 flex flex-col md:flex-row justify-between items-center gap-3">
+                        <p className="text-xs text-gray-400">© 2026 TuitionsInIndia.com. All rights reserved.</p>
+                        <p className="text-xs text-gray-400">Made with ❤️ for students across India</p>
                     </div>
                 </div>
             </footer>

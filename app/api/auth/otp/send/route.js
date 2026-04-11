@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { sendOTP } from "@/lib/sms";
+import { otpStore } from "@/lib/otpStore";
 
 export async function POST(request) {
     try {
@@ -9,12 +11,16 @@ export async function POST(request) {
             return NextResponse.json({ error: "Phone and Role are required" }, { status: 400 });
         }
 
-        // Mock OTP generation
-        const otp = "123456"; 
-        console.log(`[AUTH] Sending OTP ${otp} to ${phone} for role ${role}`);
+        // Generate a 6-digit OTP
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-        // Update or create lead capture (Placeholder user)
-        // In a real app, you might use a separate 'Prospect' table or just update the User
+        // Store OTP with 10-minute expiry
+        otpStore.set(phone, {
+            code: otp,
+            expires: Date.now() + 10 * 60 * 1000
+        });
+
+        // Update or create user record
         const user = await prisma.user.upsert({
             where: { phone: phone },
             update: {
@@ -29,12 +35,16 @@ export async function POST(request) {
             }
         });
 
-        // Store OTP in a session or a cache (mocking with a return for now)
-        // In production, use Redis or a dedicated OTP table
-        return NextResponse.json({ 
-            success: true, 
-            message: "OTP sent successfully (Mock: 123456)",
-            userId: user.id 
+        // Send OTP via Twilio (falls back to console log if keys not set)
+        const formattedPhone = "+91" + phone.replace(/\D/g, '').slice(-10);
+        await sendOTP(formattedPhone, otp);
+
+        console.log(`[AUTH] OTP ${otp} dispatched to ${phone}`);
+
+        return NextResponse.json({
+            success: true,
+            message: "OTP sent successfully",
+            userId: user.id
         });
 
     } catch (error) {
