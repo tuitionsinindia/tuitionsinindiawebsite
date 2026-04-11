@@ -9,22 +9,23 @@ import SettingsModule from "@/app/components/dashboard/SettingsModule";
 import BillingModule from "@/app/components/dashboard/BillingModule";
 import {
     Building2,
-    LayoutDashboard,
     BookOpen,
     Megaphone,
     Users,
     CreditCard,
     PlusCircle,
     ArrowRight,
+    CheckCircle2,
+    Search,
     Lock,
     Zap,
+    Award,
     MessageCircle,
     Loader2,
     LogOut,
     Settings,
     UserPlus,
-    Target,
-    Award
+    Box
 } from "lucide-react";
 
 function InstituteDashboardContent() {
@@ -34,7 +35,6 @@ function InstituteDashboardContent() {
     const [leads, setLeads] = useState([]);
     const [recruitmentLeads, setRecruitmentLeads] = useState([]);
     const [courses, setCourses] = useState([]);
-    const [ads, setAds] = useState([]);
     const [loading, setLoading] = useState(true);
     const [instituteData, setInstituteData] = useState(null);
     const [activeTab, setActiveTab] = useState("leads");
@@ -43,8 +43,6 @@ function InstituteDashboardContent() {
     const [selectedSession, setSelectedSession] = useState(null);
     const [loadingChat, setLoadingChat] = useState(false);
 
-    const [showCourseForm, setShowCourseForm] = useState(false);
-
     useEffect(() => {
         if (instituteId) {
             fetchInstituteData();
@@ -52,7 +50,6 @@ function InstituteDashboardContent() {
             if (activeTab === "leads") fetchLeads();
             if (activeTab === "recruitment") fetchRecruitmentLeads();
             if (activeTab === "courses") fetchCourses();
-            if (activeTab === "ads") fetchAds();
         }
     }, [instituteId, activeTab]);
 
@@ -83,15 +80,6 @@ function InstituteDashboardContent() {
         } catch (err) { console.error(err); } finally { setLoading(false); }
     };
 
-    const fetchAds = async () => {
-        setLoading(true);
-        try {
-            const res = await fetch(`/api/institute/ads?userId=${instituteId}`);
-            const data = await res.json();
-            setAds(data);
-        } catch (err) { console.error(err); } finally { setLoading(false); }
-    };
-
     const fetchInstituteData = async () => {
         try {
             const res = await fetch(`/api/user/info?id=${instituteId}`);
@@ -114,7 +102,7 @@ function InstituteDashboardContent() {
     };
 
     const handleUnlock = async (leadId) => {
-        if (!confirm("Unlock this student? This will spend 1 credit.")) return;
+        if (!confirm("Unlock this lead? 1 credit will be used.")) return;
         try {
             const res = await fetch("/api/lead/unlock", {
                 method: "POST",
@@ -126,7 +114,7 @@ function InstituteDashboardContent() {
                 fetchInstituteData();
             } else {
                 const err = await res.json();
-                alert(err.error || "Failed to unlock. Please try again.");
+                alert(err.error || "Failed to unlock. Please check your credit balance.");
             }
         } catch (err) { console.error(err); }
     };
@@ -134,43 +122,41 @@ function InstituteDashboardContent() {
     if (!instituteId) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-10 max-w-md w-full text-center">
-                    <div className="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center mx-auto mb-6">
-                        <Building2 size={32} className="text-blue-600" />
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 max-w-md w-full text-center">
+                    <div className="size-16 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 mx-auto mb-6">
+                        <Building2 size={32} />
                     </div>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Institute Dashboard</h2>
-                    <p className="text-gray-500 text-sm mb-8">Enter your Institute ID to access your dashboard.</p>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Institute Portal</h2>
+                    <p className="text-gray-500 text-sm mb-6">Enter your institute ID to access the dashboard.</p>
                     <input
                         type="text"
-                        placeholder="Enter your Institute ID"
-                        className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 outline-none focus:border-blue-500 mb-4"
+                        placeholder="Enter institute ID"
+                        className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300 mb-4"
                         onKeyDown={(e) => { if (e.key === 'Enter') setInstituteId(e.target.value); }}
                         id="instInput"
                     />
                     <button
                         className="w-full bg-blue-600 text-white font-semibold py-3 rounded-xl hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
-                        onClick={() => setInstituteId(document.getElementById('instInput').value)}
-                    >
+                        onClick={() => setInstituteId(document.getElementById('instInput').value)}>
                         Access Dashboard <ArrowRight size={16} />
                     </button>
-                    <Link href="/" className="inline-block mt-6 text-sm text-gray-400 hover:text-blue-600 transition-colors">← Back to Home</Link>
+                    <Link href="/" className="inline-block mt-4 text-sm text-gray-400 hover:text-gray-600 transition-colors">Back to Home</Link>
                 </div>
             </div>
         );
     }
 
-    const navItems = [
-        { id: "leads", label: "Student Leads", icon: Target },
-        { id: "recruitment", label: "Find Tutors", icon: UserPlus },
+    const NAV_ITEMS = [
+        { id: "leads", label: "Student Leads", icon: Users },
+        { id: "recruitment", label: "Hire Tutors", icon: UserPlus },
         { id: "chat", label: "Messages", icon: MessageCircle },
-        { id: "courses", label: "Courses", icon: BookOpen },
-        { id: "ads", label: "Ads", icon: Megaphone },
-        { id: "billing", label: "Billing", icon: CreditCard },
-        { id: "settings", label: "Settings", icon: Settings },
+        { id: "courses", label: "Courses", icon: Box },
+        { id: "billing", label: "Credits & Billing", icon: CreditCard },
+        { id: "settings", label: "Settings", icon: Settings }
     ];
 
     return (
-        <div className="flex min-h-screen flex-col bg-gray-50">
+        <div className="flex min-h-screen flex-col bg-gray-50 font-sans">
             <DashboardHeader
                 user={instituteData}
                 role="INSTITUTE"
@@ -178,270 +164,222 @@ function InstituteDashboardContent() {
                 onLogout={() => router.push("/")}
             />
 
-            <div className="flex flex-1 pt-16">
-                <aside className="fixed left-0 top-16 bottom-0 w-16 md:w-64 bg-white border-r border-gray-200 flex flex-col py-6 px-3 md:px-4 z-40">
-                    <nav className="flex-1 space-y-1">
-                        {navItems.map((item) => (
+            <div className="flex flex-1">
+                {/* Sidebar */}
+                <aside className="fixed left-0 top-[85px] bottom-0 w-20 md:w-64 bg-white border-r border-gray-100 flex flex-col items-center md:items-stretch py-6 px-3 md:px-5 z-50">
+                    <nav className="space-y-1 w-full">
+                        {NAV_ITEMS.map((item) => (
                             <button
                                 key={item.id}
                                 onClick={() => setActiveTab(item.id)}
-                                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                                className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-all ${
                                     activeTab === item.id
-                                        ? "bg-blue-600 text-white"
-                                        : "text-gray-600 hover:bg-gray-100"
+                                    ? "bg-blue-50 text-blue-700"
+                                    : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
                                 }`}
                             >
-                                <item.icon size={18} />
+                                <item.icon size={18} className="shrink-0" />
                                 <span className="hidden md:block">{item.label}</span>
                             </button>
                         ))}
                     </nav>
+
                     <button
                         onClick={() => router.push("/")}
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-red-500 hover:bg-red-50 transition-colors"
+                        className="mt-auto flex items-center justify-center md:justify-start gap-3 px-3 py-3 text-sm text-gray-400 hover:text-red-500 transition-colors w-full"
                     >
-                        <LogOut size={18} />
-                        <span className="hidden md:block">Logout</span>
+                        <LogOut size={16} className="shrink-0" />
+                        <span className="hidden md:block">Log Out</span>
                     </button>
                 </aside>
 
-                <main className="flex-1 ml-16 md:ml-64 p-6">
+                {/* Main content */}
+                <main className="flex-1 ml-20 md:ml-64 p-6 md:p-10">
                     <div className="max-w-5xl mx-auto">
 
                         {activeTab === "settings" && <SettingsModule user={instituteData} onUpdate={fetchInstituteData} />}
                         {activeTab === "billing" && <BillingModule user={instituteData} />}
 
-                        {activeTab === "leads" && (
-                            <div className="space-y-6">
-                                <div>
-                                    <h1 className="text-2xl font-bold text-gray-900">Student Leads</h1>
-                                    <p className="text-gray-500 text-sm mt-1">Students looking for courses at institutes like yours.</p>
-                                </div>
-                                {loading ? (
-                                    <div className="flex items-center justify-center py-20 text-gray-400">
-                                        <Loader2 className="animate-spin mr-2" size={20} /> Loading leads...
+                        {activeTab === "chat" && (
+                            <div className="h-[75vh] grid grid-cols-1 lg:grid-cols-12 gap-5">
+                                {/* Sessions list */}
+                                <div className="lg:col-span-4 bg-white rounded-2xl border border-gray-200 overflow-hidden flex flex-col">
+                                    <div className="p-4 border-b border-gray-100 flex items-center justify-between">
+                                        <h3 className="text-sm font-semibold text-gray-700">Messages</h3>
+                                        <span className="size-6 rounded-lg bg-gray-100 text-gray-600 flex items-center justify-center text-xs font-bold">{chatSessions.length}</span>
                                     </div>
-                                ) : leads.length > 0 ? (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {leads.map((lead) => (
-                                            <div key={lead.id} className="bg-white rounded-xl border border-gray-200 p-6">
-                                                <div className="flex items-center justify-between mb-3">
-                                                    <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-semibold">
-                                                        {lead.subjects?.[0] || 'General'}
-                                                    </span>
-                                                    <span className="text-xs text-emerald-600 font-medium">Active</span>
-                                                </div>
-                                                <p className="text-gray-700 font-medium mb-4 line-clamp-2">"{lead.description}"</p>
-                                                {lead.isUnlocked ? (
-                                                    <div className="flex items-center gap-3 p-3 bg-emerald-50 rounded-lg border border-emerald-100">
-                                                        <div className="w-10 h-10 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-lg">
-                                                            {lead.student?.name?.[0]}
-                                                        </div>
-                                                        <div className="flex-1 min-w-0">
-                                                            <p className="font-semibold text-gray-900 text-sm">{lead.student?.name}</p>
-                                                            <p className="text-xs text-emerald-600">Contact unlocked</p>
-                                                        </div>
-                                                        <button
-                                                            onClick={async () => {
-                                                                const res = await fetch("/api/chat/session", {
-                                                                    method: "POST",
-                                                                    headers: { "Content-Type": "application/json" },
-                                                                    body: JSON.stringify({ studentId: lead.studentId, tutorId: instituteId })
-                                                                });
-                                                                if (res.ok) { await fetchChatSessions(); setActiveTab("chat"); }
-                                                            }}
-                                                            className="px-3 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors flex items-center gap-1"
-                                                        >
-                                                            <MessageCircle size={14} /> Chat
-                                                        </button>
-                                                    </div>
-                                                ) : (
-                                                    <button
-                                                        onClick={() => handleUnlock(lead.id)}
-                                                        className="w-full py-2.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
-                                                    >
-                                                        <Lock size={14} /> Unlock Student (1 credit)
-                                                    </button>
-                                                )}
+                                    <div className="flex-1 overflow-y-auto">
+                                        {loadingChat ? (
+                                            <div className="flex items-center justify-center py-10">
+                                                <Loader2 className="animate-spin text-gray-400" size={20} />
                                             </div>
-                                        ))}
+                                        ) : chatSessions.length > 0 ? chatSessions.map((session) => {
+                                            const recipient = session.tutorId === instituteId ? session.student : session.tutor;
+                                            const isActive = selectedSession?.id === session.id;
+                                            return (
+                                                <button
+                                                    key={session.id}
+                                                    onClick={() => setSelectedSession(session)}
+                                                    className={`w-full p-4 flex items-center gap-3 transition-colors border-b border-gray-50 last:border-0 ${isActive ? "bg-blue-50" : "hover:bg-gray-50"}`}
+                                                >
+                                                    <div className={`size-10 rounded-full flex items-center justify-center font-bold text-sm shrink-0 ${isActive ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-600"}`}>
+                                                        {recipient?.name?.[0] || "?"}
+                                                    </div>
+                                                    <div className="flex-1 text-left min-w-0">
+                                                        <p className="text-sm font-semibold text-gray-900 truncate">{recipient?.name}</p>
+                                                        <p className="text-xs text-gray-400 truncate">Tap to open chat</p>
+                                                    </div>
+                                                </button>
+                                            );
+                                        }) : (
+                                            <div className="py-10 text-center text-sm text-gray-400">No conversations yet.</div>
+                                        )}
                                     </div>
-                                ) : (
-                                    <div className="text-center py-20 text-gray-400">
-                                        <Target size={40} className="mx-auto mb-3 opacity-30" />
-                                        <p className="font-medium">No student leads yet.</p>
-                                        <p className="text-sm mt-1">Complete your profile to start receiving leads.</p>
-                                    </div>
-                                )}
+                                </div>
+
+                                <div className="lg:col-span-8 overflow-hidden">
+                                    {selectedSession ? (
+                                        <FacultyChat
+                                            sessionId={selectedSession.id}
+                                            currentUser={{ id: instituteId, name: instituteData?.name }}
+                                            recipientName={selectedSession.tutorId === instituteId ? selectedSession.student?.name : selectedSession.tutor?.name}
+                                        />
+                                    ) : (
+                                        <div className="h-full flex flex-col items-center justify-center bg-white rounded-2xl border border-gray-200 text-center p-10">
+                                            <MessageCircle size={40} className="text-gray-200 mb-4" />
+                                            <h2 className="text-lg font-semibold text-gray-700 mb-1">Select a conversation</h2>
+                                            <p className="text-sm text-gray-400">Choose a chat from the list to get started.</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === "leads" && (
+                            <div>
+                                <div className="mb-6">
+                                    <h1 className="text-2xl font-bold text-gray-900">Student Leads</h1>
+                                    <p className="text-gray-500 text-sm mt-1">Students looking for tutors. Unlock a lead to see contact details.</p>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {loading ? (
+                                        <div className="col-span-2 flex justify-center py-20">
+                                            <Loader2 className="animate-spin text-gray-400" size={32} />
+                                        </div>
+                                    ) : leads.length > 0 ? leads.map((lead) => (
+                                        <div key={lead.id} className="bg-white border border-gray-200 rounded-2xl p-6 flex flex-col gap-4">
+                                            <div className="flex items-start justify-between">
+                                                <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium">{lead.subjects?.[0] || 'General'}</span>
+                                                <span className="px-2 py-1 bg-green-50 text-green-700 rounded-lg text-xs font-medium">Active</span>
+                                            </div>
+                                            <p className="text-gray-800 font-medium text-sm leading-relaxed">"{lead.description}"</p>
+
+                                            {lead.isUnlocked ? (
+                                                <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                                                    <div className="size-10 rounded-full bg-green-100 text-green-700 flex items-center justify-center font-bold text-sm shrink-0">
+                                                        {lead.student?.name?.[0]}
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="text-sm font-semibold text-gray-900">{lead.student?.name}</p>
+                                                        <p className="text-xs text-green-600">Contact unlocked</p>
+                                                    </div>
+                                                    <button
+                                                        onClick={async () => {
+                                                            const res = await fetch("/api/chat/session", {
+                                                                method: "POST",
+                                                                headers: { "Content-Type": "application/json" },
+                                                                body: JSON.stringify({ studentId: lead.studentId, tutorId: instituteId })
+                                                            });
+                                                            if (res.ok) { await fetchChatSessions(); setActiveTab("chat"); }
+                                                        }}
+                                                        className="p-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors"
+                                                    >
+                                                        <MessageCircle size={16} />
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <button onClick={() => handleUnlock(lead.id)} className="w-full flex items-center justify-center gap-2 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition-colors">
+                                                    <Lock size={14} />
+                                                    Unlock Lead (1 credit)
+                                                </button>
+                                            )}
+                                        </div>
+                                    )) : (
+                                        <div className="col-span-2 text-center py-16 text-gray-400 text-sm">No student leads found.</div>
+                                    )}
+                                </div>
                             </div>
                         )}
 
                         {activeTab === "recruitment" && (
-                            <div className="space-y-6">
-                                <div>
-                                    <h1 className="text-2xl font-bold text-gray-900">Find Tutors</h1>
-                                    <p className="text-gray-500 text-sm mt-1">Browse tutors available for hire at your institute.</p>
+                            <div>
+                                <div className="mb-6">
+                                    <h1 className="text-2xl font-bold text-gray-900">Hire Tutors</h1>
+                                    <p className="text-gray-500 text-sm mt-1">Browse verified tutors available to join your institute.</p>
                                 </div>
-                                {loading ? (
-                                    <div className="flex items-center justify-center py-20 text-gray-400">
-                                        <Loader2 className="animate-spin mr-2" size={20} /> Searching tutors...
-                                    </div>
-                                ) : recruitmentLeads.length > 0 ? (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                        {recruitmentLeads.map((tutor) => (
-                                            <div key={tutor.id} className="bg-white rounded-xl border border-gray-200 p-6">
-                                                <div className="flex items-center gap-3 mb-4">
-                                                    <div className="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xl">
-                                                        {tutor.tutor?.name?.[0]}
-                                                    </div>
-                                                    <div>
-                                                        <h3 className="font-semibold text-gray-900">{tutor.tutor?.name}</h3>
-                                                        <div className="flex items-center gap-1 text-amber-500 text-xs mt-0.5">
-                                                            <Award size={12} /> Expert Tutor
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div className="flex flex-wrap gap-1.5 mb-4">
-                                                    {tutor.subjects?.slice(0, 3).map(s => (
-                                                        <span key={s} className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">{s}</span>
-                                                    ))}
-                                                </div>
-                                                <button
-                                                    onClick={() => router.push(`/search/${tutor.id}`)}
-                                                    className="w-full py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
-                                                >
-                                                    View Profile
-                                                </button>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <div className="text-center py-20 text-gray-400">
-                                        <UserPlus size={40} className="mx-auto mb-3 opacity-30" />
-                                        <p className="font-medium">No tutors found.</p>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-
-                        {activeTab === "chat" && (
-                            <div className="space-y-4">
-                                <h1 className="text-2xl font-bold text-gray-900">Messages</h1>
-                                <div className="flex h-[calc(100vh-220px)] bg-white rounded-xl border border-gray-200 overflow-hidden">
-                                    <div className="w-72 border-r border-gray-200 flex flex-col">
-                                        <div className="p-4 border-b border-gray-100">
-                                            <h3 className="font-semibold text-gray-900 text-sm">Conversations</h3>
-                                            <p className="text-xs text-gray-500 mt-0.5">{chatSessions.length} active</p>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {loading ? (
+                                        <div className="col-span-3 flex justify-center py-20">
+                                            <Loader2 className="animate-spin text-gray-400" size={32} />
                                         </div>
-                                        <div className="flex-1 overflow-y-auto">
-                                            {loadingChat ? (
-                                                <div className="flex items-center justify-center py-10 text-gray-400">
-                                                    <Loader2 className="animate-spin mr-2" size={16} /> Loading...
+                                    ) : recruitmentLeads.length > 0 ? recruitmentLeads.map((tutor) => (
+                                        <div key={tutor.id} className="bg-white border border-gray-200 rounded-2xl p-5 flex flex-col gap-4 hover:shadow-sm transition-shadow">
+                                            <div className="flex items-center gap-3">
+                                                <div className="size-12 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-lg shrink-0">
+                                                    {tutor.tutor?.name?.[0]}
                                                 </div>
-                                            ) : chatSessions.length > 0 ? chatSessions.map((session) => {
-                                                const recipient = session.tutorId === instituteId ? session.student : session.tutor;
-                                                return (
-                                                    <button
-                                                        key={session.id}
-                                                        onClick={() => setSelectedSession(session)}
-                                                        className={`w-full p-4 text-left flex items-center gap-3 transition-colors border-b border-gray-50 ${
-                                                            selectedSession?.id === session.id ? "bg-blue-50" : "hover:bg-gray-50"
-                                                        }`}
-                                                    >
-                                                        <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold text-sm shrink-0">
-                                                            {recipient?.name?.[0] || "?"}
-                                                        </div>
-                                                        <div className="flex-1 min-w-0">
-                                                            <p className="font-medium text-gray-900 text-sm truncate">{recipient?.name || "Unknown"}</p>
-                                                        </div>
-                                                    </button>
-                                                );
-                                            }) : (
-                                                <div className="p-6 text-center text-gray-400 text-sm">No conversations yet.</div>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <div className="flex-1">
-                                        {selectedSession ? (
-                                            <FacultyChat
-                                                sessionId={selectedSession.id}
-                                                currentUser={{ id: instituteId, name: instituteData?.name }}
-                                                recipientName={selectedSession.tutorId === instituteId ? selectedSession.student?.name : selectedSession.tutor?.name}
-                                            />
-                                        ) : (
-                                            <div className="h-full flex flex-col items-center justify-center text-gray-400">
-                                                <MessageCircle size={48} className="mb-3 opacity-30" />
-                                                <p className="font-medium">Select a conversation</p>
-                                                <p className="text-sm mt-1">Choose a chat from the left to start messaging.</p>
+                                                <div className="min-w-0">
+                                                    <h3 className="font-semibold text-gray-900 truncate">{tutor.tutor?.name}</h3>
+                                                    <p className="text-xs text-amber-600 font-medium">Verified Tutor</p>
+                                                </div>
                                             </div>
-                                        )}
-                                    </div>
+                                            <div className="flex flex-wrap gap-1.5">
+                                                {tutor.subjects?.slice(0, 3).map(s => (
+                                                    <span key={s} className="px-2 py-1 bg-gray-100 rounded-md text-xs text-gray-600">{s}</span>
+                                                ))}
+                                            </div>
+                                            <button
+                                                className="w-full py-2.5 bg-gray-900 text-white text-sm font-semibold rounded-xl hover:bg-gray-800 transition-colors"
+                                                onClick={() => router.push(`/search/${tutor.id}`)}
+                                            >
+                                                View Profile
+                                            </button>
+                                        </div>
+                                    )) : (
+                                        <div className="col-span-3 text-center py-16 text-gray-400 text-sm">No tutors found.</div>
+                                    )}
                                 </div>
                             </div>
                         )}
 
                         {activeTab === "courses" && (
-                            <div className="space-y-6">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <h1 className="text-2xl font-bold text-gray-900">Courses</h1>
-                                        <p className="text-gray-500 text-sm mt-1">Manage your course offerings.</p>
-                                    </div>
-                                    <button
-                                        onClick={() => setShowCourseForm(true)}
-                                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
-                                    >
-                                        <PlusCircle size={16} /> Add Course
-                                    </button>
+                            <div>
+                                <div className="mb-6">
+                                    <h1 className="text-2xl font-bold text-gray-900">Courses & Batches</h1>
+                                    <p className="text-gray-500 text-sm mt-1">Manage your courses and student batches.</p>
                                 </div>
-                                {courses.length > 0 ? (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {courses.map((course) => (
-                                            <div key={course.id} className="bg-white rounded-xl border border-gray-200 p-6">
-                                                <div className="flex justify-between items-start mb-3">
-                                                    <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">{course.category}</span>
-                                                    <span className="text-xl font-bold text-gray-900">₹{course.price}</span>
-                                                </div>
-                                                <h3 className="font-semibold text-gray-900 mb-4">{course.title}</h3>
-                                                <div className="grid grid-cols-2 gap-4 pt-3 border-t border-gray-100 text-sm">
-                                                    <div>
-                                                        <p className="text-gray-400 text-xs">Seats</p>
-                                                        <p className="font-semibold text-gray-900">{course.enrolledCount} / {course.maxSeats}</p>
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-gray-400 text-xs">Status</p>
-                                                        <p className={`font-semibold ${course.isActive ? 'text-emerald-600' : 'text-gray-400'}`}>
-                                                            {course.isActive ? 'Active' : 'Inactive'}
-                                                        </p>
-                                                    </div>
-                                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {courses.length > 0 ? courses.map((course) => (
+                                        <div key={course.id} className="bg-white border border-gray-200 rounded-2xl p-6 flex flex-col gap-4">
+                                            <div className="flex items-start justify-between">
+                                                <span className="px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-xs font-medium">{course.category}</span>
+                                                <span className="text-lg font-bold text-gray-900">₹{course.price}</span>
                                             </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <div className="text-center py-20 text-gray-400">
-                                        <BookOpen size={40} className="mx-auto mb-3 opacity-30" />
-                                        <p className="font-medium">No courses added yet.</p>
-                                        <p className="text-sm mt-1">Add your first course to start enrolling students.</p>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-
-                        {activeTab === "ads" && (
-                            <div className="space-y-6">
-                                <div>
-                                    <h1 className="text-2xl font-bold text-gray-900">Ads</h1>
-                                    <p className="text-gray-500 text-sm mt-1">Promote your institute to students.</p>
-                                </div>
-                                <div className="bg-white rounded-xl border border-gray-200 p-12 text-center text-gray-400">
-                                    <Megaphone size={40} className="mx-auto mb-3 opacity-30" />
-                                    <p className="font-medium">Ads feature coming soon.</p>
-                                    <p className="text-sm mt-1">You'll be able to run targeted campaigns for students in your area.</p>
+                                            <h3 className="text-base font-semibold text-gray-900">{course.title}</h3>
+                                            <div className="flex gap-6 pt-2 border-t border-gray-100 text-sm text-gray-500">
+                                                <span>{course.enrolledCount} / {course.maxSeats} seats</span>
+                                                <span className={course.isActive ? 'text-green-600' : 'text-gray-400'}>{course.isActive ? 'Active' : 'Inactive'}</span>
+                                            </div>
+                                        </div>
+                                    )) : (
+                                        <div className="col-span-2 flex flex-col items-center justify-center py-16 bg-white rounded-2xl border border-dashed border-gray-200 text-center">
+                                            <Box size={32} className="text-gray-300 mb-3" />
+                                            <p className="text-sm text-gray-400">No courses created yet.</p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         )}
-
                     </div>
                 </main>
             </div>
@@ -453,10 +391,7 @@ export default function InstituteDashboard() {
     return (
         <Suspense fallback={
             <div className="flex items-center justify-center min-h-screen bg-gray-50">
-                <div className="flex flex-col items-center gap-3 text-gray-400">
-                    <Loader2 size={32} className="animate-spin text-blue-600" />
-                    <p className="text-sm">Loading dashboard...</p>
-                </div>
+                <Loader2 className="animate-spin text-blue-600" size={32} />
             </div>
         }>
             <InstituteDashboardContent />

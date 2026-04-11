@@ -21,7 +21,7 @@ export default function MatchBadge({ score, label, showDetails = false, factors 
     const offset = circumference - (animatedScore / 100) * circumference;
 
     return (
-        <div className={`inline-flex flex-col items-center gap-4 p-6 rounded-[2.5rem] bg-surface-dark border ${getColorClass()} backdrop-blur-3xl shadow-2xl transition-all group relative overflow-hidden`}>
+        <div className={`inline-flex flex-col items-center gap-4 p-6 rounded-[2.5rem] bg-white border ${getColorClass()} shadow-md transition-all group relative overflow-hidden`}>
             {/* Background Glow */}
             <div className={`absolute inset-0 opacity-[0.03] pointer-events-none transition-opacity duration-1000 ${score >= 85 ? 'bg-emerald-500' : 'bg-blue-500'}`}></div>
 
@@ -51,19 +51,19 @@ export default function MatchBadge({ score, label, showDetails = false, factors 
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
                     <span className="text-3xl font-black italic tracking-tighter leading-none">{animatedScore}%</span>
-                    <span className="text-[7px] font-black uppercase tracking-widest opacity-40 leading-none mt-1">AFFINITY</span>
+                    <span className="text-xs font-black uppercase tracking-widest opacity-40 leading-none mt-1">AFFINITY</span>
                 </div>
             </div>
 
             <div className="text-center">
                 <div className="flex items-center justify-center gap-1.5 mb-1">
                     {score >= 85 ? <Zap size={10} className="fill-current" /> : <Target size={10} />}
-                    <span className="text-[9px] font-black uppercase tracking-[0.2em] italic leading-none">{label?.replace('_', ' ')}</span>
+                    <span className="text-xs font-black uppercase tracking-[0.2em] italic leading-none">{label?.replace('_', ' ')}</span>
                 </div>
                 {showDetails && (
                     <div className="mt-4 flex flex-wrap justify-center gap-2 max-w-[200px]">
                         {factors.map((f, i) => (
-                            <span key={i} className="px-2 py-0.5 bg-white/5 rounded-md text-[7px] font-black uppercase tracking-widest text-white/40 italic">
+                            <span key={i} className="px-2 py-0.5 bg-white/5 rounded-md text-xs font-black uppercase tracking-widest text-white/40 italic">
                                 {f.label}
                             </span>
                         ))}

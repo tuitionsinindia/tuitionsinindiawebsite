@@ -34,7 +34,7 @@ function SubscriptionContent() {
         <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950 font-sans">
             <main className="flex-1 overflow-y-auto p-6 md:p-10">
                 <div className="max-w-4xl mx-auto">
-                    <Link href={`/dashboard/student?studentId=${studentId}`} className="flex items-center gap-2 text-primary font-bold mb-8 hover:underline">
+                    <Link href={`/dashboard/student?studentId=${studentId}`} className="flex items-center gap-2 text-blue-600 font-bold mb-8 hover:underline">
                         <span className="material-symbols-outlined text-sm">arrow_back</span> Back to Dashboard
                     </Link>
 
@@ -72,7 +72,7 @@ function SubscriptionContent() {
                                                     <p className="text-xs font-bold text-slate-400">{new Date(tx.createdAt).toLocaleDateString()}</p>
                                                     <p className="text-sm font-semibold">{tx.description?.split('(')[0] || 'Credit Top-up'}</p>
                                                 </div>
-                                                <p className="font-bold text-primary">₹{tx.amount}</p>
+                                                <p className="font-bold text-blue-600">₹{tx.amount}</p>
                                             </div>
                                         ))}
                                     </div>

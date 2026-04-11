@@ -36,7 +36,7 @@ function StudentsContent() {
         <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950 font-sans">
             <main className="flex-1 overflow-y-auto p-10">
                 <div className="max-w-4xl mx-auto">
-                    <Link href={`/dashboard/tutor?tutorId=${tutorId}`} className="flex items-center gap-2 text-primary font-bold mb-8 hover:underline">
+                    <Link href={`/dashboard/tutor?tutorId=${tutorId}`} className="flex items-center gap-2 text-blue-600 font-bold mb-8 hover:underline">
                         <span className="material-symbols-outlined text-sm">arrow_back</span> Back to Dashboard
                     </Link>
 
@@ -47,7 +47,7 @@ function StudentsContent() {
                     ) : (
                         <div>
                             <div className="flex items-center gap-6 mb-10">
-                                <div className="size-16 bg-primary/10 rounded-2xl flex items-center justify-center text-primary shrink-0">
+                                <div className="size-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 shrink-0">
                                     <span className="material-symbols-outlined text-3xl">groups</span>
                                 </div>
                                 <div>
@@ -70,7 +70,7 @@ function StudentsContent() {
                                                 </div>
                                                 <div>
                                                     <h3 className="font-bold text-lg">{student.name || 'Anonymous Student'}</h3>
-                                                    <p className="text-xs font-bold text-primary uppercase tracking-widest">{student.subject}</p>
+                                                    <p className="text-xs font-bold text-blue-600 uppercase tracking-widest">{student.subject}</p>
                                                 </div>
                                             </div>
 
@@ -85,7 +85,7 @@ function StudentsContent() {
 
                                             <div className="flex gap-2">
                                                 <a href={`tel:${student.phone}`} className="flex-1 py-2.5 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl text-center text-xs font-bold hover:bg-slate-100 transition-colors">Call Now</a>
-                                                <Link href={`/dashboard/tutor/students?tutorId=${tutorId}&activeChat=${student.id}`} className="flex-1 py-2.5 bg-primary text-white rounded-xl text-center text-xs font-bold hover:bg-primary-glow transition-all shadow-lg shadow-primary/10">Message</Link>
+                                                <Link href={`/dashboard/tutor/students?tutorId=${tutorId}&activeChat=${student.id}`} className="flex-1 py-2.5 bg-blue-600 text-white rounded-xl text-center text-xs font-bold hover:bg-blue-700 transition-all">Message</Link>
                                             </div>
                                         </div>
                                     ))}
@@ -97,7 +97,7 @@ function StudentsContent() {
                                     </div>
                                     <h2 className="text-xl font-bold mb-2">No students yet</h2>
                                     <p className="text-slate-500 mb-8 max-w-xs mx-auto">Explore available leads in your dashboard and use credits to start teaching.</p>
-                                    <Link href={`/dashboard/tutor?tutorId=${tutorId}`} className="px-8 py-3 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/10">Browse Leads</Link>
+                                    <Link href={`/dashboard/tutor?tutorId=${tutorId}`} className="px-8 py-3 bg-blue-600 text-white font-bold rounded-xl">Browse Leads</Link>
                                 </div>
                             )}
                         </div>
