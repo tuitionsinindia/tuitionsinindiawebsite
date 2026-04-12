@@ -17,7 +17,7 @@ export default function InstituteHowItWorks() {
         {
             step: "01",
             title: "Register Your Institute",
-            desc: "Onboard your coaching centre or academy. Deploy a master profile highlighting your faculty strength, infrastructure, and subjects.",
+            desc: "Create a profile for your coaching centre or academy, highlighting your courses, faculty, and locations.",
             icon: Building2,
             color: "text-blue-600",
             bg: "bg-blue-50/50"
@@ -32,16 +32,16 @@ export default function InstituteHowItWorks() {
         },
         {
             step: "03",
-            title: "Market Capture",
-            desc: "Appear at the top of local search hierarchies. Our engine prioritizes verified institutions for student distribution.",
+            title: "Get Discovered",
+            desc: "Appear at the top of local search results. Verified institutes are prioritised and shown to more students in your area.",
             icon: Globe,
             color: "text-indigo-600",
             bg: "bg-indigo-50/50"
         },
         {
             step: "04",
-            title: "Efficiency Analytics",
-            desc: "Monitor enquiry pipelines and profile performance. Scale your student intake with data-driven pedagogical insights.",
+            title: "Track & Grow",
+            desc: "Monitor enquiries and profile performance. Use your dashboard analytics to grow student intake over time.",
             icon: BarChart3,
             color: "text-blue-600",
             bg: "bg-blue-50/50"
@@ -64,21 +64,21 @@ export default function InstituteHowItWorks() {
                 <div className="max-w-4xl mx-auto">
                     <div className="inline-flex items-center gap-3 px-4 py-2 bg-blue-50 rounded-full border border-blue-100 mb-8">
                         <Users size={14} className="text-blue-600" />
-                        <span className="text-blue-700 text-xs font-black uppercase tracking-[0.3em]">Institutional Scaling Protocol</span>
+                        <span className="text-blue-700 text-xs font-black uppercase tracking-[0.3em]">For Institutes</span>
                     </div>
-                    
+
                     <h1 className="text-5xl md:text-8xl font-black tracking-tighter mb-10 leading-[0.9] uppercase italic text-gray-900">
-                        Maximize <br />
-                        <span className="text-blue-600 font-serif lowercase tracking-normal not-italic px-4">enrolment</span> infrastructure.
+                        Grow your <br />
+                        <span className="text-blue-600 font-serif lowercase tracking-normal not-italic px-4">institute's</span> reach.
                     </h1>
-                    
+
                     <p className="text-lg md:text-xl text-gray-500 font-medium max-w-2xl mx-auto mb-12 leading-relaxed italic">
-                        Deploy your academy's presence on India's most trusted academic directory. Fill your classrooms with precision-matched students.
+                        List your coaching centre or academy on India's fastest-growing tuition directory and fill your classrooms.
                     </p>
-                    
+
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <Link href="/register/institute" className="px-10 py-5 bg-blue-600 text-white rounded-2xl font-black shadow-2xl shadow-blue-600/30 hover:bg-black active:scale-95 transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-xs">
-                            Initialize Institute <ArrowRight size={20} />
+                            Register Your Institute <ArrowRight size={20} />
                         </Link>
                     </div>
                 </div>
@@ -128,17 +128,17 @@ export default function InstituteHowItWorks() {
                     </div>
                     
                     <h2 className="text-4xl md:text-7xl font-black tracking-tighter uppercase italic mb-10 leading-none">
-                        Global <span className="text-blue-500 font-serif lowercase tracking-normal not-italic px-4">reach</span> Local Presence.
+                        Local presence, <span className="text-blue-500 font-serif lowercase tracking-normal not-italic px-4">wider</span> reach.
                     </h2>
-                    
+
                     <p className="text-xl text-gray-400 font-medium mb-12 italic max-w-2xl mx-auto">
-                        We connect your physical branches with digital intent. Be the first choice for parents in your geographic and academic domain.
+                        Connect your branches with students searching nearby. Be the first choice for parents in your city.
                     </p>
-                    
+
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-8 text-left border-t border-white/10 pt-12">
                         {[
-                            { label: "Market Dominance", val: "#1", sub: "Category Lead" },
-                            { label: "Branch Support", val: "Unlimited", sub: "Scalable Hubs" },
+                            { label: "Category Rank", val: "#1", sub: "Top Institutes" },
+                            { label: "Branch Support", val: "Unlimited", sub: "Multi-location" },
                             { label: "Discovery Rate", val: "High", sub: "Verified Boost" }
                         ].map((stat, i) => (
                             <div key={i} className="space-y-1">
@@ -155,7 +155,7 @@ export default function InstituteHowItWorks() {
             <section className="snap-section px-6 bg-gray-50">
                 <div className="max-w-4xl mx-auto">
                     <div className="text-center mb-16">
-                        <h2 className="text-4xl font-black tracking-tighter uppercase italic text-gray-900">Institutional <span className="text-blue-600">FAQ</span></h2>
+                        <h2 className="text-4xl font-black tracking-tighter uppercase italic text-gray-900">Frequently Asked <span className="text-blue-600">Questions</span></h2>
                     </div>
                     
                     <div className="grid gap-6">
@@ -170,9 +170,6 @@ export default function InstituteHowItWorks() {
                             </div>
                         ))}
                     </div>
-                </div>
-                <div className="mt-20 text-center flex items-center justify-center gap-2 text-xs font-black text-gray-300 uppercase tracking-[0.5em]">
-                    <Lock size={12} strokeWidth={3} /> Standard Security Protocols Active
                 </div>
             </section>
         </div>

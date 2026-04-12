@@ -21,7 +21,7 @@ export default function MatchBadge({ score, label, showDetails = false, factors 
     const offset = circumference - (animatedScore / 100) * circumference;
 
     return (
-        <div className={`inline-flex flex-col items-center gap-4 p-6 rounded-[2.5rem] bg-surface-dark border ${getColorClass()} backdrop-blur-3xl shadow-2xl transition-all group relative overflow-hidden`}>
+        <div className={`inline-flex flex-col items-center gap-4 p-6 rounded-[2.5rem] bg-white border ${getColorClass()} shadow-md transition-all group relative overflow-hidden`}>
             {/* Background Glow */}
             <div className={`absolute inset-0 opacity-[0.03] pointer-events-none transition-opacity duration-1000 ${score >= 85 ? 'bg-emerald-500' : 'bg-blue-500'}`}></div>
 

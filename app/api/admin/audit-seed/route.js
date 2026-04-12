@@ -5,13 +5,11 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const phase = searchParams.get('phase') || '1';
     
-    // SECURITY: Simple key check (you can change this to a proper env var)
     const key = searchParams.get('key');
-    if (key !== 'academy_audit_2026') {
-        return NextResponse.json({ error: "UNAUTHORIZED_PROTOCOL" }, { status: 401 });
+    const expectedKey = process.env.AUDIT_SEED_KEY;
+    if (!expectedKey || key !== expectedKey) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
-    console.log(`🚀 PRODUCTION AUDIT API: PHASE ${phase} STARTING...`);
 
     try {
         if (phase === '1') {

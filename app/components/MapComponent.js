@@ -92,7 +92,7 @@ export default function MapComponent({ tutors = [] }) {
                 {tutors.length === 0 && (
                     <div className="absolute inset-0 flex items-center justify-center text-center p-20">
                         <div className="space-y-8 max-w-sm">
-                            <div className="size-32 bg-white/5 rounded-[3rem] border border-border-dark flex items-center justify-center mx-auto text-indigo-500/20 animate-pulse">
+                            <div className="size-32 bg-gray-50 rounded-[3rem] border border-gray-200 flex items-center justify-center mx-auto text-gray-200 animate-pulse">
                                 <Radar size={64} strokeWidth={1} />
                             </div>
                             <div>

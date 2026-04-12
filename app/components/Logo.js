@@ -9,10 +9,12 @@ export default function Logo({ light = false, className = "", iconOnly = false }
     return (
         <Link href="/" className={`flex items-center gap-2 group transition-opacity hover:opacity-90 ${className}`}>
             <div className="relative size-8 md:size-10 overflow-hidden rounded-lg bg-white shadow-sm border border-gray-100 flex items-center justify-center p-0.5 group-hover:shadow-md transition-all">
-                <img 
-                    src={mainLogo} 
-                    alt="TuitionsInIndia Logo" 
-                    className="w-full h-full object-contain"
+                <Image
+                    src={mainLogo}
+                    alt="TuitionsInIndia Logo"
+                    fill
+                    className="object-contain"
+                    sizes="40px"
                 />
             </div>
             {!iconOnly && (

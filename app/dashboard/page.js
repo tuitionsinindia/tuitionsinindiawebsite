@@ -11,10 +11,10 @@ export default function DashboardPortal() {
             <div className="max-w-4xl w-full z-10 text-center">
                 <div className="mb-12">
                     <span className="bg-blue-600 text-white text-xs font-black px-5 py-2 rounded-full uppercase tracking-[0.4em] inline-block shadow-lg mb-8">
-                        Access Neural Grid
+                        Your Dashboard
                     </span>
-                    <h1 className="mb-6">Portal <span className="text-blue-600">Entry</span></h1>
-                    <p className="text-gray-500 font-medium text-base max-w-sm mx-auto italic uppercase tracking-widest opacity-60">Select your operational identity to synchronize with discovery streams.</p>
+                    <h1 className="mb-6">Welcome <span className="text-blue-600">Back</span></h1>
+                    <p className="text-gray-500 font-medium text-base max-w-sm mx-auto italic uppercase tracking-widest opacity-60">Choose how you are using TuitionsInIndia.</p>
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-6 max-w-2xl mx-auto">
@@ -23,13 +23,13 @@ export default function DashboardPortal() {
                         <div className="size-16 rounded-2xl bg-blue-50 flex items-center justify-center mx-auto mb-6 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all">
                             <User size={32} strokeWidth={1.5} />
                         </div>
-                        <h2 className="text-2xl mb-4 italic">Student <span className="text-blue-600">Node</span></h2>
+                        <h2 className="text-2xl mb-4 italic">Student <span className="text-blue-600">Dashboard</span></h2>
                         <ul className="text-left text-gray-400 space-y-3 mb-10 mx-auto text-xs font-black uppercase tracking-widest leading-relaxed">
-                            <li className="flex gap-3 items-center"><ShieldCheck size={14} className="text-blue-600" /> Unlock Verified Nodes</li>
-                            <li className="flex gap-3 items-center"><ShieldCheck size={14} className="text-blue-600" /> Manage Discoveries</li>
+                            <li className="flex gap-3 items-center"><ShieldCheck size={14} className="text-blue-600" /> Find Verified Tutors</li>
+                            <li className="flex gap-3 items-center"><ShieldCheck size={14} className="text-blue-600" /> Manage Your Searches</li>
                         </ul>
                         <div className="mt-auto py-5 bg-gray-50 rounded-2xl text-blue-600 font-black text-xs uppercase tracking-widest group-hover:bg-blue-600 group-hover:text-white transition-all shadow-sm">
-                            Enter Grid
+                            Go to Dashboard
                         </div>
                     </Link>
 
@@ -38,19 +38,19 @@ export default function DashboardPortal() {
                         <div className="size-16 rounded-2xl bg-blue-50 flex items-center justify-center mx-auto mb-6 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all">
                             <GraduationCap size={32} strokeWidth={1.5} />
                         </div>
-                        <h2 className="text-2xl mb-4 italic">Faculty <span className="text-blue-600">Hub</span></h2>
+                        <h2 className="text-2xl mb-4 italic">Tutor <span className="text-blue-600">Dashboard</span></h2>
                         <ul className="text-left text-gray-400 space-y-3 mb-10 mx-auto text-xs font-black uppercase tracking-widest leading-relaxed">
-                            <li className="flex gap-3 items-center"><ShieldCheck size={14} className="text-blue-600" /> Sync Match Inquiries</li>
-                            <li className="flex gap-3 items-center"><ShieldCheck size={14} className="text-blue-600" /> Optimize Analytics</li>
+                            <li className="flex gap-3 items-center"><ShieldCheck size={14} className="text-blue-600" /> View Student Enquiries</li>
+                            <li className="flex gap-3 items-center"><ShieldCheck size={14} className="text-blue-600" /> Track Your Performance</li>
                         </ul>
                         <div className="mt-auto py-5 bg-gray-50 rounded-2xl text-blue-600 font-black text-xs uppercase tracking-widest group-hover:bg-blue-600 group-hover:text-white transition-all shadow-sm">
-                            Initialize Link
+                            Go to Dashboard
                         </div>
                     </Link>
                 </div>
 
                 <div className="mt-12 flex items-center justify-center gap-2 text-xs font-black text-gray-300 uppercase tracking-[0.5em] italic">
-                    Establish New Identity? <Link href="/register" className="text-blue-600 hover:underline">Sync Registration Trace</Link>
+                    New here? <Link href="/register" className="text-blue-600 hover:underline">Create an account</Link>
                 </div>
             </div>
         </div>

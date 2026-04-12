@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { ShieldCheck, Facebook, Twitter, Linkedin, Instagram, ArrowRight } from "lucide-react";
 
 export default function Footer() {
@@ -13,10 +14,10 @@ export default function Footer() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 lg:gap-24 mb-20 pb-20 border-b border-gray-100">
                     <div className="space-y-8 col-span-1 md:col-span-2 lg:col-span-1">
                         <Link href="/" className="flex items-center gap-3">
-                             <img src="/logo.png" alt="TuitionsInIndia Logo" className="h-10 w-auto" />
+                            <Image src="/logo.png" alt="TuitionsInIndia Logo" width={120} height={40} className="h-10 w-auto" />
                         </Link>
                         <p className="text-gray-400 text-sm font-medium leading-relaxed italic max-w-sm">
-                            India's premier academic matchmaking engine, architecting connections between verified faculty and elite learning legacies through neural-match precision.
+                            India's trusted platform for finding verified tutors and coaching centres. Connect directly — no middlemen, no commission.
                         </p>
                         <div className="flex items-center gap-6">
                             {[Facebook, Twitter, Linkedin, Instagram].map((Icon, i) => (

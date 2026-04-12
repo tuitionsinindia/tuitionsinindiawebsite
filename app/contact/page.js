@@ -2,172 +2,217 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { 
-    Mail, 
-    MessageSquare, 
-    MapPin, 
-    Phone, 
-    ShieldCheck, 
-    Send, 
-    CheckCircle2, 
-    ArrowRight,
-    Search,
-    Zap,
+import {
+    Mail,
+    MessageSquare,
+    Phone,
+    ShieldCheck,
+    Send,
+    CheckCircle2,
     Building2,
-    Users
+    Loader2
 } from "lucide-react";
 
 export default function ContactPage() {
-    const [formState, setFormState] = useState("IDLE"); // IDLE, SUBMITTING, SUCCESS
+    const [formState, setFormState] = useState("IDLE"); // IDLE, SUBMITTING, SUCCESS, ERROR
+    const [errorMsg, setErrorMsg] = useState("");
+    const [form, setForm] = useState({ name: "", email: "", phone: "", subject: "General Enquiry", message: "" });
+
+    const handleChange = (e) => setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setFormState("SUBMITTING");
-        // Simulate high-fidelity API sequence
-        setTimeout(() => setFormState("SUCCESS"), 1500);
+        setErrorMsg("");
+        try {
+            const res = await fetch("/api/contact", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(form)
+            });
+            const data = await res.json();
+            if (data.success) {
+                setFormState("SUCCESS");
+            } else {
+                setErrorMsg(data.error || "Something went wrong. Please try again.");
+                setFormState("ERROR");
+            }
+        } catch (err) {
+            setErrorMsg("Network error. Please check your connection and try again.");
+            setFormState("ERROR");
+        }
     };
 
     return (
-        <div className="min-h-screen bg-background-dark font-sans text-on-background-dark antialiased pt-40 pb-32 selection:bg-primary/30">
-            {/* Redundant Header/Footer removed (in RootLayout) */}
-
-            <main className="px-6 max-w-7xl mx-auto space-y-32">
-                
-                {/* Hero Protocol */}
-                <section className="text-center relative overflow-hidden max-w-4xl mx-auto">
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-primary/5 blur-[120px] rounded-full -z-10"></div>
-                    
-                    <div className="inline-flex items-center gap-3 px-4 py-2 bg-primary/10 rounded-full border border-primary/20 mb-8">
-                        <MessageSquare size={14} className="text-primary" />
-                        <span className="text-primary text-xs font-black uppercase tracking-[0.3em]">Academic Support Hub</span>
+        <div className="min-h-screen bg-white">
+            {/* Hero */}
+            <section className="bg-gray-50 border-b border-gray-100 py-16 px-6">
+                <div className="max-w-3xl mx-auto text-center">
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50 rounded-full border border-blue-100 mb-6">
+                        <MessageSquare size={13} className="text-blue-600" />
+                        <span className="text-blue-700 text-xs font-medium">Get in Touch</span>
                     </div>
-
-                    <h1 className="text-6xl md:text-8xl font-black italic tracking-tighter leading-[0.9] text-white uppercase mb-12">
-                        Consult with the <br />
-                        <span className="text-primary font-serif lowercase tracking-normal not-italic px-4">strategy</span> team.
-                    </h1>
-
-                    <p className="text-xl md:text-2xl text-on-background-dark/40 font-medium leading-relaxed italic max-w-2xl mx-auto">
-                        Whether you are an ambitious student seeking the perfect mentor or an elite educator looking to scale your practice, our team is here to architect your success.
+                    <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 tracking-tight">How can we help?</h1>
+                    <p className="text-gray-500 text-lg max-w-xl mx-auto">
+                        Have a question or need support? Fill out the form and our team will get back to you within 24 hours.
                     </p>
-                </section>
+                </div>
+            </section>
 
-                <div className="grid lg:grid-cols-2 gap-24 items-start">
-                    
-                    {/* Inquiry Matrix */}
-                    <section className="bg-surface-dark p-12 md:p-20 rounded-[4rem] border border-border-dark shadow-4xl relative overflow-hidden group">
-                        <div className="absolute inset-0 bg-primary/5 blur-3xl opacity-50 -z-10 group-hover:scale-110 transition-transform duration-1000"></div>
-                        
-                        {formState === "SUCCESS" ? (
-                            <div className="relative z-10 text-center py-24 animate-in fade-in zoom-in duration-500">
-                                <div className="size-24 rounded-[2rem] bg-primary/10 text-primary flex items-center justify-center mx-auto mb-10 shadow-2xl shadow-primary/20">
-                                    <CheckCircle2 size={48} />
+            <div className="max-w-6xl mx-auto px-6 py-16">
+                <div className="grid lg:grid-cols-5 gap-12 items-start">
+
+                    {/* Contact Form */}
+                    <div className="lg:col-span-3">
+                        <div className="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm">
+
+                            {formState === "SUCCESS" ? (
+                                <div className="text-center py-12">
+                                    <div className="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-5">
+                                        <CheckCircle2 size={32} className="text-emerald-500" />
+                                    </div>
+                                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Message Sent</h2>
+                                    <p className="text-gray-500 mb-8">We've received your message and will respond within 24 hours.</p>
+                                    <button
+                                        onClick={() => { setFormState("IDLE"); setForm({ name: "", email: "", phone: "", subject: "General Enquiry", message: "" }); }}
+                                        className="text-blue-600 text-sm font-medium hover:underline"
+                                    >
+                                        Send another message
+                                    </button>
                                 </div>
-                                <h2 className="text-4xl font-black text-white uppercase italic tracking-tighter mb-6">Inquiry Received</h2>
-                                <p className="text-on-surface-dark/60 font-medium italic mb-12 text-lg">Our academic strategy counsel will contact you within 24 business hours.</p>
-                                <button 
-                                    onClick={() => setFormState("IDLE")}
-                                    className="text-primary font-black uppercase text-xs tracking-[0.4em] border-b-2 border-primary/20 hover:border-primary transition-all pb-2"
-                                >
-                                    Initialize New Batch
-                                </button>
-                            </div>
-                        ) : (
-                            <form onSubmit={handleSubmit} className="relative z-10 space-y-10">
-                                <div className="space-y-4">
-                                    <label className="text-xs font-black uppercase tracking-[0.3em] text-on-surface-dark/20 ml-6 italic">Full Identity</label>
-                                    <input 
-                                        required
-                                        type="text" 
-                                        placeholder="eg. Dr. Aarav Mehta"
-                                        className="w-full bg-background-dark p-7 rounded-3xl border border-border-dark focus:border-primary transition-all font-medium italic outline-none text-white text-lg placeholder:text-on-surface-dark/10"
-                                    />
-                                </div>
-                                <div className="grid md:grid-cols-2 gap-8">
-                                    <div className="space-y-4">
-                                        <label className="text-xs font-black uppercase tracking-[0.3em] text-on-surface-dark/20 ml-6 italic">Electronic Mail</label>
-                                        <input 
+                            ) : (
+                                <form onSubmit={handleSubmit} className="space-y-5">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1.5">Full Name <span className="text-red-500">*</span></label>
+                                        <input
                                             required
-                                            type="email" 
-                                            placeholder="aarav@university.edu"
-                                            className="w-full bg-background-dark p-7 rounded-3xl border border-border-dark focus:border-primary transition-all font-medium italic outline-none text-white text-lg placeholder:text-on-surface-dark/10"
+                                            type="text"
+                                            name="name"
+                                            value={form.name}
+                                            onChange={handleChange}
+                                            placeholder="Your name"
+                                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300 transition-colors"
                                         />
                                     </div>
-                                    <div className="space-y-4">
-                                        <label className="text-xs font-black uppercase tracking-[0.3em] text-on-surface-dark/20 ml-6 italic">Protocol Objective</label>
-                                        <div className="relative">
-                                            <select className="w-full bg-background-dark p-7 rounded-3xl border border-border-dark focus:border-primary transition-all font-medium italic outline-none appearance-none text-white text-lg">
-                                                <option>Institutional Membership</option>
-                                                <option>Student Matching Services</option>
-                                                <option>Technical Infrastructure</option>
-                                                <option>Academic Partnerships</option>
-                                            </select>
-                                            <div className="absolute right-7 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-dark/20">
-                                                <Zap size={16} />
-                                            </div>
+
+                                    <div className="grid md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1.5">Email <span className="text-red-500">*</span></label>
+                                            <input
+                                                required
+                                                type="email"
+                                                name="email"
+                                                value={form.email}
+                                                onChange={handleChange}
+                                                placeholder="you@example.com"
+                                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300 transition-colors"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1.5">Phone <span className="text-gray-400 font-normal">(optional)</span></label>
+                                            <input
+                                                type="tel"
+                                                name="phone"
+                                                value={form.phone}
+                                                onChange={handleChange}
+                                                placeholder="+91 98765 43210"
+                                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300 transition-colors"
+                                            />
                                         </div>
                                     </div>
-                                </div>
-                                <div className="space-y-4">
-                                    <label className="text-xs font-black uppercase tracking-[0.3em] text-on-surface-dark/20 ml-6 italic">Requirement Context</label>
-                                    <textarea 
-                                        required
-                                        rows="5"
-                                        placeholder="Describe your academic objectives or technical legacy concerns..."
-                                        className="w-full bg-background-dark p-7 rounded-3xl border border-border-dark focus:border-primary transition-all font-medium italic outline-none resize-none text-white text-lg placeholder:text-on-surface-dark/10"
-                                    ></textarea>
-                                </div>
-                                <button 
-                                    disabled={formState === "SUBMITTING"}
-                                    className="w-full py-7 bg-primary text-white rounded-3xl font-black uppercase text-xs tracking-[0.4em] shadow-2xl shadow-primary/40 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-4"
-                                >
-                                    {formState === "SUBMITTING" ? (
-                                        <span className="animate-pulse italic">Synchronizing Batch...</span>
-                                    ) : (
-                                        <>Dispatch Inquiry <Send size={16} strokeWidth={3} /></>
-                                    )}
-                                </button>
-                            </form>
-                        )}
-                    </section>
 
-                    {/* Channel Intelligence */}
-                    <div className="space-y-16 py-12">
-                        <section className="space-y-12">
-                            <h3 className="text-4xl font-black uppercase italic tracking-tighter text-white">Direct <span className="text-primary font-serif lowercase tracking-normal not-italic px-4">channels</span>.</h3>
-                            <div className="space-y-10">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1.5">Subject</label>
+                                        <select
+                                            name="subject"
+                                            value={form.subject}
+                                            onChange={handleChange}
+                                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300 transition-colors"
+                                        >
+                                            <option>General Enquiry</option>
+                                            <option>Finding a Tutor</option>
+                                            <option>Tutor Registration</option>
+                                            <option>Institute Registration</option>
+                                            <option>Billing & Subscription</option>
+                                            <option>Technical Support</option>
+                                            <option>Partnership</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1.5">Message <span className="text-red-500">*</span></label>
+                                        <textarea
+                                            required
+                                            rows="5"
+                                            name="message"
+                                            value={form.message}
+                                            onChange={handleChange}
+                                            placeholder="Tell us how we can help..."
+                                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300 transition-colors resize-none"
+                                        />
+                                    </div>
+
+                                    {formState === "ERROR" && (
+                                        <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-xl px-4 py-3">{errorMsg}</p>
+                                    )}
+
+                                    <button
+                                        type="submit"
+                                        disabled={formState === "SUBMITTING"}
+                                        className="w-full py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-60 flex items-center justify-center gap-2 text-sm"
+                                    >
+                                        {formState === "SUBMITTING" ? (
+                                            <><Loader2 size={16} className="animate-spin" /> Sending...</>
+                                        ) : (
+                                            <><Send size={15} /> Send Message</>
+                                        )}
+                                    </button>
+                                </form>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Contact Info */}
+                    <div className="lg:col-span-2 space-y-6">
+                        <div>
+                            <h3 className="text-lg font-semibold text-gray-900 mb-4">Contact Information</h3>
+                            <div className="space-y-4">
                                 {[
-                                    { label: "Institutional HQ", value: "Cyber Hub, Level 14, Gurugram, Bharat", icon: Building2 },
-                                    { label: "Strategic Support", value: "counsel@tuitionsinindia.com", icon: Mail },
-                                    { label: "Protocol Hotline", value: "+91 (800) ACAD-ELITE", icon: Phone }
+                                    { icon: Mail, label: "Email", value: "support@tuitionsinindia.com" },
+                                    { icon: Phone, label: "Phone", value: "+91 99309 93025" }
                                 ].map((info, i) => (
-                                    <div key={i} className="flex gap-8 items-start group">
-                                        <div className="size-16 rounded-2xl bg-surface-dark border border-border-dark text-on-surface-dark/40 flex items-center justify-center shrink-0 group-hover:text-primary group-hover:border-primary/30 transition-all">
-                                            <info.icon size={28} />
+                                    <div key={i} className="flex items-start gap-3">
+                                        <div className="w-9 h-9 bg-blue-50 rounded-lg flex items-center justify-center shrink-0">
+                                            <info.icon size={15} className="text-blue-600" />
                                         </div>
-                                        <div className="pt-2">
-                                            <p className="text-xs font-black uppercase tracking-[0.3em] text-on-surface-dark/20 mb-2 italic">{info.label}</p>
-                                            <p className="text-2xl font-black italic text-white tracking-tight">{info.value}</p>
+                                        <div>
+                                            <p className="text-xs font-medium text-gray-400 mb-0.5">{info.label}</p>
+                                            <p className="text-sm text-gray-700">{info.value}</p>
                                         </div>
                                     </div>
                                 ))}
                             </div>
-                        </section>
+                        </div>
 
-                        {/* Security Protocol */}
-                        <section className="p-16 bg-surface-dark rounded-[4rem] border border-border-dark shadow-4xl relative overflow-hidden group">
-                            <div className="absolute inset-0 bg-primary/5 opacity-50 -z-10 group-hover:scale-110 transition-transform duration-700"></div>
-                            <div className="relative z-10 space-y-8">
-                                <ShieldCheck size={56} className="text-primary group-hover:scale-110 transition-transform" />
-                                <h4 className="text-2xl font-black uppercase italic text-white tracking-tight">Elite Support Protocol</h4>
-                                <p className="text-lg text-on-surface-dark/60 font-medium leading-relaxed italic opacity-80">
-                                    All inquiries are handled with absolute confidentiality and prioritized by our academic advisory board. Expect a high-fidelity response from a senior strategist within 24 hours.
-                                </p>
+                        <div className="p-5 bg-blue-50 border border-blue-100 rounded-2xl">
+                            <ShieldCheck size={20} className="text-blue-600 mb-3" />
+                            <h4 className="font-semibold text-gray-900 text-sm mb-1">We respond within 24 hours</h4>
+                            <p className="text-xs text-gray-500 leading-relaxed">
+                                All enquiries are handled by our support team. Your information is kept confidential and never shared with third parties.
+                            </p>
+                        </div>
+
+                        <div className="p-5 bg-gray-50 border border-gray-200 rounded-2xl">
+                            <h4 className="font-semibold text-gray-900 text-sm mb-3">Looking for something specific?</h4>
+                            <div className="space-y-2">
+                                <Link href="/search" className="flex items-center gap-2 text-sm text-blue-600 hover:underline">Find a tutor near you</Link>
+                                <Link href="/register/tutor" className="flex items-center gap-2 text-sm text-blue-600 hover:underline">Register as a tutor</Link>
+                                <Link href="/pricing" className="flex items-center gap-2 text-sm text-blue-600 hover:underline">View pricing plans</Link>
                             </div>
-                        </section>
+                        </div>
                     </div>
                 </div>
-            </main>
+            </div>
         </div>
     );
 }

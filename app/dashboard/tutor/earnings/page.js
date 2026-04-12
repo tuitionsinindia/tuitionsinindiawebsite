@@ -34,7 +34,7 @@ function EarningsContent() {
         <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950 font-sans">
             <main className="flex-1 overflow-y-auto p-10">
                 <div className="max-w-4xl mx-auto">
-                    <Link href={`/dashboard/tutor?tutorId=${tutorId}`} className="flex items-center gap-2 text-primary font-bold mb-8 hover:underline">
+                    <Link href={`/dashboard/tutor?tutorId=${tutorId}`} className="flex items-center gap-2 text-blue-600 font-bold mb-8 hover:underline">
                         <span className="material-symbols-outlined text-sm">arrow_back</span> Back to Dashboard
                     </Link>
 
