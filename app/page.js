@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import {
     Search, MapPin, ChevronDown, Star, ShieldCheck,
     MessageSquare, ArrowRight, CheckCircle2, Users,
@@ -321,7 +322,7 @@ export default function Home() {
                 <div className="max-w-5xl mx-auto px-4">
                     <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
                         <Link href="/">
-                            <img src="/logo_minimal.png" alt="TuitionsInIndia" className="h-9 w-auto" />
+                            <Image src="/logo_minimal.png" alt="TuitionsInIndia" width={120} height={36} className="h-9 w-auto" />
                         </Link>
                         <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2">
                             {[
