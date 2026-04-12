@@ -13,18 +13,6 @@ export default function RequirementForm({ user, prefill = {}, initialStep = 1, o
     const [subjectQuery, setSubjectQuery] = useState("");
     const [showSuggestions, setShowSuggestions] = useState(false);
 
-    const filteredSubjects = subjectQuery.length >= 1
-        ? ALL_SUBJECTS.filter(s => s.toLowerCase().includes(subjectQuery.toLowerCase()) && !form.subjects.includes(s)).slice(0, 8)
-        : [];
-
-    const addSubject = (subject) => {
-        if (!form.subjects.includes(subject)) {
-            setForm(f => ({ ...f, subjects: [...f.subjects, subject] }));
-        }
-        setSubjectQuery("");
-        setShowSuggestions(false);
-    };
-
     const [form, setForm] = useState({
         subjects: prefill.subject ? [prefill.subject] : [],
         grades: prefill.grade ? [prefill.grade] : [],
@@ -41,6 +29,18 @@ export default function RequirementForm({ user, prefill = {}, initialStep = 1, o
     const GRADES = ["Class 1-5", "Class 6-8", "Class 9-10", "Class 11-12", "Graduate", "Competitive Exams"];
     const BOARDS = ["CBSE", "ICSE", "IB", "State Board", "IGCSE"];
     const TIMING_SLOTS = ["Morning (7-12)", "Afternoon (12-4)", "Evening (4-8)", "Weekends"];
+
+    const filteredSubjects = subjectQuery.length >= 1
+        ? ALL_SUBJECTS.filter(s => s.toLowerCase().includes(subjectQuery.toLowerCase()) && !form.subjects.includes(s)).slice(0, 8)
+        : [];
+
+    const addSubject = (subject) => {
+        if (!form.subjects.includes(subject)) {
+            setForm(f => ({ ...f, subjects: [...f.subjects, subject] }));
+        }
+        setSubjectQuery("");
+        setShowSuggestions(false);
+    };
 
     const toggleItem = (field, item) => {
         setForm(f => ({
