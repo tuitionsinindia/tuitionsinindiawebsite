@@ -178,7 +178,7 @@ export default function ContactPage() {
                             <h3 className="text-lg font-semibold text-gray-900 mb-4">Contact Information</h3>
                             <div className="space-y-4">
                                 {[
-                                    { icon: Building2, label: "Office", value: "Cyber Hub, Level 14, Gurugram, Haryana" },
+                                    { icon: Building2, label: "Office", value: "Gurugram, Haryana" },
                                     { icon: Mail, label: "Email", value: "support@tuitionsinindia.com" },
                                     { icon: Phone, label: "Phone", value: "+91 98765 43210" }
                                 ].map((info, i) => (
