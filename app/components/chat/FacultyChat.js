@@ -107,8 +107,8 @@ export default function FacultyChat({ sessionId, currentUser, recipientName }) {
                     <div className="absolute inset-0 bg-indigo-500/20 blur-2xl animate-pulse rounded-full"></div>
                 </div>
                 <div className="text-center space-y-2">
-                    <p className="text-[11px] font-black uppercase tracking-[0.5em] text-white italic">Establishing Secure Line</p>
-                    <p className="text-[8px] font-black uppercase tracking-[0.3em] text-white/20">Syncing Neural Nodes...</p>
+                    <p className="text-[11px] font-black uppercase tracking-[0.5em] text-white italic">Connecting...</p>
+                    <p className="text-[8px] font-black uppercase tracking-[0.3em] text-white/20">Loading messages...</p>
                 </div>
             </div>
         );

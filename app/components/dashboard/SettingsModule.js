@@ -72,7 +72,7 @@ export default function SettingsModule({ userData, onUpdate }) {
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-[9px] font-black uppercase tracking-widest text-white/20 px-4">Neural Signal (Email)</label>
+                            <label className="text-[9px] font-black uppercase tracking-widest text-white/20 px-4">Email Address</label>
                             <div className="relative">
                                 <Mail className="absolute left-6 top-1/2 -translate-y-1/2 text-white/20" size={16} />
                                 <input 
@@ -85,7 +85,7 @@ export default function SettingsModule({ userData, onUpdate }) {
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-[9px] font-black uppercase tracking-widest text-white/20 px-4">Contact Logic (Phone)</label>
+                            <label className="text-[9px] font-black uppercase tracking-widest text-white/20 px-4">Phone Number</label>
                             <div className="relative">
                                 <Phone className="absolute left-6 top-1/2 -translate-y-1/2 text-white/20" size={16} />
                                 <input 
@@ -105,7 +105,7 @@ export default function SettingsModule({ userData, onUpdate }) {
                         <div className="size-10 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center">
                             <ShieldCheck size={20} strokeWidth={3} />
                         </div>
-                        <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40 italic">Privacy Protocols</h3>
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40 italic">Privacy Settings</h3>
                     </div>
 
                     <div className="space-y-6">
