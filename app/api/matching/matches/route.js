@@ -21,13 +21,17 @@ export async function GET(request) {
                 select: { subjects: true, locations: true }
             });
 
+            // Normalize to uppercase for case-insensitive matching (Listings store uppercase)
             const uniqueSubjects = [...new Set(studentLeads.flatMap(l => l.subjects))];
             const uniqueLocations = [...new Set(studentLeads.flatMap(l => l.locations))];
+            const subjectsUpper = uniqueSubjects.map(s => s.toUpperCase());
+            const subjectsLower = uniqueSubjects.map(s => s.toLowerCase());
+            const subjectsBoth = [...new Set([...uniqueSubjects, ...subjectsUpper, ...subjectsLower])];
 
-            // 2. Find listings (Tutors/Institutes) that match these subjects
+            // 2. Find listings that match these subjects (try all case variants)
             const listings = await prisma.listing.findMany({
                 where: {
-                    subjects: { hasSome: uniqueSubjects },
+                    subjects: { hasSome: subjectsBoth },
                     isActive: true
                 },
                 include: {

@@ -12,109 +12,79 @@ export async function POST(request) {
             return NextResponse.json({ error: "Missing Lead ID or Tutor ID" }, { status: 400 });
         }
 
-        // 1. Check if already unlocked
+        // 1. Pre-transaction validation (outside $transaction to safely return responses)
         const existingUnlock = await prisma.leadUnlock.findUnique({
-            where: {
-                leadId_tutorId: { leadId, tutorId }
-            }
+            where: { leadId_tutorId: { leadId, tutorId } },
         });
-
         if (existingUnlock) {
             return NextResponse.json({ error: "Lead already unlocked" }, { status: 400 });
         }
 
-        // 2. Start a transaction to deduct credits and create unlock
-        return await prisma.$transaction(async (tx) => {
-            const tutor = await tx.user.findUnique({
-                where: { id: tutorId },
-                select: { credits: true, subscriptionTier: true }
-            });
+        const tutor = await prisma.user.findUnique({
+            where: { id: tutorId },
+            select: { credits: true },
+        });
 
-            // PRO/ELITE tutors see contacts for free — block unlock attempt (they shouldn't need it)
-            if (tutor && ['PRO', 'ELITE'].includes(tutor.subscriptionTier)) {
-                return NextResponse.json({ error: "Premium tutors access contacts directly from the lead list." }, { status: 400 });
-            }
+        const lead = await prisma.lead.findUnique({
+            where: { id: leadId },
+            select: { unlockCount: true, maxUnlocks: true, status: true, premiumTier: true, studentId: true, subjects: true },
+        });
 
-            // Enforce free tier monthly unlock limit (5 per month)
-            const startOfMonth = new Date();
-            startOfMonth.setDate(1);
-            startOfMonth.setHours(0, 0, 0, 0);
+        if (!lead || ["CLOSED", "CLOSED_STUDENT", "CLOSED_ADMIN"].includes(lead.status) || lead.unlockCount >= lead.maxUnlocks) {
+            return NextResponse.json({ error: "Lead is no longer available" }, { status: 410 });
+        }
 
-            const monthlyUnlocks = await tx.leadUnlock.count({
-                where: { tutorId, createdAt: { gte: startOfMonth } }
-            });
+        const creditCost = lead.premiumTier === 2 ? 3 : lead.premiumTier === 1 ? 2 : 1;
 
-            if (tutor?.subscriptionTier === 'FREE' && monthlyUnlocks >= 5) {
-                return NextResponse.json({
-                    error: "Free plan limit reached. Upgrade to Expert to unlock unlimited leads.",
-                    upgradeRequired: true
-                }, { status: 403 });
-            }
+        if (!tutor || tutor.credits < creditCost) {
+            return NextResponse.json({
+                error: `Insufficient credits. This lead requires ${creditCost} credit${creditCost > 1 ? "s" : ""}. Buy credits or upgrade your plan.`,
+                upgradeRequired: true,
+            }, { status: 403 });
+        }
 
-            const lead = await tx.lead.findUnique({
-                where: { id: leadId },
-                select: { unlockCount: true, maxUnlocks: true, status: true, premiumTier: true }
-            });
-
-            if (!lead || ['CLOSED', 'CLOSED_STUDENT', 'CLOSED_ADMIN'].includes(lead.status) || lead.unlockCount >= lead.maxUnlocks) {
-                return NextResponse.json({ error: "Lead is no longer available" }, { status: 410 });
-            }
-
-            // Determine cost: 0: basic (1), 1: turbo (2), 2: verified (3)
-            const creditCost = lead.premiumTier === 2 ? 3 : lead.premiumTier === 1 ? 2 : 1;
-
-            if (!tutor || tutor.credits < creditCost) {
-                return NextResponse.json({ error: `Insufficient credits. This lead requires ${creditCost} credits.` }, { status: 403 });
-            }
-
-            // Deduct credits
+        // 2. Execute the transaction (all writes)
+        await prisma.$transaction(async (tx) => {
             await tx.user.update({
                 where: { id: tutorId },
-                data: { credits: { decrement: creditCost } }
+                data: { credits: { decrement: creditCost } },
             });
 
-            // Create unlock record
             await tx.leadUnlock.create({
-                data: { leadId, tutorId }
+                data: { leadId, tutorId },
             });
 
-            // Update lead unlock count
             const updatedLead = await tx.lead.update({
                 where: { id: leadId },
-                data: { unlockCount: { increment: 1 } }
+                data: { unlockCount: { increment: 1 } },
             });
 
-            // If max unlocks reached, close the lead
             if (updatedLead.unlockCount >= updatedLead.maxUnlocks) {
                 await tx.lead.update({
                     where: { id: leadId },
-                    data: { status: 'CLOSED' }
+                    data: { status: "CLOSED" },
                 });
             }
-
-            // Notify the student that a tutor has viewed their requirement
-            const leadWithStudent = await tx.lead.findUnique({
-                where: { id: leadId },
-                select: { studentId: true, subjects: true }
-            });
-            const subject = leadWithStudent?.subjects?.[0] || "your requirement";
-            if (leadWithStudent?.studentId) {
-                createNotification(leadWithStudent.studentId, {
-                    type: "LEAD_UNLOCK",
-                    title: "A tutor is interested in your requirement",
-                    body: `A tutor has viewed your ${subject} requirement and may contact you soon.`,
-                });
-            }
-
-            // Confirm to the tutor that they've successfully unlocked
-            createNotification(tutorId, {
-                type: "LEAD_UNLOCK",
-                title: "Lead unlocked successfully",
-                body: `You've unlocked a ${subject} lead. ${creditCost} credit${creditCost > 1 ? "s" : ""} used. Check the student's contact details.`,
-            });
-
-            return NextResponse.json({ success: true });
         });
+
+        // 3. Non-blocking notifications (outside transaction)
+        const subject = lead.subjects?.[0] || "your requirement";
+
+        if (lead.studentId) {
+            createNotification(lead.studentId, {
+                type: "LEAD_UNLOCK",
+                title: "A tutor is interested in your requirement",
+                body: `A tutor has viewed your ${subject} requirement and may contact you soon.`,
+            });
+        }
+
+        createNotification(tutorId, {
+            type: "LEAD_UNLOCK",
+            title: "Lead unlocked successfully",
+            body: `You've unlocked a ${subject} lead. ${creditCost} credit${creditCost > 1 ? "s" : ""} used. Check the student's contact details.`,
+        });
+
+        return NextResponse.json({ success: true });
 
     } catch (error) {
         console.error("Error unlocking lead:", error);
