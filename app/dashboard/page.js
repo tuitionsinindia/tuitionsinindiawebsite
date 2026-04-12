@@ -38,13 +38,13 @@ export default function DashboardPortal() {
                         <div className="size-16 rounded-2xl bg-blue-50 flex items-center justify-center mx-auto mb-6 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all">
                             <GraduationCap size={32} strokeWidth={1.5} />
                         </div>
-                        <h2 className="text-2xl mb-4 italic">Faculty <span className="text-blue-600">Hub</span></h2>
+                        <h2 className="text-2xl mb-4 italic">Tutor <span className="text-blue-600">Dashboard</span></h2>
                         <ul className="text-left text-gray-400 space-y-3 mb-10 mx-auto text-xs font-black uppercase tracking-widest leading-relaxed">
                             <li className="flex gap-3 items-center"><ShieldCheck size={14} className="text-blue-600" /> Sync Match Inquiries</li>
                             <li className="flex gap-3 items-center"><ShieldCheck size={14} className="text-blue-600" /> Optimize Analytics</li>
                         </ul>
                         <div className="mt-auto py-5 bg-gray-50 rounded-2xl text-blue-600 font-black text-xs uppercase tracking-widest group-hover:bg-blue-600 group-hover:text-white transition-all shadow-sm">
-                            Initialize Link
+                            Get Started
                         </div>
                     </Link>
                 </div>

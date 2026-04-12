@@ -14,7 +14,7 @@ export default function NotFound() {
                     <div className="relative z-10">
                         <div className="inline-flex items-center gap-3 px-5 py-2 bg-red-500/10 rounded-full border border-red-500/20 mb-10">
                             <ShieldAlert size={16} className="text-red-400" />
-                            <span className="text-red-400 text-xs font-black uppercase tracking-[0.3em]">Error Protocol: 404</span>
+                            <span className="text-red-400 text-xs font-black uppercase tracking-[0.3em]">Page Not Found</span>
                         </div>
                         
                         <h1 className="text-[120px] md:text-[200px] font-black leading-none tracking-tighter text-white/5 mb-[-60px] md:mb-[-100px] cursor-default select-none">

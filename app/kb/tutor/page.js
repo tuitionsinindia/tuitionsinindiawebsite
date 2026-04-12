@@ -46,7 +46,7 @@ export default function TutorKB() {
                 <div className="text-center mb-24 space-y-6">
                     <div className="inline-flex items-center gap-3 px-4 py-2 bg-primary/10 rounded-full border border-primary/20 mb-8">
                         <Briefcase size={14} className="text-primary" />
-                        <span className="text-primary text-xs font-black uppercase tracking-[0.3em]">Educator Success Matrix</span>
+                        <span className="text-primary text-xs font-black uppercase tracking-[0.3em]">Tutor Help Centre</span>
                     </div>
                     <h1 className="text-6xl md:text-8xl font-black text-white italic tracking-tighter leading-none uppercase">
                         Expert <br />

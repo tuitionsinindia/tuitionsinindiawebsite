@@ -117,7 +117,7 @@ function InstituteProfileEditorContent() {
                     </Link>
                     <div>
                         <h1 className="text-2xl font-black uppercase italic tracking-tighter text-white leading-none mb-1">Entity <span className="text-indigo-500 underline decoration-indigo-500/20 underline-offset-4 decoration-4">Config.</span></h1>
-                        <p className="text-xs font-black uppercase tracking-[0.4em] text-on-surface-dark/20 leading-none">Institutional Protocol 01</p>
+                        <p className="text-xs font-black uppercase tracking-[0.4em] text-on-surface-dark/20 leading-none">Institute Profile</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-4">
@@ -131,7 +131,7 @@ function InstituteProfileEditorContent() {
                 {loading ? (
                     <div className="py-40 flex flex-col items-center justify-center opacity-50">
                         <div className="size-20 rounded-[2rem] border-[8px] border-indigo-500/5 border-t-indigo-500 animate-spin mb-10 shadow-2xl"></div>
-                        <p className="font-black text-xs uppercase tracking-[0.6em] italic animate-pulse">Synchronizing Data Matrix...</p>
+                        <p className="font-black text-xs uppercase tracking-[0.6em] italic animate-pulse">Loading profile...</p>
                     </div>
                 ) : (
                     <form onSubmit={handleSave} className="space-y-16">
@@ -171,7 +171,7 @@ function InstituteProfileEditorContent() {
                                         />
                                     </div>
                                     <div className="md:col-span-2 space-y-4">
-                                        <label className="text-xs font-black uppercase tracking-[0.4em] text-on-surface-dark/40 ml-2 italic">Institutional Contact Protocol (Phone)</label>
+                                        <label className="text-xs font-black uppercase tracking-[0.4em] text-on-surface-dark/40 ml-2 italic">Phone Number</label>
                                         <input 
                                             type="tel" 
                                             value={formData.phone}

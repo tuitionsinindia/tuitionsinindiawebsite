@@ -113,7 +113,7 @@ export default function RequirementForm({ user, onComplete }) {
                             <Zap size={14} className="animate-pulse" /> Alignment Step 0{step + 1}
                         </div>
                         <h2 className="text-4xl font-black text-gray-900 tracking-tighter uppercase italic leading-[0.9]">
-                            {step === 1 && "Academic <br/><span className='text-blue-600'>Mandate.</span>"}
+                            {step === 1 && "Your <br/><span className='text-blue-600'>Requirements</span>"}
                             {step === 2 && "Logistics <br/><span className='text-blue-600'>Constraints.</span>"}
                             {step === 3 && "Neural <br/><span className='text-blue-600'>Verification.</span>"}
                         </h2>
@@ -125,7 +125,7 @@ export default function RequirementForm({ user, onComplete }) {
                     )}
                 </div>
 
-                {/* Step 1: Academic Mandate */}
+                {/* Step 1: Your Requirements */}
                 {step === 1 && (
                     <div className="space-y-10 animate-in fade-in slide-in-from-right-8 duration-700">
                         <div className="space-y-4">
@@ -207,7 +207,7 @@ export default function RequirementForm({ user, onComplete }) {
                     <div className="space-y-10 animate-in fade-in slide-in-from-right-8 duration-700">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-4">
-                                <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2 text-center block">Transmission Protocol (Location)</label>
+                                <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2 text-center block">Preferred Location</label>
                                 <div className="grid grid-cols-2 gap-4">
                                     {[
                                         { id: "ONLINE", icon: Monitor, label: "Digital Hub", desc: "Remote learning" },
@@ -276,7 +276,7 @@ export default function RequirementForm({ user, onComplete }) {
                                 </div>
                             </div>
                             <div className="space-y-4">
-                                <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2">Faculty Gender Preference</label>
+                                <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2">Tutor Gender Preference</label>
                                 <div className="grid grid-cols-3 gap-2">
                                     {["MALE", "FEMALE", "ANY"].map(g => (
                                         <button 
@@ -343,7 +343,7 @@ export default function RequirementForm({ user, onComplete }) {
                                 value={form.description}
                                 onChange={(e) => setForm({...form, description: e.target.value})}
                                 className="w-full px-8 py-6 bg-gray-50 border-2 border-transparent rounded-[2rem] focus:bg-white focus:border-blue-600 focus:ring-8 focus:ring-blue-100 transition-all outline-none font-medium text-sm placeholder:text-gray-200 min-h-[140px]"
-                                placeholder="State any additional pedagogical requirements or constraints for the matched faculty..."
+                                placeholder="State any additional additional requirements or preferences for the tutor..."
                             />
                         </div>
 
@@ -353,14 +353,14 @@ export default function RequirementForm({ user, onComplete }) {
                             className="w-full py-8 bg-blue-600 text-white rounded-[2.5rem] font-black text-xs uppercase tracking-[0.5em] shadow-4xl shadow-blue-600/30 hover:bg-gray-900 transition-all flex items-center justify-center gap-6 active:scale-95 group"
                         >
                             {loading ? <Loader2 className="animate-spin" size={24} /> : (
-                                <>Initiate Scholarly Sync <ArrowRight size={24} strokeWidth={3} className="group-hover:translate-x-4 transition-transform" /></>
+                                <>Submit Requirement <ArrowRight size={24} strokeWidth={3} className="group-hover:translate-x-4 transition-transform" /></>
                             )}
                         </button>
                     </div>
                 )}
                 
                 <div className="mt-12 text-center flex items-center justify-center gap-2 text-xs font-black text-gray-300 uppercase tracking-[0.7em]">
-                    <Lock size={14} strokeWidth={3} /> Standard Security Protocols Active
+                    <Lock size={14} strokeWidth={3} /> Your data is secure
                 </div>
             </div>
         </div>

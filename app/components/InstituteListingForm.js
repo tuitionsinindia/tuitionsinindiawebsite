@@ -65,7 +65,7 @@ export default function InstituteListingForm({ user, onComplete }) {
                 </div>
                 <div>
                     <h2 className="text-4xl font-black text-gray-900 tracking-tighter uppercase italic mb-2 leading-none">Center Deployed.</h2>
-                    <p className="text-gray-400 font-bold text-xs uppercase tracking-widest leading-relaxed">Your institutional terminal is now active in the academy directory.</p>
+                    <p className="text-gray-400 font-bold text-xs uppercase tracking-widest leading-relaxed">Your institute profile is now live. Students can find you in search.</p>
                 </div>
             </div>
         );

@@ -90,7 +90,7 @@ export default function SubjectsPage() {
                                 <span className="underline decoration-primary/20 decoration-8 underline-offset-8">Inventories</span>.
                             </h1>
                             <p className="text-on-background-dark/60 text-xl font-medium leading-relaxed max-w-2xl">
-                                Navigate through our institutional-grade subject mapping. Select a specialized level to reveal verified faculty assets.
+                                Navigate through our subject categories below to find verified tutors.
                             </p>
                         </div>
                         <div className="hidden lg:block bg-surface-dark p-8 rounded-[3rem] border border-border-dark shadow-4xl rotate-3 translate-y-6">
@@ -209,7 +209,7 @@ export default function SubjectsPage() {
                         <div className="relative z-10">
                             <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md px-6 py-2 rounded-full border border-white/30 mb-10">
                                 <ShieldCheck size={16} className="text-white" />
-                                <span className="text-white text-xs font-black uppercase tracking-widest">Requirement Protocols</span>
+                                <span className="text-white text-xs font-black uppercase tracking-widest">Post Requirement</span>
                             </div>
                             <h2 className="text-4xl md:text-6xl font-black text-white italic tracking-tighter leading-tight mb-8">
                                 Domain not found in <br className="hidden md:block" /> the <span className="underline decoration-white/30 decoration-8 underline-offset-8">Primary Inventory</span>?

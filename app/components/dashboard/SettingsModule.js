@@ -26,13 +26,13 @@ export default function SettingsModule({ userData, onUpdate }) {
             });
 
             if (res.ok) {
-                setMessage({ type: "success", text: "Registry Updated: Faculty credentials synchronized." });
+                setMessage({ type: "success", text: "Settings saved successfully." });
                 if (onUpdate) onUpdate();
             } else {
                 throw new Error("SYNC_FAILURE");
             }
         } catch (err) {
-            setMessage({ type: "error", text: "Protocol Error: Unable to synchronize with institutional database." });
+            setMessage({ type: "error", text: "Failed to save. Please try again." });
         } finally {
             setIsSaving(false);
         }
@@ -41,7 +41,7 @@ export default function SettingsModule({ userData, onUpdate }) {
     return (
         <div className="space-y-12 animate-in fade-in duration-700">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                <h2 className="text-4xl font-black text-gray-900 uppercase italic tracking-tighter">Faculty <span className="text-blue-600 underline decoration-blue-600/10">Registry.</span></h2>
+                <h2 className="text-4xl font-black text-gray-900 uppercase italic tracking-tighter">Profile Settings</h2>
                 <div className="px-5 py-2 bg-blue-50 text-blue-600 rounded-xl text-[10px] font-black uppercase tracking-widest border border-blue-100 italic shadow-sm w-fit">
                     Security Level: Verified_{userData?.role}
                 </div>
@@ -85,7 +85,7 @@ export default function SettingsModule({ userData, onUpdate }) {
                         </div>
 
                         <div className="space-y-3">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-300 px-2 lg:px-4">Contact Protocol (Phone)</label>
+                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-300 px-2 lg:px-4">Phone Number</label>
                             <div className="relative group">
                                 <Phone className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-200 group-focus-within:text-blue-600 transition-all font-black" size={18} />
                                 <input 
@@ -113,7 +113,7 @@ export default function SettingsModule({ userData, onUpdate }) {
                             <div className="flex items-start gap-4">
                                 <Info size={16} className="text-blue-600 shrink-0 mt-1" />
                                 <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 leading-relaxed italic">
-                                    Control how the global discovery stream handles your institutional contact nodes.
+                                    Choose how students and tutors can contact you.
                                 </p>
                             </div>
                             <div className="flex flex-col gap-3">
@@ -137,9 +137,9 @@ export default function SettingsModule({ userData, onUpdate }) {
                              <div className="absolute top-0 right-0 size-32 bg-blue-600/20 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-blue-600/40 transition-all"></div>
                              <div className="flex items-center gap-3">
                                 <Lock size={16} className="text-blue-400" strokeWidth={3} />
-                                <h4 className="text-[10px] font-black text-blue-400 uppercase tracking-widest leading-none">Access Protocol</h4>
+                                <h4 className="text-[10px] font-black text-blue-400 uppercase tracking-widest leading-none">Change Password</h4>
                              </div>
-                             <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em] italic leading-relaxed">Securely modify your institutional access key and synchronization password.</p>
+                             <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em] italic leading-relaxed">Request a password reset link sent to your email.</p>
                              <button className="relative z-10 mt-4 px-8 py-3 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black text-white uppercase tracking-widest hover:bg-white hover:text-gray-900 transition-all italic">Initiate Re-keying Request</button>
                         </div>
                     </div>

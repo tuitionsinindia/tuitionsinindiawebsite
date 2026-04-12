@@ -360,7 +360,7 @@ function InstituteDashboardContent() {
                                     {loading ? (
                                         <div className="col-span-3 py-40 flex flex-col items-center justify-center opacity-50 italic text-white font-black uppercase tracking-[0.5em]">
                                             <Loader2 size={48} className="animate-spin mb-6" />
-                                            Scanning Faculty Directory...
+                                            Loading tutors...
                                         </div>
                                     ) : recruitmentLeads.length > 0 ? recruitmentLeads.map((tutor) => (
                                         <div key={tutor.id} className="bg-surface-dark/40 border border-border-dark rounded-[2.5rem] p-8 hover:border-indigo-500/30 transition-all flex flex-col gap-6 text-white group relative overflow-hidden">
@@ -386,7 +386,7 @@ function InstituteDashboardContent() {
                                             </button>
                                         </div>
                                     )) : (
-                                        <div className="col-span-3 py-40 text-center opacity-20 italic font-black uppercase tracking-[0.8em] text-white">Faculty Sync: 0 Active Tutors</div>
+                                        <div className="col-span-3 py-40 text-center opacity-20 italic font-black uppercase tracking-[0.8em] text-white">No tutors found</div>
                                     )}
                                 </div>
                             )}
@@ -438,7 +438,7 @@ export default function InstituteDashboard() {
                     <div className="size-24 rounded-[3.5rem] bg-indigo-500/10 border-2 border-indigo-500/20 flex items-center justify-center animate-spin-slow shadow-[0_0_50px_rgba(79,70,229,0.2)]">
                         <Building2 size={32} className="animate-pulse" strokeWidth={3} />
                     </div>
-                    <p className="text-xs font-black uppercase tracking-[0.8em] animate-pulse">Initializing Corporate Terminal...</p>
+                    <p className="text-xs font-black uppercase tracking-[0.8em] animate-pulse">Loading dashboard...</p>
                  </div>
             </div>
         }>

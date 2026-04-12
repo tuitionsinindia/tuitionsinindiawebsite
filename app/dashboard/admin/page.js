@@ -176,9 +176,9 @@ function AdminDashboardContent() {
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                                         {[
                                             { label: 'Total Experts', value: data?.metrics.totalTutors || 0, icon: GraduationCap, color: 'text-blue-600', bg: 'bg-blue-50' },
-                                            { label: 'Verified Scholars', value: data?.metrics.totalStudents || 0, icon: UserCheck, color: 'text-amber-600', bg: 'bg-amber-50' },
+                                            { label: 'Students', value: data?.metrics.totalStudents || 0, icon: UserCheck, color: 'text-amber-600', bg: 'bg-amber-50' },
                                             { label: 'Gross Revenue', value: `₹${data?.metrics.totalRevenue || 0}`, icon: Wallet, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-                                            { label: 'Mandate Volume', value: data?.metrics.activeLeads || 0, icon: Target, color: 'text-purple-600', bg: 'bg-purple-50' }
+                                            { label: 'Active Leads', value: data?.metrics.activeLeads || 0, icon: Target, color: 'text-purple-600', bg: 'bg-purple-50' }
                                         ].map((stat, i) => (
                                             <div key={i} className="p-8 bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all group">
                                                 <div className="flex items-center gap-4 mb-6">
@@ -388,7 +388,7 @@ export default function AdminDashboard() {
                             <Cpu size={28} className="text-primary animate-pulse" />
                          </div>
                     </div>
-                    <p className="font-black text-[12px] text-on-surface-dark/20 uppercase tracking-[0.6em] italic animate-pulse">Initializing Master Protocol...</p>
+                    <p className="font-black text-[12px] text-on-surface-dark/20 uppercase tracking-[0.6em] italic animate-pulse">Loading admin dashboard...</p>
                 </div>
             </div>
         }>

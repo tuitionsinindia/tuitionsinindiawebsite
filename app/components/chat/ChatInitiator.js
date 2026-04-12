@@ -40,14 +40,14 @@ export default function ChatInitiator({ studentId, tutorId, currentUser, recipie
                 router.push(redirectPath);
             } else if (res.status === 403) {
                 const data = await res.json();
-                alert(`Institutional Protocol Restriction: ${data.details}`);
+                alert(`Access restricted: ${data.details}`);
             } else {
                 const data = await res.json();
                 alert(`System Error: ${data.error || "Connection failed."}`);
             }
         } catch (err) {
             console.error("Failed to initiate chat:", err);
-            alert("Network Protocol Failure: Please re-synchronize.");
+            alert("Something went wrong. Please try again.");
         } finally {
             setLoading(false);
         }

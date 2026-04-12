@@ -15,7 +15,7 @@ export default function TermsOfService() {
                         <section className="space-y-4">
                             <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary rounded-full border border-primary/20 mb-4">
                                 <Scale size={14} />
-                                <span className="text-xs font-black uppercase tracking-[0.2em]">Institutional Mandate</span>
+                                <span className="text-xs font-black uppercase tracking-[0.2em]">Terms of Service</span>
                             </div>
                             <h1 className="text-4xl md:text-6xl font-black uppercase italic tracking-tighter leading-none text-white">Terms of <span className="text-primary font-serif lowercase tracking-normal not-italic">engagement</span>.</h1>
                             <p className="text-on-surface-dark/40 font-medium italic text-sm">Last Audit: March 24, 2026</p>
@@ -25,9 +25,9 @@ export default function TermsOfService() {
                             <section className="space-y-6">
                                 <div className="flex items-center gap-4 mb-2">
                                     <FileText className="text-primary size-5" />
-                                    <h2 className="text-2xl font-black text-white uppercase italic tracking-tight underline decoration-primary/20 decoration-4 underline-offset-4">01. Acceptance of Mandate</h2>
+                                    <h2 className="text-2xl font-black text-white uppercase italic tracking-tight underline decoration-primary/20 decoration-4 underline-offset-4">01. Acceptance of Terms</h2>
                                 </div>
-                                <p>By accessing the TuitionsInIndia digital infrastructure, you enter into a formal covenant to abide by our institutional standards. We provide the ecosystem; you provide the integrity.</p>
+                                <p>By accessing the TuitionsInIndia platform, you agree to follow these terms. We provide the platform; you agree to use it responsibly.</p>
                             </section>
 
                             <section className="space-y-6">
@@ -51,7 +51,7 @@ export default function TermsOfService() {
                                     <CheckCircle2 className="text-primary size-5" />
                                     <h2 className="text-2xl font-black text-white uppercase italic tracking-tight underline decoration-primary/20 decoration-4 underline-offset-4">04. Professional Conduct</h2>
                                 </div>
-                                <p>Harassment, fraud, or pedagogical misrepresentation is strictly prohibited. We maintain an 'Ivory Tower' standard—excellence, respect, and academic rigor are the only currencies accepted here.</p>
+                                <p>Harassment, fraud, or misrepresentation is strictly prohibited. We maintain an 'zero-tolerance' standard—honesty and respect are expected from all users.</p>
                             </section>
 
                             <section className="space-y-6">

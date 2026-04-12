@@ -107,7 +107,7 @@ export default function TutorListingForm({ user, onComplete }) {
                 <div className="mb-12 flex justify-between items-start">
                     <div>
                         <div className="flex items-center gap-2 text-blue-600 font-black text-[10px] uppercase tracking-[0.4em] mb-4 leading-none">
-                            <Star size={14} className="animate-pulse" /> Faculty Calibration: Phase 0{step}
+                            <Star size={14} className="animate-pulse" /> Step {step}
                         </div>
                         <h2 className="text-4xl font-black text-gray-900 tracking-tighter uppercase italic leading-[0.9]">
                             {step === 1 && "Identity <br/><span className='text-blue-600'>Branding.</span>"}
@@ -264,7 +264,7 @@ export default function TutorListingForm({ user, onComplete }) {
                             onClick={() => setStep(3)}
                             className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.4em] flex items-center justify-center gap-4 shadow-2xl shadow-blue-900/20 hover:bg-gray-900 transition-all active:scale-95 disabled:opacity-30 group"
                         >
-                            Logistics Protocol <ArrowRight size={20} strokeWidth={3} className="group-hover:translate-x-2 transition-transform" />
+                            Next: Location & Schedule <ArrowRight size={20} strokeWidth={3} className="group-hover:translate-x-2 transition-transform" />
                         </button>
                     </div>
                 )}
@@ -303,7 +303,7 @@ export default function TutorListingForm({ user, onComplete }) {
                             </div>
 
                             <div className="space-y-4">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-300 ml-2">Cohort Protocol</label>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-300 ml-2">Session Type</label>
                                 <div className="bg-gray-50 border border-gray-100 rounded-[2rem] p-8 space-y-6">
                                      <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-3">
@@ -389,7 +389,7 @@ export default function TutorListingForm({ user, onComplete }) {
                             className="w-full py-8 bg-blue-600 text-white rounded-[2.5rem] font-black text-xs uppercase tracking-[0.5em] shadow-2xl shadow-blue-900/20 hover:bg-gray-900 transition-all flex items-center justify-center gap-6 active:scale-95 group leading-none"
                         >
                             {loading ? <Loader2 className="animate-spin" size={24} /> : (
-                                <>Verify Faculty Credentials <ArrowRight size={24} strokeWidth={3} className="group-hover:translate-x-4 transition-transform" /></>
+                                <>Save & Continue <ArrowRight size={24} strokeWidth={3} className="group-hover:translate-x-4 transition-transform" /></>
                             )}
                         </button>
                     </div>

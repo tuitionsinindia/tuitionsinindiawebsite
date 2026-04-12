@@ -136,7 +136,7 @@ function SearchContent() {
                         <button onClick={() => setViewMode("map")} className={`p-4 rounded-xl transition-all ${viewMode === "map" ? 'bg-white text-blue-600 shadow-xl' : 'text-gray-400 hover:text-gray-900'}`}><MapIcon size={22}/></button>
                     </div>
                     <Link href="/register?role=STUDENT" className="bg-blue-600 text-white px-8 py-5 rounded-[1.25rem] font-black text-xs uppercase tracking-widest shadow-xl shadow-blue-600/20 hover:bg-gray-900 transition-all flex items-center gap-3 active:scale-95 italic">
-                        Acquire Faculty <ArrowRight size={16} />
+                        Find Tutors <ArrowRight size={16} />
                     </Link>
                 </div>
             </div>
@@ -147,7 +147,7 @@ function SearchContent() {
                     <div className="p-8 border-b border-gray-100 flex items-center justify-between bg-white shrink-0">
                         <div className="flex items-center gap-4">
                             <Target size={22} className="text-blue-600" />
-                            <h2 className="font-black text-sm uppercase tracking-[0.2em] italic text-gray-900">Filter Matrix</h2>
+                            <h2 className="font-black text-sm uppercase tracking-[0.2em] italic text-gray-900">Filters</h2>
                         </div>
                         <button 
                             onClick={resetFilters}
@@ -160,10 +160,10 @@ function SearchContent() {
                     <div className="flex-1 overflow-y-auto p-8 space-y-12 pb-32 custom-scrollbar">
                         {/* Listing Type */}
                         <div className="space-y-6">
-                            <label className="text-[10px] font-black text-gray-300 uppercase tracking-[0.4em] italic">Listing Protocol</label>
+                            <label className="text-[10px] font-black text-gray-300 uppercase tracking-[0.4em] italic">Listing Type</label>
                             <div className="grid grid-cols-1 gap-3">
                                 {[
-                                    { id: "TUTOR", label: "Expert Faculty", icon: GraduationCap },
+                                    { id: "TUTOR", label: "Tutors", icon: GraduationCap },
                                     { id: "STUDENT", label: "Requirement Stream", icon: Users },
                                     { id: "INSTITUTE", label: "Academy Hubs", icon: Building2 }
                                 ].map(t => (
@@ -276,7 +276,7 @@ function SearchContent() {
                                 <div key={i} className="group bg-white p-8 md:p-10 rounded-[3rem] border border-gray-100 hover:border-blue-600/20 hover:shadow-4xl transition-all flex flex-col md:flex-row gap-10 cursor-pointer relative overflow-hidden active:scale-[0.99] animate-in fade-in duration-500">
                                     <div className="absolute top-0 left-0 w-2 h-full bg-blue-600 opacity-0 group-hover:opacity-100 transition-all"></div>
                                     
-                                    {/* Faculty Identity Node */}
+                                    {/* Tutor Card */}
                                     <div className="size-36 md:size-44 bg-gray-50 rounded-[2.5rem] border border-gray-50 overflow-hidden shrink-0 relative group-hover:border-blue-600/10 transition-all shadow-inner">
                                         <div className="absolute inset-0 bg-gradient-to-tr from-gray-900/5 to-transparent"></div>
                                         <div className="w-full h-full flex items-center justify-center text-gray-200 group-hover:text-blue-100 transition-all">
@@ -313,7 +313,7 @@ function SearchContent() {
                                         </div>
 
                                         <p className="text-gray-400 text-sm font-medium italic line-clamp-2 leading-relaxed opacity-80 group-hover:opacity-100 transition-opacity">
-                                            {item.bio || "Establishing pedagogical channels through rigorous scholarship and strategic mentorship."}
+                                            {item.bio || "Professional educator available for tuition."}
                                         </p>
 
                                         <div className="flex flex-wrap items-center gap-5 pt-4">
@@ -337,7 +337,7 @@ function SearchContent() {
                                     {/* Tactical Action */}
                                     <div className="flex md:flex-col justify-end gap-3 shrink-0 pt-6 md:pt-0">
                                         <Link href={`/${item.isInstitute ? 'institute' : 'tutor'}/${item.id}`} className="flex-1 md:flex-none px-12 py-6 bg-gray-900 text-white rounded-[1.8rem] text-[10px] font-black uppercase tracking-[0.3em] hover:bg-blue-600 transition-all flex items-center justify-center gap-4 italic active:scale-95 shadow-2xl shadow-black/5">
-                                            Initialize Link <ArrowRight size={16} strokeWidth={3} />
+                                            Get Started <ArrowRight size={16} strokeWidth={3} />
                                         </Link>
                                     </div>
                                 </div>

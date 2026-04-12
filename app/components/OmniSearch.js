@@ -108,7 +108,7 @@ export default function OmniSearch({
             {variant === 'hero' && (
                 <div className="flex bg-gray-50/50 rounded-t-[3rem] overflow-hidden border-b border-gray-100">
                     {[
-                        { id: "TUTOR", label: "Faculty Discovery", icon: GraduationCap },
+                        { id: "TUTOR", label: "Find Tutors", icon: GraduationCap },
                         { id: "STUDENT", label: "Requirement Stream", icon: Users },
                         { id: "INSTITUTE", label: "Institutional Hubs", icon: Building2 }
                     ].map(tab => (

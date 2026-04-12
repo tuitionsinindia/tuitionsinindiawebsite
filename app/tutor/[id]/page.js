@@ -28,15 +28,15 @@ export async function generateMetadata({ params }) {
         include: { tutorListing: true }
     });
 
-    if (!tutor) return { title: "Faculty Profile | TuitionsInIndia" };
+    if (!tutor) return { title: "Tutor Profile | TuitionsInIndia" };
 
-    const name = tutor.name || "Expert Faculty";
+    const name = tutor.name || "Tutor";
     const subject = tutor.tutorListing?.subjects?.[0] || "Academics";
     const location = tutor.tutorListing?.locations?.[0] || "India";
 
     return {
-        title: `Best ${subject} Faculty in ${location} | ${name} | TuitionsInIndia`,
-        description: `Connect with ${name}, a premier ${subject} specialist in ${location}. View verified credentials, academic affinity scores, and pedagogical approach.`,
+        title: `Best ${subject} Tutor in ${location} | ${name} | TuitionsInIndia`,
+        description: `Connect with ${name}, a premier ${subject} specialist in ${location}. View verified credentials, academic affinity scores, and teaching style.`,
         openGraph: {
             title: `${name} - Professional ${subject} Educator`,
             description: `Verify the Match Score for ${name} in ${location}. Strategic academic outcomes and high-fidelity tutoring.`,
@@ -100,12 +100,12 @@ export default async function TutorProfile({ params, searchParams }) {
                 <div className="mb-16">
                     <Link href="/tutors" className="inline-flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.4em] text-gray-300 hover:text-blue-600 transition-all group italic">
                         <ArrowLeft size={16} className="group-hover:-translate-x-2 transition-transform" /> 
-                        Global Faculty Directory
+                        All Tutors
                     </Link>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24">
-                    {/* Left Column: Faculty Intelligence */}
+                    {/* Left Column: Tutor Profile */}
                     <div className="lg:col-span-8">
                         <section className="relative">
                             <div className="relative h-[500px] md:h-[750px] w-full rounded-[4rem] overflow-hidden mb-16 shadow-4xl shadow-blue-900/10 border border-gray-100 bg-white group">
@@ -130,7 +130,7 @@ export default async function TutorProfile({ params, searchParams }) {
                             <div className="space-y-6">
                                 <div className="flex flex-wrap items-center gap-4 mb-6">
                                     <span className="px-6 py-2.5 bg-blue-50 text-blue-600 rounded-xl text-[10px] font-black uppercase tracking-widest border border-blue-100 shadow-sm italic">
-                                        {tutor.subscriptionTier === 'ELITE' ? "Elite Institution" : "Verified Faculty"}
+                                        {tutor.subscriptionTier === 'ELITE' ? "Elite Tutor" : "Verified Tutor"}
                                     </span>
                                     <div className="flex items-center gap-1.5 text-amber-500 font-black px-4 py-2 bg-white rounded-xl border border-gray-100 shadow-sm">
                                         <Star size={14} fill="currentColor" strokeWidth={0} />
@@ -180,13 +180,13 @@ export default async function TutorProfile({ params, searchParams }) {
                         <div className="space-y-28">
                             <section>
                                 <div className="flex items-center gap-10 mb-14">
-                                    <h2 className="text-4xl md:text-5xl font-black uppercase italic tracking-tighter text-gray-900 shrink-0">Faculty <span className="text-blue-600 lowercase font-serif font-light not-italic">Bio.</span></h2>
+                                    <h2 className="text-4xl md:text-5xl font-black uppercase italic tracking-tighter text-gray-900 shrink-0">About <span className="text-blue-600 lowercase font-serif font-light not-italic">Bio.</span></h2>
                                     <div className="flex-1 h-px bg-gray-100"></div>
                                 </div>
                                 <div className="relative">
                                     <div className="absolute -left-10 top-0 text-[120px] font-black text-gray-50 select-none pointer-events-none italic opacity-50 uppercase">BIO</div>
                                     <p className="text-xl text-gray-400 font-bold leading-relaxed max-w-3xl whitespace-pre-line relative z-10 italic uppercase tracking-tighter">
-                                        {listing.bio || "Institutional data synchronization in progress. This faculty member maintains a high-performance pedagogical framework."}
+                                        {listing.bio || "Professional tutor available for classes."}
                                     </p>
                                 </div>
                             </section>
@@ -239,7 +239,7 @@ export default async function TutorProfile({ params, searchParams }) {
                             {/* Reputation Registry */}
                             <section id="reviews">
                                 <div className="flex items-center gap-10 mb-14">
-                                    <h2 className="text-4xl md:text-5xl font-black uppercase italic tracking-tighter text-gray-900 shrink-0">Scholarly <span className="text-blue-600 lowercase font-serif font-light not-italic">Dialogue.</span></h2>
+                                    <h2 className="text-4xl md:text-5xl font-black uppercase italic tracking-tighter text-gray-900 shrink-0">Reviews <span className="text-blue-600 lowercase font-serif font-light not-italic">Dialogue.</span></h2>
                                     <div className="flex-1 h-px bg-gray-100"></div>
                                 </div>
                                 
@@ -299,7 +299,7 @@ export default async function TutorProfile({ params, searchParams }) {
 
                                 <div className="relative z-10">
                                     <h3 className="text-4xl font-black mb-6 uppercase italic tracking-tighter text-gray-900 leading-[0.9]">Initiate <br/> <span className="text-blue-600 not-italic lowercase font-serif font-light tracking-normal">Engagement.</span></h3>
-                                    <p className="text-gray-400 font-bold mb-14 opacity-80 leading-relaxed italic uppercase text-[11px] tracking-tight">Secure an institutional diagnostic session to assess scholarly affinity.</p>
+                                    <p className="text-gray-400 font-bold mb-14 opacity-80 leading-relaxed italic uppercase text-[11px] tracking-tight">Book a trial class to see if this tutor is right for you.</p>
                                     
                                     <div className="space-y-8">
                                         <Link 
@@ -352,7 +352,7 @@ export default async function TutorProfile({ params, searchParams }) {
                                                     +82
                                                 </div>
                                             </div>
-                                            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-200 italic">Active Scholarly Cohort</p>
+                                            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-200 italic">Current Students</p>
                                         </div>
                                     </div>
                                 </div>
@@ -366,7 +366,7 @@ export default async function TutorProfile({ params, searchParams }) {
                                 </div>
                                 <div>
                                     <h4 className="font-black text-gray-900 mb-2 italic tracking-tighter uppercase leading-none text-xl">Elite Integrity</h4>
-                                    <p className="text-[10px] text-gray-300 leading-relaxed font-black uppercase tracking-widest italic opacity-80">This faculty partner adheres to the Global Learning Protocol for verifiable growth.</p>
+                                    <p className="text-[10px] text-gray-300 leading-relaxed font-black uppercase tracking-widest italic opacity-80">This tutor is committed to helping students achieve their learning goals.</p>
                                 </div>
                             </div>
                         </div>

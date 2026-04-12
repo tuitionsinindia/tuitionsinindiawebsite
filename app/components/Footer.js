@@ -35,7 +35,7 @@ export default function Footer() {
                                 { name: "Discover Student Leads", href: "/search?role=STUDENT" },
                                 { name: "How Methodology Works", href: "/#methodology" },
                                 { name: "Academic Subjects", href: "/subjects" },
-                                { name: "Verification Protocol", href: "/kb/tutor" }
+                                { name: "Tutor Verification", href: "/kb/tutor" }
                             ].map((link, i) => (
                                 <Link 
                                     key={i} 
@@ -73,7 +73,7 @@ export default function Footer() {
                         <h4 className="text-xs font-black uppercase tracking-[0.4em] text-gray-900 mb-8 italic">Legal Framework</h4>
                         <nav className="flex flex-col gap-4">
                             {[
-                                { name: "Privacy Protocol", href: "/legal/privacy" },
+                                { name: "Privacy Policy", href: "/legal/privacy" },
                                 { name: "Terms of Engagement", href: "/legal/terms" },
                                 { name: "Cookie Security", href: "/legal/cookies" },
                                 { name: "Network Integrity", href: "/about" }

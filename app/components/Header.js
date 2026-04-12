@@ -43,10 +43,10 @@ export default function Header() {
         tutors: [
             { label: "Find Student Leads", href: "/search?role=STUDENT", icon: Target },
             { label: "Tutor Dashboard", href: "/dashboard/tutor", icon: GraduationCap },
-            { label: "Verification Protocol", href: "/kb/tutor", icon: ShieldCheck }
+            { label: "Tutor Verification", href: "/kb/tutor", icon: ShieldCheck }
         ],
         institutes: [
-            { label: "Recruit Faculty", href: "/search?role=TUTOR", icon: Users },
+            { label: "Find Tutors", href: "/search?role=TUTOR", icon: Users },
             { label: "Institute Solutions", href: "/how-it-works/institute", icon: Building2 },
             { label: "Academy Hubs", href: "/categories", icon: Globe }
         ]

@@ -41,7 +41,7 @@ export default function InstituteHowItWorks() {
         {
             step: "04",
             title: "Efficiency Analytics",
-            desc: "Monitor enquiry pipelines and profile performance. Scale your student intake with data-driven pedagogical insights.",
+            desc: "Monitor enquiry pipelines and profile performance. Scale your student intake with data-driven actionable insights.",
             icon: BarChart3,
             color: "text-blue-600",
             bg: "bg-blue-50/50"
@@ -64,7 +64,7 @@ export default function InstituteHowItWorks() {
                 <div className="max-w-4xl mx-auto">
                     <div className="inline-flex items-center gap-3 px-4 py-2 bg-blue-50 rounded-full border border-blue-100 mb-8">
                         <Users size={14} className="text-blue-600" />
-                        <span className="text-blue-700 text-xs font-black uppercase tracking-[0.3em]">Institutional Scaling Protocol</span>
+                        <span className="text-blue-700 text-xs font-black uppercase tracking-[0.3em]">How It Works for Institutes</span>
                     </div>
                     
                     <h1 className="text-5xl md:text-8xl font-black tracking-tighter mb-10 leading-[0.9] uppercase italic text-gray-900">
@@ -78,7 +78,7 @@ export default function InstituteHowItWorks() {
                     
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <Link href="/register/institute" className="px-10 py-5 bg-blue-600 text-white rounded-2xl font-black shadow-2xl shadow-blue-600/30 hover:bg-black active:scale-95 transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-xs">
-                            Initialize Institute <ArrowRight size={20} />
+                            Register Institute <ArrowRight size={20} />
                         </Link>
                     </div>
                 </div>
@@ -172,7 +172,7 @@ export default function InstituteHowItWorks() {
                     </div>
                 </div>
                 <div className="mt-20 text-center flex items-center justify-center gap-2 text-xs font-black text-gray-300 uppercase tracking-[0.5em]">
-                    <Lock size={12} strokeWidth={3} /> Standard Security Protocols Active
+                    <Lock size={12} strokeWidth={3} /> Your data is secure
                 </div>
             </section>
         </div>

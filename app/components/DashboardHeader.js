@@ -59,7 +59,7 @@ export default function DashboardHeader({
                     <div className="flex flex-col text-right hidden lg:block leading-none">
                         <span className="text-xs font-black text-gray-900 uppercase tracking-widest leading-none mb-1">{user?.name || "Member"}</span>
                         <span className="text-[10px] font-black text-blue-600 uppercase tracking-[0.2em] italic opacity-60">
-                            {role === "ADMIN" ? "Registry Admin" : role === "TUTOR" ? "Verified Faculty" : "Registered Scholar"}
+                            {role === "ADMIN" ? "Admin" : role === "TUTOR" ? "Tutor" : "Student"}
                         </span>
                     </div>
                     <div className="relative group/profile">

@@ -18,7 +18,7 @@ export default function TutorHowItWorks() {
         {
             step: "01",
             title: "Architect Your Profile",
-            desc: "Sign up and build a high-fidelity profile highlighting your subjects, pedagogical experience, and geographic range.",
+            desc: "Sign up and build a high-fidelity profile highlighting your subjects, teaching experience, and service areas.",
             icon: UserPlus,
             color: "text-blue-600",
             bg: "bg-blue-50/50"
@@ -65,7 +65,7 @@ export default function TutorHowItWorks() {
                 <div className="max-w-4xl mx-auto">
                     <div className="inline-flex items-center gap-3 px-4 py-2 bg-blue-50 rounded-full border border-blue-100 mb-8">
                         <Zap size={14} className="text-blue-600" />
-                        <span className="text-blue-700 text-xs font-black uppercase tracking-[0.3em]">Independent Faculty Protocol</span>
+                        <span className="text-blue-700 text-xs font-black uppercase tracking-[0.3em]">How It Works for Tutors</span>
                     </div>
                     
                     <h1 className="text-5xl md:text-8xl font-black tracking-tighter mb-10 leading-[0.9] uppercase italic text-gray-900">
@@ -79,7 +79,7 @@ export default function TutorHowItWorks() {
                     
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <Link href="/register/tutor" className="px-10 py-5 bg-blue-600 text-white rounded-2xl font-black shadow-2xl shadow-blue-600/30 hover:bg-black active:scale-95 transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-xs">
-                            Initiate Faculty Profile <ArrowRight size={20} />
+                            Create Tutor Profile <ArrowRight size={20} />
                         </Link>
                     </div>
                 </div>
@@ -156,7 +156,7 @@ export default function TutorHowItWorks() {
             <section className="snap-section px-6 bg-gray-50">
                 <div className="max-w-4xl mx-auto">
                     <div className="text-center mb-16">
-                        <h2 className="text-4xl font-black tracking-tighter uppercase italic text-gray-900">Faculty <span className="text-blue-600">FAQ</span></h2>
+                        <h2 className="text-4xl font-black tracking-tighter uppercase italic text-gray-900">Tutor <span className="text-blue-600">FAQ</span></h2>
                     </div>
                     
                     <div className="grid gap-6">
@@ -173,7 +173,7 @@ export default function TutorHowItWorks() {
                     </div>
                 </div>
                 <div className="mt-20 text-center flex items-center justify-center gap-2 text-xs font-black text-gray-300 uppercase tracking-[0.5em]">
-                    <Lock size={12} strokeWidth={3} /> Standard Security Protocols Active
+                    <Lock size={12} strokeWidth={3} /> Your data is secure
                 </div>
             </section>
         </div>

@@ -155,7 +155,7 @@ function DashboardContent() {
                     <div className="size-20 rounded-3xl bg-blue-50 flex items-center justify-center text-blue-600 mx-auto mb-8 border border-blue-100 shadow-inner">
                         <GraduationCap size={40} strokeWidth={1.5} />
                     </div>
-                    <h2 className="text-3xl font-black mb-3 tracking-tighter uppercase italic text-gray-900 leading-none">Faculty Hub.</h2>
+                    <h2 className="text-3xl font-black mb-3 tracking-tighter uppercase italic text-gray-900 leading-none">Tutor Dashboard</h2>
                     <p className="text-gray-400 mb-10 text-[10px] font-black uppercase tracking-widest leading-relaxed italic">Verification required to access the expert discovery pipeline.</p>
                     <input
                         type="text"
@@ -195,7 +195,7 @@ function DashboardContent() {
 
                     <nav className="space-y-4 w-full">
                         {[
-                            { id: "HOME", label: "Faculty Hub", icon: LayoutDashboard },
+                            { id: "HOME", label: "Dashboard", icon: LayoutDashboard },
                             { id: "PIPELINE", label: "Discovery Stream", icon: Radar },
                             { id: "BATCHES", label: "Cohort Manager", icon: Box },
                             { id: "CHAT", label: "Dialogue Hub", icon: MessageCircle },
@@ -239,13 +239,13 @@ function DashboardContent() {
                                     <div className="absolute -left-20 top-0 text-[160px] font-black text-gray-100 leading-none tracking-tighter italic select-none pointer-events-none uppercase opacity-50">HUB</div>
                                     <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-full border border-blue-100 mb-8 relative z-10 shadow-sm">
                                         <Activity size={14} className="animate-pulse text-blue-600" />
-                                        <span className="text-[10px] font-black text-blue-600 uppercase tracking-[0.3em] italic">Faculty Terminal Active</span>
+                                        <span className="text-[10px] font-black text-blue-600 uppercase tracking-[0.3em] italic">Dashboard active</span>
                                     </div>
                                     <h1 className="text-6xl md:text-8xl font-black tracking-tighter mb-8 uppercase italic leading-[0.85] text-gray-900 relative z-10">
-                                        Faculty <br/><span className="text-blue-600 underline decoration-blue-600/10 decoration-8 underline-offset-8">Terminal.</span>
+                                        Tutor <span className="text-blue-600">Dashboard</span>
                                     </h1>
                                     <p className="text-lg text-gray-400 font-bold leading-relaxed max-w-xl italic uppercase tracking-tighter opacity-80">
-                                        Monitoring <span className="text-gray-900 font-black underline decoration-blue-600/10">{tutorData?.name || "Expert Faculty"}</span>. Global discovery active.
+                                        Monitoring <span className="text-gray-900 font-black underline decoration-blue-600/10">{tutorData?.name || "Tutors"}</span>. Global discovery active.
                                     </p>
                                 </div>
                                 {activeTab === 'BATCHES' && (
@@ -267,7 +267,7 @@ function DashboardContent() {
                                         {[
                                             { label: "Credit Asset Balance", val: tutorData?.credits || 0, icon: Wallet, theme: "text-blue-600", bg: "bg-blue-50" },
                                             { label: "Student Leads Density", val: leads.length, icon: Radar, theme: "text-indigo-600", bg: "bg-indigo-50" },
-                                            { label: "Faculty Trust Index", val: "A+", icon: ShieldCheck, theme: "text-emerald-600", bg: "bg-emerald-50" },
+                                            { label: "Trust Score", val: "A+", icon: ShieldCheck, theme: "text-emerald-600", bg: "bg-emerald-50" },
                                             { label: "Enrollment Velocity", val: "14%", icon: TrendingUp, theme: "text-amber-600", bg: "bg-amber-50" }
                                         ].map((stat, i) => (
                                             <div key={i} className="group p-12 rounded-[3.5rem] bg-white border border-gray-100 shadow-4xl shadow-blue-900/[0.03] hover:shadow-blue-900/10 transition-all relative overflow-hidden">
@@ -300,7 +300,7 @@ function DashboardContent() {
                                             <div className="absolute top-0 right-0 size-48 bg-blue-600/20 rounded-full -mr-20 -mt-20 blur-3xl group-hover:bg-blue-600/40 transition-all"></div>
                                             <div className="space-y-2">
                                                 <p className="text-[10px] font-black uppercase tracking-[0.5em] opacity-40 italic">Account Tier</p>
-                                                <h3 className="text-3xl font-black italic uppercase tracking-tighter">Verified Faculty</h3>
+                                                <h3 className="text-3xl font-black italic uppercase tracking-tighter">Verified Tutors</h3>
                                             </div>
                                             <div className="space-y-6 relative z-10">
                                                 <div className="flex items-center gap-4 py-4 px-6 bg-white/5 rounded-2xl border border-white/5 backdrop-blur-md">
@@ -337,7 +337,7 @@ function DashboardContent() {
                                                         <div className="size-16 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-black text-2xl italic shadow-2xl shadow-blue-600/20">{lead.student?.name?.[0]}</div>
                                                         <div className="flex-1 min-w-0">
                                                             <h4 className="text-xl font-black uppercase italic text-gray-900 truncate tracking-tighter">{lead.student?.name}</h4>
-                                                            <p className="text-[10px] font-black text-blue-600/60 uppercase tracking-widest leading-none mt-2 italic">Faculty Sync Locked</p>
+                                                            <p className="text-[10px] font-black text-blue-600/60 uppercase tracking-widest leading-none mt-2 italic">Contact locked</p>
                                                         </div>
                                                         <button 
                                                             onClick={async () => {
@@ -470,12 +470,12 @@ function DashboardContent() {
                                                         <Users size={16} className="text-blue-600" />
                                                         <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest leading-none">Occupancy</p>
                                                     </div>
-                                                    <p className="font-black text-xl text-gray-900 italic tracking-tighter leading-none">{course.enrolledCount} / {course.maxSeats} Scholars</p>
+                                                    <p className="font-black text-xl text-gray-900 italic tracking-tighter leading-none">{course.enrolledCount} / {course.maxSeats} Students</p>
                                                 </div>
                                                 <div className="flex flex-col gap-2">
                                                     <div className="flex items-center gap-2">
                                                         <Activity size={16} className="text-emerald-500" />
-                                                        <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest leading-none">Protocol Status</p>
+                                                        <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest leading-none">Status</p>
                                                     </div>
                                                     <p className="font-black text-xl text-emerald-500 italic tracking-tighter leading-none uppercase">{course.isActive ? 'Active_Live' : 'Inactive'}</p>
                                                 </div>
@@ -506,7 +506,7 @@ function DashboardContent() {
                                                 {[1,2,3,4].map(i => <div key={i} className="size-12 rounded-full border-4 border-white bg-blue-50 flex items-center justify-center font-black text-[10px] text-blue-600 ring-2 ring-gray-50">{String.fromCharCode(64+i)}</div>)}
                                                 <div className="size-12 rounded-full border-4 border-white bg-gray-900 text-white flex items-center justify-center font-black text-[10px] ring-2 ring-gray-900">+12</div>
                                             </div>
-                                            <p className="text-[10px] font-black text-gray-300 uppercase tracking-[0.3em] italic mb-4">Scholarly Transaction Ledger</p>
+                                            <p className="text-[10px] font-black text-gray-300 uppercase tracking-[0.3em] italic mb-4">Transaction History</p>
                                             <button className="px-10 py-5 bg-blue-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.4em] shadow-2xl shadow-blue-600/20 hover:scale-105 transition-all">Export Revenue Registry</button>
                                          </div>
                                     </div>
@@ -519,7 +519,7 @@ function DashboardContent() {
                                                     <div className="flex items-center gap-6">
                                                         <div className="size-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-black italic">INR</div>
                                                         <div>
-                                                            <p className="text-sm font-black text-gray-900 uppercase italic tracking-tighter">Scholarly Sync: {t.id.slice(0, 8)}</p>
+                                                            <p className="text-sm font-black text-gray-900 uppercase italic tracking-tighter">Transaction: {t.id.slice(0, 8)}</p>
                                                             <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest mt-1 italic">{new Date(t.createdAt).toLocaleDateString()}</p>
                                                         </div>
                                                     </div>
@@ -561,7 +561,7 @@ export default function Dashboard() {
                     <div className="size-24 rounded-[3.5rem] bg-blue-50 border-2 border-blue-100 flex items-center justify-center animate-spin-slow shadow-inner">
                         <Radar size={32} className="animate-pulse" strokeWidth={3} />
                     </div>
-                    <p className="text-[10px] font-black uppercase tracking-[0.8em] animate-pulse">Initializing Faculty TerminalHub...</p>
+                    <p className="text-[10px] font-black uppercase tracking-[0.8em] animate-pulse">Loading dashboard...</p>
                  </div>
             </div>
         }>

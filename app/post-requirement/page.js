@@ -310,9 +310,9 @@ export default function PostRequirement() {
             {/* Professional Hub Context */}
             <div className="max-w-4xl mx-auto mt-20 grid grid-cols-1 md:grid-cols-3 gap-10 px-6">
                 {[
-                    { label: "Verified Faculty", value: "24k+", icon: Award },
+                    { label: "Verified Tutors", value: "24k+", icon: Award },
                     { label: "Sync Velocity", value: "Avg 15m", icon: Zap },
-                    { label: "Security Tier", value: "Protocol A", icon: ShieldCheck }
+                    { label: "Secure Payments", icon: ShieldCheck }
                 ].map((stat, i) => (
                     <div key={i} className="flex flex-col items-center text-center space-y-3 group">
                         <div className="size-10 bg-white rounded-xl border border-gray-100 flex items-center justify-center text-blue-600/30 group-hover:text-blue-600 transition-colors shadow-sm">

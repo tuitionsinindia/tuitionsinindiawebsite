@@ -8,23 +8,23 @@ export default function StudentFAQ() {
     const questions = [
         {
             question: "How do I find the right tutor for my needs?",
-            answer: "You can use our 'Expert Search' to filter by subject, location, and institutional metrics. Alternatively, deploy our AI Matchmaker for an automated, high-precision recommendation based on your pedagogical requirements."
+            answer: "Use the search page to filter tutors by subject, location, and class level. You can also post your requirement and matching tutors will be notified automatically."
         },
         {
-            question: "Is the first trial session really free?",
-            answer: "The majority of our verified institutional specialists offer a 30-minute diagnostic session at zero cost. Look for the 'Verified Trial' badge on the educator's profile for confirmation."
+            question: "Is it free to search for tutors?",
+            answer: "Yes, searching and browsing tutor profiles is completely free. You can view subjects, experience, ratings, and fees before deciding to connect."
         },
         {
-            question: "How are financial transactions handled?",
-            answer: "We utilize a secure credit-based ecosystem and direct payment protocols through Razorpay. All transactions are encrypted and support UPI, Netbanking, and major platform facilities."
+            question: "How do payments work?",
+            answer: "Payments are handled securely through Razorpay. We support UPI, net banking, debit cards, and credit cards. All transactions are encrypted and safe."
         },
         {
-            question: "What is the Satisfaction Guarantee protocol?",
-            answer: "Our Academic Integrity Guarantee ensures that if your first session does not meet institutional standards, we will re-initiate a high-priority match sequence at no additional cost."
+            question: "What if I'm not happy with a tutor?",
+            answer: "You can close your requirement at any time and post a new one. We also encourage you to leave a review so other students benefit from your experience."
         },
         {
-            question: "Does the platform support home-based discovery?",
-            answer: "Yes. Our matching engine supports 'Home Laboratory', 'Online Synchronous', and 'Institutional Center' modes. You can filter your search based on your preferred learning environment."
+            question: "Can I find tutors for home tuition and online classes?",
+            answer: "Yes! You can filter by teaching mode — home tuition, online classes, or at a coaching centre. Many tutors offer multiple modes."
         }
     ];
 
@@ -37,17 +37,17 @@ export default function StudentFAQ() {
                 
                 <div className="max-w-4xl mx-auto">
                     <div className="inline-flex items-center gap-3 px-4 py-2 bg-blue-50 rounded-full border border-blue-100 mb-8">
-                        <ShieldCheck size={14} className="text-blue-600" />
-                        <span className="text-blue-700 text-xs font-black uppercase tracking-[0.3em]">Institutional Support Matrix</span>
+                        <CircleHelp size={14} className="text-blue-600" />
+                        <span className="text-blue-700 text-xs font-semibold uppercase tracking-wider">Student Help Centre</span>
                     </div>
-                    
-                    <h1 className="text-5xl md:text-8xl font-black tracking-tighter mb-10 leading-[0.9] uppercase italic text-gray-900">
-                        Student <br />
-                        <span className="text-blue-600 font-serif lowercase tracking-normal not-italic px-4">Support</span> Terminal.
+
+                    <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-8 text-gray-900">
+                        Frequently Asked <br />
+                        <span className="text-blue-600">Questions</span>
                     </h1>
-                    
-                    <p className="text-lg md:text-xl text-gray-500 font-medium max-w-2xl mx-auto mb-12 leading-relaxed italic">
-                        Comprehensive documentation for navigating the TuitionsInIndia academic ecosystem. Find clarity on procurement and matching protocols.
+
+                    <p className="text-lg text-gray-500 max-w-2xl mx-auto mb-12 leading-relaxed">
+                        Everything you need to know about finding and connecting with tutors on TuitionsInIndia.
                     </p>
                 </div>
                 
@@ -87,16 +87,16 @@ export default function StudentFAQ() {
                             href="/post-requirement" 
                             className="bg-blue-600 text-white font-black px-12 py-6 rounded-2xl hover:bg-white hover:text-gray-900 active:scale-95 transition-all shadow-2xl shadow-blue-600/20 flex items-center justify-center gap-3 uppercase tracking-widest text-xs"
                         >
-                            Deploy Requirement <ArrowRight size={18} />
+                            Post Requirement <ArrowRight size={18} />
                         </Link>
                         <button className="bg-transparent border border-white/20 text-white font-black px-12 py-6 rounded-2xl hover:bg-white/5 active:scale-95 transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-xs">
                             <Mail size={18} className="text-blue-500" />
-                            Contact Counsel
+                            Contact Support
                         </button>
                     </div>
 
-                    <div className="mt-20 flex items-center justify-center gap-2 text-xs font-black text-gray-500 uppercase tracking-[0.5em]">
-                        <Lock size={12} strokeWidth={3} /> Standard Security Protocols Active
+                    <div className="mt-16 flex items-center justify-center gap-2 text-xs text-gray-400">
+                        <Lock size={12} /> Your data is secure
                     </div>
                 </div>
             </section>

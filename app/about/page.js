@@ -16,7 +16,7 @@ import {
 
 export default function AboutPage() {
     const stats = [
-        { label: "Faculty Members", value: "10K+", icon: Users, color: "text-primary" },
+        { label: "Tutors Listed", value: "10K+", icon: Users, color: "text-primary" },
         { label: "Matches Architected", value: "50K+", icon: Zap, color: "text-amber-400" },
         { label: "Intelligence Hubs", value: "543+", icon: Globe, color: "text-emerald-400" },
         { label: "Trust Index", value: "4.9/5", icon: ShieldCheck, color: "text-purple-400" }
@@ -24,13 +24,13 @@ export default function AboutPage() {
 
     const values = [
         { 
-            title: "Curated Faculty", 
+            title: "Verified Tutors", 
             desc: "Every educator on our platform undergoes a high-fidelity verification sequence to ensure they meet our 'Digital Ivory Tower' standards.", 
             icon: Target 
         },
         { 
             title: "Economic Efficiency", 
-            desc: "Our zero-commission model ensures 100% of the economic value flows directly from students to educators, maximizing pedagogical impact.", 
+            desc: "Our zero-commission model ensures 100% of the economic value flows directly from students to educators, maximizing positive impact.", 
             icon: Layers 
         },
         { 
@@ -46,7 +46,7 @@ export default function AboutPage() {
             
             <main className="max-w-7xl mx-auto px-6 space-y-48">
                 
-                {/* Hero Matrix */}
+                {/* Our Story */}
                 <section className="relative text-center max-w-4xl mx-auto space-y-12">
                     <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-primary/5 blur-[120px] rounded-full -z-10"></div>
                     
@@ -92,7 +92,7 @@ export default function AboutPage() {
                         </div>
                         <div className="flex flex-wrap gap-6">
                             <Link href="/register/tutor" className="px-10 py-5 bg-primary text-white rounded-2xl font-black text-xs tracking-[0.3em] uppercase shadow-2xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all">
-                                Deploy Faculty
+                                Browse Tutors
                             </Link>
                             <Link href="/search" className="px-10 py-5 bg-surface-dark text-white rounded-2xl font-black text-xs tracking-[0.3em] uppercase border border-border-dark hover:border-primary/50 active:scale-95 transition-all">
                                 Discover Experts
@@ -121,7 +121,7 @@ export default function AboutPage() {
                     </div>
                 </section>
 
-                {/* Values Matrix */}
+                {/* Our Values */}
                 <section className="space-y-24">
                     <div className="text-center">
                         <h2 className="text-4xl md:text-5xl font-black uppercase italic tracking-tighter text-white">Core <span className="text-primary font-serif lowercase tracking-normal not-italic">principles</span></h2>
@@ -150,10 +150,10 @@ export default function AboutPage() {
                         <p className="text-xl md:text-2xl text-white/80 font-medium italic leading-relaxed">Join the most elite academic network in Bharat and synchronize your learning trajectory with the future.</p>
                         <div className="flex flex-wrap justify-center gap-6 pt-8">
                             <Link href="/search" className="bg-white text-primary px-16 py-6 rounded-2xl font-black uppercase text-xs tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl shadow-white/10">
-                                Explore Faculty
+                                View Pricing
                             </Link>
                             <Link href="/pricing/student" className="bg-transparent border border-white/30 text-white px-16 py-6 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-white/10 active:scale-95 transition-all">
-                                Protocol Pricing
+                                Transparent Pricing
                             </Link>
                         </div>
                     </div>

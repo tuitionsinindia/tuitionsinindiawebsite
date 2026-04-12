@@ -49,11 +49,11 @@ export default function TutorRegisterPage() {
                         </div>
 
                         <h1 className="text-5xl md:text-7xl font-black text-gray-900 tracking-tighter uppercase italic leading-[0.85]">
-                            Faculty <br/><span className="text-blue-600 underline decoration-blue-600/10 underline-offset-8">Enrollment.</span>
+                            Tutor <br/><span className="text-blue-600">Registration</span>
                         </h1>
                         
                         <p className="text-gray-400 font-black text-[10px] max-w-lg mx-auto uppercase tracking-[0.2em] leading-relaxed italic">
-                            {step === 1 && "Start your professional journey by verifying your institutional identity."}
+                            {step === 1 && "Start your professional journey by verifying your phone number."}
                             {step === 2 && "Calibrate your faculty profile to start receiving academic mandates."}
                             {step === 3 && "Finalize privacy controls and visibility protocols."}
                         </p>

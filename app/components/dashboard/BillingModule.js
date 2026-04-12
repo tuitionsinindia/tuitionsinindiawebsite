@@ -119,7 +119,7 @@ export default function BillingModule({ userData, transactions = [] }) {
                                 <AlertCircle size={80} className="text-gray-300" strokeWidth={1} />
                                 <div className="absolute inset-0 bg-blue-600/10 blur-3xl rounded-full"></div>
                              </div>
-                             <p className="text-[10px] font-black uppercase tracking-[0.6em] max-w-xs mx-auto leading-relaxed">Financial history directory is currently void of institutional logs.</p>
+                             <p className="text-[10px] font-black uppercase tracking-[0.6em] max-w-xs mx-auto leading-relaxed">No transactions yet.</p>
                         </div>
                     )}
                 </div>

@@ -197,7 +197,7 @@ export default function LeadCaptureFlow({ initialRole = "STUDENT", onComplete })
                     </div>
                 </div>
                 <div className="mt-8 flex items-center justify-center gap-2 text-xs font-black text-gray-300 uppercase tracking-widest">
-                    <Lock size={12} strokeWidth={3} /> Standard Security Protocols Active
+                    <Lock size={12} strokeWidth={3} /> Your data is secure
                 </div>
             </div>
         );

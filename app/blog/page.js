@@ -14,7 +14,7 @@ export default function Blog() {
         },
         {
             title: "Scaling Your Pedagogical Estate: From 1 to 50 Verified Students",
-            excerpt: "Learn how the top-earning educators on our platform manage their schedule and grow their institutional brand through our AI-driven matching engine...",
+            excerpt: "Learn how the top-earning educators on our platform manage their schedule and grow their student base through our matching platform...",
             image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=800",
             category: "Expert Growth",
             date: "MARCH 21, 2026",
@@ -48,7 +48,7 @@ export default function Blog() {
                             <span className="text-primary italic font-serif lowercase tracking-normal">Insights</span>.
                         </h1>
                         <p className="text-on-background-dark/60 text-xl font-medium leading-relaxed max-w-2xl">
-                            The official repository of institutional research, educator strategies, and student success frameworks from the TuitionsInIndia community.
+                            The official repository of tips for tutors, guides for students, and platform updates from the TuitionsInIndia community.
                         </p>
                     </div>
 
@@ -105,7 +105,7 @@ export default function Blog() {
                                             </div>
                                             <div>
                                                 <p className="text-white font-black text-xs tracking-tight">{post.author}</p>
-                                                <p className="text-xs font-black uppercase tracking-widest text-primary">Senior Scholar</p>
+                                                <p className="text-xs font-black uppercase tracking-widest text-primary">Team Member</p>
                                             </div>
                                         </div>
                                         <Link href="#" className="p-4 bg-background-dark border border-border-dark rounded-2xl text-primary group-hover:bg-primary group-hover:text-white transition-all shadow-lg active:scale-95">
@@ -126,7 +126,7 @@ export default function Blog() {
                                 Join the <span className="underline decoration-primary decoration-4 underline-offset-4">Academic Registry</span>.
                             </h2>
                             <p className="text-on-background-dark/60 font-medium text-lg mb-12">
-                                Receive monthly intelligence reports on the Indian tutoring market, pedagogical optimization, and AI match frameworks.
+                                Receive monthly updates on the Indian tutoring market and tips to get more students.
                             </p>
                             <div className="flex flex-col sm:flex-row gap-4">
                                 <input 

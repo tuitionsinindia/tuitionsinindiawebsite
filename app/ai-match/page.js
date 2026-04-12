@@ -102,7 +102,7 @@ export default function AIMatchingFlow() {
                                 Analysis <span className="text-primary font-serif lowercase tracking-normal not-italic px-4">complete</span>.
                             </h1>
                             <p className="text-xl text-on-background-dark/40 font-medium italic max-w-2xl mx-auto leading-relaxed">
-                                We've identified the top educator matches based on your unique pedagogical profile.
+                                We've identified the top educator matches based on your requirements.
                             </p>
                         </>
                     )}
@@ -172,7 +172,7 @@ export default function AIMatchingFlow() {
                                 </div>
 
                                 <div className="space-y-4">
-                                    <label className="text-xs font-black text-primary uppercase tracking-[0.3em] ml-6 italic">Academic Protocol Level</label>
+                                    <label className="text-xs font-black text-primary uppercase tracking-[0.3em] ml-6 italic">Class Level</label>
                                     <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                                         {['Primary', 'Middle', 'High School', 'College', 'Elite'].map(lvl => (
                                             <button
@@ -258,14 +258,14 @@ export default function AIMatchingFlow() {
                                     <Cpu size={56} className="animate-pulse" />
                                 </div>
                             </div>
-                            <h2 className="text-4xl font-black text-white italic uppercase tracking-tighter mb-4">Executing Match Protocols</h2>
+                            <h2 className="text-4xl font-black text-white italic uppercase tracking-tighter mb-4">Finding Your Best Matches</h2>
                             <p className="text-on-background-dark/40 font-medium italic max-w-sm mb-16">Filtering verified faculty assets for {subject || "your specifications"}.</p>
 
                             <div className="space-y-6 w-full max-w-md mx-auto text-left">
                                 {[
                                     { label: "Goal metadata analyzed", done: true },
                                     { label: "Cross-referencing domain expertise", done: true },
-                                    { label: "Validating pedagogical alignment", done: false }
+                                    { label: "Checking subject and location match", done: false }
                                 ].map((item, i) => (
                                     <div key={i} className={`flex items-center gap-4 text-xs font-black uppercase tracking-[0.4em] ${item.done ? 'text-primary' : 'text-on-surface-dark/10 animate-pulse'}`}>
                                         {item.done ? <CheckCircle2 size={16} /> : <div className="size-4 border-2 border-border-dark border-t-primary rounded-full animate-spin"></div>}
@@ -330,7 +330,7 @@ export default function AIMatchingFlow() {
                                                         View Full Asset
                                                     </Link>
                                                     <Link href="/post-requirement" className="flex-[2] bg-primary text-white font-black py-6 rounded-2xl hover:scale-[1.02] active:scale-95 shadow-2xl shadow-primary/30 transition-all text-center uppercase tracking-widest text-xs">
-                                                        Initialize Trial Class
+                                                        Book Trial Class
                                                     </Link>
                                                 </div>
                                             </div>

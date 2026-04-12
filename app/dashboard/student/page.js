@@ -218,7 +218,7 @@ function StudentDashboardContent() {
                                             <CheckCircle2 size={40} strokeWidth={3} />
                                         </div>
                                         <div>
-                                            <h2 className="text-3xl md:text-5xl font-black tracking-tighter uppercase italic leading-[0.85] mb-4 text-gray-900">Mandate <br/><span className="text-emerald-500">Active.</span></h2>
+                                            <h2 className="text-3xl md:text-5xl font-black tracking-tighter uppercase italic leading-[0.85] mb-4 text-gray-900">Requirement <br/><span className="text-emerald-500">Posted</span></h2>
                                             <p className="text-gray-500 font-medium text-lg leading-relaxed max-w-xl italic">
                                                 Your requirement has been synchronized with our verified faculty network. Expert mentors will contact you shortly.
                                             </p>
@@ -237,10 +237,10 @@ function StudentDashboardContent() {
                                     <div className="max-w-2xl">
                                         <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-full border border-blue-100 mb-8">
                                             <span className="size-2 rounded-full bg-blue-600 animate-pulse"></span>
-                                            <span className="text-[10px] font-black text-blue-600 uppercase tracking-[0.3em] italic">Protocol: Neural Matching Active</span>
+                                            <span className="text-[10px] font-black text-blue-600 uppercase tracking-[0.3em] italic">Smart matching enabled</span>
                                         </div>
                                         <h1 className="text-6xl md:text-8xl font-black tracking-tighter mb-8 uppercase italic leading-[0.85] text-gray-900">
-                                            Academic <br/><span className="text-blue-600 underline decoration-blue-600/10 decoration-8 underline-offset-8">Terminal.</span>
+                                            Your <span className="text-blue-600">Dashboard</span>
                                         </h1>
                                         <p className="text-xl text-gray-400 font-medium leading-relaxed max-w-xl italic">
                                             Managing the academic trajectory of <span className="text-gray-900 font-black italic uppercase">{studentData?.name || "Candidate"}</span>.
@@ -275,7 +275,7 @@ function StudentDashboardContent() {
                                 {/* Session Sidebar */}
                                 <div className="lg:col-span-4 bg-white rounded-[3rem] border border-gray-100 overflow-hidden flex flex-col shadow-sm">
                                     <div className="p-8 border-b border-gray-50 flex items-center justify-between bg-gray-50/50">
-                                        <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.5em] italic">Active Protocols</h3>
+                                        <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.5em] italic">Your Requests</h3>
                                         <div className="size-8 rounded-lg bg-blue-600 text-white flex items-center justify-center font-black text-xs shadow-lg shadow-blue-600/20">{chatSessions.length}</div>
                                     </div>
                                     <div className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-hide">
@@ -304,10 +304,10 @@ function StudentDashboardContent() {
                                                     </div>
                                                     <div className="flex-1 text-left min-w-0">
                                                         <p className={`text-[10px] font-black uppercase tracking-tight truncate italic leading-none mb-2 ${isActive ? "text-white" : "text-gray-900"}`}>
-                                                            {recipient?.name || "Anonymous Scholar"}
+                                                            {recipient?.name || "User"}
                                                         </p>
                                                         <p className={`text-[10px] font-medium tracking-wide truncate italic opacity-60 leading-none ${isActive ? "text-white/80" : "text-gray-400"}`}>
-                                                            {lastMsg ? lastMsg.content.substring(0, 20) : "Protocol Initialized"}
+                                                            {lastMsg ? lastMsg.content.substring(0, 20) : "No messages yet"}
                                                         </p>
                                                     </div>
                                                     {isActive && <div className="absolute right-0 top-0 bottom-0 w-1.5 bg-white"></div>}
@@ -357,7 +357,7 @@ function StudentDashboardContent() {
                                             <p className="text-3xl font-black text-gray-900 italic leading-[1.1] mb-12 relative z-10 tracking-tighter uppercase line-clamp-3">"{lead.description}"</p>
                                             <div className="grid grid-cols-2 gap-10 pt-10 border-t border-gray-50 relative z-10">
                                                 <div>
-                                                    <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest mb-2 italic">Faculty Zone</p>
+                                                    <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest mb-2 italic">Tutor</p>
                                                     <p className="text-xs font-black text-gray-900 italic uppercase tracking-widest leading-none">{lead.locations?.[0] || 'Remote'}</p>
                                                 </div>
                                                 <div>
@@ -376,7 +376,7 @@ function StudentDashboardContent() {
 
                         {activeTab === "MATCHES" && (
                             <div className="space-y-12 animate-in fade-in duration-700">
-                                <h2 className="text-4xl font-black text-gray-900 uppercase italic tracking-tighter">Faculty <span className="text-emerald-500">Discovery.</span></h2>
+                                <h2 className="text-4xl font-black text-gray-900 uppercase italic tracking-tighter">Tutor <span className="text-emerald-500">Search</span></h2>
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                                     {unlockedTutors.length > 0 ? unlockedTutors.map((t) => (
                                         <div key={t.id} className="bg-white p-12 rounded-[3.5rem] border border-gray-100 hover:border-emerald-500 transition-all text-center group relative overflow-hidden shadow-sm border-b-8">
@@ -444,8 +444,8 @@ function StudentDashboardContent() {
                                     <table className="w-full text-left">
                                         <thead>
                                             <tr className="border-b border-gray-50 bg-gray-50/50">
-                                                <th className="px-12 py-10 text-[10px] font-black uppercase tracking-[0.5em] text-gray-400 italic">Faculty Identity</th>
-                                                <th className="px-12 py-10 text-[10px] font-black uppercase tracking-[0.5em] text-gray-400 italic">Secure Line Protocol</th>
+                                                <th className="px-12 py-10 text-[10px] font-black uppercase tracking-[0.5em] text-gray-400 italic">Tutor</th>
+                                                <th className="px-12 py-10 text-[10px] font-black uppercase tracking-[0.5em] text-gray-400 italic">Contact</th>
                                                 <th className="px-12 py-10 text-[10px] font-black uppercase tracking-[0.5em] text-gray-400 italic">Action Terminal</th>
                                             </tr>
                                         </thead>

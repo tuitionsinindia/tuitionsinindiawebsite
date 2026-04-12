@@ -17,7 +17,7 @@ export default function StudentPricing() {
         <div className="min-h-screen bg-background-dark font-sans text-on-background-dark antialiased pt-40 pb-32 selection:bg-primary/30">
             {/* Redundant Header/Footer removed (in RootLayout) */}
 
-            {/* Hero Protocol */}
+            {/* Hero Section */}
             <section className="py-24 px-6 relative overflow-hidden text-center max-w-7xl mx-auto mb-24">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-primary/5 blur-[120px] rounded-full -z-10"></div>
                 
@@ -71,7 +71,7 @@ export default function StudentPricing() {
                     </ul>
 
                     <Link href="/search" className="w-full py-6 bg-background-dark border border-border-dark text-white font-black rounded-2xl hover:border-primary/50 transition-all uppercase tracking-widest text-xs active:scale-95 shadow-xl">
-                        Explore Faculty
+                        Browse Tutors
                     </Link>
                 </div>
 
@@ -85,11 +85,11 @@ export default function StudentPricing() {
                     </div>
                     <h3 className="text-4xl font-black text-white mb-6 uppercase italic tracking-tighter">Academic Bundles</h3>
                     <p className="text-on-background-dark/40 font-medium mb-16 italic text-lg leading-relaxed max-w-sm">
-                        Consistent pedagogical progress through dedicated mentorship and academic coaching.
+                        Consistent learning progress through dedicated mentorship and academic coaching.
                     </p>
 
                     <div className="mb-16">
-                        <p className="text-xs font-black text-primary uppercase tracking-[0.3em] mb-4">Efficiency Protocol</p>
+                        <p className="text-xs font-black text-primary uppercase tracking-[0.3em] mb-4">Why Students Love Us</p>
                         <div className="text-8xl font-black text-primary italic tracking-tighter">20%<span className="text-2xl text-white font-black not-italic px-4">OFF</span></div>
                     </div>
 
@@ -114,14 +114,14 @@ export default function StudentPricing() {
                 </div>
             </section>
 
-            {/* Satisfaction Protocol */}
+            {/* Our Promise */}
             <section className="py-48 px-6 max-w-7xl mx-auto">
                 <div className="text-center p-16 md:p-32 rounded-[5rem] border border-border-dark bg-surface-dark/40 relative overflow-hidden group shadow-4xl">
                     <div className="absolute inset-0 bg-primary/5 blur-3xl -z-10 group-hover:scale-125 transition-transform duration-1000"></div>
                     <ShieldCheck size={64} className="text-primary mx-auto mb-12 group-hover:scale-110 transition-transform" />
                     <h2 className="text-4xl md:text-6xl font-black mb-10 uppercase italic tracking-tighter text-white">The <span className="text-primary font-serif lowercase tracking-normal not-italic px-4">unconditional</span> trust.</h2>
                     <p className="text-xl md:text-2xl text-on-background-dark/40 font-medium leading-relaxed italic max-w-3xl mx-auto">
-                        Our benchmark for excellence is your pedagogical satisfaction. If your initial session does not meet institutional standards, we provide a priority match re-sequence at zero cost.
+                        Our benchmark for excellence is your satisfaction. If your initial session does not meet your expectations, we provide a new match at zero cost.
                     </p>
                 </div>
             </section>

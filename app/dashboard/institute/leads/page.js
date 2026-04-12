@@ -63,10 +63,10 @@ function InstituteLeadsContent() {
                             <div className="absolute -left-20 top-0 text-[160px] font-black text-gray-100 leading-none tracking-tighter italic select-none pointer-events-none uppercase opacity-50">LEADS</div>
                             <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-full border border-blue-100 mb-8 relative z-10">
                                 <Activity size={14} className="animate-pulse text-blue-600" />
-                                <span className="text-[10px] font-black text-blue-600 uppercase tracking-[0.3em] italic">Unlocked Faculty Pool</span>
+                                <span className="text-[10px] font-black text-blue-600 uppercase tracking-[0.3em] italic">Unlocked Tutors</span>
                             </div>
                             <h1 className="text-6xl md:text-8xl font-black tracking-tighter mb-8 uppercase italic leading-[0.85] text-gray-900 relative z-10">
-                                Lead <br/><span className="text-blue-600 underline decoration-blue-600/10 decoration-8 underline-offset-8">Terminal.</span>
+                                Student Leads
                             </h1>
                             <p className="text-lg text-gray-400 font-bold leading-relaxed max-w-xl italic uppercase tracking-tighter opacity-80">
                                 Managing acquired academic mandates for <span className="text-gray-900 font-black">Authorized Institute</span>. Direct contact protocol enabled.
@@ -137,7 +137,7 @@ function InstituteLeadsContent() {
                                 <div className="absolute inset-0 bg-blue-600/5 blur-[80px] rounded-full scale-150 animate-pulse"></div>
                             </div>
                             <h2 className="text-3xl font-black mb-4 uppercase italic tracking-tighter text-gray-900">Lead Registry Empty.</h2>
-                            <p className="text-gray-400 mb-12 max-w-xs mx-auto font-black text-[10px] uppercase tracking-[0.3em] leading-relaxed italic">Synchronized student mandates will appear in this terminal for institutional processing.</p>
+                            <p className="text-gray-400 mb-12 max-w-xs mx-auto font-black text-[10px] uppercase tracking-[0.3em] leading-relaxed italic">Student requirements matching your subjects will appear here.</p>
                             <Link href={`/dashboard/institute?instituteId=${instituteId}`} className="px-12 py-6 bg-blue-600 text-white font-black text-[10px] uppercase tracking-[0.4em] rounded-[2rem] shadow-2xl shadow-blue-600/30 hover:bg-gray-900 transition-all italic">
                                 Calibrate Discovery Feed
                             </Link>

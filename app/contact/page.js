@@ -33,7 +33,7 @@ export default function ContactPage() {
 
             <main className="px-6 max-w-7xl mx-auto space-y-32">
                 
-                {/* Hero Protocol */}
+                {/* Hero Section */}
                 <section className="text-center relative overflow-hidden max-w-4xl mx-auto">
                     <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-primary/5 blur-[120px] rounded-full -z-10"></div>
                     
@@ -54,7 +54,7 @@ export default function ContactPage() {
 
                 <div className="grid lg:grid-cols-2 gap-24 items-start">
                     
-                    {/* Inquiry Matrix */}
+                    {/* Contact Form */}
                     <section className="bg-surface-dark p-12 md:p-20 rounded-[4rem] border border-border-dark shadow-4xl relative overflow-hidden group">
                         <div className="absolute inset-0 bg-primary/5 blur-3xl opacity-50 -z-10 group-hover:scale-110 transition-transform duration-1000"></div>
                         
@@ -69,7 +69,7 @@ export default function ContactPage() {
                                     onClick={() => setFormState("IDLE")}
                                     className="text-primary font-black uppercase text-xs tracking-[0.4em] border-b-2 border-primary/20 hover:border-primary transition-all pb-2"
                                 >
-                                    Initialize New Batch
+                                    Start New Enquiry
                                 </button>
                             </div>
                         ) : (
@@ -94,7 +94,7 @@ export default function ContactPage() {
                                         />
                                     </div>
                                     <div className="space-y-4">
-                                        <label className="text-xs font-black uppercase tracking-[0.3em] text-on-surface-dark/20 ml-6 italic">Protocol Objective</label>
+                                        <label className="text-xs font-black uppercase tracking-[0.3em] text-on-surface-dark/20 ml-6 italic">What do you need help with?</label>
                                         <div className="relative">
                                             <select className="w-full bg-background-dark p-7 rounded-3xl border border-border-dark focus:border-primary transition-all font-medium italic outline-none appearance-none text-white text-lg">
                                                 <option>Institutional Membership</option>
@@ -139,7 +139,7 @@ export default function ContactPage() {
                                 {[
                                     { label: "Institutional HQ", value: "Cyber Hub, Level 14, Gurugram, Bharat", icon: Building2 },
                                     { label: "Strategic Support", value: "counsel@tuitionsinindia.com", icon: Mail },
-                                    { label: "Protocol Hotline", value: "+91 (800) ACAD-ELITE", icon: Phone }
+                                    { label: "Support Line", value: "+91 (800) ACAD-ELITE", icon: Phone }
                                 ].map((info, i) => (
                                     <div key={i} className="flex gap-8 items-start group">
                                         <div className="size-16 rounded-2xl bg-surface-dark border border-border-dark text-on-surface-dark/40 flex items-center justify-center shrink-0 group-hover:text-primary group-hover:border-primary/30 transition-all">
@@ -154,12 +154,12 @@ export default function ContactPage() {
                             </div>
                         </section>
 
-                        {/* Security Protocol */}
+                        {/* Contact Info */}
                         <section className="p-16 bg-surface-dark rounded-[4rem] border border-border-dark shadow-4xl relative overflow-hidden group">
                             <div className="absolute inset-0 bg-primary/5 opacity-50 -z-10 group-hover:scale-110 transition-transform duration-700"></div>
                             <div className="relative z-10 space-y-8">
                                 <ShieldCheck size={56} className="text-primary group-hover:scale-110 transition-transform" />
-                                <h4 className="text-2xl font-black uppercase italic text-white tracking-tight">Elite Support Protocol</h4>
+                                <h4 className="text-2xl font-black uppercase italic text-white tracking-tight">Need Priority Support?</h4>
                                 <p className="text-lg text-on-surface-dark/60 font-medium leading-relaxed italic opacity-80">
                                     All inquiries are handled with absolute confidentiality and prioritized by our academic advisory board. Expect a high-fidelity response from a senior strategist within 24 hours.
                                 </p>

@@ -189,11 +189,11 @@ export default function FacultyChat({ sessionId, currentUser, recipientName }) {
                 <div ref={messagesEndRef} />
             </div>
 
-            {/* Interaction Matrix */}
+            {/* Message Input */}
             <div className="p-12 md:p-14 bg-gray-50/50 border-t border-gray-100 relative z-20 shadow-inner">
                 {!online && (
                     <div className="absolute top-0 left-1/2 -translate-y-1/2 -translate-x-1/2 px-8 py-3 bg-red-600 text-white rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-3 shadow-2xl anim-fade-in border-4 border-white">
-                        <WifiOff size={16} strokeWidth={3} className="animate-pulse" /> Protocol Alert: Sync Unstable
+                        <WifiOff size={16} strokeWidth={3} className="animate-pulse" /> Connection lost. Retrying...
                     </div>
                 )}
                 

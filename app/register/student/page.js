@@ -48,7 +48,7 @@ export default function StudentRegisterPage() {
                         
                         <p className="text-gray-400 font-black text-xs max-w-lg mx-auto uppercase tracking-[0.2em] leading-relaxed italic">
                             {step === 1 && "Identity synchronization initialized. Authenticate profile via secure identity protocol."}
-                            {step === 2 && "Academic preference configuration. Define your pedagogical constraints for matching."}
+                            {step === 2 && "Tell us what you need so we can find the right tutor for you."}
                         </p>
                     </div>
 
