@@ -6,27 +6,29 @@ export const dynamic = 'force-dynamic';
 export async function POST(request) {
     try {
         const body = await request.json();
-        const { 
-            userId, 
-            tutorId, 
-            name, 
-            phone, 
-            title, 
-            bio, 
-            subjects, 
-            locations, 
-            hourlyRate, 
-            grades, 
-            isInstitute, 
-            instituteName, 
-            contactPerson, 
+        const {
+            userId,
+            tutorId,
+            name,
+            phone,
+            title,
+            bio,
+            subjects,
+            locations,
+            hourlyRate,
+            grades,
+            isInstitute,
+            instituteName,
+            contactPerson,
             experience,
             teachingModes,
             timings,
             boards,
             languages,
             expertiseLevel,
-            gender
+            gender,
+            type,
+            maxSeats
         } = body;
 
         const targetId = userId || tutorId;
@@ -69,7 +71,9 @@ export async function POST(request) {
             boards: boardList,
             languages: languageList,
             expertiseLevel,
-            gender
+            gender,
+            type: type || "PRIVATE",
+            maxSeats: parseInt(maxSeats) || 1
         };
 
         // 4. Upsert Listing

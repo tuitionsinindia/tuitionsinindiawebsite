@@ -25,9 +25,6 @@ export async function POST(req) {
         // 4. Dispatch SMS
         await sendOTP(formattedPhone, otpCode);
 
-        // In development, you might want to console log it just in case Twilio credits run out
-        console.log(`[AUTH] Generated OTP ${otpCode} for ${phone}`);
-
         return NextResponse.json({ success: true, message: "OTP Sent Successfully" });
     } catch (error) {
         console.error("Error sending OTP:", error);
