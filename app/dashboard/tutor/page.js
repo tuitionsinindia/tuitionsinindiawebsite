@@ -53,6 +53,7 @@ function DashboardContent() {
     const [selectedSession, setSelectedSession] = useState(null);
     const [loadingChat, setLoadingChat] = useState(false);
     const [showBatchForm, setShowBatchForm] = useState(false);
+    const [upgradePrompt, setUpgradePrompt] = useState(false);
 
     useEffect(() => {
         const savedId = localStorage.getItem("ti_active_tutor_id");
@@ -125,7 +126,7 @@ function DashboardContent() {
     };
 
     const handleUnlock = async (leadId) => {
-        if (!confirm("Unlock this lead? 1 credit will be used.")) return;
+        if (!confirm("Unlock this lead? Credits will be used.")) return;
         try {
             const res = await fetch("/api/lead/unlock", {
                 method: "POST",
@@ -137,7 +138,11 @@ function DashboardContent() {
                 fetchTutorData();
             } else {
                 const err = await res.json();
-                alert(err.error || "Failed to unlock. Please check your credit balance.");
+                if (err.upgradeRequired) {
+                    setUpgradePrompt(true);
+                } else {
+                    alert(err.error || "Failed to unlock. Please check your credit balance.");
+                }
             }
         } catch (err) { console.error(err); }
     };
@@ -227,7 +232,35 @@ function DashboardContent() {
                     <div className="max-w-5xl mx-auto">
 
                         {activeTab === "SETTINGS" && <SettingsModule userData={tutorData} onUpdate={fetchTutorData} />}
-                        {activeTab === "REVENUE" && <BillingModule userData={tutorData} transactions={transactions} />}
+                        {activeTab === "REVENUE" && <BillingModule userData={tutorData} transactions={transactions} userId={tutorId} onRefresh={fetchTutorData} />}
+
+                        {upgradePrompt && (
+                            <div className="fixed inset-x-0 bottom-6 flex justify-center z-50 px-4">
+                                <div className="bg-white border border-blue-200 shadow-xl rounded-2xl p-5 max-w-md w-full flex items-start gap-4">
+                                    <div className="w-10 h-10 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0">
+                                        <Zap size={18} />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="font-semibold text-gray-900 text-sm mb-1">Free plan limit reached</p>
+                                        <p className="text-gray-500 text-xs mb-3">You've used all 5 free leads this month. Upgrade to Expert for unlimited access.</p>
+                                        <div className="flex gap-2">
+                                            <Link
+                                                href="/pricing/tutor"
+                                                className="px-4 py-2 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+                                            >
+                                                Upgrade to Expert
+                                            </Link>
+                                            <button
+                                                onClick={() => setUpgradePrompt(false)}
+                                                className="px-4 py-2 border border-gray-200 text-gray-600 text-xs font-medium rounded-lg hover:border-gray-300 transition-colors"
+                                            >
+                                                Dismiss
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
 
                         {activeTab === "HOME" && (
                             <div className="space-y-6">
