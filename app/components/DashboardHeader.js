@@ -140,7 +140,7 @@ export default function DashboardHeader({
                         </button>
 
                         {bellOpen && (
-                            <div className="absolute top-full right-0 mt-2 w-80 bg-white border border-gray-100 rounded-2xl shadow-xl z-[70] overflow-hidden">
+                            <div className="absolute top-full right-0 mt-2 w-[calc(100vw-2rem)] sm:w-80 bg-white border border-gray-100 rounded-2xl shadow-xl z-[70] overflow-hidden">
                                 <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
                                     <h3 className="text-sm font-semibold text-gray-900">Notifications</h3>
                                     <div className="flex items-center gap-2">

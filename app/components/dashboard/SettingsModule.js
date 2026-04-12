@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { User, ShieldCheck, Mail, Phone, Bell, Save, Loader2, Lock } from "lucide-react";
+import { useRef } from "react";
+import { User, ShieldCheck, Mail, Phone, Bell, Save, Loader2, Lock, Camera } from "lucide-react";
 
 export default function SettingsModule({ userData, onUpdate }) {
     const [formData, setFormData] = useState({
@@ -22,6 +23,35 @@ export default function SettingsModule({ userData, onUpdate }) {
     const [message, setMessage] = useState(null);
     const [resetSent, setResetSent] = useState(false);
     const [resetLoading, setResetLoading] = useState(false);
+    const [avatarPreview, setAvatarPreview] = useState(userData?.image || null);
+    const [avatarUploading, setAvatarUploading] = useState(false);
+    const fileInputRef = useRef(null);
+
+    const handleAvatarUpload = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        if (file.size > 2 * 1024 * 1024) { setMessage({ type: "error", text: "Image must be under 2MB." }); return; }
+
+        setAvatarUploading(true);
+        const formData = new FormData();
+        formData.append("file", file);
+        try {
+            const res = await fetch("/api/upload/avatar", { method: "POST", body: formData });
+            if (res.ok) {
+                const data = await res.json();
+                setAvatarPreview(data.image);
+                setMessage({ type: "success", text: "Photo updated." });
+                if (onUpdate) onUpdate();
+            } else {
+                const err = await res.json();
+                setMessage({ type: "error", text: err.error || "Upload failed." });
+            }
+        } catch {
+            setMessage({ type: "error", text: "Upload failed." });
+        } finally {
+            setAvatarUploading(false);
+        }
+    };
 
     const handlePasswordReset = async () => {
         if (!userData?.email) return;
@@ -86,6 +116,43 @@ export default function SettingsModule({ userData, onUpdate }) {
             <div>
                 <h2 className="text-2xl font-bold text-gray-900">Settings</h2>
                 <p className="text-gray-500 text-sm mt-1">Manage your profile and notification preferences.</p>
+            </div>
+
+            {/* Profile Photo */}
+            <div className="bg-white border border-gray-200 rounded-2xl p-6 flex items-center gap-5">
+                <div className="relative group">
+                    <div className="size-20 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-bold text-2xl overflow-hidden border-2 border-gray-200">
+                        {avatarPreview ? (
+                            <img src={avatarPreview} alt="Profile" className="w-full h-full object-cover" />
+                        ) : (
+                            userData?.name?.[0] || <User size={28} />
+                        )}
+                    </div>
+                    <button
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={avatarUploading}
+                        className="absolute -bottom-1 -right-1 size-7 rounded-full bg-blue-600 text-white flex items-center justify-center border-2 border-white hover:bg-blue-700 transition-colors"
+                    >
+                        {avatarUploading ? <Loader2 size={12} className="animate-spin" /> : <Camera size={12} />}
+                    </button>
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        onChange={handleAvatarUpload}
+                        className="hidden"
+                    />
+                </div>
+                <div>
+                    <p className="text-sm font-semibold text-gray-900">{userData?.name || "User"}</p>
+                    <p className="text-xs text-gray-400 mt-0.5">{userData?.email || userData?.phone || ""}</p>
+                    <button
+                        onClick={() => fileInputRef.current?.click()}
+                        className="mt-2 text-xs text-blue-600 hover:underline font-medium"
+                    >
+                        {avatarPreview ? "Change photo" : "Upload photo"}
+                    </button>
+                </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
