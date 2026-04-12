@@ -319,7 +319,7 @@ function StudentDashboardContent() {
                                     </div>
                                 </div>
 
-                                {/* Active Terminal */}
+                                {/* Active Chats */}
                                 <div className="lg:col-span-8 overflow-hidden rounded-[4rem] bg-white border border-gray-100 shadow-sm relative">
                                     {selectedSession ? (
                                         <FacultyChat 
@@ -446,7 +446,7 @@ function StudentDashboardContent() {
                                             <tr className="border-b border-gray-50 bg-gray-50/50">
                                                 <th className="px-12 py-10 text-[10px] font-black uppercase tracking-[0.5em] text-gray-400 italic">Tutor</th>
                                                 <th className="px-12 py-10 text-[10px] font-black uppercase tracking-[0.5em] text-gray-400 italic">Contact</th>
-                                                <th className="px-12 py-10 text-[10px] font-black uppercase tracking-[0.5em] text-gray-400 italic">Action Terminal</th>
+                                                <th className="px-12 py-10 text-[10px] font-black uppercase tracking-[0.5em] text-gray-400 italic">Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-gray-50">
@@ -520,7 +520,7 @@ function StudentDashboardContent() {
                 </main>
             </div>
 
-            {/* Review Terminal Modal */}
+            {/* Review Modal */}
             <ReviewModal
                 isOpen={isReviewOpen}
                 onClose={() => setIsReviewOpen(false)}

@@ -167,7 +167,7 @@ function InstituteDashboardContent() {
                         onClick={() => setInstituteId(document.getElementById('instInput').value)}>
                         AUTHORIZE ACCESS <ArrowRight size={16} strokeWidth={3} />
                     </button>
-                    <Link href="/" className="inline-block mt-8 text-xs font-black uppercase tracking-[0.3em] text-white/20 hover:text-indigo-500 transition-colors italic">Bypass Terminal</Link>
+                    <Link href="/" className="inline-block mt-8 text-xs font-black uppercase tracking-[0.3em] text-white/20 hover:text-indigo-500 transition-colors italic">Back to Home</Link>
                 </div>
             </div>
         );

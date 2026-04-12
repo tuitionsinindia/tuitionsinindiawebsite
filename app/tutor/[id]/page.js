@@ -285,7 +285,7 @@ export default async function TutorProfile({ params, searchParams }) {
                         </div>
                     </div>
 
-                    {/* Right Column: Enrollment Terminal */}
+                    {/* Right Column: Get Started */}
                     <aside className="lg:col-span-4">
                         <div className="sticky top-40">
                             <div className="bg-white rounded-[4rem] shadow-4xl shadow-blue-900/10 p-12 lg:p-14 border border-gray-100 relative overflow-hidden group border-b-[12px] border-blue-600">

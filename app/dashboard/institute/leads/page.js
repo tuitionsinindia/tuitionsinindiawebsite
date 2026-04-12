@@ -157,7 +157,7 @@ export default function InstituteLeads() {
                     <div className="size-24 rounded-[3.5rem] bg-blue-50 border-2 border-blue-100 flex items-center justify-center animate-spin-slow shadow-3xl shadow-blue-900/10">
                         <Loader2 size={32} className="animate-pulse" strokeWidth={3} />
                     </div>
-                    <p className="text-[10px] font-black uppercase tracking-[0.8em] animate-pulse">Initializing Lead TerminalHub...</p>
+                    <p className="text-[10px] font-black uppercase tracking-[0.8em] animate-pulse">Loading leads...</p>
                  </div>
             </div>
         }>

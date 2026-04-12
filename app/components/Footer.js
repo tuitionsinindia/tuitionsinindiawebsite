@@ -56,7 +56,7 @@ export default function Footer() {
                                 { name: "Institute Solutions", href: "/how-it-works/institute" },
                                 { name: "Pricing Models", href: "/pricing/tutor" },
                                 { name: "Academic Blog", href: "/blog" },
-                                { name: "Contact Terminal", href: "/contact" }
+                                { name: "Contact Us", href: "/contact" }
                             ].map((link, i) => (
                                 <Link 
                                     key={i} 

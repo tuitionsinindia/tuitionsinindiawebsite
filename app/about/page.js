@@ -140,7 +140,7 @@ export default function AboutPage() {
                     </div>
                 </section>
 
-                {/* Terminal CTA */}
+                {/* Call to Action */}
                 <section className="p-16 md:p-32 bg-primary rounded-[5rem] text-center text-white relative overflow-hidden shadow-4xl group">
                     <div className="absolute -right-20 -bottom-20 size-96 bg-white/10 rounded-full blur-[100px] group-hover:scale-125 transition-transform duration-1000"></div>
                     <div className="absolute -left-20 -top-20 size-96 bg-black/10 rounded-full blur-[100px] group-hover:scale-125 transition-transform duration-1000"></div>

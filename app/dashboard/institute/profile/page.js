@@ -101,7 +101,7 @@ function InstituteProfileEditorContent() {
                 <div className="bg-surface-dark p-10 rounded-[2.5rem] border border-border-dark max-w-md w-full text-center">
                     <h2 className="text-3xl font-black text-white mb-4 uppercase italic tracking-tighter">Access Denied</h2>
                     <p className="text-on-surface-dark/40 mb-8 font-medium uppercase tracking-widest text-xs italic leading-loose">"Identity verification required to access the B2B configuration matrix."</p>
-                    <Link href="/dashboard/institute" className="text-indigo-500 font-black text-xs uppercase tracking-[0.3em] hover:text-white transition-colors">Return to Terminal</Link>
+                    <Link href="/dashboard/institute" className="text-indigo-500 font-black text-xs uppercase tracking-[0.3em] hover:text-white transition-colors">Back to Dashboard</Link>
                 </div>
             </div>
         );
