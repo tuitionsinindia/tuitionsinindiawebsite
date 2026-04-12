@@ -18,6 +18,7 @@ model User {
   phoneVerified      Boolean            @default(false)
   isProfileComplete  Boolean            @default(false)
   privacySettings    Json?              @default("{\"showPhonePublicly\": true, \"preferredContact\": \"PHONE\"}")
+  notificationPrefs  Json?              @default("{\"emailMatches\": true, \"emailMessages\": true, \"emailPayments\": true, \"smsLeads\": false}")
   lat                Float?
   lng                Float?
   isVerified         Boolean            @default(false)
@@ -39,6 +40,7 @@ model User {
   reviewsGiven       Review[]           @relation("ReviewAuthor")
   reviewsReceived    Review[]           @relation("ReviewTarget")
   transactions       Transaction[]
+  notifications      Notification[]
 }
 
 model Listing {
@@ -186,6 +188,18 @@ model Message {
   createdAt DateTime    @default(now())
   sender    User        @relation("SentMessages", fields: [senderId], references: [id])
   session   ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // LEAD_UNLOCK | NEW_LEAD | NEW_MESSAGE | PAYMENT | SYSTEM
+  title     String
+  body      String
+  isRead    Boolean  @default(false)
+  link      String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 enum Role {
