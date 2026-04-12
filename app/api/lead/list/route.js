@@ -26,17 +26,24 @@ export async function GET(request) {
 
             if (tutorListing) {
                 const orConditions = [];
-                
+
                 if (tutorListing.subjects && tutorListing.subjects.length > 0) {
-                    orConditions.push({
-                        subjects: { hasSome: tutorListing.subjects }
-                    });
+                    // Include both original and lowercase variants for case-insensitive matching
+                    const subjectVariants = [...new Set([
+                        ...tutorListing.subjects,
+                        ...tutorListing.subjects.map(s => s.toLowerCase()),
+                        ...tutorListing.subjects.map(s => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase()),
+                    ])];
+                    orConditions.push({ subjects: { hasSome: subjectVariants } });
                 }
 
                 if (tutorListing.locations && tutorListing.locations.length > 0) {
-                    orConditions.push({
-                        locations: { hasSome: tutorListing.locations }
-                    });
+                    const locationVariants = [...new Set([
+                        ...tutorListing.locations,
+                        ...tutorListing.locations.map(l => l.toLowerCase()),
+                        ...tutorListing.locations.map(l => l.charAt(0).toUpperCase() + l.slice(1).toLowerCase()),
+                    ])];
+                    orConditions.push({ locations: { hasSome: locationVariants } });
                 }
 
                 if (orConditions.length > 0) {

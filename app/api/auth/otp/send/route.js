@@ -22,12 +22,19 @@ export async function POST(request) {
 
         let user;
         if (isRegistration) {
-            // Registration flow — create or update user
-            user = await prisma.user.upsert({
-                where: { phone },
-                update: { name: name || undefined, role },
-                create: { phone, name: name || "User", role, phoneVerified: false },
-            });
+            // Registration flow — create if new, update name if existing
+            const existing = await prisma.user.findUnique({ where: { phone } });
+            if (existing) {
+                // Allow re-registration to proceed (user may be completing a profile)
+                user = await prisma.user.update({
+                    where: { phone },
+                    data: { name: name || existing.name },
+                });
+            } else {
+                user = await prisma.user.create({
+                    data: { phone, name: name || "User", role, phoneVerified: false },
+                });
+            }
         } else {
             // Login flow — only find existing user, don't create
             user = await prisma.user.findUnique({ where: { phone } });
