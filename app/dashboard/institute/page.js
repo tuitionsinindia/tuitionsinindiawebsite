@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import DashboardHeader from "@/app/components/DashboardHeader";
-import FacultyChat from "@/app/components/chat/FacultyChat";
+import Chat from "@/app/components/chat/Chat";
 import SettingsModule from "@/app/components/dashboard/SettingsModule";
 import BillingModule from "@/app/components/dashboard/BillingModule";
 import { 
@@ -288,7 +288,7 @@ function InstituteDashboardContent() {
                                     </div>
                                     <div className="lg:col-span-8 overflow-hidden">
                                         {selectedSession ? (
-                                            <FacultyChat 
+                                            <Chat 
                                                 sessionId={selectedSession.id} 
                                                 currentUser={{ id: instituteId, name: instituteData?.name }} 
                                                 recipientName={selectedSession.tutorId === instituteId ? selectedSession.student?.name : selectedSession.tutor?.name}

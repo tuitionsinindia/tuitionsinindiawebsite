@@ -8,7 +8,7 @@ export default function ChatInitiator({ studentId, tutorId, currentUser, recipie
     const router = useRouter();
     const [loading, setLoading] = useState(false);
 
-    // Protocol Check: Free users cannot initiate proactive neural links
+    // Free users cannot start chats without unlocking first
     const isFree = currentUser?.subscriptionTier === 'FREE' || !currentUser;
     const canInitiate = !isFree || currentUser?.role === 'ADMIN';
 

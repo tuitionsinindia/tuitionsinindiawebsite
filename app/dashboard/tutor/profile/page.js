@@ -155,7 +155,7 @@ function ProfileEditorContent() {
                             </div>
                         </section>
 
-                        {/* Section 2: Expertise & Domain */}
+                        {/* Section 2: Expertise & Subjects */}
                         <section className="bg-white dark:bg-slate-900/50 rounded-[3rem] p-10 md:p-16 border border-outline-variant/5 shadow-sm">
                             <h2 className="text-3xl font-headline font-black mb-10 uppercase italic tracking-tight">Expertise <span className="text-primary not-italic font-serif lowercase font-light">domain</span></h2>
                             

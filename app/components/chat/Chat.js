@@ -19,7 +19,7 @@ import {
     MessageCircle
 } from "lucide-react";
 
-export default function FacultyChat({ sessionId, currentUser, recipientName }) {
+export default function Chat({ sessionId, currentUser, recipientName }) {
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState("");
     const [loading, setLoading] = useState(true);
@@ -118,7 +118,7 @@ export default function FacultyChat({ sessionId, currentUser, recipientName }) {
     return (
         <div className="flex flex-col h-full bg-white backdrop-blur-3xl rounded-[3.5rem] border border-gray-100 overflow-hidden relative shadow-4xl shadow-blue-900/[0.03] border-b-[12px] border-blue-600 anim-fade-in group">
             
-            {/* Tactical Identity Header */}
+            {/* Chat Header */}
             <div className="p-8 md:p-12 bg-gray-50/50 border-b border-gray-100 flex items-center justify-between relative z-10 shadow-sm">
                 <div className="flex items-center gap-6">
                     <div className="size-16 rounded-[1.8rem] bg-blue-600 text-white flex items-center justify-center font-black text-2xl italic shadow-2xl shadow-blue-600/20 border border-blue-400/20 group-hover:rotate-6 transition-transform">

@@ -34,7 +34,7 @@ export default function AboutPage() {
             icon: Layers 
         },
         { 
-            title: "Neural Matching", 
+            title: "Smart Matching", 
             desc: "Our proprietary AI Matchmaker analyzes millions of academic data points to ensure the perfect alignment between student needs and faculty expertise.", 
             icon: Cpu 
         }

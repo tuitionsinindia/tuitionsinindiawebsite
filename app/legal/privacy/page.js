@@ -38,7 +38,7 @@ export default function PrivacyPolicy() {
                         <div className="size-20 rounded-3xl bg-gray-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-inner border border-gray-100">
                             <Lock size={32} strokeWidth={1} />
                         </div>
-                        <h2 className="text-2xl font-black text-gray-900 uppercase italic tracking-tighter underline decoration-blue-600/10 decoration-8 underline-offset-4">01. Neural Security</h2>
+                        <h2 className="text-2xl font-black text-gray-900 uppercase italic tracking-tighter underline decoration-blue-600/10 decoration-8 underline-offset-4">01. Data Security</h2>
                         <p className="text-gray-500 leading-relaxed font-medium italic text-lg">
                             We collect only the information necessary to connect students with tutors. Your data is encrypted and never shared without your consent.
                         </p>
@@ -75,7 +75,7 @@ export default function PrivacyPolicy() {
                     </div>
                 </div>
 
-                {/* Tactical Support Node */}
+                {/* Contact Us */}
                 <div className="p-16 md:p-24 bg-gray-50/50 rounded-[4rem] border border-gray-100 flex flex-col lg:flex-row items-center justify-between gap-16 group transition-all hover:border-blue-600/20 hover:bg-white relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-2 h-full bg-blue-600 opacity-10"></div>
                     <div className="space-y-6 relative z-10 max-w-xl">

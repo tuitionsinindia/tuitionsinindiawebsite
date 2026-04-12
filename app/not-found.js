@@ -22,7 +22,7 @@ export default function NotFound() {
                         </h1>
                         
                         <h2 className="text-5xl md:text-8xl font-black text-white italic tracking-tighter mb-8 leading-tight">
-                            Domain <span className="text-primary underline decoration-primary/20 decoration-8 underline-offset-8">Deficient</span>.
+                            Page <span className="text-primary underline decoration-primary/20 decoration-8 underline-offset-8">Not Found</span>.
                         </h2>
                         
                         <p className="text-on-background-dark/60 font-medium text-xl max-w-xl mx-auto leading-relaxed mb-16">

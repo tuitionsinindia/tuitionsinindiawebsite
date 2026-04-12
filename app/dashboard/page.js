@@ -11,7 +11,7 @@ export default function DashboardPortal() {
             <div className="max-w-4xl w-full z-10 text-center">
                 <div className="mb-12">
                     <span className="bg-blue-600 text-white text-xs font-black px-5 py-2 rounded-full uppercase tracking-[0.4em] inline-block shadow-lg mb-8">
-                        Access Neural Grid
+                        Go to Dashboard
                     </span>
                     <h1 className="mb-6">Portal <span className="text-blue-600">Entry</span></h1>
                     <p className="text-gray-500 font-medium text-base max-w-sm mx-auto italic uppercase tracking-widest opacity-60">Select your operational identity to synchronize with discovery streams.</p>

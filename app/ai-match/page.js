@@ -155,13 +155,13 @@ export default function AIMatchingFlow() {
                     {step === 2 && !isAnalyzing && (
                         <div className="animate-fade-in-up space-y-12">
                             <div className="text-center">
-                                <h2 className="text-3xl font-black text-white italic tracking-tighter uppercase mb-4">Domain Analysis</h2>
+                                <h2 className="text-3xl font-black text-white italic tracking-tighter uppercase mb-4">Subject Match</h2>
                                 <p className="text-on-background-dark/40 font-medium italic">Help us calibrate by providing subject depth.</p>
                             </div>
 
                             <div className="space-y-10">
                                 <div className="space-y-4">
-                                    <label className="text-xs font-black text-primary uppercase tracking-[0.3em] ml-6 italic">Target Subject / Domain</label>
+                                    <label className="text-xs font-black text-primary uppercase tracking-[0.3em] ml-6 italic">Subject</label>
                                     <input
                                         type="text"
                                         value={subject}
@@ -282,7 +282,7 @@ export default function AIMatchingFlow() {
                             {aiResults && aiResults.length > 0 ? (
                                 <div className="space-y-10">
                                     <div className="inline-flex items-center gap-3 bg-emerald-400/10 px-6 py-2 rounded-full border border-emerald-400/20 text-emerald-400 font-black uppercase tracking-[0.3em] text-xs">
-                                        <UserCheck size={14} strokeWidth={3} /> Neural Match Score: {aiResults[0].matchScore}%
+                                        <UserCheck size={14} strokeWidth={3} /> Match Score: {aiResults[0].matchScore}%
                                     </div>
 
                                     {/* Top Match Card */}
@@ -313,7 +313,7 @@ export default function AIMatchingFlow() {
                                                 <div className="bg-surface-dark p-10 rounded-[3rem] border border-border-dark">
                                                     <h4 className="text-xs font-black text-primary uppercase tracking-[0.3em] mb-6 flex items-center gap-3">
                                                         <Cpu size={14} />
-                                                        Recommendation Matrix Basis
+                                                        How We Match You
                                                     </h4>
                                                     <ul className="space-y-4">
                                                         {aiResults[0].matchReasons.map((reason, idx) => (

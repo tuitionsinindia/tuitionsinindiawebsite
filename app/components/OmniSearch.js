@@ -81,7 +81,7 @@ export default function OmniSearch({
                    <Search size={16} className="text-gray-300 mr-3" />
                    <input 
                         className="w-full bg-transparent border-none focus:ring-0 text-[10px] font-black uppercase tracking-widest text-gray-900 outline-none placeholder:text-gray-200 italic"
-                        placeholder="Neural Domain Search..."
+                        placeholder="Search..."
                         value={searchSubject}
                         onChange={(e) => setSearchSubject(e.target.value)}
                         onFocus={() => searchSubject && setShowSubjectSuggestions(true)}
@@ -128,10 +128,10 @@ export default function OmniSearch({
             )}
 
             <div className={`bg-white flex flex-col md:flex-row items-center gap-4 relative ${variant === 'hero' ? 'p-5 md:p-8 rounded-b-[3rem]' : 'rounded-[2.5rem] border border-gray-100 p-4 shadow-xl shadow-blue-900/5'}`}>
-                {/* Domain Matrix */}
+                {/* Subjects */}
                 <div className="w-full md:w-1/3 relative border-2 border-gray-50 rounded-[1.8rem] flex flex-col px-7 py-5 bg-gray-50/50 focus-within:bg-white focus-within:border-blue-600/30 transition-all group" ref={subjectRef}>
                     <span className="text-[9px] font-black uppercase tracking-[0.4em] text-gray-300 mb-1 flex items-center gap-2 group-focus-within:text-blue-600 italic">
-                        <Search size={14} strokeWidth={3} /> Domain / Subject
+                        <Search size={14} strokeWidth={3} /> Subject
                     </span>
                     <input 
                         className="w-full bg-transparent border-none focus:ring-0 text-gray-900 font-black text-sm uppercase outline-none placeholder:text-gray-200 italic p-0" 

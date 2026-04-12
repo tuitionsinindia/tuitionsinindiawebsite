@@ -37,7 +37,7 @@ import {
     ArrowUpRight
 } from "lucide-react";
 import DashboardHeader from "@/app/components/DashboardHeader";
-import FacultyChat from "@/app/components/chat/FacultyChat";
+import Chat from "@/app/components/chat/Chat";
 import SettingsModule from "@/app/components/dashboard/SettingsModule";
 import BillingModule from "@/app/components/dashboard/BillingModule";
 
@@ -434,7 +434,7 @@ function DashboardContent() {
                                     </div>
                                     <div className="flex-1 bg-white relative">
                                         {selectedSession ? (
-                                            <FacultyChat 
+                                            <Chat 
                                                 sessionId={selectedSession.id}
                                                 currentUser={tutorData}
                                                 recipientName={selectedSession.student?.name}

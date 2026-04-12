@@ -152,7 +152,7 @@ export default function SubjectsPage() {
                                 <span className={`font-black uppercase tracking-widest text-xs mb-2 block ${selectedGrade === grade ? "text-white" : "text-primary"}`}>Level Category</span>
                                 <h3 className="text-xl font-black leading-tight tracking-tight mb-4">{grade}</h3>
                                 <p className={`text-xs font-black uppercase tracking-[0.2em] ${selectedGrade === grade ? "text-white/80" : "text-on-surface-dark/40"}`}>
-                                    {GRADE_SUBJECT_MAPPING[grade].length} Verified Domains
+                                    {GRADE_SUBJECT_MAPPING[grade].length} Popular Subjects
                                 </p>
                             </button>
                         ))}
@@ -212,7 +212,7 @@ export default function SubjectsPage() {
                                 <span className="text-white text-xs font-black uppercase tracking-widest">Post Requirement</span>
                             </div>
                             <h2 className="text-4xl md:text-6xl font-black text-white italic tracking-tighter leading-tight mb-8">
-                                Domain not found in <br className="hidden md:block" /> the <span className="underline decoration-white/30 decoration-8 underline-offset-8">Primary Inventory</span>?
+                                Subject not found in <br className="hidden md:block" /> the <span className="underline decoration-white/30 decoration-8 underline-offset-8">All Subjects</span>?
                             </h2>
                             <p className="text-white/80 font-medium text-lg mb-14 max-w-2xl mx-auto">
                                 Our AI system can deploy custom discovery markers. Post a specific requirement and let our matching engine authenticate the perfect educator.

@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Script from "next/script";
 import Link from "next/link";
 import DashboardHeader from "@/app/components/DashboardHeader";
-import FacultyChat from "@/app/components/chat/FacultyChat";
+import Chat from "@/app/components/chat/Chat";
 import { 
     GraduationCap, 
     Briefcase, 
@@ -322,7 +322,7 @@ function StudentDashboardContent() {
                                 {/* Active Chats */}
                                 <div className="lg:col-span-8 overflow-hidden rounded-[4rem] bg-white border border-gray-100 shadow-sm relative">
                                     {selectedSession ? (
-                                        <FacultyChat 
+                                        <Chat 
                                             sessionId={selectedSession.id} 
                                             currentUser={{ id: studentId, name: studentData?.name }} 
                                             recipientName={selectedSession.studentId === studentId ? selectedSession.tutor?.name : selectedSession.student?.name}
@@ -361,7 +361,7 @@ function StudentDashboardContent() {
                                                     <p className="text-xs font-black text-gray-900 italic uppercase tracking-widest leading-none">{lead.locations?.[0] || 'Remote'}</p>
                                                 </div>
                                                 <div>
-                                                    <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest mb-2 italic">Neural Level</p>
+                                                    <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest mb-2 italic">Grade Level</p>
                                                     <p className="text-xs font-black text-gray-900 italic uppercase tracking-widest leading-none">{lead.grades?.[0] || 'Global'}</p>
                                                 </div>
                                             </div>

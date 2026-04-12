@@ -106,7 +106,7 @@ export default function RequirementForm({ user, onComplete }) {
                     <div className={`h-full bg-blue-600 transition-all duration-1000 ${step === 1 ? "w-1/3" : step === 2 ? "w-2/3" : "w-full"}`}></div>
                 </div>
 
-                {/* Tactical Header */}
+                {/* Header */}
                 <div className="mb-12 flex justify-between items-start">
                     <div>
                         <div className="flex items-center gap-2 text-blue-600 font-black text-xs uppercase tracking-[0.4em] mb-4 leading-none">
@@ -115,7 +115,7 @@ export default function RequirementForm({ user, onComplete }) {
                         <h2 className="text-4xl font-black text-gray-900 tracking-tighter uppercase italic leading-[0.9]">
                             {step === 1 && "Your <br/><span className='text-blue-600'>Requirements</span>"}
                             {step === 2 && "Logistics <br/><span className='text-blue-600'>Constraints.</span>"}
-                            {step === 3 && "Neural <br/><span className='text-blue-600'>Verification.</span>"}
+                            {step === 3 && "Review & <span className='text-blue-600'>Submit</span>"}
                         </h2>
                     </div>
                     {step > 1 && (
@@ -304,7 +304,7 @@ export default function RequirementForm({ user, onComplete }) {
                     </div>
                 )}
 
-                {/* Step 3: Neural Verification */}
+                {/* Step 3: Review & Submit */}
                 {step === 3 && (
                     <div className="space-y-10 animate-in zoom-in-95 duration-700">
                         <div className="bg-blue-50/50 border-2 border-blue-100 rounded-[3.5rem] p-10 space-y-8 shadow-inner">
@@ -337,7 +337,7 @@ export default function RequirementForm({ user, onComplete }) {
                         </div>
 
                         <div className="space-y-4">
-                            <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2">Neural Description (Brief)</label>
+                            <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2">Additional Details (Brief)</label>
                             <textarea 
                                 rows={3}
                                 value={form.description}

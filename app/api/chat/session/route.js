@@ -62,7 +62,7 @@ export async function POST(req) {
             }
         });
 
-        // 2. If it's a NEW connection, enforce Protocol Access Control
+        // 2. If new connection, check if initiator has unlock or premium
         if (!session) {
             const { initiatorId } = body;
             

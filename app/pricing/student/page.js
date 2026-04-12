@@ -36,7 +36,7 @@ export default function StudentPricing() {
                 </p>
             </section>
 
-            {/* Pricing Matrix */}
+            {/* Pricing Plans */}
             <section className="px-6 max-w-7xl mx-auto grid md:grid-cols-2 gap-12">
                 
                 {/* Pay Per Hour */}
