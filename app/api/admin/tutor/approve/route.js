@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { isAdminAuthorized } from "@/lib/adminAuth";
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request) {
+    if (!isAdminAuthorized(request)) {
+        return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
     try {
         const body = await request.json();
         const { tutorId, isApproved } = body;

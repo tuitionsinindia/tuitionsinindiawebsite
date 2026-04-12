@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { isAdminAuthorized } from "@/lib/adminAuth";
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(request) {
+    if (!isAdminAuthorized(request)) {
+        return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
     try {
         // 1. Fetch generic counts
         const totalTutors = await prisma.user.count({ where: { role: 'TUTOR' } });

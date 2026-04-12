@@ -22,6 +22,7 @@ model User {
   lng                Float?
   isVerified         Boolean            @default(false)
   isIdVerified       Boolean            @default(false)
+  isSuspended        Boolean            @default(false)
   credits            Int                @default(0)
   subscriptionTier   SubscriptionTier   @default(FREE)
   subscriptionStatus SubscriptionStatus @default(INACTIVE)
