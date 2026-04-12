@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import Link from "next/link";
-import { GraduationCap, ArrowLeft, Loader2, Search, MapPin, BookOpen, CheckCircle2 } from "lucide-react";
+import { GraduationCap, ArrowLeft, Loader2, Search, MapPin, BookOpen, CheckCircle2, Phone } from "lucide-react";
 import LeadCaptureFlow from "../../components/LeadCaptureFlow";
 import RequirementForm from "../../components/RequirementForm";
 
@@ -12,21 +12,24 @@ function StudentRegisterContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [user, setUser] = useState(null);
-    const [step, setStep] = useState(1);
+    const [step, setStep] = useState(1); // 1=OTP, 2=Requirement, 3=Preferences, 4=Contact
 
     const prefill = {
         subject: searchParams.get("subject") || "",
         grade: searchParams.get("grade") || "",
         location: searchParams.get("location") || "",
+        category: searchParams.get("category") || "",
         tutorId: searchParams.get("tutorId") || "",
         intent: searchParams.get("intent") || "",
     };
 
     const hasContext = prefill.subject || prefill.location || prefill.tutorId;
-    const steps = [
-        { id: 1, label: "Verify Phone" },
-        { id: 2, label: "Your Requirement" },
-        { id: 3, label: "Confirm" },
+
+    const stepLabels = [
+        { id: 1, label: "Verify Phone", icon: Phone },
+        { id: 2, label: "Requirement", icon: BookOpen },
+        { id: 3, label: "Preferences", icon: Search },
+        { id: 4, label: "Contact Info", icon: GraduationCap },
     ];
 
     return (
@@ -36,13 +39,13 @@ function StudentRegisterContent() {
                     <ArrowLeft size={16} /> Back
                 </Link>
 
-                {/* Context Banner — shows what they searched for */}
+                {/* Context Banner */}
                 {hasContext && step === 1 && (
                     <div className="mb-6 p-4 bg-blue-50 border border-blue-100 rounded-xl flex items-start gap-3">
                         <Search size={16} className="text-blue-500 mt-0.5 shrink-0" />
                         <div>
                             <p className="text-sm font-medium text-blue-900">
-                                {prefill.intent === "unlock" ? "Create a free account to contact this tutor" : "Find the right tutor for you"}
+                                {prefill.intent === "unlock" ? "Create a free account to contact this tutor" : "Sign up to find the right tutor"}
                             </p>
                             <div className="flex flex-wrap gap-2 mt-2">
                                 {prefill.subject && (
@@ -67,32 +70,35 @@ function StudentRegisterContent() {
 
                 {/* Header */}
                 <div className="text-center mb-6">
-                    <div className="size-14 rounded-2xl bg-blue-600 text-white flex items-center justify-center mx-auto mb-4">
-                        <GraduationCap size={28} />
+                    <div className="size-12 rounded-xl bg-blue-600 text-white flex items-center justify-center mx-auto mb-3">
+                        <GraduationCap size={24} />
                     </div>
-                    <h1 className="text-2xl font-bold text-gray-900">
-                        {step === 1 ? "Verify Your Phone" : step === 2 ? "Tell Us What You Need" : "Review & Submit"}
+                    <h1 className="text-xl font-bold text-gray-900">
+                        {step === 1 ? "Verify Your Phone" :
+                         step === 2 ? "What Do You Need?" :
+                         step === 3 ? "Tuition Preferences" :
+                         "Your Contact Details"}
                     </h1>
-                    <p className="text-sm text-gray-500 mt-2">
-                        {step === 1 ? "Quick verification — we'll send a 6-digit OTP to your mobile." :
-                         step === 2 ? (hasContext ? "We've pre-filled your details. Review and add anything else." : "A few details so we can find the best tutors for you.") :
-                         "Check your details and submit. You'll see matching tutors in your dashboard."}
+                    <p className="text-sm text-gray-500 mt-1">
+                        {step === 1 ? "Quick OTP verification to get started." :
+                         step === 2 ? (hasContext ? "We've pre-filled your details — review and continue." : "Tell us what subject and level you need.") :
+                         step === 3 ? "Help us find the best tutor for you." :
+                         "Almost done — just your name so tutors can reach you."}
                     </p>
                 </div>
 
                 {/* Progress Steps */}
-                <div className="flex items-center justify-center gap-2 mb-8">
-                    {steps.map((s, i) => (
-                        <div key={s.id} className="flex items-center gap-2">
-                            <div className={`size-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
+                <div className="flex items-center justify-center gap-1 mb-6">
+                    {stepLabels.map((s, i) => (
+                        <div key={s.id} className="flex items-center gap-1">
+                            <div className={`size-6 rounded-full flex items-center justify-center text-[10px] font-bold transition-colors ${
                                 s.id < step ? "bg-blue-600 text-white" :
-                                s.id === step ? "bg-blue-100 text-blue-600 border-2 border-blue-600" :
+                                s.id === step ? "bg-blue-100 text-blue-600 ring-2 ring-blue-600" :
                                 "bg-gray-100 text-gray-400"
                             }`}>
-                                {s.id < step ? <CheckCircle2 size={14} /> : s.id}
+                                {s.id < step ? <CheckCircle2 size={12} /> : s.id}
                             </div>
-                            <span className="text-xs font-medium text-gray-500 hidden sm:inline">{s.label}</span>
-                            {i < steps.length - 1 && <div className={`w-6 h-0.5 ${s.id < step ? "bg-blue-600" : "bg-gray-200"}`} />}
+                            {i < stepLabels.length - 1 && <div className={`w-5 h-0.5 ${s.id < step ? "bg-blue-600" : "bg-gray-200"}`} />}
                         </div>
                     ))}
                 </div>
@@ -105,12 +111,11 @@ function StudentRegisterContent() {
                             onComplete={(verifiedUser) => { setUser(verifiedUser); setStep(2); }}
                         />
                     )}
-                    {(step === 2 || step === 3) && (
+                    {step >= 2 && (
                         <RequirementForm
                             user={user}
                             prefill={prefill}
-                            initialStep={step === 2 ? 1 : 3}
-                            onStepChange={(s) => setStep(s === 3 ? 3 : 2)}
+                            onStepChange={(formStep) => setStep(formStep + 1)} // formStep 1=req, 2=pref, 3=contact → page step 2,3,4
                             onComplete={() => {
                                 router.push(`/dashboard/student?success=true${prefill.tutorId ? `&highlightTutor=${prefill.tutorId}` : ""}`);
                             }}

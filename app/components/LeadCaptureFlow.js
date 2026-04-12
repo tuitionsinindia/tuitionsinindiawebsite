@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { User, Phone, ArrowRight, Loader2, ArrowLeft, ShieldCheck } from "lucide-react";
+import { Phone, ArrowRight, Loader2, ArrowLeft, ShieldCheck } from "lucide-react";
 
 export default function LeadCaptureFlow({ initialRole = "STUDENT", onComplete }) {
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-    const [form, setForm] = useState({ name: "", phone: "", role: initialRole, otp: "" });
+    const [phone, setPhone] = useState("");
+    const [otp, setOtp] = useState("");
     const [userId, setUserId] = useState(null);
 
     const handleSendOTP = async (e) => {
@@ -18,7 +19,7 @@ export default function LeadCaptureFlow({ initialRole = "STUDENT", onComplete })
             const res = await fetch("/api/auth/otp/send", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ ...form, isRegistration: true }),
+                body: JSON.stringify({ phone, role: initialRole, isRegistration: true }),
             });
             const data = await res.json();
             if (data.success) { setUserId(data.userId); setStep(2); }
@@ -35,7 +36,7 @@ export default function LeadCaptureFlow({ initialRole = "STUDENT", onComplete })
             const res = await fetch("/api/auth/otp/verify", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ userId, phone: form.phone, otp: form.otp }),
+                body: JSON.stringify({ userId, phone, otp }),
             });
             const data = await res.json();
             if (data.success) { onComplete(data.user); }
@@ -51,32 +52,21 @@ export default function LeadCaptureFlow({ initialRole = "STUDENT", onComplete })
                     <ShieldCheck size={14} /> Verified & Secure
                 </div>
                 <div>
-                    <h2 className="text-lg font-bold text-gray-900">Your contact details</h2>
-                    <p className="text-sm text-gray-500 mt-1">We'll send an OTP to confirm your number.</p>
+                    <h2 className="text-lg font-bold text-gray-900">Enter your mobile number</h2>
+                    <p className="text-sm text-gray-500 mt-1">We'll send a 6-digit OTP to verify your number.</p>
                 </div>
                 <form onSubmit={handleSendOTP} className="space-y-4">
-                    <div className="space-y-1.5">
-                        <label className="text-xs font-medium text-gray-500">Full Name</label>
-                        <div className="relative">
-                            <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" size={16} />
-                            <input
-                                required type="text" value={form.name}
-                                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                                className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
-                                placeholder="Your name"
-                            />
-                        </div>
-                    </div>
                     <div className="space-y-1.5">
                         <label className="text-xs font-medium text-gray-500">Mobile Number</label>
                         <div className="relative">
                             <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" size={16} />
                             <span className="absolute left-9 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium border-r border-gray-200 pr-2">+91</span>
                             <input
-                                required type="tel" pattern="[0-9]{10}" value={form.phone}
-                                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                                required type="tel" pattern="[0-9]{10}" value={phone}
+                                onChange={(e) => setPhone(e.target.value)}
                                 className="w-full pl-[4.5rem] pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
                                 placeholder="10-digit number"
+                                autoFocus
                             />
                         </div>
                     </div>
@@ -94,19 +84,19 @@ export default function LeadCaptureFlow({ initialRole = "STUDENT", onComplete })
 
     return (
         <div className="space-y-5">
-            <button onClick={() => setStep(1)} className="text-gray-400 hover:text-blue-600 transition-colors">
+            <button onClick={() => { setStep(1); setOtp(""); setError(""); }} className="text-gray-400 hover:text-blue-600 transition-colors">
                 <ArrowLeft size={18} />
             </button>
             <div className="text-center">
                 <h2 className="text-lg font-bold text-gray-900">Enter OTP</h2>
                 <p className="text-sm text-gray-500 mt-1">
-                    We sent a 6-digit code to <span className="font-medium text-gray-700">+91 {form.phone}</span>
+                    Sent to <span className="font-medium text-gray-700">+91 {phone}</span>
                 </p>
             </div>
             <form onSubmit={handleVerifyOTP} className="space-y-5">
                 <input
-                    required type="text" maxLength="6" value={form.otp}
-                    onChange={(e) => setForm({ ...form, otp: e.target.value })}
+                    required type="text" maxLength="6" value={otp}
+                    onChange={(e) => setOtp(e.target.value)}
                     className="w-full text-center text-2xl tracking-[0.5em] font-bold py-4 bg-gray-50 border-2 border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
                     placeholder="------" autoFocus
                 />
@@ -119,7 +109,7 @@ export default function LeadCaptureFlow({ initialRole = "STUDENT", onComplete })
                 </button>
             </form>
             <p className="text-center text-xs text-gray-400">
-                Didn't receive it? <button onClick={() => { setStep(1); setError(""); }} className="text-blue-600 hover:underline font-medium">Change number</button>
+                Didn't receive it? <button onClick={() => { setStep(1); setError(""); setOtp(""); }} className="text-blue-600 hover:underline font-medium">Change number</button>
             </p>
         </div>
     );

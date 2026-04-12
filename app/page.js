@@ -8,39 +8,38 @@ import {
     MessageSquare, ArrowRight, CheckCircle2, Users,
     GraduationCap, Zap, BookOpen, Phone
 } from "lucide-react";
-import { ALL_SUBJECTS, POPULAR_SUBJECTS } from "../lib/subjects";
+import { ALL_SUBJECTS, BROAD_CATEGORIES, getSubjectsForCategory, GRADE_OPTIONS, CITY_OPTIONS } from "../lib/subjects";
 
 export default function Home() {
+    const [searchCategory, setSearchCategory] = useState("");
     const [searchSubject, setSearchSubject] = useState("");
     const [searchGrade, setSearchGrade] = useState("");
     const [searchLocation, setSearchLocation] = useState("");
     const [filteredSubjects, setFilteredSubjects] = useState([]);
     const [showSubjectSuggestions, setShowSubjectSuggestions] = useState(false);
-    const [showCityDropdown, setShowCityDropdown] = useState(false);
-    const [showGradeDropdown, setShowGradeDropdown] = useState(false);
     const [activeTab, setActiveTab] = useState("TUTOR");
     const [openFaq, setOpenFaq] = useState(null);
 
-    const majorCities = ["Mumbai", "Delhi", "Bangalore", "Kolkata", "Hyderabad", "Chennai", "Pune", "Ahmedabad"];
-    const gradesList = ["Class 1–5", "Class 6–8", "Class 9–10", "Class 11–12", "Competitive Exams", "College / University"];
+    const availableSubjects = searchCategory ? getSubjectsForCategory(searchCategory) : ALL_SUBJECTS;
 
     const router = useRouter();
 
     useEffect(() => {
         if (searchSubject.length >= 1) {
             const q = searchSubject.toLowerCase();
-            const filtered = ALL_SUBJECTS.filter(s => s.toLowerCase().includes(q));
+            const filtered = availableSubjects.filter(s => s.toLowerCase().includes(q)).slice(0, 8);
             setFilteredSubjects(filtered);
             setShowSubjectSuggestions(filtered.length > 0);
         } else {
             setShowSubjectSuggestions(false);
         }
-    }, [searchSubject]);
+    }, [searchSubject, searchCategory]);
 
     const handleSearch = () => {
         const params = new URLSearchParams();
-        params.set("subject", searchSubject);
-        params.set("grade", searchGrade);
+        if (searchCategory) params.set("category", searchCategory);
+        if (searchSubject) params.set("subject", searchSubject);
+        if (searchGrade) params.set("grade", searchGrade);
         params.set("role", activeTab);
         if (searchLocation) params.set("location", searchLocation);
         router.push(`/search?${params.toString()}`);
@@ -93,74 +92,64 @@ export default function Home() {
                             ))}
                         </div>
 
-                        {/* Search inputs row */}
-                        <div className="p-3" style={{display:'grid', gridTemplateColumns:'1fr 160px 130px auto', gap:'8px'}}>
-                            {/* Subject */}
-                            <div className="relative">
-                                <div className="flex items-center gap-2 px-3 h-11 border border-gray-200 rounded-lg bg-gray-50 focus-within:border-blue-500 focus-within:bg-white transition-all">
-                                    <Search size={15} className="text-gray-400 shrink-0" />
+                        {/* Search inputs — 2 rows on mobile, 1 row on desktop */}
+                        <div className="p-3 space-y-2">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                {/* Category */}
+                                <select
+                                    value={searchCategory}
+                                    onChange={(e) => { setSearchCategory(e.target.value); setSearchSubject(""); }}
+                                    className="h-11 px-3 border border-gray-200 rounded-lg bg-gray-50 text-sm text-gray-700 outline-none focus:border-blue-500 cursor-pointer"
+                                >
+                                    <option value="">All Categories</option>
+                                    {BROAD_CATEGORIES.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
+                                </select>
+
+                                {/* Subject (autocomplete) */}
+                                <div className="relative">
                                     <input
-                                        className="w-full bg-transparent text-sm text-gray-800 outline-none placeholder:text-gray-400"
-                                        placeholder="Subject (e.g. Maths)"
+                                        className="w-full h-11 px-3 border border-gray-200 rounded-lg bg-gray-50 text-sm text-gray-700 outline-none focus:border-blue-500 focus:bg-white transition-all"
+                                        placeholder="Subject"
                                         value={searchSubject}
                                         onChange={e => setSearchSubject(e.target.value)}
+                                        onFocus={() => { if (searchSubject.length >= 1) setShowSubjectSuggestions(true); }}
                                     />
+                                    {showSubjectSuggestions && filteredSubjects.length > 0 && (
+                                        <div className="absolute top-full mt-1 left-0 w-56 bg-white border border-gray-200 rounded-xl shadow-lg z-50 py-1 max-h-48 overflow-y-auto">
+                                            {filteredSubjects.map((s, i) => (
+                                                <div key={i} onMouseDown={() => { setSearchSubject(s); setShowSubjectSuggestions(false); }}
+                                                    className="px-4 py-2.5 hover:bg-blue-50 cursor-pointer text-sm text-gray-700 hover:text-blue-700">
+                                                    {s}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
-                                {showSubjectSuggestions && (
-                                    <div className="absolute top-full mt-1 left-0 w-56 bg-white border border-gray-200 rounded-xl shadow-lg z-50 py-1 overflow-hidden">
-                                        {filteredSubjects.slice(0, 6).map((s, i) => (
-                                            <div key={i} onMouseDown={() => { setSearchSubject(s); setShowSubjectSuggestions(false); }}
-                                                className="px-4 py-2.5 hover:bg-blue-50 cursor-pointer text-sm text-gray-700 hover:text-blue-700">
-                                                {s}
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
 
-                            {/* Grade */}
-                            <div className="relative">
-                                <div className="flex items-center gap-1.5 px-3 h-11 border border-gray-200 rounded-lg bg-gray-50 cursor-pointer hover:border-blue-400 transition-all"
-                                    onClick={() => { setShowGradeDropdown(!showGradeDropdown); setShowCityDropdown(false); }}>
-                                    <GraduationCap size={14} className="text-gray-400 shrink-0" />
-                                    <span className="flex-1 text-sm text-gray-600 truncate">{searchGrade || "Class"}</span>
-                                    <ChevronDown size={13} className="text-gray-400 shrink-0" />
-                                </div>
-                                {showGradeDropdown && (
-                                    <div className="absolute top-full mt-1 left-0 w-52 bg-white border border-gray-200 rounded-xl shadow-lg z-50 py-1">
-                                        {gradesList.map((g, i) => (
-                                            <div key={i} onClick={() => { setSearchGrade(g); setShowGradeDropdown(false); }}
-                                                className="px-4 py-2.5 hover:bg-blue-50 cursor-pointer text-sm text-gray-700 hover:text-blue-700">
-                                                {g}
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
+                                {/* Level */}
+                                <select
+                                    value={searchGrade}
+                                    onChange={(e) => setSearchGrade(e.target.value)}
+                                    className="h-11 px-3 border border-gray-200 rounded-lg bg-gray-50 text-sm text-gray-700 outline-none focus:border-blue-500 cursor-pointer"
+                                >
+                                    <option value="">Level</option>
+                                    {GRADE_OPTIONS.map(g => <option key={g} value={g}>{g}</option>)}
+                                </select>
 
-                            {/* City */}
-                            <div className="relative">
-                                <div className="flex items-center gap-1.5 px-3 h-11 border border-gray-200 rounded-lg bg-gray-50 cursor-pointer hover:border-blue-400 transition-all"
-                                    onClick={() => { setShowCityDropdown(!showCityDropdown); setShowGradeDropdown(false); }}>
-                                    <MapPin size={14} className="text-gray-400 shrink-0" />
-                                    <span className="flex-1 text-sm text-gray-600 truncate">{searchLocation || "City"}</span>
-                                    <ChevronDown size={13} className="text-gray-400 shrink-0" />
-                                </div>
-                                {showCityDropdown && (
-                                    <div className="absolute top-full mt-1 left-0 w-44 bg-white border border-gray-200 rounded-xl shadow-lg z-50 py-1">
-                                        {majorCities.map((city, i) => (
-                                            <div key={i} onClick={() => { setSearchLocation(city); setShowCityDropdown(false); }}
-                                                className="px-4 py-2.5 hover:bg-blue-50 cursor-pointer text-sm text-gray-700 hover:text-blue-700">
-                                                {city}
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
+                                {/* City */}
+                                <select
+                                    value={searchLocation}
+                                    onChange={(e) => setSearchLocation(e.target.value)}
+                                    className="h-11 px-3 border border-gray-200 rounded-lg bg-gray-50 text-sm text-gray-700 outline-none focus:border-blue-500 cursor-pointer"
+                                >
+                                    <option value="">City</option>
+                                    {CITY_OPTIONS.map(c => <option key={c} value={c}>{c}</option>)}
+                                </select>
                             </div>
 
                             <button onClick={handleSearch}
-                                className="h-11 px-5 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-blue-700 active:scale-95 transition-all flex items-center gap-2 whitespace-nowrap shadow-md">
-                                <Search size={15} /> Search
+                                className="w-full h-11 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-blue-700 active:scale-95 transition-all flex items-center justify-center gap-2 shadow-md">
+                                <Search size={15} /> Search Tutors
                             </button>
                         </div>
                     </div>
@@ -220,21 +209,21 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* ── POPULAR SUBJECTS ── */}
+            {/* ── BROWSE BY CATEGORY ── */}
             <section className="py-14 px-4 bg-white">
                 <div className="max-w-5xl mx-auto">
                     <div className="text-center mb-10">
-                        <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Popular Subjects</h2>
-                        <p className="text-gray-500 mt-2 text-sm">Find expert tutors for any subject</p>
+                        <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Browse by Category</h2>
+                        <p className="text-gray-500 mt-2 text-sm">Find tutors across all subjects and skill areas</p>
                     </div>
-                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
-                        {POPULAR_SUBJECTS.map((cat, i) => (
-                            <Link key={i} href={`/search?subject=${encodeURIComponent(cat.title)}&role=TUTOR`}
-                                className="flex flex-col items-center gap-2 p-4 rounded-xl border border-gray-100 hover:border-blue-500 hover:bg-blue-50 cursor-pointer transition-all group text-center">
-                                <div className="text-blue-600 group-hover:text-blue-700">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+                        {BROAD_CATEGORIES.map((cat) => (
+                            <Link key={cat.id} href={`/categories?category=${cat.id}`}
+                                className="flex flex-col items-center gap-3 p-6 rounded-xl border border-gray-100 hover:border-blue-500 hover:bg-blue-50 cursor-pointer transition-all group text-center">
+                                <div className="size-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors">
                                     <cat.icon size={24} strokeWidth={1.5} />
                                 </div>
-                                <span className="text-xs font-semibold text-gray-700 group-hover:text-blue-700 leading-tight">{cat.title}</span>
+                                <span className="text-sm font-semibold text-gray-700 group-hover:text-blue-700 leading-tight">{cat.label}</span>
                             </Link>
                         ))}
                     </div>

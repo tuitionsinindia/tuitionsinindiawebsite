@@ -120,6 +120,8 @@ function SearchResultsContent() {
     const handleContactTutor = (tutor) => {
         const registerRoute = queryRole === "STUDENT" ? "/register/tutor" : "/register/student";
         const params = new URLSearchParams();
+        const queryCategory = searchParams.get("category");
+        if (queryCategory) params.set("category", queryCategory);
         if (querySubject) params.set("subject", querySubject);
         if (grade) params.set("grade", grade);
         if (queryLocation) params.set("location", queryLocation);
