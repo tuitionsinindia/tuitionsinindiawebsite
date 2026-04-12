@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { BookOpen, MapPin, ArrowRight, ArrowLeft, Loader2, Navigation, ChevronDown, CheckCircle2, Mail } from "lucide-react";
+import { ALL_SUBJECTS } from "@/lib/subjects";
 
 export default function RequirementForm({ user, prefill = {}, initialStep = 1, onStepChange, onComplete }) {
     const [loading, setLoading] = useState(false);
@@ -9,6 +10,20 @@ export default function RequirementForm({ user, prefill = {}, initialStep = 1, o
     const [step, setStep] = useState(initialStep);
     const [showOptional, setShowOptional] = useState(false);
     const [email, setEmail] = useState("");
+    const [subjectQuery, setSubjectQuery] = useState("");
+    const [showSuggestions, setShowSuggestions] = useState(false);
+
+    const filteredSubjects = subjectQuery.length >= 1
+        ? ALL_SUBJECTS.filter(s => s.toLowerCase().includes(subjectQuery.toLowerCase()) && !form.subjects.includes(s)).slice(0, 8)
+        : [];
+
+    const addSubject = (subject) => {
+        if (!form.subjects.includes(subject)) {
+            setForm(f => ({ ...f, subjects: [...f.subjects, subject] }));
+        }
+        setSubjectQuery("");
+        setShowSuggestions(false);
+    };
 
     const [form, setForm] = useState({
         subjects: prefill.subject ? [prefill.subject] : [],
@@ -87,33 +102,55 @@ export default function RequirementForm({ user, prefill = {}, initialStep = 1, o
             {/* Step 1: Core Requirements */}
             {step === 1 && (
                 <div className="space-y-5">
-                    {/* Subject */}
+                    {/* Subject — autocomplete */}
                     <div className="space-y-2">
                         <label className="text-xs font-medium text-gray-500">What subject do you need help with?</label>
                         <div className="relative">
-                            <BookOpen className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" size={16} />
+                            <BookOpen className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300 z-10" size={16} />
                             <input
                                 className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:border-blue-500 outline-none transition-all"
-                                placeholder="e.g. Maths, Physics — press Enter to add"
+                                placeholder="Start typing — e.g. Maths, Physics, NEET"
+                                value={subjectQuery}
+                                onChange={(e) => { setSubjectQuery(e.target.value); setShowSuggestions(true); }}
+                                onFocus={() => setShowSuggestions(true)}
                                 onKeyDown={(e) => {
-                                    if (e.key === "Enter" && e.target.value.trim()) {
+                                    if (e.key === "Enter" && subjectQuery.trim()) {
                                         e.preventDefault();
-                                        const val = e.target.value.trim();
-                                        if (!form.subjects.includes(val)) toggleItem("subjects", val);
-                                        e.target.value = "";
+                                        addSubject(subjectQuery.trim());
                                     }
+                                    if (e.key === "Escape") setShowSuggestions(false);
                                 }}
                             />
+                            {/* Autocomplete dropdown */}
+                            {showSuggestions && filteredSubjects.length > 0 && (
+                                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-20 max-h-48 overflow-y-auto">
+                                    {filteredSubjects.map(s => (
+                                        <button
+                                            key={s}
+                                            type="button"
+                                            onMouseDown={(e) => { e.preventDefault(); addSubject(s); }}
+                                            className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors first:rounded-t-xl last:rounded-b-xl"
+                                        >
+                                            {s}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                         </div>
-                        <div className="flex flex-wrap gap-2">
-                            {form.subjects.map(s => (
-                                <span key={s} className="inline-flex items-center gap-1 px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-medium">
-                                    {hasPrefilled && prefill.subject === s && <CheckCircle2 size={11} className="text-emerald-500" />}
-                                    {s}
-                                    <button onClick={() => toggleItem("subjects", s)} className="ml-1 text-blue-400 hover:text-red-500">x</button>
-                                </span>
-                            ))}
-                        </div>
+                        {form.subjects.length > 0 && (
+                            <div className="flex flex-wrap gap-2">
+                                {form.subjects.map(s => (
+                                    <span key={s} className="inline-flex items-center gap-1 px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-medium">
+                                        {hasPrefilled && prefill.subject === s && <CheckCircle2 size={11} className="text-emerald-500" />}
+                                        {s}
+                                        <button onClick={() => toggleItem("subjects", s)} className="ml-1 text-blue-400 hover:text-red-500">x</button>
+                                    </span>
+                                ))}
+                            </div>
+                        )}
+                        {form.subjects.length === 0 && (
+                            <p className="text-xs text-gray-400">You can add multiple subjects. Popular: Maths, Physics, Chemistry, English, NEET, IIT JEE</p>
+                        )}
                     </div>
 
                     {/* Grade */}
