@@ -79,7 +79,6 @@ export default function RootLayout({ children }) {
               "image": "https://tuitionsinindia.com/logo.png",
               "@id": "https://tuitionsinindia.com",
               "url": "https://tuitionsinindia.com",
-              "telephone": "+919930993025",
               "address": {
                 "@type": "PostalAddress",
                 "addressLocality": "Mumbai",

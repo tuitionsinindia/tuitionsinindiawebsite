@@ -1,8 +1,117 @@
 "use client";
 
-import { Zap, History, BadgeCheck, AlertCircle } from "lucide-react";
+import { useState } from "react";
+import { Zap, History, BadgeCheck, AlertCircle, Loader2, X } from "lucide-react";
 
-export default function BillingModule({ userData, transactions = [] }) {
+const CREDIT_PACKAGES = [
+    { id: "10", label: "10 Credits", credits: 10, price: 99, description: "Unlock ~10 basic leads" },
+    { id: "25", label: "25 Credits", credits: 25, price: 249, description: "Best for active tutors", popular: true },
+    { id: "50", label: "50 Credits", credits: 50, price: 449, description: "Stock up and save" },
+];
+
+function loadRazorpayScript() {
+    return new Promise((resolve) => {
+        if (window.Razorpay) return resolve(true);
+        const script = document.createElement("script");
+        script.src = "https://checkout.razorpay.com/v1/checkout.js";
+        script.onload = () => resolve(true);
+        script.onerror = () => resolve(false);
+        document.body.appendChild(script);
+    });
+}
+
+export default function BillingModule({ userData, transactions = [], userId, onRefresh }) {
+    const [showCreditModal, setShowCreditModal] = useState(false);
+    const [selectedPackage, setSelectedPackage] = useState("25");
+    const [paymentLoading, setPaymentLoading] = useState(false);
+    const [paymentError, setPaymentError] = useState("");
+
+    const handleBuyCredits = async () => {
+        const pkg = CREDIT_PACKAGES.find(p => p.id === selectedPackage);
+        if (!pkg || !userId) return;
+
+        setPaymentLoading(true);
+        setPaymentError("");
+
+        try {
+            const loaded = await loadRazorpayScript();
+            if (!loaded) {
+                setPaymentError("Payment system failed to load. Please try again.");
+                setPaymentLoading(false);
+                return;
+            }
+
+            const orderRes = await fetch("/api/payment/order", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    amount: pkg.price,
+                    currency: "INR",
+                    receipt: `credits_${userId}_${Date.now()}`,
+                    userId,
+                    description: `${pkg.credits} Credits Pack`
+                })
+            });
+            const order = await orderRes.json();
+
+            if (!order.id) {
+                setPaymentError("Could not create payment. Please try again.");
+                setPaymentLoading(false);
+                return;
+            }
+
+            const options = {
+                key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+                amount: order.amount,
+                currency: order.currency,
+                name: "TuitionsInIndia",
+                description: `${pkg.credits} Credits`,
+                order_id: order.id,
+                handler: async function (response) {
+                    const verifyRes = await fetch("/api/payment/verify", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_signature: response.razorpay_signature,
+                            userId,
+                            creditsToAdd: pkg.credits,
+                            subscriptionTier: userData?.subscriptionTier || "FREE"
+                        })
+                    });
+                    const result = await verifyRes.json();
+                    if (result.success) {
+                        setShowCreditModal(false);
+                        if (onRefresh) onRefresh();
+                    } else {
+                        setPaymentError("Payment verification failed. Contact support.");
+                    }
+                    setPaymentLoading(false);
+                },
+                prefill: {
+                    name: userData?.name || "",
+                    contact: userData?.phone ? `+91${userData.phone}` : ""
+                },
+                theme: { color: "#2563EB" },
+                modal: {
+                    ondismiss: () => setPaymentLoading(false)
+                }
+            };
+
+            const rzp = new window.Razorpay(options);
+            rzp.on("payment.failed", () => {
+                setPaymentError("Payment failed. Please try again.");
+                setPaymentLoading(false);
+            });
+            rzp.open();
+
+        } catch (err) {
+            setPaymentError("Something went wrong. Please try again.");
+            setPaymentLoading(false);
+        }
+    };
+
     return (
         <div className="space-y-6">
             <div>
@@ -18,7 +127,10 @@ export default function BillingModule({ userData, transactions = [] }) {
                     </div>
                     <p className="text-sm text-amber-700 font-medium mb-1">Credits Available</p>
                     <p className="text-3xl font-bold text-amber-900">{userData?.credits || 0}</p>
-                    <button className="mt-4 w-full py-2 bg-amber-600 text-white rounded-lg text-sm font-medium hover:bg-amber-700 transition-colors">
+                    <button
+                        onClick={() => setShowCreditModal(true)}
+                        className="mt-4 w-full py-2 bg-amber-600 text-white rounded-lg text-sm font-medium hover:bg-amber-700 transition-colors"
+                    >
                         Buy Credits
                     </button>
                 </div>
@@ -95,6 +207,70 @@ export default function BillingModule({ userData, transactions = [] }) {
                     </div>
                 )}
             </div>
+
+            {/* Buy Credits Modal */}
+            {showCreditModal && (
+                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 px-4">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+                        <div className="flex items-center justify-between mb-5">
+                            <h3 className="text-lg font-bold text-gray-900">Buy Credits</h3>
+                            <button
+                                onClick={() => { setShowCreditModal(false); setPaymentError(""); }}
+                                className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-gray-100 transition-colors"
+                            >
+                                <X size={16} className="text-gray-400" />
+                            </button>
+                        </div>
+
+                        <p className="text-sm text-gray-500 mb-5">Credits are used to unlock student contact details. 1 basic lead = 1 credit.</p>
+
+                        <div className="space-y-3 mb-5">
+                            {CREDIT_PACKAGES.map((pkg) => (
+                                <button
+                                    key={pkg.id}
+                                    type="button"
+                                    onClick={() => setSelectedPackage(pkg.id)}
+                                    className={`w-full text-left p-4 rounded-xl border-2 transition-all relative ${
+                                        selectedPackage === pkg.id
+                                            ? "border-blue-600 bg-blue-50"
+                                            : "border-gray-200 hover:border-gray-300"
+                                    }`}
+                                >
+                                    {pkg.popular && (
+                                        <span className="absolute -top-2.5 right-4 bg-blue-600 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full">
+                                            Popular
+                                        </span>
+                                    )}
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="font-semibold text-gray-900 text-sm">{pkg.label}</p>
+                                            <p className="text-xs text-gray-400 mt-0.5">{pkg.description}</p>
+                                        </div>
+                                        <p className="text-lg font-bold text-gray-900">₹{pkg.price}</p>
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+
+                        {paymentError && (
+                            <div className="text-red-600 text-xs bg-red-50 p-3 rounded-xl border border-red-100 mb-4">
+                                {paymentError}
+                            </div>
+                        )}
+
+                        <button
+                            onClick={handleBuyCredits}
+                            disabled={paymentLoading}
+                            className="w-full py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors text-sm flex items-center justify-center gap-2 disabled:opacity-50"
+                        >
+                            {paymentLoading
+                                ? <><Loader2 className="animate-spin" size={16} /> Opening payment...</>
+                                : <>Pay ₹{CREDIT_PACKAGES.find(p => p.id === selectedPackage)?.price}</>
+                            }
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

@@ -15,8 +15,7 @@ import {
     Zap,
     Activity,
     Cpu,
-    BadgeCheck,
-    MessageCircle
+    BadgeCheck
 } from "lucide-react";
 
 export default function FacultyChat({ sessionId, currentUser, recipientName }) {
@@ -102,62 +101,64 @@ export default function FacultyChat({ sessionId, currentUser, recipientName }) {
 
     if (loading && messages.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center h-full gap-8 bg-gray-50/50 backdrop-blur-3xl rounded-[3.5rem] border border-gray-100 italic">
+            <div className="flex flex-col items-center justify-center h-full gap-6 bg-background-dark/50 backdrop-blur-3xl rounded-[3rem] border border-border-dark italic">
                 <div className="relative">
-                    <Loader2 className="animate-spin text-blue-600" size={64} strokeWidth={3} />
-                    <div className="absolute inset-0 bg-blue-600/10 blur-3xl animate-pulse rounded-full scale-150"></div>
+                    <Loader2 className="animate-spin text-indigo-500" size={48} strokeWidth={1.5} />
+                    <div className="absolute inset-0 bg-indigo-500/20 blur-2xl animate-pulse rounded-full"></div>
                 </div>
-                <div className="text-center space-y-3">
-                    <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-900 italic">Synchronizing Dialogue...</p>
-                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-300">Initializing Secure Node Link</p>
+                <div className="text-center space-y-2">
+                    <p className="text-[11px] font-black uppercase tracking-[0.5em] text-white italic">Connecting...</p>
+                    <p className="text-[8px] font-black uppercase tracking-[0.3em] text-white/20">Loading messages...</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="flex flex-col h-full bg-white backdrop-blur-3xl rounded-[3.5rem] border border-gray-100 overflow-hidden relative shadow-4xl shadow-blue-900/[0.03] border-b-[12px] border-blue-600 anim-fade-in group">
+        <div className="flex flex-col h-full bg-surface-dark/40 backdrop-blur-3xl rounded-[3.5rem] border border-border-dark overflow-hidden relative shadow-2xl border-b-[12px] anim-fade-in group">
             
-            {/* Tactical Identity Header */}
-            <div className="p-8 md:p-12 bg-gray-50/50 border-b border-gray-100 flex items-center justify-between relative z-10 shadow-sm">
+            {/* Visual Grid Decorator */}
+            <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
+
+            {/* Tactical Header */}
+            <div className="p-8 md:p-10 bg-background-dark/80 border-b border-border-dark flex items-center justify-between relative z-10">
                 <div className="flex items-center gap-6">
-                    <div className="size-16 rounded-[1.8rem] bg-blue-600 text-white flex items-center justify-center font-black text-2xl italic shadow-2xl shadow-blue-600/20 border border-blue-400/20 group-hover:rotate-6 transition-transform">
-                        {recipientName?.[0] || <User size={28} />}
+                    <div className="size-16 rounded-[1.8rem] bg-indigo-600 text-white flex items-center justify-center font-black text-2xl italic shadow-2xl shadow-indigo-600/20 border border-white/10 group-hover:rotate-3 transition-transform">
+                        {recipientName?.[0] || <User size={24} />}
                     </div>
                     <div>
-                        <div className="flex items-center gap-3 mb-1.5">
-                            <h3 className="text-xl font-black text-gray-900 uppercase italic tracking-tighter leading-none">{recipientName || "Scholarly Node"}</h3>
-                            <BadgeCheck size={18} className="text-blue-600" />
+                        <div className="flex items-center gap-2 mb-1.5">
+                            <h3 className="text-xl font-black text-white uppercase italic tracking-tighter leading-none">{recipientName || "SCHOLARLY PEER"}</h3>
+                            <BadgeCheck size={16} className="text-indigo-500 fill-indigo-500/10" />
                         </div>
                         <div className="flex items-center gap-2.5">
                             <div className="relative flex items-center">
                                 <span className={`size-2.5 rounded-full ${online ? "bg-emerald-500" : "bg-red-500"}`}></span>
                                 {online && <span className="absolute inset-0 size-2.5 bg-emerald-500 rounded-full animate-ping"></span>}
                             </div>
-                            <span className="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em] italic">
-                                {online ? "Registry Link Active" : "Synchronization Suspended"}
+                            <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] italic">
+                                {online ? "Secure Frequency Active" : "Link Interrupted"}
                             </span>
                         </div>
                     </div>
                 </div>
-                <div className="flex items-center gap-6 text-gray-200">
-                    <div className="hidden md:flex items-center gap-3 px-5 py-2.5 bg-white rounded-xl border border-gray-100 shadow-sm italic">
-                        <Cpu size={14} className="text-blue-600" strokeWidth={3} />
-                        <span className="text-[10px] font-black tracking-widest uppercase text-gray-300">SECURE_SYNC: AES_256</span>
+                <div className="flex items-center gap-6 text-white/20">
+                    <div className="hidden md:flex items-center gap-3 px-4 py-2 bg-white/5 rounded-xl border border-white/5 italic">
+                        <Cpu size={14} className="text-indigo-500" />
+                        <span className="text-[9px] font-black tracking-widest uppercase">Node_Encr: AES-256</span>
                     </div>
-                    <button className="hover:text-blue-600 transition-colors p-2"><MoreHorizontal size={24} /></button>
+                    <button className="hover:text-indigo-500 transition-colors p-2"><MoreHorizontal size={24} /></button>
                 </div>
             </div>
 
-            {/* Scholarly Dialogue Feed */}
-            <div className="flex-1 overflow-y-auto p-10 md:p-14 space-y-12 scrollbar-hide relative z-10">
+            {/* Strategic Message Feed */}
+            <div className="flex-1 overflow-y-auto p-8 md:p-12 space-y-10 scrollbar-hide relative z-10">
                 {messages.length === 0 && (
-                    <div className="flex flex-col items-center justify-center h-full text-center space-y-8 opacity-20 select-none">
-                        <div className="p-12 bg-gray-50 rounded-full border border-gray-100 animate-pulse relative">
-                             <div className="absolute inset-0 bg-blue-600/5 blur-3xl rounded-full scale-150"></div>
-                             <Lock size={64} strokeWidth={1} className="text-gray-300" />
+                    <div className="flex flex-col items-center justify-center h-full text-center space-y-6 opacity-30 select-none">
+                        <div className="p-10 bg-white/5 rounded-full border border-white/5 animate-pulse">
+                            <Lock size={48} strokeWidth={1} />
                         </div>
-                        <p className="text-[10px] font-black uppercase tracking-[0.6em] max-w-[240px] leading-relaxed italic">Institutional Dialogue Link Established. End-to-End Encryption Active.</p>
+                        <p className="text-[10px] font-black uppercase tracking-[0.5em] max-w-[200px]">End-to-End Encrypted Session Initialized.</p>
                     </div>
                 )}
                 {messages.map((m, i) => {
@@ -167,20 +168,20 @@ export default function FacultyChat({ sessionId, currentUser, recipientName }) {
                     return (
                         <div key={m.id} className={`flex flex-col ${isMe ? "items-end" : "items-start"} anim-slide-up`} style={{ animationDelay: `${i * 50}ms` }}>
                             {showHeader && (
-                                <p className="text-[10px] font-black text-gray-200 uppercase tracking-[0.4em] mb-4 px-8 italic">
+                                <p className="text-[10px] font-black text-white/10 uppercase tracking-[0.3em] mb-3 px-6 italic">
                                     {isMe ? "Node_Origin" : "Node_Remote"} • {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 </p>
                             )}
-                            <div className={`max-w-[85%] md:max-w-[75%] px-10 py-7 rounded-[2.8rem] text-[15px] font-semibold leading-relaxed shadow-4xl break-words transition-all hover:scale-[1.01] relative border ${
+                            <div className={`max-w-[85%] md:max-w-[70%] px-8 py-6 rounded-[2.2rem] text-[15px] font-medium leading-relaxed shadow-2xl break-words transition-all hover:scale-[1.01] relative ${
                                 isMe 
-                                ? "bg-blue-600 text-white rounded-tr-none border-blue-600 shadow-blue-600/10 italic" 
-                                : "bg-gray-50 border-gray-100 text-gray-900 rounded-tl-none shadow-blue-900/[0.02]"
-                            } ${m.isOptimistic ? "opacity-30 grayscale" : ""}`}>
+                                ? "bg-indigo-600 text-white rounded-tr-none shadow-indigo-600/10 border border-white/10" 
+                                : "bg-surface-dark border border-border-dark text-white/90 rounded-tl-none shadow-black/5"
+                            } ${m.isOptimistic ? "opacity-50 grayscale" : ""}`}>
                                 {m.content}
                             </div>
                             {isMe && i === messages.length - 1 && !m.isOptimistic && (
-                                <div className="mt-4 px-4 flex items-center gap-2 text-[10px] font-black text-emerald-500 uppercase tracking-[0.3em] italic animate-in fade-in slide-in-from-right-4">
-                                    <CheckCheck size={14} strokeWidth={3} /> Synchronized
+                                <div className="mt-3 px-2 flex items-center gap-2 text-[9px] font-black text-emerald-500 uppercase tracking-[0.3em] italic animate-in fade-in slide-in-from-right-4">
+                                    <CheckCheck size={12} strokeWidth={3} /> Transmission_Confirmed
                                 </div>
                             )}
                         </div>
@@ -189,11 +190,11 @@ export default function FacultyChat({ sessionId, currentUser, recipientName }) {
                 <div ref={messagesEndRef} />
             </div>
 
-            {/* Interaction Matrix */}
-            <div className="p-12 md:p-14 bg-gray-50/50 border-t border-gray-100 relative z-20 shadow-inner">
+            {/* Interaction Terminal */}
+            <div className="p-10 md:p-12 bg-background-dark/80 border-t border-border-dark relative z-20 shadow-[0_-20px_50px_rgba(0,0,0,0.5)]">
                 {!online && (
-                    <div className="absolute top-0 left-1/2 -translate-y-1/2 -translate-x-1/2 px-8 py-3 bg-red-600 text-white rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-3 shadow-2xl anim-fade-in border-4 border-white">
-                        <WifiOff size={16} strokeWidth={3} className="animate-pulse" /> Protocol Alert: Sync Unstable
+                    <div className="absolute top-0 left-1/2 -translate-y-1/2 -translate-x-1/2 px-6 py-2.5 bg-red-600 text-white rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-3 shadow-[0_0_30px_rgba(220,38,38,0.5)] anim-fade-in">
+                        <WifiOff size={14} strokeWidth={3} className="animate-pulse" /> Signal Variance: Link Unstable
                     </div>
                 )}
                 
@@ -202,25 +203,25 @@ export default function FacultyChat({ sessionId, currentUser, recipientName }) {
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         placeholder="INPUT SCHOLARLY DATA..."
-                        className="w-full bg-white border-2 border-gray-100 rounded-[2.8rem] px-12 py-8 text-gray-900 font-bold text-base focus:outline-none focus:border-blue-600 focus:ring-[24px] focus:ring-blue-600/5 transition-all placeholder:text-gray-200 shadow-xl italic"
+                        className="w-full bg-background-dark/80 border-2 border-border-dark rounded-[2.5rem] pl-10 pr-24 py-7 text-white font-medium text-base focus:outline-none focus:border-indigo-500 focus:ring-[20px] focus:ring-indigo-500/5 transition-all placeholder:text-white/5 shadow-inner"
                     />
                     <button 
                         type="submit"
                         disabled={!input.trim() || sending}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 size-16 rounded-[2rem] bg-blue-600 text-white flex items-center justify-center hover:bg-gray-900 transition-all shadow-2xl active:scale-90 disabled:opacity-10 group/btn"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 size-16 rounded-[1.8rem] bg-indigo-600 text-white flex items-center justify-center hover:bg-white hover:text-indigo-600 transition-all shadow-2xl active:scale-90 disabled:opacity-10 group/btn"
                     >
                         {sending ? <Loader2 className="animate-spin" size={24} /> : (
-                            <Send size={28} strokeWidth={3} className="group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1 transition-transform" />
+                            <Send size={28} strokeWidth={2.5} className="group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1 transition-transform" />
                         )}
                     </button>
                 </form>
                 
-                <div className="mt-10 flex items-center justify-between opacity-10 group-hover:opacity-30 transition-opacity">
-                    <div className="flex items-center gap-8 text-[10px] font-black text-gray-900 uppercase tracking-[0.5em] italic leading-none">
-                        <div className="flex items-center gap-2"><Lock size={12} strokeWidth={3} /> Secure_Vault</div>
-                        <div className="flex items-center gap-2"><Zap size={12} strokeWidth={3} fill="currentColor" /> High_Bandwidth</div>
+                <div className="mt-8 flex items-center justify-between opacity-20 group-hover:opacity-40 transition-opacity">
+                    <div className="flex items-center gap-6 text-[10px] font-black text-white uppercase tracking-[0.4em] italic leading-none">
+                        <div className="flex items-center gap-2"><Lock size={12} strokeWidth={3} /> Crypt_Vault</div>
+                        <div className="flex items-center gap-2"><Zap size={12} strokeWidth={3} /> Low_Lat</div>
                     </div>
-                    <Activity size={18} className="text-blue-600 animate-pulse" strokeWidth={3} />
+                    <Activity size={16} className="text-white animate-pulse" />
                 </div>
             </div>
         </div>
