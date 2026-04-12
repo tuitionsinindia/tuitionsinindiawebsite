@@ -431,7 +431,7 @@ function StudentDashboardContent() {
                             <div className="space-y-4">
                                 <h1 className="text-2xl font-bold text-gray-900">Messages</h1>
                                 <div className="flex flex-col md:flex-row h-[calc(100vh-220px)] bg-white rounded-xl border border-gray-200 overflow-hidden">
-                                    <div className="w-full md:w-72 border-b md:border-b-0 md:border-r border-gray-200 flex flex-col max-h-48 md:max-h-none
+                                    <div className="w-full md:w-72 border-b md:border-b-0 md:border-r border-gray-200 flex flex-col max-h-48 md:max-h-none">
                                         <div className="p-4 border-b border-gray-100">
                                             <h3 className="font-semibold text-gray-900 text-sm">Conversations</h3>
                                             <p className="text-xs text-gray-500 mt-0.5">{chatSessions.length} active</p>
