@@ -1,23 +1,17 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
+import { GraduationCap } from "lucide-react";
 
 export default function Logo({ light = false, className = "", iconOnly = false }) {
-    const mainLogo = "/logo.png";
-    
     return (
-        <Link href="/" className={`flex items-center gap-2 group transition-opacity hover:opacity-90 ${className}`}>
-            <div className="relative size-8 md:size-10 overflow-hidden rounded-lg bg-white shadow-sm border border-gray-100 flex items-center justify-center p-0.5 group-hover:shadow-md transition-all">
-                <img 
-                    src={mainLogo} 
-                    alt="TuitionsInIndia Logo" 
-                    className="w-full h-full object-contain"
-                />
+        <Link href="/" className={`flex items-center gap-2.5 group ${className}`}>
+            <div className="size-9 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-sm">
+                <GraduationCap size={20} strokeWidth={2} />
             </div>
             {!iconOnly && (
-                <span className={`text-base md:text-lg font-black tracking-tighter uppercase italic drop-shadow-sm ${light ? 'text-white' : 'text-gray-900'}`}>
-                    TUITIONS<span className="text-blue-600 not-italic lowercase px-0.5">in</span>INDIA
+                <span className={`text-base font-bold tracking-tight ${light ? 'text-white' : 'text-gray-900'}`}>
+                    Tuitions<span className="text-blue-600">in</span>India
                 </span>
             )}
         </Link>
