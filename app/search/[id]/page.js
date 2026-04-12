@@ -5,6 +5,7 @@ import {
     MapPin, Clock, Star, BadgeCheck, GraduationCap, BookOpen,
     Phone, Mail, ArrowLeft, Briefcase, Languages, Users
 } from "lucide-react";
+import { WhatsAppShareButton, ShareButton } from "@/app/components/ShareButtons";
 
 export async function generateMetadata({ params }) {
     const { id } = await params;
@@ -13,9 +14,13 @@ export async function generateMetadata({ params }) {
         include: { tutor: { select: { name: true } } },
     });
     if (!listing) return { title: "Tutor Not Found" };
+    const title = `${listing.tutor.name} — ${listing.subjects?.[0] || "Tutor"} | TuitionsInIndia`;
+    const description = listing.bio?.slice(0, 160) || `${listing.tutor.name} teaches ${listing.subjects?.join(", ")} on TuitionsInIndia.`;
     return {
-        title: `${listing.tutor.name} — ${listing.subjects?.[0] || "Tutor"} | TuitionsInIndia`,
-        description: listing.bio?.slice(0, 160) || `${listing.tutor.name} teaches ${listing.subjects?.join(", ")} on TuitionsInIndia.`,
+        title,
+        description,
+        openGraph: { title, description, type: "profile" },
+        twitter: { card: "summary", title, description },
     };
 }
 
@@ -78,13 +83,21 @@ export default async function TutorProfilePage({ params }) {
                                 </div>
                                 <p className="text-gray-500 text-sm mt-1">{listing.title}</p>
                             </div>
-                            <div className="flex gap-2 shrink-0">
+                            <div className="flex flex-wrap gap-2 shrink-0">
                                 <Link
                                     href={`/register/student?intent=unlock&tutorId=${tutor.id}&subject=${listing.subjects?.[0] || ""}`}
                                     className="px-5 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors"
                                 >
                                     Contact Tutor
                                 </Link>
+                                <WhatsAppShareButton
+                                    text={`Check out ${tutor.name} on TuitionsInIndia — ${listing.subjects?.join(", ")} tutor`}
+                                    url={`https://tuitionsinindia.com/search/${tutor.id}`}
+                                />
+                                <ShareButton
+                                    title={`${tutor.name} — ${listing.subjects?.[0]} Tutor`}
+                                    url={`https://tuitionsinindia.com/search/${tutor.id}`}
+                                />
                             </div>
                         </div>
                     </div>
