@@ -18,7 +18,7 @@ const ROLE_MAP = { student: 'STUDENT', tutor: 'TUTOR', institute: 'INSTITUTE' };
 const DASHBOARD_MAP = {
     STUDENT: (id) => `/dashboard/student?studentId=${id}`,
     TUTOR: (id) => `/dashboard/tutor?tutorId=${id}`,
-    INSTITUTE: (id) => `/dashboard/institute?instId=${id}`
+    INSTITUTE: (id) => `/dashboard/institute?instituteId=${id}`
 };
 
 export default function LoginPage() {
@@ -39,7 +39,7 @@ export default function LoginPage() {
             const res = await fetch("/api/auth/otp/send", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ phone, role: ROLE_MAP[loginType] })
+                body: JSON.stringify({ phone, role: ROLE_MAP[loginType], isRegistration: false })
             });
             const data = await res.json();
             if (data.success) {

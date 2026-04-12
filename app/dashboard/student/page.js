@@ -69,9 +69,6 @@ function StudentDashboardContent() {
                     }
                 }
             } catch {}
-            // Fallback: URL param (for email deep links)
-            const urlId = searchParams.get("studentId");
-            if (urlId) { setStudentId(urlId); setSessionLoading(false); return; }
             router.replace("/login");
         };
         init();
@@ -264,6 +261,20 @@ function StudentDashboardContent() {
                                         </div>
                                     ))}
                                 </div>
+
+                                {/* Getting Started — shown when no active leads */}
+                                {activeLeads.length === 0 && unlockedTutors.length === 0 && (
+                                    <div className="bg-blue-50 border border-blue-100 rounded-xl p-6 space-y-3">
+                                        <h3 className="font-semibold text-blue-900">Getting Started</h3>
+                                        <p className="text-sm text-blue-700">Welcome! Here's how to find your perfect tutor:</p>
+                                        <ol className="text-sm text-blue-700 space-y-2 list-decimal list-inside">
+                                            <li>Click <strong>"+ Post New Request"</strong> above to describe what you need.</li>
+                                            <li>Matching tutors will be notified and may <strong>unlock your contact</strong>.</li>
+                                            <li>You'll see them in the <strong>My Tutors</strong> tab — start a chat from there.</li>
+                                            <li>You can also <Link href="/search" className="underline font-medium">search for tutors</Link> directly.</li>
+                                        </ol>
+                                    </div>
+                                )}
                             </div>
                         )}
 
@@ -294,6 +305,24 @@ function StudentDashboardContent() {
                                                         <p className="font-medium text-gray-700">{lead.grades?.[0] || 'N/A'}</p>
                                                     </div>
                                                 </div>
+                                                {lead.status === "OPEN" && (
+                                                    <button
+                                                        onClick={async () => {
+                                                            if (!confirm("Close this request? Tutors will no longer be able to unlock it.")) return;
+                                                            try {
+                                                                const res = await fetch("/api/lead/close", {
+                                                                    method: "POST",
+                                                                    headers: { "Content-Type": "application/json" },
+                                                                    body: JSON.stringify({ leadId: lead.id, studentId }),
+                                                                });
+                                                                if (res.ok) fetchActiveLeads();
+                                                            } catch (err) { console.error(err); }
+                                                        }}
+                                                        className="mt-3 w-full py-2 text-xs text-red-500 border border-red-100 rounded-lg hover:bg-red-50 transition-colors font-medium"
+                                                    >
+                                                        Close Request
+                                                    </button>
+                                                )}
                                             </div>
                                         ))}
                                     </div>

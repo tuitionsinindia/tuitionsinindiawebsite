@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { createNotification } from '@/lib/notifications';
 
 // Fetch all messages for a session (used for polling)
 export async function GET(req) {
@@ -47,9 +48,18 @@ export async function POST(req) {
         });
 
         // Update the session's updatedAt time
-        await prisma.chatSession.update({
+        const session = await prisma.chatSession.update({
             where: { id: sessionId },
-            data: { updatedAt: new Date() }
+            data: { updatedAt: new Date() },
+            select: { studentId: true, tutorId: true },
+        });
+
+        // Notify the recipient (non-blocking)
+        const recipientId = senderId === session.studentId ? session.tutorId : session.studentId;
+        createNotification(recipientId, {
+            type: "NEW_MESSAGE",
+            title: `New message from ${message.sender?.name || "someone"}`,
+            body: content.length > 80 ? content.slice(0, 80) + "..." : content,
         });
 
         return NextResponse.json({ message });

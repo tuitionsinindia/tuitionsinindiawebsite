@@ -32,7 +32,7 @@ export default function LeadCaptureFlow({ initialRole = "STUDENT", onComplete })
             const res = await fetch("/api/auth/otp/send", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(form)
+                body: JSON.stringify({ ...form, isRegistration: true })
             });
             const data = await res.json();
 
@@ -81,7 +81,7 @@ export default function LeadCaptureFlow({ initialRole = "STUDENT", onComplete })
             const res = await fetch("/api/auth/otp/send", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(form)
+                body: JSON.stringify({ ...form, isRegistration: true })
             });
             const data = await res.json();
             if (!data.success) setError("Failed to resend OTP.");

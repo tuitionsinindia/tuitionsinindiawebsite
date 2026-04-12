@@ -75,7 +75,7 @@ export async function POST(request) {
                 grades: gradeList,
                 locations: locationList,
                 hourlyRate: parseInt(hourlyRate) || 0,
-                isActive: false, // Profiles require admin approval by default
+                isActive: true,
             },
         });
 

@@ -65,8 +65,6 @@ function InstituteDashboardContent() {
                     }
                 }
             } catch {}
-            const urlId = searchParams.get("instituteId");
-            if (urlId) { setInstituteId(urlId); return; }
             router.replace("/login");
         };
         init();

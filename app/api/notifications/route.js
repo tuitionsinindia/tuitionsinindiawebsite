@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { verifyToken, COOKIE_NAME } from "@/lib/session";
 
 export const dynamic = 'force-dynamic';
 
@@ -11,6 +12,13 @@ export async function GET(request) {
 
     if (!userId) {
         return NextResponse.json({ error: "userId required" }, { status: 400 });
+    }
+
+    // Verify caller owns this data
+    const cookie = request.cookies.get(COOKIE_NAME);
+    const session = cookie ? verifyToken(cookie.value) : null;
+    if (!session || session.id !== userId) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     try {

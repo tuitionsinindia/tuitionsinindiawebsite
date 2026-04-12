@@ -72,10 +72,6 @@ function DashboardContent() {
                     }
                 }
             } catch {}
-            // Fallback: URL param or localStorage
-            if (paramTutorId) { setTutorId(paramTutorId); return; }
-            const savedId = localStorage.getItem("ti_active_tutor_id");
-            if (savedId) { setTutorId(savedId); return; }
             router.replace("/login");
         };
         init();
@@ -283,6 +279,21 @@ function DashboardContent() {
                                         </div>
                                     ))}
                                 </div>
+
+                                {/* Getting Started — shown only for new users with no leads unlocked */}
+                                {leads.length === 0 && (tutorData?.credits || 0) >= 5 && (
+                                    <div className="bg-blue-50 border border-blue-100 rounded-xl p-6 space-y-3">
+                                        <h3 className="font-semibold text-blue-900">Getting Started</h3>
+                                        <p className="text-sm text-blue-700">Welcome! Here's how to get your first students:</p>
+                                        <ol className="text-sm text-blue-700 space-y-2 list-decimal list-inside">
+                                            <li>Your profile is now <strong>live in search</strong> — students can find you.</li>
+                                            <li>Browse <strong>Student Leads</strong> tab to see students looking for your subjects.</li>
+                                            <li><strong>Unlock</strong> a lead (costs 1 credit) to see the student's contact info.</li>
+                                            <li>Start a <strong>chat</strong> to introduce yourself and arrange classes.</li>
+                                        </ol>
+                                        <p className="text-sm text-blue-600 font-medium">You have {tutorData?.credits || 0} free credits to get started!</p>
+                                    </div>
+                                )}
 
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                                     <div className="bg-white rounded-xl border border-gray-200 p-6">
