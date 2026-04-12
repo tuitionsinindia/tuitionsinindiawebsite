@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { calculateMatchScore } from "@/lib/matchEngine";
 
 export const dynamic = 'force-dynamic';
 
@@ -84,21 +85,43 @@ export async function GET(request) {
             },
         });
 
-        // Fetch tutor info for premium check
-        const requester = tutorId ? await prisma.user.findUnique({ where: { id: tutorId }, select: { subscriptionTier: true } }) : null;
+        // Fetch tutor info for match scoring and premium check
+        let tutorListing = null;
+        let requester = null;
+        if (tutorId) {
+            [tutorListing, requester] = await Promise.all([
+                prisma.listing.findUnique({ where: { tutorId }, select: { subjects: true, locations: true, teachingModes: true, type: true, isInstitute: true } }),
+                prisma.user.findUnique({ where: { id: tutorId }, select: { subscriptionTier: true, isVerified: true, lat: true, lng: true } }),
+            ]);
+        }
         const isPremiumTutor = ['PRO', 'ELITE', 'INSTITUTE'].includes(requester?.subscriptionTier);
 
-        // Sanitize leads
+        // Sanitize leads and add match scores
         const sanitizedLeads = leads.map(lead => {
             const isUnlockedByCredit = lead.unlockedBy.length > 0;
             const isUnlocked = isUnlockedByCredit || isPremiumTutor;
-            
+
+            // Calculate match score if tutor listing exists
+            let matchScore = 0, matchLabel = "Partial Match", matchFactors = [];
+            if (tutorListing) {
+                const result = calculateMatchScore(
+                    { subjects: tutorListing.subjects, locations: tutorListing.locations, modes: tutorListing.teachingModes, lat: requester?.lat, lng: requester?.lng },
+                    { subjects: lead.subjects, locations: lead.locations, teachingModes: lead.modes, type: lead.type }
+                );
+                matchScore = result.score;
+                matchLabel = result.label;
+                matchFactors = result.factors;
+            }
+
             return {
                 ...lead,
                 student: isUnlocked ? lead.student : { name: "Hidden", phone: "Hidden", email: "Hidden" },
                 isUnlocked,
+                matchScore,
+                matchLabel,
+                matchFactors,
             };
-        });
+        }).sort((a, b) => b.matchScore - a.matchScore);
 
         return NextResponse.json(sanitizedLeads);
     } catch (error) {
