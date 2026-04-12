@@ -25,13 +25,23 @@ export const metadata = {
     siteName: "TuitionsInIndia",
     locale: "en_IN",
     type: "website",
+    images: [
+      {
+        url: "https://tuitionsinindia.com/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "TuitionsInIndia — Find Home Tutors & Online Tutors Near You",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "TuitionsInIndia — Find Home Tutors & Online Tutors Near You",
     description: "Browse thousands of verified tutors across India for JEE, NEET, CBSE, ICSE and more.",
     creator: "@tuitionsinindia",
+    images: ["https://tuitionsinindia.com/og-image.png"],
   },
+  metadataBase: new URL("https://tuitionsinindia.com"),
   robots: {
     index: true,
     follow: true,
