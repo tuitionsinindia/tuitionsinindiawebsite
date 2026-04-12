@@ -17,32 +17,32 @@ export default function TutorHowItWorks() {
     const steps = [
         {
             step: "01",
-            title: "Build Your Profile",
-            desc: "Sign up and create a profile showcasing your subjects, teaching experience, and areas you serve.",
+            title: "Architect Your Profile",
+            desc: "Sign up and build a high-fidelity profile highlighting your subjects, pedagogical experience, and geographic range.",
             icon: UserPlus,
             color: "text-blue-600",
             bg: "bg-blue-50/50"
         },
         {
             step: "02",
-            title: "Get Verified",
-            desc: "Submit your ID and academic certificates through our quick KYC process. Earn the trusted 'Verified' badge and rank higher in searches.",
+            title: "Credential Audit",
+            desc: "Complete our quick KYC process by submitting your ID and academic certificates. Earn the elite 'Verified' status badge.",
             icon: ShieldCheck,
             color: "text-emerald-600",
             bg: "bg-emerald-50/50"
         },
         {
             step: "03",
-            title: "Receive Enquiries",
-            desc: "Get notified instantly when students search for your subjects in your area. View their requirements and decide who to connect with.",
+            title: "Pipeline Enquiries",
+            desc: "Get notified instantly via our matching engine when students search for your exact expertise in your preferred zones.",
             icon: BellRing,
             color: "text-purple-600",
             bg: "bg-purple-50/50"
         },
         {
             step: "04",
-            title: "Teach & Earn",
-            desc: "Chat with students, agree on fees, and start teaching. Zero commission — you keep 100% of what you earn.",
+            title: "Direct Monetization",
+            desc: "Chat with students, finalize terms, and teach. We operate a zero-commission protocol—you keep 100% of your value.",
             icon: TrendingUp,
             color: "text-blue-600",
             bg: "bg-blue-50/50"
@@ -65,21 +65,21 @@ export default function TutorHowItWorks() {
                 <div className="max-w-4xl mx-auto">
                     <div className="inline-flex items-center gap-3 px-4 py-2 bg-blue-50 rounded-full border border-blue-100 mb-8">
                         <Zap size={14} className="text-blue-600" />
-                        <span className="text-blue-700 text-xs font-black uppercase tracking-[0.3em]">For Tutors</span>
+                        <span className="text-blue-700 text-xs font-black uppercase tracking-[0.3em]">Independent Faculty Protocol</span>
                     </div>
-
+                    
                     <h1 className="text-5xl md:text-8xl font-black tracking-tighter mb-10 leading-[0.9] uppercase italic text-gray-900">
-                        Your expertise, <br />
-                        <span className="text-blue-600 font-serif lowercase tracking-normal not-italic px-4">your</span> earnings.
+                        Pedagogical <br />
+                        <span className="text-blue-600 font-serif lowercase tracking-normal not-italic px-4">uncompromised</span> profit.
                     </h1>
-
+                    
                     <p className="text-lg md:text-xl text-gray-500 font-medium max-w-2xl mx-auto mb-12 leading-relaxed italic">
-                        Stop losing income to middlemen. List your profile free and connect directly with students across India.
+                        Stop paying agency tolls. Deploy your expertise on India's most advanced academic matchmaking infrastructure.
                     </p>
-
+                    
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <Link href="/register/tutor" className="px-10 py-5 bg-blue-600 text-white rounded-2xl font-black shadow-2xl shadow-blue-600/30 hover:bg-black active:scale-95 transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-xs">
-                            Create Your Profile <ArrowRight size={20} />
+                            Initiate Faculty Profile <ArrowRight size={20} />
                         </Link>
                     </div>
                 </div>
@@ -129,18 +129,18 @@ export default function TutorHowItWorks() {
                     </div>
                     
                     <h2 className="text-4xl md:text-7xl font-black tracking-tighter uppercase italic mb-10 leading-none">
-                        Earn trust, <span className="text-blue-500 font-serif lowercase tracking-normal not-italic px-4">earn</span> more.
+                        Certified <span className="text-blue-500 font-serif lowercase tracking-normal not-italic px-4">authority</span> Pipeline.
                     </h2>
-
+                    
                     <p className="text-xl text-gray-400 font-medium mb-12 italic max-w-2xl mx-auto">
-                        Verified tutors earn the confidence of thousands of parents across India. Get more enquiries with our trusted verification process.
+                        Earn the trust of thousands of parents. Our verification engine is the industry standard for academic credentialing.
                     </p>
-
+                    
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-8 text-left border-t border-white/10 pt-12">
                         {[
-                            { label: "Parent Rating", val: "9.8/10", sub: "Average Score" },
-                            { label: "More Enquiries", val: "4.5x", sub: "vs Unverified" },
-                            { label: "You Keep", val: "100%", sub: "Zero Commission" }
+                            { label: "Trust Index", val: "9.8/10", sub: "Parent Rating" },
+                            { label: "Lead Velocity", val: "4.5x", sub: "Verified Edge" },
+                            { label: "Revenue Share", val: "100%", sub: "Zero Margin" }
                         ].map((stat, i) => (
                             <div key={i} className="space-y-1">
                                 <p className="text-xs font-black uppercase tracking-widest text-gray-500">{stat.label}</p>
@@ -156,7 +156,7 @@ export default function TutorHowItWorks() {
             <section className="snap-section px-6 bg-gray-50">
                 <div className="max-w-4xl mx-auto">
                     <div className="text-center mb-16">
-                        <h2 className="text-4xl font-black tracking-tighter uppercase italic text-gray-900">Tutor <span className="text-blue-600">FAQ</span></h2>
+                        <h2 className="text-4xl font-black tracking-tighter uppercase italic text-gray-900">Faculty <span className="text-blue-600">FAQ</span></h2>
                     </div>
                     
                     <div className="grid gap-6">
@@ -171,6 +171,9 @@ export default function TutorHowItWorks() {
                             </div>
                         ))}
                     </div>
+                </div>
+                <div className="mt-20 text-center flex items-center justify-center gap-2 text-xs font-black text-gray-300 uppercase tracking-[0.5em]">
+                    <Lock size={12} strokeWidth={3} /> Standard Security Protocols Active
                 </div>
             </section>
         </div>

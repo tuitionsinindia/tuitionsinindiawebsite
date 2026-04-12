@@ -8,23 +8,23 @@ export default function StudentFAQ() {
     const questions = [
         {
             question: "How do I find the right tutor for my needs?",
-            answer: "Use our search to filter by subject, location, and grade level. You can also use our AI Matchmaker to get a personalised recommendation based on your requirements."
+            answer: "You can use our 'Expert Search' to filter by subject, location, and institutional metrics. Alternatively, deploy our AI Matchmaker for an automated, high-precision recommendation based on your pedagogical requirements."
         },
         {
             question: "Is the first trial session really free?",
-            answer: "Most of our verified tutors offer a free 30-minute trial session. Look for the 'Free Trial' badge on a tutor's profile to confirm availability."
+            answer: "The majority of our verified institutional specialists offer a 30-minute diagnostic session at zero cost. Look for the 'Verified Trial' badge on the educator's profile for confirmation."
         },
         {
-            question: "How are payments handled?",
-            answer: "Payments are processed securely through Razorpay and support UPI, Netbanking, and all major cards. You pay your tutor directly — we don't take a commission."
+            question: "How are financial transactions handled?",
+            answer: "We utilize a secure credit-based ecosystem and direct payment protocols through Razorpay. All transactions are encrypted and support UPI, Netbanking, and major platform facilities."
         },
         {
-            question: "What is the Satisfaction Guarantee?",
-            answer: "If your first session doesn't meet your expectations, we will help you find a better match at no additional cost."
+            question: "What is the Satisfaction Guarantee protocol?",
+            answer: "Our Academic Integrity Guarantee ensures that if your first session does not meet institutional standards, we will re-initiate a high-priority match sequence at no additional cost."
         },
         {
-            question: "Can I find tutors who come to my home?",
-            answer: "Yes. You can filter by teaching mode — at your home, at the tutor's location, at a coaching centre, or online. Choose whatever suits you best."
+            question: "Does the platform support home-based discovery?",
+            answer: "Yes. Our matching engine supports 'Home Laboratory', 'Online Synchronous', and 'Institutional Center' modes. You can filter your search based on your preferred learning environment."
         }
     ];
 
@@ -38,16 +38,16 @@ export default function StudentFAQ() {
                 <div className="max-w-4xl mx-auto">
                     <div className="inline-flex items-center gap-3 px-4 py-2 bg-blue-50 rounded-full border border-blue-100 mb-8">
                         <ShieldCheck size={14} className="text-blue-600" />
-                        <span className="text-blue-700 text-xs font-black uppercase tracking-[0.3em]">Student Help</span>
+                        <span className="text-blue-700 text-xs font-black uppercase tracking-[0.3em]">Institutional Support Matrix</span>
                     </div>
-
+                    
                     <h1 className="text-5xl md:text-8xl font-black tracking-tighter mb-10 leading-[0.9] uppercase italic text-gray-900">
                         Student <br />
-                        <span className="text-blue-600 font-serif lowercase tracking-normal not-italic px-4">FAQ</span>
+                        <span className="text-blue-600 font-serif lowercase tracking-normal not-italic px-4">Support</span> Terminal.
                     </h1>
-
+                    
                     <p className="text-lg md:text-xl text-gray-500 font-medium max-w-2xl mx-auto mb-12 leading-relaxed italic">
-                        Everything you need to know about finding and working with tutors on TuitionsInIndia.
+                        Comprehensive documentation for navigating the TuitionsInIndia academic ecosystem. Find clarity on procurement and matching protocols.
                     </p>
                 </div>
                 
@@ -84,18 +84,21 @@ export default function StudentFAQ() {
                     </p>
                     
                     <div className="flex flex-col sm:flex-row gap-6 justify-center">
-                        <Link
-                            href="/post-requirement"
+                        <Link 
+                            href="/post-requirement" 
                             className="bg-blue-600 text-white font-black px-12 py-6 rounded-2xl hover:bg-white hover:text-gray-900 active:scale-95 transition-all shadow-2xl shadow-blue-600/20 flex items-center justify-center gap-3 uppercase tracking-widest text-xs"
                         >
-                            Post a Requirement <ArrowRight size={18} />
+                            Deploy Requirement <ArrowRight size={18} />
                         </Link>
-                        <Link href="/contact" className="bg-transparent border border-white/20 text-white font-black px-12 py-6 rounded-2xl hover:bg-white/5 active:scale-95 transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-xs">
+                        <button className="bg-transparent border border-white/20 text-white font-black px-12 py-6 rounded-2xl hover:bg-white/5 active:scale-95 transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-xs">
                             <Mail size={18} className="text-blue-500" />
-                            Contact Us
-                        </Link>
+                            Contact Counsel
+                        </button>
                     </div>
 
+                    <div className="mt-20 flex items-center justify-center gap-2 text-xs font-black text-gray-500 uppercase tracking-[0.5em]">
+                        <Lock size={12} strokeWidth={3} /> Standard Security Protocols Active
+                    </div>
                 </div>
             </section>
         </div>

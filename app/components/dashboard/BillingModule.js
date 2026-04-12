@@ -1,348 +1,129 @@
 "use client";
 
-import { useState } from "react";
-import { Zap, History, BadgeCheck, AlertCircle, Loader2, X, Crown, Check, Star } from "lucide-react";
+import { Zap, CreditCard, History, ArrowUpRight, BadgeCheck, AlertCircle, Wallet } from "lucide-react";
 
-const CREDIT_PACKAGES = [
-    { id: "10", label: "10 Credits", credits: 10, price: 99, description: "Unlock ~10 basic leads" },
-    { id: "25", label: "25 Credits", credits: 25, price: 249, description: "Best for active tutors", popular: true },
-    { id: "50", label: "50 Credits", credits: 50, price: 449, description: "Stock up and save" },
-];
-
-const SUBSCRIPTION_PLANS = [
-    {
-        id: "FREE", label: "Free", price: 0, period: "",
-        features: ["Basic profile listing", "Appear in search results", "Receive student enquiries", "View matching leads (locked)"],
-        cta: null,
-    },
-    {
-        id: "PRO", label: "Pro", price: 499, period: "/month",
-        features: ["Verified badge in search", "Unlock 30 leads/month", "Priority search ranking", "Unlimited messaging", "5 subjects listed"],
-        cta: "Upgrade to Pro", popular: true, credits: 30,
-    },
-    {
-        id: "ELITE", label: "Elite", price: 1999, period: "/month",
-        features: ["Everything in Pro", "Unlimited lead unlocks", "Featured in search results", "Priority support", "Institute dashboard access"],
-        cta: "Upgrade to Elite", credits: 100,
-    },
-];
-
-function loadRazorpayScript() {
-    return new Promise((resolve) => {
-        if (window.Razorpay) return resolve(true);
-        const script = document.createElement("script");
-        script.src = "https://checkout.razorpay.com/v1/checkout.js";
-        script.onload = () => resolve(true);
-        script.onerror = () => resolve(false);
-        document.body.appendChild(script);
-    });
-}
-
-export default function BillingModule({ userData, transactions = [], userId, onRefresh }) {
-    const [showCreditModal, setShowCreditModal] = useState(false);
-    const [selectedPackage, setSelectedPackage] = useState("25");
-    const [paymentLoading, setPaymentLoading] = useState(false);
-    const [paymentError, setPaymentError] = useState("");
-
-    const currentTier = userData?.subscriptionTier || "FREE";
-
-    const handlePayment = async (amount, description, creditsToAdd, subscriptionTier) => {
-        if (!userId) return;
-        setPaymentLoading(true);
-        setPaymentError("");
-
-        try {
-            const loaded = await loadRazorpayScript();
-            if (!loaded) { setPaymentError("Payment system failed to load."); setPaymentLoading(false); return; }
-
-            const orderRes = await fetch("/api/payment/order", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ amount, currency: "INR", receipt: `${subscriptionTier}_${userId}_${Date.now()}`, userId, description }),
-            });
-            const order = await orderRes.json();
-            if (!order.id) { setPaymentError("Could not create payment."); setPaymentLoading(false); return; }
-
-            const options = {
-                key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-                amount: order.amount,
-                currency: order.currency,
-                name: "TuitionsInIndia",
-                description,
-                order_id: order.id,
-                handler: async function (response) {
-                    const verifyRes = await fetch("/api/payment/verify", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            razorpay_order_id: response.razorpay_order_id,
-                            razorpay_payment_id: response.razorpay_payment_id,
-                            razorpay_signature: response.razorpay_signature,
-                            userId,
-                            creditsToAdd,
-                            subscriptionTier,
-                        }),
-                    });
-                    const result = await verifyRes.json();
-                    if (result.success) { setShowCreditModal(false); if (onRefresh) onRefresh(); }
-                    else { setPaymentError("Payment verification failed. Contact support."); }
-                    setPaymentLoading(false);
-                },
-                prefill: { name: userData?.name || "", contact: userData?.phone ? `+91${userData.phone}` : "" },
-                theme: { color: "#2563EB" },
-                modal: { ondismiss: () => setPaymentLoading(false) },
-            };
-
-            const rzp = new window.Razorpay(options);
-            rzp.on("payment.failed", () => { setPaymentError("Payment failed."); setPaymentLoading(false); });
-            rzp.open();
-        } catch {
-            setPaymentError("Something went wrong.");
-            setPaymentLoading(false);
-        }
-    };
-
-    const handleBuyCredits = () => {
-        const pkg = CREDIT_PACKAGES.find(p => p.id === selectedPackage);
-        if (!pkg) return;
-        handlePayment(pkg.price, `${pkg.credits} Credits Pack`, pkg.credits, currentTier);
-    };
-
-    const handleUpgrade = (plan) => {
-        handlePayment(plan.price, `${plan.label} Subscription`, plan.credits, plan.id);
-    };
-
+export default function BillingModule({ userData, transactions = [] }) {
     return (
-        <div className="space-y-8">
-            <div>
-                <h2 className="text-2xl font-bold text-gray-900">Billing & Plans</h2>
-                <p className="text-gray-500 text-sm mt-1">Manage your subscription, credits, and transaction history.</p>
-            </div>
-
-            {/* Subscription Plans */}
-            <div>
-                <h3 className="text-base font-semibold text-gray-900 mb-4">Choose Your Plan</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {SUBSCRIPTION_PLANS.map((plan) => {
-                        const isCurrent = currentTier === plan.id;
-                        const isDowngrade = SUBSCRIPTION_PLANS.findIndex(p => p.id === currentTier) >= SUBSCRIPTION_PLANS.findIndex(p => p.id === plan.id);
-                        return (
-                            <div key={plan.id} className={`relative rounded-2xl border-2 p-6 flex flex-col ${
-                                plan.popular ? "border-blue-600 bg-blue-50/30" : isCurrent ? "border-emerald-300 bg-emerald-50/30" : "border-gray-200 bg-white"
-                            }`}>
-                                {plan.popular && (
-                                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                                        Most Popular
-                                    </span>
-                                )}
-                                {isCurrent && (
-                                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-500 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                                        Current Plan
-                                    </span>
-                                )}
-                                <div className="mb-4">
-                                    <h4 className="text-lg font-bold text-gray-900">{plan.label}</h4>
-                                    <div className="flex items-baseline gap-1 mt-1">
-                                        {plan.price > 0 ? (
-                                            <>
-                                                <span className="text-2xl font-black text-gray-900">₹{plan.price.toLocaleString("en-IN")}</span>
-                                                <span className="text-sm text-gray-400">{plan.period}</span>
-                                            </>
-                                        ) : (
-                                            <span className="text-2xl font-black text-gray-900">Free</span>
-                                        )}
-                                    </div>
-                                </div>
-                                <ul className="space-y-2 flex-1 mb-5">
-                                    {plan.features.map((f, i) => (
-                                        <li key={i} className="flex items-start gap-2 text-sm text-gray-600">
-                                            <Check size={14} className="text-emerald-500 mt-0.5 shrink-0" />
-                                            {f}
-                                        </li>
-                                    ))}
-                                </ul>
-                                {plan.cta && !isCurrent && !isDowngrade && (
-                                    <button
-                                        onClick={() => handleUpgrade(plan)}
-                                        disabled={paymentLoading}
-                                        className={`w-full py-2.5 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 ${
-                                            plan.popular
-                                                ? "bg-blue-600 text-white hover:bg-blue-700"
-                                                : "bg-gray-900 text-white hover:bg-gray-800"
-                                        }`}
-                                    >
-                                        {paymentLoading ? <Loader2 className="animate-spin mx-auto" size={16} /> : plan.cta}
-                                    </button>
-                                )}
-                                {isCurrent && (
-                                    <div className="w-full py-2.5 text-center rounded-xl text-sm font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                        Active
-                                    </div>
-                                )}
-                            </div>
-                        );
-                    })}
+        <div className="space-y-12 animate-in fade-in duration-700">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <h2 className="text-4xl font-black text-gray-900 uppercase italic tracking-tighter">Financial <span className="text-blue-600 underline decoration-blue-600/10">Ledger.</span></h2>
+                <div className="flex gap-4">
+                     <span className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border italic shadow-sm ${
+                        userData?.subscriptionTier === 'ELITE' ? 'bg-blue-600 text-white border-blue-600 shadow-blue-600/20' : 'bg-white border-gray-100 text-blue-600'
+                     }`}>
+                        Tier Status: {userData?.subscriptionTier || 'Standard Discoverer'}
+                    </span>
                 </div>
             </div>
 
-            {/* Feature My Profile */}
-            {userData?.role !== "STUDENT" && (
-                <div className="bg-white border border-gray-200 rounded-2xl p-6">
-                    <div className="flex items-center gap-3 mb-4">
-                        <div className="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center">
-                            <Star size={18} className="text-amber-500" />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                {/* Credit Asset Balance */}
+                <div className="p-12 rounded-[3.5rem] bg-blue-600 text-white shadow-4xl shadow-blue-600/30 relative overflow-hidden group border-b-8 border-blue-800">
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none"></div>
+                    <Zap size={110} className="absolute -right-6 -top-6 opacity-10 group-hover:scale-110 transition-transform duration-700 font-black" strokeWidth={3} />
+                    <div className="relative z-10">
+                        <p className="text-[10px] font-black uppercase tracking-[0.5em] mb-4 opacity-70 italic leading-none">Global Credit Assets</p>
+                        <p className="text-7xl font-black italic tracking-tighter leading-none mb-10">{userData?.credits || 0}</p>
+                        <button className="w-full py-5 bg-white text-blue-600 rounded-2xl text-[10px] font-black uppercase tracking-[0.4em] hover:bg-gray-900 hover:text-white transition-all italic shadow-xl">
+                            Recharge Reserves
+                        </button>
+                    </div>
+                </div>
+
+                {/* Subscription Status Card */}
+                <div className="p-12 rounded-[3.5rem] bg-white border border-gray-100 flex flex-col justify-between shadow-4xl shadow-blue-900/[0.02] border-b-8 group">
+                    <div className="space-y-6">
+                        <div className="size-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100 shadow-inner">
+                            <BadgeCheck size={28} strokeWidth={2.5} />
                         </div>
                         <div>
-                            <h3 className="text-base font-semibold text-gray-900">Feature My Profile</h3>
-                            <p className="text-xs text-gray-400 mt-0.5">Appear at the top of search results with a "Featured" badge.</p>
+                            <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-300 italic mb-2">Institutional Tier</h4>
+                            <p className="text-3xl font-black text-gray-900 italic tracking-tight uppercase">{userData?.subscriptionStatus || 'PROVISIONAL'}</p>
                         </div>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <button
-                            onClick={() => handlePayment(199, "Featured Listing - 1 Week", 0, currentTier).then(() =>
-                                fetch("/api/ad/purchase", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId, type: "SEARCH_TOP", duration: "week" }) })
-                            )}
-                            disabled={paymentLoading}
-                            className="p-4 border-2 border-gray-200 rounded-xl hover:border-amber-300 transition-colors text-left"
-                        >
-                            <p className="text-sm font-semibold text-gray-900">1 Week</p>
-                            <p className="text-lg font-bold text-amber-600 mt-1">₹199</p>
-                        </button>
-                        <button
-                            onClick={() => handlePayment(499, "Featured Listing - 1 Month", 0, currentTier).then(() =>
-                                fetch("/api/ad/purchase", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId, type: "SEARCH_TOP", duration: "month" }) })
-                            )}
-                            disabled={paymentLoading}
-                            className="p-4 border-2 border-amber-300 bg-amber-50 rounded-xl hover:border-amber-400 transition-colors text-left relative"
-                        >
-                            <span className="absolute -top-2 right-3 bg-amber-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">Best Value</span>
-                            <p className="text-sm font-semibold text-gray-900">1 Month</p>
-                            <p className="text-lg font-bold text-amber-600 mt-1">₹499</p>
-                        </button>
+                    <div className="flex items-center justify-between mt-10 pt-6 border-t border-gray-50">
+                        <p className="text-[10px] font-black text-gray-300 uppercase tracking-[0.3em] italic">Next Registry Update</p>
+                        <p className="text-[10px] font-black text-blue-600 uppercase italic">PENDING</p>
                     </div>
                 </div>
-            )}
 
-            {/* Quick Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6">
-                    <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center mb-3">
-                        <Zap size={18} className="text-amber-600" />
+                {/* Sync Logs Frequency */}
+                <div className="p-12 rounded-[3.5rem] bg-white border border-gray-100 flex flex-col justify-between shadow-4xl shadow-blue-900/[0.02] border-b-8">
+                    <div className="space-y-6">
+                        <div className="size-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100 shadow-inner">
+                            <History size={28} strokeWidth={2.5} />
+                        </div>
+                        <div>
+                            <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-300 italic mb-2">Synchronization Density</h4>
+                            <p className="text-3xl font-black text-gray-900 italic tracking-tight uppercase">{transactions.length} Total Logs</p>
+                        </div>
                     </div>
-                    <p className="text-sm text-amber-700 font-medium mb-1">Credits Available</p>
-                    <p className="text-3xl font-bold text-amber-900">{userData?.credits || 0}</p>
-                    <button
-                        onClick={() => setShowCreditModal(true)}
-                        className="mt-4 w-full py-2 bg-amber-600 text-white rounded-lg text-sm font-medium hover:bg-amber-700 transition-colors"
-                    >
-                        Buy Credits
-                    </button>
-                </div>
-
-                <div className="bg-white border border-gray-200 rounded-2xl p-6">
-                    <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center mb-3">
-                        <BadgeCheck size={18} className="text-blue-600" />
+                    <div className="flex items-center justify-between mt-10 pt-6 border-t border-gray-50">
+                        <p className="text-[10px] font-black text-gray-300 uppercase tracking-[0.3em] italic">Ledger Status</p>
+                        <p className="text-[10px] font-black text-emerald-600 uppercase italic">SYNCHRONIZED</p>
                     </div>
-                    <p className="text-sm text-gray-500 font-medium mb-1">Current Plan</p>
-                    <p className="text-xl font-bold text-gray-900 capitalize">{currentTier.toLowerCase()}</p>
-                    <p className="text-xs text-gray-400 mt-1">
-                        {userData?.subscriptionStatus === "ACTIVE" ? "Active subscription" : currentTier === "FREE" ? "Upgrade to unlock leads" : "No active subscription"}
-                    </p>
-                </div>
-
-                <div className="bg-white border border-gray-200 rounded-2xl p-6">
-                    <div className="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center mb-3">
-                        <History size={18} className="text-indigo-600" />
-                    </div>
-                    <p className="text-sm text-gray-500 font-medium mb-1">Transactions</p>
-                    <p className="text-3xl font-bold text-gray-900">{transactions.length}</p>
-                    <p className="text-xs text-gray-400 mt-1">Total payments made</p>
                 </div>
             </div>
 
-            {/* Transaction History */}
-            <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-100">
-                    <h3 className="font-semibold text-gray-900">Transaction History</h3>
+            {/* Detailed Transaction Registry */}
+            <div className="space-y-10">
+                <div className="flex items-center gap-8">
+                    <h3 className="text-2xl font-black text-gray-900 uppercase italic tracking-tighter">Asset Synchronization <span className="text-gray-200">Ledger.</span></h3>
+                    <div className="flex-1 h-px bg-gray-100"></div>
                 </div>
-                {transactions.length > 0 ? (
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left">
-                            <thead>
-                                <tr className="bg-gray-50 border-b border-gray-100">
-                                    <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Description</th>
-                                    <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Amount</th>
-                                    <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
-                                    <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-50">
-                                {transactions.map((tx) => (
-                                    <tr key={tx.id} className="hover:bg-gray-50 transition-colors">
-                                        <td className="px-6 py-4 text-sm text-gray-700">{tx.description || "Credit Purchase"}</td>
-                                        <td className="px-6 py-4 text-sm font-semibold text-emerald-600">₹{tx.amount}</td>
-                                        <td className="px-6 py-4 text-sm text-gray-400">
-                                            {new Date(tx.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                                                tx.status === "SUCCESS" ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"
-                                            }`}>
-                                                {tx.status === "SUCCESS" ? "Paid" : tx.status?.charAt(0) + tx.status?.slice(1)?.toLowerCase()}
-                                            </span>
-                                        </td>
+
+                <div className="bg-white border border-gray-100 rounded-[3.5rem] overflow-hidden shadow-4xl shadow-blue-900/[0.03] border-b-8">
+                    {transactions.length > 0 ? (
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse">
+                                <thead>
+                                    <tr className="border-b border-gray-50 bg-gray-50/50">
+                                        <th className="px-12 py-10 text-[10px] font-black uppercase tracking-[0.6em] text-gray-300 italic">Financial Narrative</th>
+                                        <th className="px-12 py-10 text-[10px] font-black uppercase tracking-[0.6em] text-gray-300 italic">Institutional Value</th>
+                                        <th className="px-12 py-10 text-[10px] font-black uppercase tracking-[0.6em] text-gray-300 italic">Registry Status</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                ) : (
-                    <div className="py-16 text-center">
-                        <AlertCircle size={32} className="text-gray-200 mx-auto mb-3" />
-                        <p className="text-sm text-gray-400">No transactions yet.</p>
-                    </div>
-                )}
-            </div>
-
-            {/* Buy Credits Modal */}
-            {showCreditModal && (
-                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 px-4">
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
-                        <div className="flex items-center justify-between mb-5">
-                            <h3 className="text-lg font-bold text-gray-900">Buy Credits</h3>
-                            <button onClick={() => { setShowCreditModal(false); setPaymentError(""); }} className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-gray-100"><X size={16} className="text-gray-400" /></button>
+                                </thead>
+                                <tbody className="divide-y divide-gray-50">
+                                    {transactions.map((tx) => (
+                                        <tr key={tx.id} className="group hover:bg-blue-50/30 transition-all font-black text-gray-900 italic tracking-tighter">
+                                            <td className="px-12 py-10">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="size-10 rounded-xl bg-gray-50 text-gray-400 flex items-center justify-center border border-gray-100 group-hover:bg-white group-hover:text-blue-600 transition-colors shadow-sm">
+                                                        <Wallet size={16} strokeWidth={3} />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-xs lg:text-sm uppercase leading-none mb-2">{tx.description || 'CREDIT_RESERVE_RECAPTURE'}</p>
+                                                        <p className="text-[10px] text-gray-300 uppercase tracking-widest leading-none font-medium italic">{new Date(tx.createdAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-12 py-10 text-xl text-blue-600 font-serif font-light">
+                                                <span className="font-sans font-black mr-1 text-gray-900 not-italic">₹</span>{tx.amount}
+                                            </td>
+                                            <td className="px-12 py-10">
+                                                <span className={`px-5 py-2 rounded-full text-[10px] uppercase tracking-widest border italic shadow-sm flex items-center gap-2 w-fit ${
+                                                    tx.status === 'SUCCESS' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-amber-50 text-amber-600 border-amber-100'
+                                                }`}>
+                                                    <div className={`size-1.5 rounded-full ${tx.status === 'SUCCESS' ? 'bg-emerald-500' : 'bg-amber-500'} animate-pulse`}></div>
+                                                    {tx.status}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
-                        <p className="text-sm text-gray-500 mb-5">Credits are used to unlock student contact details. 1 basic lead = 1 credit.</p>
-                        <div className="space-y-3 mb-5">
-                            {CREDIT_PACKAGES.map((pkg) => (
-                                <button
-                                    key={pkg.id} type="button"
-                                    onClick={() => setSelectedPackage(pkg.id)}
-                                    className={`w-full text-left p-4 rounded-xl border-2 transition-all relative ${
-                                        selectedPackage === pkg.id ? "border-blue-600 bg-blue-50" : "border-gray-200 hover:border-gray-300"
-                                    }`}
-                                >
-                                    {pkg.popular && <span className="absolute -top-2.5 right-4 bg-blue-600 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full">Popular</span>}
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <p className="font-semibold text-gray-900 text-sm">{pkg.label}</p>
-                                            <p className="text-xs text-gray-400 mt-0.5">{pkg.description}</p>
-                                        </div>
-                                        <p className="text-lg font-bold text-gray-900">₹{pkg.price}</p>
-                                    </div>
-                                </button>
-                            ))}
+                    ) : (
+                        <div className="py-32 text-center flex flex-col items-center justify-center gap-8 opacity-20">
+                             <div className="relative">
+                                <AlertCircle size={80} className="text-gray-300" strokeWidth={1} />
+                                <div className="absolute inset-0 bg-blue-600/10 blur-3xl rounded-full"></div>
+                             </div>
+                             <p className="text-[10px] font-black uppercase tracking-[0.6em] max-w-xs mx-auto leading-relaxed">Financial history directory is currently void of institutional logs.</p>
                         </div>
-                        {paymentError && <div className="text-red-600 text-xs bg-red-50 p-3 rounded-xl border border-red-100 mb-4">{paymentError}</div>}
-                        <button
-                            onClick={handleBuyCredits} disabled={paymentLoading}
-                            className="w-full py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors text-sm flex items-center justify-center gap-2 disabled:opacity-50"
-                        >
-                            {paymentLoading ? <><Loader2 className="animate-spin" size={16} /> Opening payment...</> : <>Pay ₹{CREDIT_PACKAGES.find(p => p.id === selectedPackage)?.price}</>}
-                        </button>
-                    </div>
+                    )}
                 </div>
-            )}
+            </div>
         </div>
     );
 }

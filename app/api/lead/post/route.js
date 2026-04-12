@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { sendWelcomeEmail, sendLeadAlertEmail } from "@/lib/email";
 import { sendLeadAlertSMS } from "@/lib/sms";
-import { createNotifications } from "@/lib/notifications";
 
 export const dynamic = 'force-dynamic';
 
@@ -10,8 +9,6 @@ export async function POST(request) {
     try {
         const body = await request.json();
         let { name, email, phone, subject, location, budget, description, grade } = body;
-        // Parse budget safely — form sends strings like "1000/hr", schema expects Int?
-        const budgetInt = budget ? parseInt(String(budget).replace(/\D/g, ''), 10) || null : null;
 
         // Validation
         if (!email || !name || !phone) {
@@ -64,7 +61,7 @@ export async function POST(request) {
                 subjects: subject ? [subject] : [],
                 grades: grade ? [grade] : [],
                 locations: location ? [location] : [],
-                budget: budgetInt,
+                budget: budget,
                 description: description,
                 status: 'OPEN',
             },
@@ -77,17 +74,11 @@ export async function POST(request) {
                 sendWelcomeEmail(email, name, "Student").catch(console.error);
             }
 
-            // Fetch tutors whose listing subjects overlap with the lead
-            const leadSubjects = lead.subjects?.length ? lead.subjects.map(s => s.toUpperCase()) : [];
+            // Fetch active tutors to notify them about the new lead
             prisma.user.findMany({
-                where: {
-                    role: 'TUTOR',
-                    tutorListing: leadSubjects.length > 0
-                        ? { subjects: { hasSome: leadSubjects }, isActive: true }
-                        : { isActive: true },
-                },
-                select: { id: true, email: true, phone: true },
-                take: 50,
+                where: { role: 'TUTOR' },
+                select: { email: true, phone: true },
+                take: 50 // In production, filter by subject/location algorithm
             }).then(tutors => {
                 const tutorEmails = tutors.map(t => t.email).filter(Boolean);
                 if (tutorEmails.length > 0) {
@@ -96,15 +87,6 @@ export async function POST(request) {
                 // Send SMS to a small subset (mock)
                 tutors.slice(0, 5).forEach(t => {
                     if (t.phone) sendLeadAlertSMS(t.phone, lead).catch(console.error);
-                });
-                // In-app notifications for all matching tutors
-                const tutorIds = tutors.map(t => t.id);
-                const subjectLabel = lead.subjects?.[0] || "a subject";
-                createNotifications(tutorIds, {
-                    type: "NEW_LEAD",
-                    title: "New student requirement",
-                    body: `A student is looking for a ${subjectLabel} tutor. Unlock the lead to connect.`,
-                    link: `/dashboard/tutor?tab=leads`,
                 });
             }).catch(console.error);
         } catch (notifyErr) {

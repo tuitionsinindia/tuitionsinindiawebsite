@@ -3,133 +3,102 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import {
-    Search,
+import { 
+    Search, 
+    MapPin, 
+    ChevronDown, 
+    Star, 
+    ShieldCheck, 
+    ArrowRight, 
     Filter,
-    Map as MapIcon,
+    Layout,
     List,
-    Star,
-    MapPin,
-    ShieldCheck,
-    GraduationCap,
-    ChevronDown,
-    WifiOff,
-    ArrowRight,
-    Lock,
-    BadgeCheck,
-    User,
-    Briefcase,
-    Home,
-    Monitor,
+    Map as MapIcon,
+    X,
+    Target,
+    Layers,
+    Activity,
+    Zap,
     Users,
+    ChevronRight,
+    SearchCheck,
+    Lock,
+    GraduationCap,
     Building2,
-    RefreshCw
+    Monitor,
+    Globe,
+    User
 } from "lucide-react";
-import { ALL_SUBJECTS } from "../../lib/subjects";
-import SkeletonLoader from "../components/SkeletonLoader";
 import MapComponent from "../components/MapComponent";
+import Header from "../components/Header";
+import OmniSearch from "../components/OmniSearch";
+import MatchBadge from "../components/MatchBadge";
+import SkeletonLoader from "../components/SkeletonLoader";
 
-function SearchResultsContent() {
+function SearchContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
-    const querySubject = searchParams.get("subject") || "";
-    const queryLocation = searchParams.get("location") || "";
-    const queryRole = (searchParams.get("role") || "TUTOR").toUpperCase();
-    const queryLat = searchParams.get("lat");
-    const queryLng = searchParams.get("lng");
-
+    
+    const [viewMode, setViewMode] = useState("split"); // split, list, map
     const [results, setResults] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [viewMode, setViewMode] = useState("list"); // list, map
-    const [filtersOpen, setFiltersOpen] = useState(false); // mobile filter drawer
-    const [visibleCount, setVisibleCount] = useState(12); // pagination
+    
+    // Core parameters from URL
+    const subject = searchParams.get("subject") || "";
+    const locationParam = searchParams.get("location") || "";
+    const gradeParam = searchParams.get("grade") || "";
+    const role = searchParams.get("role") || "TUTOR";
 
-    // Filter & Sort State
-    const [grade, setGrade] = useState(searchParams.get("grade") || "");
+    // Side-bar Filter states
+    const [grade, setGrade] = useState(gradeParam);
     const [maxRate, setMaxRate] = useState(10000);
-    const [sortBy, setSortBy] = useState("relevance");
     const [verifiedOnly, setVerifiedOnly] = useState(false);
-    const [listingType, setListingType] = useState("ALL"); // ALL, PRIVATE, GROUP
-
-    // Advanced Filters
     const [gender, setGender] = useState("");
     const [experience, setExperience] = useState("");
     const [teachingMode, setTeachingMode] = useState("");
     const [board, setBoard] = useState("");
+    const [listingType, setListingType] = useState(role); 
 
-    const grades = [
-        "Primary (1-5)", "Middle (6-8)", "High School (9-10)",
-        "Higher Secondary (11-12)", "Undergraduate", "Competitive Exams"
-    ];
-
-    const boards = ["CBSE", "ICSE", "State Board", "IB", "IGCSE", "Other"];
-
+    // Sync filters with URL on first load
     useEffect(() => {
-        // Persist browsing context
-        try {
-            if (querySubject) localStorage.setItem("last_browsed_subject", querySubject);
-            if (grade) localStorage.setItem("last_browsed_grade", grade);
-            if (queryLocation) localStorage.setItem("last_browsed_location", queryLocation);
-        } catch (e) {}
-
-        fetchResults();
-    }, [querySubject, queryLocation, queryRole, queryLat, queryLng, grade, maxRate, sortBy, verifiedOnly, gender, experience, teachingMode, board, listingType]);
+        setGrade(gradeParam);
+        setListingType(role);
+    }, [gradeParam, role]);
 
     const fetchResults = async () => {
         setLoading(true);
-        setError(null);
         try {
-            const params = new URLSearchParams({
-                subject: querySubject,
-                location: queryLocation,
-                role: queryRole,
-                grade: grade,
-                maxRate: maxRate.toString(),
-                sortBy: sortBy,
-                verified: verifiedOnly.toString(),
-                gender,
-                experience,
-                teachingMode,
-                board,
-                listingType
-            });
-            if (queryLat) params.set("lat", queryLat);
-            if (queryLng) params.set("lng", queryLng);
+            const params = new URLSearchParams();
+            if (subject) params.set("subject", subject);
+            if (locationParam) params.set("location", locationParam);
+            if (grade) params.set("grade", grade);
+            params.set("role", listingType);
+            params.set("maxRate", maxRate);
+            if (gender) params.set("gender", gender);
+            if (experience) params.set("experience", experience);
+            if (teachingMode) params.set("teachingMode", teachingMode);
+            if (board) params.set("board", board);
 
             const res = await fetch(`/api/search/tutors?${params.toString()}`);
             const data = await res.json();
-
-            if (res.ok && Array.isArray(data)) {
+            
+            if (Array.isArray(data)) {
                 setResults(data);
-            } else if (data && data.error) {
-                setError(data.error);
-                setResults([]);
             } else {
                 setResults([]);
-                if (!res.ok) setError("Unable to reach the server. Please try again.");
             }
-        } catch (err) {
-            console.error(err);
-            setError("Something went wrong. Please check your connection and try again.");
+        } catch (error) {
+            console.error("Discovery Pulse Failure:", error);
+            setResults([]);
         } finally {
             setLoading(false);
         }
     };
 
-    const handleContactTutor = (tutor) => {
-        const registerRoute = queryRole === "STUDENT" ? "/register/tutor" : "/register/student";
-        const params = new URLSearchParams();
-        if (querySubject) params.set("subject", querySubject);
-        if (grade) params.set("grade", grade);
-        if (queryLocation) params.set("location", queryLocation);
-        const tutorId = tutor.id || tutor.userId || "";
-        if (tutorId) params.set("tutorId", tutorId);
-        params.set("intent", "unlock");
-        router.push(`${registerRoute}?${params.toString()}`);
-    };
-
-    const roleLabel = queryRole === "STUDENT" ? "students" : queryRole === "INSTITUTE" ? "institutes" : "tutors";
+    // Refetch when filters change
+    useEffect(() => {
+        fetchResults();
+    }, [subject, locationParam, grade, listingType, maxRate, teachingMode, board, gender]);
 
     const resetFilters = () => {
         setGrade("");
@@ -139,486 +108,290 @@ function SearchResultsContent() {
         setExperience("");
         setTeachingMode("");
         setBoard("");
-        setListingType("ALL");
-    };
-
-    const teachingModeLabel = (mode) => {
-        const map = {
-            ONLINE: "Online",
-            STUDENT_HOME: "At Student's Home",
-            TUTOR_HOME: "At Tutor's Home",
-            CENTER: "At Centre"
-        };
-        return map[mode] || mode;
+        setListingType("TUTOR");
+        // Clear URL as well
+        router.push("/search?role=TUTOR");
     };
 
     return (
-        <div className="flex flex-col lg:flex-row min-h-screen bg-gray-50 font-sans pt-[85px]">
+        <div className="flex flex-col h-screen bg-slate-50 pt-[70px] font-sans antialiased overflow-hidden selection:bg-blue-600/10 selection:text-blue-600">
+            <Header />
 
-            {/* Mobile filter overlay backdrop */}
-            {filtersOpen && (
-                <div
-                    className="fixed inset-0 bg-black/40 z-40 lg:hidden"
-                    onClick={() => setFiltersOpen(false)}
-                />
-            )}
-
-            {/* LEFT SIDEBAR FILTERS */}
-            <aside className={`
-                fixed lg:static inset-y-0 left-0 z-50 lg:z-40
-                w-80 lg:w-72 xl:w-80
-                bg-white border-r border-gray-200
-                flex flex-col
-                lg:sticky lg:top-[85px] lg:h-[calc(100vh-85px)]
-                overflow-y-auto
-                transition-transform duration-300
-                ${filtersOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full lg:translate-x-0"}
-            `}>
-                {/* Sidebar Header */}
-                <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <Filter size={16} className="text-gray-500" />
-                        <h2 className="font-semibold text-gray-700 text-sm">Filters</h2>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <button onClick={resetFilters} className="text-xs text-blue-600 hover:text-blue-700 font-medium">
-                            Reset all
-                        </button>
-                        <button
-                            onClick={() => setFiltersOpen(false)}
-                            className="lg:hidden text-gray-400 hover:text-gray-700 p-1"
-                            aria-label="Close filters"
-                        >
-                            ✕
-                        </button>
-                    </div>
+            {/* TOP COMMAND BAR - INTEGRATED OMNISEARCH */}
+            <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-20 shrink-0 gap-8">
+                <div className="flex-1 max-w-2xl">
+                    <OmniSearch 
+                        initialSubject={subject} 
+                        initialGrade={gradeParam} 
+                        initialLocation={locationParam} 
+                        initialRole={role}
+                        variant="compact"
+                    />
                 </div>
 
-                <div className="p-5 space-y-6">
-
-                    {/* Teaching Mode */}
-                    <div className="space-y-2">
-                        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide">Teaching Mode</label>
-                        <div className="space-y-2">
-                            {[
-                                { id: "ALL", label: "All Modes" },
-                                { id: "ONLINE", label: "Online" },
-                                { id: "STUDENT_HOME", label: "At Student's Home" },
-                                { id: "TUTOR_HOME", label: "At Tutor's Home" },
-                                { id: "CENTER", label: "At Centre" }
-                            ].map(mode => (
-                                <label key={mode.id} className="flex items-center gap-2.5 cursor-pointer group">
-                                    <input
-                                        type="radio"
-                                        name="teachingMode"
-                                        value={mode.id === "ALL" ? "" : mode.id}
-                                        checked={(mode.id === "ALL" ? teachingMode === "" : teachingMode === mode.id)}
-                                        onChange={() => setTeachingMode(mode.id === "ALL" ? "" : mode.id)}
-                                        className="accent-blue-600 w-4 h-4 cursor-pointer"
-                                    />
-                                    <span className="text-sm text-gray-700 group-hover:text-blue-600">{mode.label}</span>
-                                </label>
-                            ))}
-                        </div>
+                <div className="flex items-center gap-4">
+                    <div className="hidden md:flex items-center bg-gray-50 p-1.5 rounded-[1.25rem] border border-gray-100">
+                        <button onClick={() => setViewMode("list")} className={`p-4 rounded-xl transition-all ${viewMode === "list" ? 'bg-white text-blue-600 shadow-xl' : 'text-gray-400 hover:text-gray-900'}`}><List size={22}/></button>
+                        <button onClick={() => setViewMode("split")} className={`p-4 rounded-xl transition-all ${viewMode === "split" ? 'bg-white text-blue-600 shadow-xl' : 'text-gray-400 hover:text-gray-900'}`}><Layout size={22}/></button>
+                        <button onClick={() => setViewMode("map")} className={`p-4 rounded-xl transition-all ${viewMode === "map" ? 'bg-white text-blue-600 shadow-xl' : 'text-gray-400 hover:text-gray-900'}`}><MapIcon size={22}/></button>
                     </div>
-
-                    <div className="border-t border-gray-100" />
-
-                    {/* Session Type */}
-                    <div className="space-y-2">
-                        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide">Session Type</label>
-                        <div className="space-y-2">
-                            {[
-                                { id: "ALL", label: "All Types" },
-                                { id: "PRIVATE", label: "Private (1-on-1)" },
-                                { id: "GROUP", label: "Group / Batch" }
-                            ].map(type => (
-                                <label key={type.id} className="flex items-center gap-2.5 cursor-pointer group">
-                                    <input
-                                        type="radio"
-                                        name="listingType"
-                                        value={type.id}
-                                        checked={listingType === type.id}
-                                        onChange={() => setListingType(type.id)}
-                                        className="accent-blue-600 w-4 h-4 cursor-pointer"
-                                    />
-                                    <span className="text-sm text-gray-700 group-hover:text-blue-600">{type.label}</span>
-                                </label>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="border-t border-gray-100" />
-
-                    {/* Class / Level */}
-                    <div className="space-y-2">
-                        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide">Class / Level</label>
-                        <select
-                            value={grade}
-                            onChange={(e) => setGrade(e.target.value)}
-                            className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 bg-white outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
-                        >
-                            <option value="">All Classes</option>
-                            {grades.map(g => <option key={g} value={g}>{g}</option>)}
-                        </select>
-                    </div>
-
-                    <div className="border-t border-gray-100" />
-
-                    {/* Max Fee */}
-                    <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide">Max Fee / hr</label>
-                            <span className="text-sm font-semibold text-blue-600">₹{maxRate.toLocaleString()}</span>
-                        </div>
-                        <input
-                            type="range"
-                            min="0"
-                            max="5000"
-                            step="100"
-                            value={maxRate}
-                            onChange={(e) => setMaxRate(parseInt(e.target.value))}
-                            className="w-full accent-blue-600 cursor-pointer"
-                        />
-                        <div className="flex justify-between text-xs text-gray-400">
-                            <span>₹0</span>
-                            <span>₹5,000+</span>
-                        </div>
-                    </div>
-
-                    <div className="border-t border-gray-100" />
-
-                    {/* Verified Only */}
-                    <label className="flex items-center justify-between cursor-pointer">
-                        <div className="flex items-center gap-2">
-                            <ShieldCheck size={16} className="text-blue-600" />
-                            <span className="text-sm font-medium text-gray-700">Verified Only</span>
-                        </div>
-                        <div
-                            onClick={() => setVerifiedOnly(!verifiedOnly)}
-                            className={`relative w-10 h-5 rounded-full transition-colors cursor-pointer ${verifiedOnly ? "bg-blue-600" : "bg-gray-200"}`}
-                        >
-                            <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${verifiedOnly ? "translate-x-5" : "translate-x-0.5"}`} />
-                        </div>
-                        <input type="checkbox" checked={verifiedOnly} onChange={(e) => setVerifiedOnly(e.target.checked)} className="hidden" />
-                    </label>
-
-                    <div className="border-t border-gray-100" />
-
-                    {/* Board */}
-                    <div className="space-y-2">
-                        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide">Board</label>
-                        <select
-                            value={board}
-                            onChange={(e) => setBoard(e.target.value)}
-                            className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 bg-white outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
-                        >
-                            <option value="">All Boards</option>
-                            {["CBSE", "ICSE", "IB", "IGCSE", "State Board"].map(b => <option key={b} value={b}>{b}</option>)}
-                        </select>
-                    </div>
-
-                    <div className="border-t border-gray-100" />
-
-                    {/* Gender Preference */}
-                    <div className="space-y-2">
-                        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide">Gender</label>
-                        <select
-                            value={gender}
-                            onChange={(e) => setGender(e.target.value)}
-                            className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 bg-white outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
-                        >
-                            <option value="">Any Gender</option>
-                            <option value="MALE">Male</option>
-                            <option value="FEMALE">Female</option>
-                            <option value="OTHER">Other</option>
-                        </select>
-                    </div>
-
-                    <div className="border-t border-gray-100" />
-
-                    {/* Min Experience */}
-                    <div className="space-y-2">
-                        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide">Min Experience</label>
-                        <select
-                            value={experience}
-                            onChange={(e) => setExperience(e.target.value)}
-                            className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 bg-white outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
-                        >
-                            <option value="">Any</option>
-                            <option value="1">1+ years</option>
-                            <option value="3">3+ years</option>
-                            <option value="5">5+ years</option>
-                            <option value="10">10+ years</option>
-                        </select>
-                    </div>
-
+                    <Link href="/register?role=STUDENT" className="bg-blue-600 text-white px-8 py-5 rounded-[1.25rem] font-black text-xs uppercase tracking-widest shadow-xl shadow-blue-600/20 hover:bg-gray-900 transition-all flex items-center gap-3 active:scale-95 italic">
+                        Acquire Faculty <ArrowRight size={16} />
+                    </Link>
                 </div>
-            </aside>
+            </div>
 
-            {/* MAIN CONTENT AREA */}
-            <div className="flex-1 flex flex-col min-w-0">
+            <div className="flex flex-1 overflow-hidden relative">
+                {/* FILTER MATRIX SIDEBAR */}
+                <aside className="w-80 bg-white border-r border-gray-200 flex flex-col hidden lg:flex relative z-10 shadow-2xl shadow-black/[0.02]">
+                    <div className="p-8 border-b border-gray-100 flex items-center justify-between bg-white shrink-0">
+                        <div className="flex items-center gap-4">
+                            <Target size={22} className="text-blue-600" />
+                            <h2 className="font-black text-sm uppercase tracking-[0.2em] italic text-gray-900">Filter Matrix</h2>
+                        </div>
+                        <button 
+                            onClick={resetFilters}
+                            className="text-xs font-black text-blue-600/40 uppercase hover:text-blue-600 transition-colors"
+                        >
+                            Reset
+                        </button>
+                    </div>
 
-                {/* Search Results Header */}
-                <div className="bg-white border-b border-gray-200 px-6 py-4 sticky top-[85px] z-30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div>
+                    <div className="flex-1 overflow-y-auto p-8 space-y-12 pb-32 custom-scrollbar">
+                        {/* Listing Type */}
+                        <div className="space-y-6">
+                            <label className="text-[10px] font-black text-gray-300 uppercase tracking-[0.4em] italic">Listing Protocol</label>
+                            <div className="grid grid-cols-1 gap-3">
+                                {[
+                                    { id: "TUTOR", label: "Expert Faculty", icon: GraduationCap },
+                                    { id: "STUDENT", label: "Requirement Stream", icon: Users },
+                                    { id: "INSTITUTE", label: "Academy Hubs", icon: Building2 }
+                                ].map(t => (
+                                    <button 
+                                        key={t.id} 
+                                        onClick={() => setListingType(t.id)}
+                                        className={`flex items-center gap-4 p-5 rounded-2xl border text-[10px] font-black uppercase tracking-[0.2em] transition-all relative overflow-hidden ${listingType === t.id ? 'bg-blue-600 text-white border-blue-600 shadow-xl italic' : 'bg-gray-50/50 text-gray-400 border-gray-100 hover:bg-white hover:border-blue-600/30'}`}
+                                    >
+                                        <t.icon size={18} strokeWidth={listingType === t.id ? 3 : 2} /> {t.label}
+                                        {listingType === t.id && <div className="absolute right-4 size-1.5 bg-white rounded-full animate-pulse"></div>}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Grade Level */}
+                        <div className="space-y-6">
+                            <label className="text-[10px] font-black text-gray-300 uppercase tracking-[0.4em] italic">Academic level</label>
+                            <select 
+                                value={grade} 
+                                onChange={(e) => setGrade(e.target.value)}
+                                className="w-full bg-gray-50 border-2 border-gray-50 rounded-2xl p-5 text-[11px] font-black outline-none focus:ring-4 focus:ring-blue-600/5 focus:border-blue-600/30 focus:bg-white uppercase tracking-widest italic transition-all"
+                            >
+                                <option value="">Global Network</option>
+                                <option value="Primary (1-5)">Primary (1-5)</option>
+                                <option value="Middle (6-8)">Middle (6-8)</option>
+                                <option value="High School (9-10)">High School (9-10)</option>
+                                <option value="Higher Secondary (11-12)">Higher Sec (11-12)</option>
+                                <option value="College">College / Uni</option>
+                                <option value="Competitive Exams">Competitive Exams</option>
+                            </select>
+                        </div>
+
+                        {/* Budget Range */}
+                        <div className="space-y-6">
+                            <div className="flex justify-between items-center px-1">
+                                <label className="text-[10px] font-black text-gray-300 uppercase tracking-[0.4em] italic">Budget Index</label>
+                                <span className="text-sm font-black text-blue-600 italic">₹{maxRate}/hr</span>
+                            </div>
+                            <input 
+                                type="range" min="0" max="5000" step="100" 
+                                value={maxRate} onChange={(e) => setMaxRate(parseInt(e.target.value))}
+                                className="w-full h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                            />
+                        </div>
+
+                        {/* Teaching Mode */}
+                        <div className="space-y-6">
+                            <label className="text-[10px] font-black text-gray-300 uppercase tracking-[0.4em] italic">Instructional Mode</label>
+                            <div className="grid grid-cols-2 gap-4">
+                                {[
+                                    { id: "ONLINE", label: "Digital", icon: Monitor },
+                                    { id: "OFFLINE", label: "Local", icon: MapPin }
+                                ].map(m => (
+                                    <button 
+                                        key={m.id} 
+                                        onClick={() => setTeachingMode(teachingMode === m.id ? "" : m.id)}
+                                        className={`flex flex-col items-center justify-center p-6 rounded-2xl border text-[9px] font-black uppercase gap-4 transition-all tracking-widest ${teachingMode === m.id ? 'bg-blue-600 text-white border-blue-600 shadow-md italic' : 'bg-gray-50 text-gray-400 hover:bg-white border-gray-100'}`}
+                                    >
+                                        <m.icon size={20} /> {m.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Verification Toggle */}
+                        <div className="pt-6">
+                            <button 
+                                onClick={() => setVerifiedOnly(!verifiedOnly)}
+                                className={`w-full flex items-center justify-between p-6 rounded-[1.8rem] border transition-all ${verifiedOnly ? 'bg-blue-50 border-blue-200 text-blue-700 shadow-inner' : 'bg-gray-50 border-gray-100 text-gray-400'}`}
+                            >
+                                <div className="flex items-center gap-4">
+                                    <ShieldCheck size={20} className={verifiedOnly ? 'text-blue-600' : 'text-gray-200'} strokeWidth={3} />
+                                    <span className="text-[10px] font-black uppercase tracking-widest italic">Audit Only</span>
+                                </div>
+                                <div className={`w-10 h-5 rounded-full relative transition-all ${verifiedOnly ? 'bg-blue-600' : 'bg-gray-200'}`}>
+                                    <div className={`absolute top-1 size-3 bg-white rounded-full transition-all ${verifiedOnly ? 'left-6' : 'left-1'}`}></div>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </aside>
+
+                {/* RESULTS MAIN AREA */}
+                <main className="flex-1 flex flex-col bg-white overflow-hidden relative z-0">
+                    {/* Active HUD Metrics */}
+                    <div className="px-10 py-6 border-b border-gray-100 flex items-center justify-between bg-white shrink-0">
+                        <div className="flex items-center gap-4">
+                            <div className="px-5 py-2.5 bg-gray-50 rounded-xl text-[10px] font-black text-gray-400 uppercase tracking-widest border border-gray-100 italic">
+                                Found {results.length} Active Node Matches
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-6">
+                            <span className="text-[10px] font-black text-gray-200 uppercase tracking-[0.4em] italic">Cluster Priority:</span>
+                            <select className="bg-transparent border-none text-[10px] font-black text-blue-600 uppercase tracking-[0.2em] outline-none cursor-pointer italic">
+                                <option>Neural Relevance</option>
+                                <option>Budget: Minimal First</option>
+                                <option>Pulse Ranking</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto p-10 space-y-6 custom-scrollbar bg-slate-50/30 pb-32">
                         {loading ? (
-                            <p className="text-gray-500 text-sm">Searching...</p>
+                            <div className="space-y-8 py-10">
+                                {[1,2,3].map(i => <SkeletonLoader key={i} />)}
+                            </div>
+                        ) : results.length > 0 ? (
+                            results.map((item, i) => (
+                                <div key={i} className="group bg-white p-8 md:p-10 rounded-[3rem] border border-gray-100 hover:border-blue-600/20 hover:shadow-4xl transition-all flex flex-col md:flex-row gap-10 cursor-pointer relative overflow-hidden active:scale-[0.99] animate-in fade-in duration-500">
+                                    <div className="absolute top-0 left-0 w-2 h-full bg-blue-600 opacity-0 group-hover:opacity-100 transition-all"></div>
+                                    
+                                    {/* Faculty Identity Node */}
+                                    <div className="size-36 md:size-44 bg-gray-50 rounded-[2.5rem] border border-gray-50 overflow-hidden shrink-0 relative group-hover:border-blue-600/10 transition-all shadow-inner">
+                                        <div className="absolute inset-0 bg-gradient-to-tr from-gray-900/5 to-transparent"></div>
+                                        <div className="w-full h-full flex items-center justify-center text-gray-200 group-hover:text-blue-100 transition-all">
+                                            {item.image ? (
+                                                <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                                            ) : (
+                                                item.isInstitute ? <Building2 size={72} strokeWidth={1} /> : <User size={72} strokeWidth={1} />
+                                            )}
+                                        </div>
+                                        <div className="absolute bottom-4 right-4">
+                                            <MatchBadge score={item.matchScore || 85} />
+                                        </div>
+                                    </div>
+
+                                    {/* Intelligence Metadata */}
+                                    <div className="flex-1 space-y-6">
+                                        <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
+                                            <div>
+                                                <div className="flex items-center gap-3 mb-4">
+                                                    <span className="px-4 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-[9px] font-black uppercase tracking-[0.2em] border border-blue-100 italic">{listingType === 'STUDENT' ? 'REQUIREMENT' : item.isInstitute ? 'INSTITUTE' : 'FACULTY'}</span>
+                                                    {item.isVerified && <span className="px-4 py-1.5 bg-emerald-50 text-emerald-600 rounded-lg text-[9px] font-black uppercase tracking-[0.2em] border border-emerald-100 italic flex items-center gap-1.5"><ShieldCheck size={12} strokeWidth={3} /> VERIFIED</span>}
+                                                </div>
+                                                <h3 className="text-3xl font-black text-gray-900 group-hover:text-blue-600 transition-colors uppercase italic tracking-tighter leading-none mb-6">{item.name}</h3>
+                                                <div className="flex flex-wrap items-center gap-x-8 gap-y-3 text-[11px] font-black text-gray-400 uppercase tracking-widest italic">
+                                                    <span className="flex items-center gap-2 text-blue-600/60"><Activity size={16} /> {item.subjects?.slice(0, 2).join(", ") || "Multiple Domains"}</span>
+                                                    <span className="flex items-center gap-2"><MapPin size={16} /> {item.location}</span>
+                                                    <span className="flex items-center gap-2"><Layers size={16} /> {item.grades?.[0] || "Global Level"}</span>
+                                                </div>
+                                            </div>
+                                            <div className="text-left md:text-right space-y-1">
+                                                <p className="text-4xl font-black text-gray-900 group-hover:text-blue-600 transition-colors italic tracking-tighter leading-none">₹{item.rate}<span className="text-[10px] text-gray-300 ml-1 tracking-widest">/HR</span></p>
+                                                <p className="text-[9px] font-black text-gray-200 uppercase italic tracking-[0.3em]">Institutional Billing</p>
+                                            </div>
+                                        </div>
+
+                                        <p className="text-gray-400 text-sm font-medium italic line-clamp-2 leading-relaxed opacity-80 group-hover:opacity-100 transition-opacity">
+                                            {item.bio || "Establishing pedagogical channels through rigorous scholarship and strategic mentorship."}
+                                        </p>
+
+                                        <div className="flex flex-wrap items-center gap-5 pt-4">
+                                            <div className="flex items-center gap-2 bg-gray-50/50 px-5 py-2.5 rounded-xl border border-gray-100">
+                                                <Star size={14} className="text-blue-600 fill-blue-600" />
+                                                <span className="text-[10px] font-black text-gray-900 italic">{item.rating || "5.0"}</span>
+                                            </div>
+                                            <div className="flex items-center gap-2 bg-gray-50/50 px-5 py-2.5 rounded-xl border border-gray-100">
+                                                <Zap size={14} className="text-blue-600" />
+                                                <span className="text-[10px] font-black text-gray-900 uppercase italic">{item.experience || "5Y+"} Tenure</span>
+                                            </div>
+                                            {item.boards?.length > 0 && (
+                                                <div className="flex items-center gap-2 bg-gray-50/50 px-5 py-2.5 rounded-xl border border-gray-100">
+                                                    <Globe size={14} className="text-blue-600" />
+                                                    <span className="text-[10px] font-black text-gray-900 uppercase italic">{item.boards[0]} Board</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Tactical Action */}
+                                    <div className="flex md:flex-col justify-end gap-3 shrink-0 pt-6 md:pt-0">
+                                        <Link href={`/${item.isInstitute ? 'institute' : 'tutor'}/${item.id}`} className="flex-1 md:flex-none px-12 py-6 bg-gray-900 text-white rounded-[1.8rem] text-[10px] font-black uppercase tracking-[0.3em] hover:bg-blue-600 transition-all flex items-center justify-center gap-4 italic active:scale-95 shadow-2xl shadow-black/5">
+                                            Initialize Link <ArrowRight size={16} strokeWidth={3} />
+                                        </Link>
+                                    </div>
+                                </div>
+                            ))
                         ) : (
-                            <h1 className="text-base font-semibold text-gray-800">
-                                {results.length > 0
-                                    ? <><span className="text-blue-600">{results.length} {roleLabel}</span> found{querySubject ? <> for <span className="text-gray-900">{querySubject}</span></> : ""}{queryLocation ? <> in <span className="text-gray-900">{queryLocation}</span></> : ""}</>
-                                    : `No ${roleLabel} found`
-                                }
-                            </h1>
+                            <div className="flex flex-col items-center justify-center h-full text-center space-y-10 opacity-60 py-40 italic">
+                                <SearchCheck size={100} strokeWidth={1} className="text-gray-200" />
+                                <div className="space-y-4">
+                                    <h3 className="text-3xl font-black text-gray-900 uppercase tracking-tighter">Zero Matches Authenticated</h3>
+                                    <p className="text-[10px] font-black uppercase tracking-[0.5em]">Adjust filters or re-calibrate Discovery Pulse</p>
+                                </div>
+                                <button onClick={resetFilters} className="mt-8 px-16 py-7 bg-gray-900 text-white rounded-[2rem] font-black text-[10px] uppercase tracking-[0.4em] italic shadow-2xl active:scale-95 transition-all">Purge All Filters</button>
+                            </div>
                         )}
                     </div>
+                </main>
 
-                    <div className="flex items-center gap-3">
-                        {/* Mobile filter toggle */}
-                        <button
-                            onClick={() => setFiltersOpen(true)}
-                            className="lg:hidden flex items-center gap-1.5 px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors"
-                        >
-                            <Filter size={14} /> Filters
-                        </button>
-                        {/* Sort */}
-                        <select
-                            value={sortBy}
-                            onChange={(e) => setSortBy(e.target.value)}
-                            className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 bg-white outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
-                        >
-                            <option value="relevance">Sort: Relevance</option>
-                            <option value="rating">Highest Rated</option>
-                            <option value="fee_low">Fee: Low to High</option>
-                            <option value="fee_high">Fee: High to Low</option>
-                            <option value="experience">Most Experienced</option>
-                        </select>
-
-                        {/* View Toggle */}
-                        <div className="flex border border-gray-200 rounded-lg overflow-hidden">
-                            <button
-                                onClick={() => setViewMode("list")}
-                                className={`flex items-center gap-1.5 px-3 py-2 text-sm transition-colors ${viewMode === "list" ? "bg-blue-600 text-white" : "bg-white text-gray-500 hover:bg-gray-50"}`}
-                                title="List view"
-                            >
-                                <List size={15} />
-                            </button>
-                            <button
-                                onClick={() => setViewMode("map")}
-                                className={`flex items-center gap-1.5 px-3 py-2 text-sm transition-colors border-l border-gray-200 ${viewMode === "map" ? "bg-blue-600 text-white" : "bg-white text-gray-500 hover:bg-gray-50"}`}
-                                title="Map view"
-                            >
-                                <MapIcon size={15} />
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Results Body */}
-                <div className="flex-1">
-                    {viewMode === "map" ? (
-                        <div className="h-full p-4">
-                            <MapComponent tutors={results} />
-                        </div>
-                    ) : (
-                        <div className="max-w-4xl mx-auto p-4 md:p-6 space-y-4">
-                            {loading ? (
-                                <div className="space-y-4">
-                                    {[1, 2, 3].map(i => <SkeletonLoader key={i} />)}
+                {/* GEOSPATIAL RADAR (MAP) */}
+                {viewMode !== "list" && (
+                    <aside className="hidden lg:block w-[450px] xl:w-[650px] bg-gray-50 border-l border-gray-100 relative shrink-0 overflow-hidden shadow-4xl shadow-black/5">
+                        <MapComponent tutors={results} />
+                        
+                        {/* Overlay Controls */}
+                        <div className="absolute top-10 left-10 flex flex-col gap-5 z-20">
+                            <div className="bg-white/95 backdrop-blur-2xl p-6 rounded-[2.5rem] border border-white/50 shadow-4xl space-y-5 min-w-[240px]">
+                                <div className="flex items-center gap-3 text-blue-600 border-b border-gray-50 pb-4">
+                                    <Target size={20} className="animate-pulse" strokeWidth={3} />
+                                    <span className="text-[10px] font-black uppercase tracking-[0.2em] italic">Neural Radar Active</span>
                                 </div>
-                            ) : error ? (
-                                /* Error State */
-                                <div className="bg-white border border-red-100 rounded-xl p-10 text-center mt-4">
-                                    <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <WifiOff size={24} className="text-red-400" />
+                                <div className="space-y-3">
+                                    <div className="flex justify-between text-[10px] font-black uppercase text-gray-300 italic">
+                                        <span>Active Nodes</span>
+                                        <span className="text-blue-600">{loading ? '...' : results.length}</span>
                                     </div>
-                                    <h2 className="text-base font-semibold text-gray-800 mb-1">Could not load results</h2>
-                                    <p className="text-sm text-red-500 mb-5 max-w-sm mx-auto">{error}</p>
-                                    <button
-                                        onClick={fetchResults}
-                                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors"
-                                    >
-                                        <RefreshCw size={14} />
-                                        Retry
-                                    </button>
+                                    <div className="w-full h-1.5 bg-gray-50 rounded-full overflow-hidden">
+                                        <div className="h-full bg-blue-600 rounded-full transition-all duration-1000" style={{ width: loading ? '0%' : `${Math.min(results.length * 5, 100)}%` }}></div>
+                                    </div>
                                 </div>
-                            ) : results.length > 0 ? (
-                                <>
-                                {/* Result Cards */}
-                                {results.slice(0, visibleCount).map((item, idx) => (
-                                    <div
-                                        key={idx}
-                                        className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow p-5 flex flex-col md:flex-row gap-5"
-                                    >
-                                        {/* Avatar */}
-                                        <div className="flex flex-col items-center shrink-0 gap-2">
-                                            <div className="w-20 h-20 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center relative">
-                                                {item.role === "INSTITUTE"
-                                                    ? <Building2 size={32} className="text-blue-400" />
-                                                    : <User size={32} className="text-blue-400" />
-                                                }
-                                                {item.isVerified && (
-                                                    <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center border-2 border-white">
-                                                        <BadgeCheck size={12} className="text-white" strokeWidth={2.5} />
-                                                    </div>
-                                                )}
-                                            </div>
-                                            {/* Rating */}
-                                            <div className="flex items-center gap-0.5">
-                                                {[...Array(5)].map((_, i) => (
-                                                    <Star
-                                                        key={i}
-                                                        size={12}
-                                                        fill={i < Math.floor(item.rating || 4.5) ? "#f59e0b" : "none"}
-                                                        className={i < Math.floor(item.rating || 4.5) ? "text-amber-400" : "text-gray-200"}
-                                                    />
-                                                ))}
-                                                <span className="text-xs font-semibold text-gray-600 ml-1">{(item.rating || 4.5).toFixed(1)}</span>
-                                            </div>
-                                            <p className="text-xs text-gray-400">{item.reviewCount || "12"} reviews</p>
-                                        </div>
-
-                                        {/* Main Info */}
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-3">
-                                                <div>
-                                                    <div className="flex items-center gap-2 flex-wrap">
-                                                        <h3 className="text-lg font-bold text-gray-900">{item.name}</h3>
-                                                        {item.isVerified && (
-                                                            <span className="inline-flex items-center gap-1 text-xs text-blue-600 font-medium bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
-                                                                <ShieldCheck size={11} /> Verified
-                                                            </span>
-                                                        )}
-                                                        {item.isFeatured && (
-                                                            <span className="inline-flex items-center gap-1 text-xs text-amber-700 font-medium bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100">
-                                                                Featured
-                                                            </span>
-                                                        )}
-                                                        {item.matchScore > 0 && (
-                                                            <span className={`inline-flex items-center text-xs font-bold px-2 py-0.5 rounded-full ${
-                                                                item.matchScore >= 85 ? "bg-emerald-50 text-emerald-700 border border-emerald-200" :
-                                                                item.matchScore >= 60 ? "bg-blue-50 text-blue-700 border border-blue-200" :
-                                                                "bg-gray-50 text-gray-600 border border-gray-200"
-                                                            }`}>
-                                                                {item.matchScore}% match
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                    <div className="flex flex-wrap items-center gap-2 mt-1.5">
-                                                        <span className="inline-flex items-center gap-1.5 text-xs font-medium text-blue-700 bg-blue-50 px-2.5 py-1 rounded-md">
-                                                            <GraduationCap size={12} /> {item.subject || querySubject || "Academics"}
-                                                        </span>
-                                                        {item.location && (
-                                                            <span className="inline-flex items-center gap-1.5 text-xs text-gray-500">
-                                                                <MapPin size={12} /> {item.location}
-                                                                {item.distance && item.distance < 100 && (
-                                                                    <span className="text-emerald-600 font-medium">({item.distance.toFixed(1)} km)</span>
-                                                                )}
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                </div>
-
-                                                {/* Fee */}
-                                                <div className="text-right shrink-0">
-                                                    <p className="text-xl font-bold text-gray-900">₹{item.rate || "500"}</p>
-                                                    <p className="text-xs text-gray-400">per hour</p>
-                                                </div>
-                                            </div>
-
-                                            {/* Meta row */}
-                                            <div className="flex flex-wrap gap-4 text-xs text-gray-500 mb-3">
-                                                {item.experience && (
-                                                    <span className="flex items-center gap-1">
-                                                        <Briefcase size={12} className="text-gray-400" />
-                                                        {item.experience} yrs experience
-                                                    </span>
-                                                )}
-                                                {item.teachingMode && (
-                                                    <span className="flex items-center gap-1">
-                                                        <Monitor size={12} className="text-gray-400" />
-                                                        {teachingModeLabel(item.teachingMode)}
-                                                    </span>
-                                                )}
-                                                {item.listingType === "GROUP" && (
-                                                    <span className="flex items-center gap-1">
-                                                        <Users size={12} className="text-gray-400" />
-                                                        Group &bull; {item.enrolledCount || 0}/{item.maxSeats || "—"} seats
-                                                    </span>
-                                                )}
-                                                {item.listingType === "PRIVATE" && (
-                                                    <span className="flex items-center gap-1">
-                                                        <User size={12} className="text-gray-400" />
-                                                        Private
-                                                    </span>
-                                                )}
-                                            </div>
-
-                                            {/* Bio */}
-                                            {item.bio && (
-                                                <p className="text-sm text-gray-500 leading-relaxed line-clamp-2 mb-4">{item.bio}</p>
-                                            )}
-
-                                            {/* Action Buttons */}
-                                            <div className="flex flex-col sm:flex-row gap-2 pt-1">
-                                                <button
-                                                    onClick={() => handleContactTutor(item)}
-                                                    className="flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 active:scale-95 transition-all"
-                                                >
-                                                    <Lock size={13} />
-                                                    Contact Tutor
-                                                </button>
-                                                <Link
-                                                    href={`/search/${item.id || item.userId || "#"}`}
-                                                    className="flex items-center justify-center gap-2 px-5 py-2.5 border border-gray-200 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all"
-                                                >
-                                                    View Profile
-                                                    <ArrowRight size={13} />
-                                                </Link>
-                                                <a
-                                                    href={`https://wa.me/?text=${encodeURIComponent(`Check out ${item.name} on TuitionsInIndia\nhttps://tuitionsinindia.com/search/${item.id}`)}`}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="flex items-center justify-center size-10 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 transition-colors shrink-0"
-                                                    title="Share on WhatsApp"
-                                                >
-                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-
-                                {/* Load More */}
-                                {visibleCount < results.length && (
-                                    <button
-                                        onClick={() => setVisibleCount(prev => prev + 12)}
-                                        className="w-full py-3 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-blue-600 hover:bg-blue-50 hover:border-blue-200 transition-colors mt-4"
-                                    >
-                                        Show More ({results.length - visibleCount} remaining)
-                                    </button>
-                                )}
-                            </>
-                            ) : (
-                                /* Empty State */
-                                <div className="bg-white border border-gray-200 rounded-xl p-12 text-center mt-4">
-                                    <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <Search size={28} className="text-gray-300" />
-                                    </div>
-                                    <h2 className="text-base font-semibold text-gray-700 mb-1">No tutors found</h2>
-                                    <p className="text-sm text-gray-400 mb-5">Try changing your filters or searching for a different subject or location.</p>
-                                    <button
-                                        onClick={resetFilters}
-                                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors"
-                                    >
-                                        Clear Filters
-                                    </button>
-                                </div>
-                            )}
+                            </div>
                         </div>
-                    )}
-                </div>
+
+                        {/* Tactical Security Overlay */}
+                        <div className="absolute bottom-10 right-10 bg-gray-900/95 backdrop-blur-2xl px-8 py-5 rounded-[2rem] border border-white/10 flex items-center gap-5 text-white shadow-4xl z-20">
+                            <Lock size={18} className="text-blue-500 animate-pulse" strokeWidth={3} />
+                            <span className="text-[10px] font-black uppercase tracking-[0.4em] italic leading-none">Encrypted Discovery Layer v6.2</span>
+                        </div>
+                    </aside>
+                )}
+            </div>
+            
+            {/* MOBILE FLOATING ACTIONS */}
+            <div className="lg:hidden fixed bottom-10 left-1/2 -translate-x-1/2 flex items-center bg-gray-900/95 backdrop-blur-2xl p-3 rounded-[3rem] shadow-4xl border border-white/10 z-[100] gap-3">
+                <button onClick={() => setViewMode("list")} className={`px-10 py-5 rounded-[2.5rem] text-[10px] font-black uppercase tracking-[0.2em] transition-all italic ${viewMode === "list" ? 'bg-blue-600 text-white shadow-xl' : 'text-gray-400'}`}>Results</button>
+                <button onClick={() => setViewMode("map")} className={`px-10 py-5 rounded-[2.5rem] text-[10px] font-black uppercase tracking-[0.2em] transition-all italic ${viewMode === "map" ? 'bg-blue-600 text-white shadow-xl' : 'text-gray-400'}`}>Neural Map</button>
             </div>
         </div>
     );
@@ -627,12 +400,14 @@ function SearchResultsContent() {
 export default function SearchPage() {
     return (
         <Suspense fallback={
-            <div className="h-screen w-full flex flex-col items-center justify-center bg-gray-50 font-sans">
-                <div className="w-10 h-10 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
-                <p className="text-sm text-gray-500">Loading results...</p>
+            <div className="flex h-screen items-center justify-center bg-white">
+                <div className="text-center space-y-6">
+                    <Zap size={64} className="text-blue-600 animate-pulse mx-auto" />
+                    <p className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-600 italic">Synchronizing Discovery Node...</p>
+                </div>
             </div>
         }>
-            <SearchResultsContent />
+            <SearchContent />
         </Suspense>
     );
 }

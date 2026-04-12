@@ -2,17 +2,10 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { sendOTP } from "@/lib/sms";
 import { otpStore } from "@/lib/otpStore";
-import { checkRateLimit } from "@/lib/rateLimit";
 
 export async function POST(request) {
     try {
-        // Rate limit: 5 OTP requests per minute per IP
-        const { limited } = checkRateLimit(request, "otp-send", 5, 60000);
-        if (limited) {
-            return NextResponse.json({ error: "Too many requests. Please wait a minute and try again." }, { status: 429 });
-        }
-
-        const { name, phone, role, isRegistration } = await request.json();
+        const { name, phone, role } = await request.json();
 
         if (!phone || !role) {
             return NextResponse.json({ error: "Phone and Role are required" }, { status: 400 });
@@ -27,34 +20,26 @@ export async function POST(request) {
             expires: Date.now() + 10 * 60 * 1000
         });
 
-        let user;
-        if (isRegistration) {
-            // Registration flow — create if new, update name if existing
-            const existing = await prisma.user.findUnique({ where: { phone } });
-            if (existing) {
-                // Allow re-registration to proceed (user may be completing a profile)
-                user = await prisma.user.update({
-                    where: { phone },
-                    data: { name: name || existing.name },
-                });
-            } else {
-                user = await prisma.user.create({
-                    data: { phone, name: name || "User", role, phoneVerified: false },
-                });
+        // Update or create user record
+        const user = await prisma.user.upsert({
+            where: { phone: phone },
+            update: {
+                name: name || undefined,
+                role: role
+            },
+            create: {
+                phone: phone,
+                name: name || "Anonymous",
+                role: role,
+                phoneVerified: false
             }
-        } else {
-            // Login flow — only find existing user, don't create
-            user = await prisma.user.findUnique({ where: { phone } });
-            if (!user) {
-                return NextResponse.json({
-                    error: "No account found with this phone number. Please register first.",
-                }, { status: 404 });
-            }
-        }
+        });
 
         // Send OTP via Twilio (falls back to console log if keys not set)
         const formattedPhone = "+91" + phone.replace(/\D/g, '').slice(-10);
         await sendOTP(formattedPhone, otp);
+
+        console.log(`[AUTH] OTP ${otp} dispatched to ${phone}`);
 
         return NextResponse.json({
             success: true,

@@ -16,11 +16,7 @@ export default function ChatInterface({ studentId, tutorId, currentUserType }) {
                 const res = await fetch("/api/chat/session", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                    studentId,
-                    tutorId,
-                    initiatorId: currentUserType === "STUDENT" ? studentId : tutorId
-                })
+                    body: JSON.stringify({ studentId, tutorId })
                 });
                 if (res.ok) {
                     const data = await res.json();
@@ -120,7 +116,7 @@ export default function ChatInterface({ studentId, tutorId, currentUserType }) {
             {/* Header */}
             <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/10">
                 <div className="flex items-center gap-3">
-                    <div className="size-10 rounded-full flex items-center justify-center font-bold text-white bg-blue-600">
+                    <div className="size-10 rounded-full flex items-center justify-center font-bold text-white bg-gradient-to-tr from-primary to-accent">
                         {otherPerson?.name ? otherPerson.name[0].toUpperCase() : "?"}
                     </div>
                     <div>
@@ -144,9 +140,9 @@ export default function ChatInterface({ studentId, tutorId, currentUserType }) {
                         const isMe = msg.senderId === currentUserId;
                         return (
                             <div key={msg.id || i} className={`w-full flex ${isMe ? 'justify-end' : 'justify-start'}`}>
-                                <div className={`max-w-[75%] px-4 py-3 rounded-2xl ${isMe ? 'bg-blue-600 text-white rounded-br-sm' : 'bg-slate-200 text-slate-800 rounded-bl-sm'}`}>
+                                <div className={`max-w-[75%] px-4 py-3 rounded-2xl ${isMe ? 'bg-primary text-white rounded-br-sm' : 'bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-100 rounded-bl-sm'}`}>
                                     <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
-                                    <span className={`text-xs uppercase font-bold tracking-wider mt-1 block ${isMe ? 'text-blue-200 opacity-70' : 'text-slate-400'}`}>
+                                    <span className={`text-xs uppercase font-bold tracking-wider mt-1 block ${isMe ? 'text-primary-focus opacity-70' : 'text-slate-400'}`}>
                                         {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                     </span>
                                 </div>
@@ -165,12 +161,12 @@ export default function ChatInterface({ studentId, tutorId, currentUserType }) {
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
                         placeholder="Type a message..."
-                        className="w-full bg-slate-100 border-none rounded-full pl-6 pr-14 py-3.5 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm placeholder:font-semibold placeholder:text-slate-400"
+                        className="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-full pl-6 pr-14 py-3.5 focus:ring-2 focus:ring-primary outline-none transition-all text-sm placeholder:font-semibold placeholder:text-slate-400"
                     />
                     <button
                         type="submit"
                         disabled={!newMessage.trim()}
-                        className="absolute right-2 p-2 bg-blue-600 text-white rounded-full flex items-center justify-center hover:bg-blue-700 shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                        className="absolute right-2 p-2 bg-primary text-white rounded-full flex items-center justify-center hover:bg-primary-glow shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                     >
                         <span className="material-symbols-outlined text-[18px]">send</span>
                     </button>

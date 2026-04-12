@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { otpStore } from "@/lib/otpStore";
-import { createSessionToken, makeSessionCookie } from "@/lib/session";
 
 export async function POST(request) {
     try {
@@ -35,13 +34,15 @@ export async function POST(request) {
             data: { phoneVerified: true }
         });
 
-        const token = createSessionToken(user);
-        const response = NextResponse.json({
+        return NextResponse.json({
             success: true,
-            user: { id: user.id, name: user.name, role: user.role, phone: user.phone },
+            user: {
+                id: user.id,
+                name: user.name,
+                role: user.role,
+                phone: user.phone
+            }
         });
-        response.headers.set("Set-Cookie", makeSessionCookie(token));
-        return response;
 
     } catch (error) {
         console.error("OTP Verification Error:", error);

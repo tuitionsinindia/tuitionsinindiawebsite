@@ -62,21 +62,21 @@ export default function StudentHowItWorks() {
                 
                 <div className="max-w-4xl mx-auto">
                     <span className="bg-blue-100 text-blue-700 text-xs font-black px-4 py-2 rounded-full uppercase tracking-[0.3em] mb-8 inline-block">
-                        For Students
+                        Student Mandate
                     </span>
-
+                    
                     <h1 className="text-5xl md:text-8xl font-black tracking-tighter mb-10 leading-[0.9] uppercase italic text-gray-900">
-                        Find Your <br />
-                        <span className="text-blue-600">Perfect Tutor.</span>
+                        Academic <br />
+                        <span className="text-blue-600">Acceleration.</span>
                     </h1>
-
+                    
                     <p className="text-lg md:text-xl text-gray-500 font-medium max-w-2xl mx-auto mb-12 leading-relaxed italic">
-                        Find the right tutor for any subject, grade, or board — and connect with them directly, with no middleman.
+                        The elite matching architecture for precision learning. Connect directly with India's most qualified academic professionals.
                     </p>
-
+                    
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <Link href="/search?role=TUTOR" className="px-10 py-5 bg-blue-600 text-white rounded-2xl font-black shadow-2xl shadow-blue-600/30 hover:bg-black active:scale-95 transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-xs">
-                            Find a Tutor <ArrowRight size={20} />
+                            Initiate Discovery <ArrowRight size={20} />
                         </Link>
                     </div>
                 </div>
@@ -153,7 +153,7 @@ export default function StudentHowItWorks() {
             <section className="snap-section px-6 bg-gray-50">
                 <div className="max-w-4xl mx-auto">
                     <div className="text-center mb-16">
-                        <h2 className="text-4xl font-black tracking-tighter uppercase italic text-gray-900">Frequently Asked <span className="text-blue-600">Questions</span></h2>
+                        <h2 className="text-4xl font-black tracking-tighter uppercase italic text-gray-900">Protocol <span className="text-blue-600">FAQ</span></h2>
                     </div>
                     
                     <div className="grid gap-6">
@@ -168,6 +168,9 @@ export default function StudentHowItWorks() {
                             </div>
                         ))}
                     </div>
+                </div>
+                <div className="mt-20 text-center flex items-center justify-center gap-2 text-xs font-black text-gray-300 uppercase tracking-[0.5em]">
+                    <Lock size={12} strokeWidth={3} /> Standard Security Protocols Active
                 </div>
             </section>
         </div>

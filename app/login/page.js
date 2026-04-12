@@ -18,7 +18,7 @@ const ROLE_MAP = { student: 'STUDENT', tutor: 'TUTOR', institute: 'INSTITUTE' };
 const DASHBOARD_MAP = {
     STUDENT: (id) => `/dashboard/student?studentId=${id}`,
     TUTOR: (id) => `/dashboard/tutor?tutorId=${id}`,
-    INSTITUTE: (id) => `/dashboard/institute?instituteId=${id}`
+    INSTITUTE: (id) => `/dashboard/institute?instId=${id}`
 };
 
 export default function LoginPage() {
@@ -39,7 +39,7 @@ export default function LoginPage() {
             const res = await fetch("/api/auth/otp/send", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ phone, role: ROLE_MAP[loginType], isRegistration: false })
+                body: JSON.stringify({ phone, role: ROLE_MAP[loginType] })
             });
             const data = await res.json();
             if (data.success) {
@@ -207,18 +207,18 @@ export default function LoginPage() {
                 </div>
             </div>
 
-            <div className="max-w-4xl mx-auto container px-6 grid grid-cols-3 gap-12 text-center mb-20 opacity-40">
+            <div className="max-w-4xl mx-auto container px-6 grid grid-cols-3 gap-12 text-center mb-20 opacity-30">
                 <div className="space-y-3">
-                    <Award size={20} className="mx-auto text-slate-500" />
-                    <p className="text-xs text-slate-500">Verified Tutors</p>
+                    <Award size={20} className="mx-auto text-slate-900" />
+                    <p className="text-[9px] font-black text-slate-900 uppercase tracking-widest italic">Tier-1 Market</p>
                 </div>
                 <div className="space-y-3">
-                    <ShieldCheck size={20} className="mx-auto text-slate-500" />
-                    <p className="text-xs text-slate-500">Secure Login</p>
+                    <ShieldCheck size={20} className="mx-auto text-slate-900" />
+                    <p className="text-[9px] font-black text-slate-900 uppercase tracking-widest italic">Secure Endpoints</p>
                 </div>
                 <div className="space-y-3">
-                    <Check size={20} className="mx-auto text-slate-500" />
-                    <p className="text-xs text-slate-500">Trusted Platform</p>
+                    <Check size={20} className="mx-auto text-slate-900" />
+                    <p className="text-[9px] font-black text-slate-900 uppercase tracking-widest italic">Verified Logs</p>
                 </div>
             </div>
         </div>

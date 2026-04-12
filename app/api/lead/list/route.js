@@ -27,24 +27,17 @@ export async function GET(request) {
 
             if (tutorListing) {
                 const orConditions = [];
-
+                
                 if (tutorListing.subjects && tutorListing.subjects.length > 0) {
-                    // Include both original and lowercase variants for case-insensitive matching
-                    const subjectVariants = [...new Set([
-                        ...tutorListing.subjects,
-                        ...tutorListing.subjects.map(s => s.toLowerCase()),
-                        ...tutorListing.subjects.map(s => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase()),
-                    ])];
-                    orConditions.push({ subjects: { hasSome: subjectVariants } });
+                    orConditions.push({
+                        subjects: { hasSome: tutorListing.subjects }
+                    });
                 }
 
                 if (tutorListing.locations && tutorListing.locations.length > 0) {
-                    const locationVariants = [...new Set([
-                        ...tutorListing.locations,
-                        ...tutorListing.locations.map(l => l.toLowerCase()),
-                        ...tutorListing.locations.map(l => l.charAt(0).toUpperCase() + l.slice(1).toLowerCase()),
-                    ])];
-                    orConditions.push({ locations: { hasSome: locationVariants } });
+                    orConditions.push({
+                        locations: { hasSome: tutorListing.locations }
+                    });
                 }
 
                 if (orConditions.length > 0) {
@@ -85,43 +78,50 @@ export async function GET(request) {
             },
         });
 
-        // Fetch tutor info for match scoring and premium check
-        let tutorListing = null;
-        let requester = null;
-        if (tutorId) {
-            [tutorListing, requester] = await Promise.all([
-                prisma.listing.findUnique({ where: { tutorId }, select: { subjects: true, locations: true, teachingModes: true, type: true, isInstitute: true } }),
-                prisma.user.findUnique({ where: { id: tutorId }, select: { subscriptionTier: true, isVerified: true, lat: true, lng: true } }),
-            ]);
-        }
+        // Fetch tutor info for premium check and match calculation
+        const requester = tutorId ? await prisma.user.findUnique({ 
+            where: { id: tutorId }, 
+            include: { tutorListing: true } 
+        }) : null;
+        
         const isPremiumTutor = ['PRO', 'ELITE', 'INSTITUTE'].includes(requester?.subscriptionTier);
 
-        // Sanitize leads and add match scores
+        const requesterCriterion = requester?.tutorListing ? {
+            subjects: requester.tutorListing.subjects,
+            grades: requester.tutorListing.grades,
+            locations: requester.tutorListing.locations,
+            lat: requester.lat,
+            lng: requester.lng
+        } : null;
+
+        // Sanitize leads and inject match scores
         const sanitizedLeads = leads.map(lead => {
             const isUnlockedByCredit = lead.unlockedBy.length > 0;
             const isUnlocked = isUnlockedByCredit || isPremiumTutor;
-
-            // Calculate match score if tutor listing exists
-            let matchScore = 0, matchLabel = "Partial Match", matchFactors = [];
-            if (tutorListing) {
-                const result = calculateMatchScore(
-                    { subjects: tutorListing.subjects, locations: tutorListing.locations, modes: tutorListing.teachingModes, lat: requester?.lat, lng: requester?.lng },
-                    { subjects: lead.subjects, locations: lead.locations, teachingModes: lead.modes, type: lead.type }
-                );
-                matchScore = result.score;
-                matchLabel = result.label;
-                matchFactors = result.factors;
+            
+            let match = { score: 0, label: "Analyzing...", factors: [] };
+            if (requesterCriterion) {
+                match = calculateMatchScore(requesterCriterion, {
+                    subjects: lead.subjects,
+                    grades: lead.grades,
+                    locations: lead.locations,
+                    lat: lead.lat,
+                    lng: lead.lng
+                });
             }
 
             return {
                 ...lead,
                 student: isUnlocked ? lead.student : { name: "Hidden", phone: "Hidden", email: "Hidden" },
                 isUnlocked,
-                matchScore,
-                matchLabel,
-                matchFactors,
+                matchScore: match.score,
+                matchLabel: match.label,
+                matchFactors: match.factors
             };
-        }).sort((a, b) => b.matchScore - a.matchScore);
+        });
+
+        // Sort by matchScore descending
+        sanitizedLeads.sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
 
         return NextResponse.json(sanitizedLeads);
     } catch (error) {

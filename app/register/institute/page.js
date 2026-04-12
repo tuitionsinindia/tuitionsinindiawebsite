@@ -3,27 +3,14 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Building2, ArrowLeft, ShieldCheck, Building, Users, Crown, Loader2, CheckCircle2 } from "lucide-react";
+import { Building2, ArrowLeft, ShieldCheck, Lock, Building, Activity, Zap, Users } from "lucide-react";
 import LeadCaptureFlow from "../../components/LeadCaptureFlow";
 import InstituteListingForm from "../../components/InstituteListingForm";
-
-function loadRazorpayScript() {
-    return new Promise((resolve) => {
-        if (window.Razorpay) return resolve(true);
-        const script = document.createElement("script");
-        script.src = "https://checkout.razorpay.com/v1/checkout.js";
-        script.onload = () => resolve(true);
-        script.onerror = () => resolve(false);
-        document.body.appendChild(script);
-    });
-}
 
 export default function InstituteRegisterPage() {
     const router = useRouter();
     const [user, setUser] = useState(null);
-    const [step, setStep] = useState(1); // 1: Capture, 2: Listing, 3: Payment, 4: Done
-    const [paymentLoading, setPaymentLoading] = useState(false);
-    const [paymentError, setPaymentError] = useState("");
+    const [step, setStep] = useState(1); // 1: Capture, 2: Listing, 3: Preferences
 
     const handleLeadComplete = (verifiedUser) => {
         setUser(verifiedUser);
@@ -34,266 +21,126 @@ export default function InstituteRegisterPage() {
         setStep(3);
     };
 
-    const handleFreeContinue = () => {
-        router.push(`/dashboard/institute?instituteId=${user?.id}&success=true`);
+    const handleFinalize = () => {
+        router.push("/dashboard/institute");
     };
-
-    const handlePaidPlan = async () => {
-        setPaymentLoading(true);
-        setPaymentError("");
-
-        try {
-            const loaded = await loadRazorpayScript();
-            if (!loaded) {
-                setPaymentError("Payment system failed to load. Please try again.");
-                setPaymentLoading(false);
-                return;
-            }
-
-            const orderRes = await fetch("/api/payment/order", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    amount: 1999,
-                    currency: "INR",
-                    receipt: `institute_${user?.id}_${Date.now()}`,
-                    userId: user?.id,
-                    description: "Coaching Hub Plan — Monthly Subscription"
-                })
-            });
-            const order = await orderRes.json();
-
-            if (!order.id) {
-                setPaymentError("Could not create payment order. Please try again.");
-                setPaymentLoading(false);
-                return;
-            }
-
-            const options = {
-                key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-                amount: order.amount,
-                currency: order.currency,
-                name: "TuitionsInIndia",
-                description: "Coaching Hub Plan",
-                order_id: order.id,
-                handler: async function (response) {
-                    const verifyRes = await fetch("/api/payment/verify", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            razorpay_order_id: response.razorpay_order_id,
-                            razorpay_payment_id: response.razorpay_payment_id,
-                            razorpay_signature: response.razorpay_signature,
-                            userId: user?.id,
-                            creditsToAdd: 100,
-                            subscriptionTier: "ELITE"
-                        })
-                    });
-                    const result = await verifyRes.json();
-                    if (result.success) {
-                        setStep(4);
-                    } else {
-                        setPaymentError("Payment verification failed. Contact support.");
-                    }
-                    setPaymentLoading(false);
-                },
-                prefill: {
-                    name: user?.name || "",
-                    contact: user?.phone ? `+91${user.phone}` : ""
-                },
-                theme: { color: "#2563EB" },
-                modal: {
-                    ondismiss: () => setPaymentLoading(false)
-                }
-            };
-
-            const rzp = new window.Razorpay(options);
-            rzp.on("payment.failed", () => {
-                setPaymentError("Payment failed. Please try again.");
-                setPaymentLoading(false);
-            });
-            rzp.open();
-
-        } catch (err) {
-            setPaymentError("Something went wrong. Please try again.");
-            setPaymentLoading(false);
-        }
-    };
-
-    const stepLabels = [
-        { id: 1, label: "Verify Contact" },
-        { id: 2, label: "Set Up Institute" },
-        { id: 3, label: "Choose Plan" },
-        { id: 4, label: "You're Live" }
-    ];
 
     return (
-        <div className="min-h-screen bg-white text-gray-900 antialiased">
-            <div className="max-w-2xl mx-auto px-4 py-12">
+        <div className="h-screen overflow-y-auto snap-y snap-mandatory bg-background-dark text-on-background-dark antialiased font-sans selection:bg-indigo-500/30 selection:text-white">
+            <section className="min-h-screen snap-start snap-always flex flex-col items-center justify-center py-12 px-4 relative overflow-hidden">
+                
+                {/* Strategic Backdrop */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-[800px] bg-indigo-500/5 rounded-full blur-[140px] -z-0 animate-pulse"></div>
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent"></div>
 
-                <Link
-                    href="/register"
-                    className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-gray-700 transition-colors mb-10"
-                >
-                    <ArrowLeft size={16} />
-                    Back
-                </Link>
+                <div className="w-full max-w-4xl mx-auto flex flex-col items-center relative z-10">
+                    
+                    {/* Synchronized Header */}
+                    <div className="text-center mb-12 space-y-6">
+                        <Link href="/register" className="inline-flex items-center gap-3 text-xs font-black text-white/20 hover:text-indigo-500 transition-all mb-4 uppercase tracking-[0.4em] italic leading-none">
+                            <ArrowLeft size={16} strokeWidth={3} /> RECONFIGURE ENTITY LOGIC
+                        </Link>
+                        
+                        <div className="flex items-center justify-center">
+                            <div className="size-20 rounded-3xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center shadow-inner border border-indigo-500/20 relative group">
+                                <div className="absolute inset-0 bg-indigo-500/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                <Building2 size={40} strokeWidth={1.5} className="relative z-10" />
+                            </div>
+                        </div>
 
-                <div className="mb-10">
-                    <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center mb-5">
-                        <Building2 size={24} className="text-blue-600" />
+                        <h1 className="text-5xl md:text-7xl font-black text-white tracking-tighter uppercase italic leading-[0.85]">
+                            Institutional <br/><span className="text-indigo-500 underline decoration-indigo-500/20 underline-offset-8">Command.</span>
+                        </h1>
+                        
+                        <p className="text-white/40 font-black text-xs max-w-lg mx-auto uppercase tracking-[0.2em] leading-relaxed italic">
+                            {step === 1 && "PROTOCOL_INITIALIZED: Authenticate an official point of contact via secure identity synchronization."}
+                            {step === 2 && "ORCHESTRATION_SETUP: Configure your organization profile to start mobilizing students."}
+                            {step === 3 && "FINAL_CALIBRATION: Configure business visibility and privacy protocols."}
+                        </p>
                     </div>
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">Register Your Institute</h1>
-                    <p className="text-gray-500 text-sm">
-                        {step === 1 && "Start by verifying the contact person's mobile number."}
-                        {step === 2 && "Set up your institute profile so students can find you."}
-                        {step === 3 && "Pick a plan to unlock lead management and branding."}
-                        {step === 4 && "Your institute is live and students can find you."}
-                    </p>
-                </div>
 
-                {/* Step Indicator */}
-                <div className="flex items-center gap-2 mb-8 overflow-x-auto pb-1">
-                    {stepLabels.map((s, i) => (
-                        <div key={s.id} className="flex items-center gap-2 shrink-0">
-                            <div className="flex items-center gap-2">
-                                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold transition-colors ${
-                                    s.id === step ? "bg-blue-600 text-white"
-                                    : s.id < step ? "bg-blue-100 text-blue-600"
-                                    : "bg-gray-100 text-gray-400"
-                                }`}>
-                                    {s.id < step ? "✓" : s.id}
+                    {/* Terminal Flow Interface */}
+                    <div className="w-full max-w-2xl bg-surface-dark/40 backdrop-blur-3xl border border-border-dark p-8 md:p-12 rounded-[3.5rem] shadow-2xl relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-1.5 bg-background-dark/50">
+                            <div 
+                                className="h-full bg-indigo-500 transition-all duration-1000 ease-out shadow-[0_0_20px_rgba(79,70,229,0.5)]" 
+                                style={{ width: `${(step / 3) * 100}%` }}
+                            />
+                        </div>
+
+                        {step === 1 && (
+                            <div className="animate-in fade-in slide-in-from-bottom-8 duration-700">
+                                <LeadCaptureFlow initialRole="INSTITUTE" onComplete={handleLeadComplete} />
+                            </div>
+                        )}
+
+                        {step === 2 && (
+                            <div className="animate-in zoom-in-95 duration-700">
+                                <InstituteListingForm user={user} onComplete={handleListingComplete} />
+                            </div>
+                        )}
+
+                        {step === 3 && (
+                            <div className="w-full max-w-md mx-auto flex items-center justify-center">
+                                <div className="animate-in zoom-in-95 duration-500 text-center space-y-8">
+                                    <div className="size-24 rounded-[2.5rem] bg-indigo-500/10 text-indigo-500 flex items-center justify-center mx-auto mb-6 shadow-inner border border-indigo-500/20">
+                                        <Users size={48} strokeWidth={1.5} />
+                                    </div>
+                                    <h2 className="text-3xl font-black text-white tracking-tighter uppercase italic leading-none">Business Visibility</h2>
+                                    <p className="text-white/40 font-medium text-xs leading-relaxed uppercase tracking-widest italic">
+                                        Institutes benefit from prioritized discovery. Your institutional metadata will be accessible within the directory to facilitate rapid student synchronization.
+                                    </p>
+                                    
+                                    <div className="p-6 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-between">
+                                        <div className="text-left">
+                                            <p className="font-black text-white text-xs uppercase tracking-widest mb-1">Status: High Visibility</p>
+                                            <p className="text-white/20 text-xs font-black uppercase tracking-[0.2em] italic">SYNCED: GLOBAL_CAMPUS_DIRECTORY</p>
+                                        </div>
+                                        <div className="size-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-lg">
+                                            <Building size={20} strokeWidth={3} />
+                                        </div>
+                                    </div>
+
+                                    <button 
+                                        onClick={handleFinalize}
+                                        className="w-full py-6 bg-indigo-600 text-white rounded-[2rem] font-black text-xs shadow-xl hover:bg-white hover:text-indigo-600 transition-all active:scale-95 uppercase tracking-[0.4em] italic"
+                                    >
+                                        ENTER HUB <Zap size={16} fill="currentColor" className="inline ml-2" />
+                                    </button>
                                 </div>
-                                <span className={`text-xs hidden sm:inline transition-colors ${
-                                    s.id === step ? "text-gray-900 font-medium" : "text-gray-400"
-                                }`}>
+                            </div>
+                        )}
+                    </div>
+                
+                    {/* Progress Status Bar */}
+                    <div className="mt-16 flex items-center justify-center gap-10">
+                        {[
+                            { id: 1, label: "POC_SYNC" },
+                            { id: 2, label: "CAMPUS_GRID" },
+                            { id: 3, label: "VISIBILITY" }
+                        ].map((s) => (
+                            <div key={s.id} className="flex flex-col items-center gap-3">
+                                <div 
+                                    className={`h-1 transition-all duration-1000 ${
+                                        s.id === step 
+                                        ? "w-20 bg-indigo-600 shadow-[0_0_15px_rgba(79,70,229,0.5)]" 
+                                        : s.id < step ? "w-12 bg-white/30" : "w-6 bg-white/5"
+                                    } rounded-full`}
+                                />
+                                <span className={`text-xs font-black uppercase tracking-widest leading-none ${s.id === step ? "text-indigo-600" : "text-white/20"}`}>
                                     {s.label}
                                 </span>
                             </div>
-                            {i < stepLabels.length - 1 && (
-                                <div className={`h-px w-6 shrink-0 ${s.id < step ? "bg-blue-300" : "bg-gray-200"}`} />
-                            )}
-                        </div>
-                    ))}
+                        ))}
+                    </div>
+
+                    {/* Operational Footer */}
+                    <div className="mt-16 flex items-center gap-4 px-6 py-3 bg-white/5 rounded-full border border-white/5 text-xs font-black text-white/20 uppercase tracking-[0.5em] italic">
+                        <Activity size={12} strokeWidth={3} className="animate-pulse text-indigo-500" /> 
+                        SYSTEM_STATUS: CAMPUS_MOBILIZATION_READY
+                    </div>
                 </div>
-
-                {/* Progress bar */}
-                <div className="w-full h-1 bg-gray-100 rounded-full mb-8">
-                    <div
-                        className="h-full bg-blue-600 rounded-full transition-all duration-700"
-                        style={{ width: `${(step / 4) * 100}%` }}
-                    />
-                </div>
-
-                <div className="bg-white border border-gray-200 rounded-2xl p-6 md:p-10 shadow-sm">
-
-                    {step === 1 && (
-                        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                            <LeadCaptureFlow initialRole="INSTITUTE" onComplete={handleLeadComplete} />
-                        </div>
-                    )}
-
-                    {step === 2 && (
-                        <div className="animate-in fade-in duration-500">
-                            <InstituteListingForm user={user} onComplete={handleListingComplete} />
-                        </div>
-                    )}
-
-                    {step === 3 && (
-                        <div className="animate-in fade-in duration-500 space-y-6">
-                            {/* Coaching Hub plan card */}
-                            <div className="border-2 border-blue-600 rounded-2xl p-6 bg-blue-50 relative">
-                                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-xs font-semibold px-4 py-1 rounded-full">
-                                    Recommended
-                                </div>
-                                <div className="w-10 h-10 rounded-lg bg-blue-600 text-white flex items-center justify-center mb-4">
-                                    <Crown size={20} />
-                                </div>
-                                <p className="font-bold text-gray-900 text-xl mb-1">Coaching Hub</p>
-                                <p className="text-3xl font-bold text-gray-900 mb-1">
-                                    ₹1,999
-                                    <span className="text-sm font-normal text-gray-400 ml-1">/month</span>
-                                </p>
-                                <p className="text-xs text-blue-600 font-medium mb-5">Up to 10 tutors included</p>
-                                <ul className="space-y-2">
-                                    {[
-                                        "Institute profile with branding",
-                                        "Manage up to 10 tutors",
-                                        "Bulk lead management",
-                                        "Custom institute page",
-                                        "Performance analytics dashboard",
-                                        "100 credits included"
-                                    ].map((f, i) => (
-                                        <li key={i} className="flex items-center gap-2 text-sm text-gray-700">
-                                            <CheckCircle2 size={14} className="text-blue-600 shrink-0" />
-                                            {f}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-
-                            {paymentError && (
-                                <div className="text-red-600 text-xs bg-red-50 p-3 rounded-xl border border-red-100">
-                                    {paymentError}
-                                </div>
-                            )}
-
-                            <button
-                                onClick={handlePaidPlan}
-                                disabled={paymentLoading}
-                                className="w-full py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors text-sm flex items-center justify-center gap-2 disabled:opacity-50"
-                            >
-                                {paymentLoading
-                                    ? <><Loader2 className="animate-spin" size={16} /> Opening payment...</>
-                                    : <>Pay ₹1,999 / month</>
-                                }
-                            </button>
-
-                            <button
-                                onClick={handleFreeContinue}
-                                className="w-full py-2.5 border border-gray-200 text-gray-500 font-medium rounded-xl hover:border-gray-300 transition-colors text-sm"
-                            >
-                                Skip for now — continue free
-                            </button>
-
-                            <p className="text-center text-xs text-gray-400">
-                                You can subscribe anytime from your dashboard.
-                            </p>
-                        </div>
-                    )}
-
-                    {step === 4 && (
-                        <div className="animate-in fade-in duration-500 text-center space-y-6">
-                            <div className="w-16 h-16 rounded-2xl bg-green-50 border border-green-100 flex items-center justify-center mx-auto">
-                                <ShieldCheck size={32} className="text-green-600" />
-                            </div>
-                            <div>
-                                <h2 className="text-2xl font-bold text-gray-900 mb-2">You're all set!</h2>
-                                <p className="text-gray-500 text-sm max-w-sm mx-auto">
-                                    Your institute is live and your Coaching Hub plan is active. Students can find and contact you directly.
-                                </p>
-                            </div>
-                            <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-between text-left">
-                                <div>
-                                    <p className="font-semibold text-gray-900 text-sm mb-0.5">Coaching Hub Active</p>
-                                    <p className="text-gray-400 text-xs">Up to 10 tutors · Bulk leads · Analytics</p>
-                                </div>
-                                <div className="w-9 h-9 rounded-lg bg-blue-600 text-white flex items-center justify-center">
-                                    <Building size={16} />
-                                </div>
-                            </div>
-                            <button
-                                onClick={() => router.push(`/dashboard/institute?instituteId=${user?.id}&success=true`)}
-                                className="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors text-sm"
-                            >
-                                Go to Dashboard
-                            </button>
-                        </div>
-                    )}
-
-                </div>
-
-            </div>
+            </section>
         </div>
     );
 }

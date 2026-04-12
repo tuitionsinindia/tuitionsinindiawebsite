@@ -6,73 +6,57 @@ import Script from "next/script";
 import Link from "next/link";
 import DashboardHeader from "@/app/components/DashboardHeader";
 import FacultyChat from "@/app/components/chat/FacultyChat";
-import {
-    GraduationCap,
-    Briefcase,
-    LayoutDashboard,
-    Search,
-    ShieldCheck,
-    Settings,
-    ArrowRight,
-    Phone,
-    Star,
+import { 
+    GraduationCap, 
+    Briefcase, 
+    LayoutDashboard, 
+    Search, 
+    ShieldCheck, 
+    ArrowRight, 
+    Phone, 
+    Target,
     Zap,
+    BadgeCheck,
     LogOut,
     CheckCircle2,
     Users,
     MessageCircle,
-    CreditCard,
-    Loader2
+    Loader2,
+    Activity
 } from "lucide-react";
 import ReviewModal from "@/app/components/ReviewModal";
-import SettingsModule from "@/app/components/dashboard/SettingsModule";
-import BillingModule from "@/app/components/dashboard/BillingModule";
 
 function StudentDashboardContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [studentId, setStudentId] = useState("");
-    const [sessionLoading, setSessionLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState("HOME");
+    const [activeTab, setActiveTab] = useState("HOME"); 
     const [loading, setLoading] = useState(true);
     const [studentData, setStudentData] = useState(null);
     const [unlockedTutors, setUnlockedTutors] = useState([]);
     const [activeLeads, setActiveLeads] = useState([]);
-    const [transactions, setTransactions] = useState([]);
     const [showSuccess, setShowSuccess] = useState(searchParams.get("success") === "true");
-    const highlightTutorId = searchParams.get("highlightTutor") || "";
-
+    
+    // Chat States
     const [chatSessions, setChatSessions] = useState([]);
     const [selectedSession, setSelectedSession] = useState(null);
     const [loadingChat, setLoadingChat] = useState(false);
-
+    
+    // Review States
     const [isReviewOpen, setIsReviewOpen] = useState(false);
     const [selectedTutorForReview, setSelectedTutorForReview] = useState(null);
 
-    // Resolve identity: session cookie first, URL param as fallback
+    // Initial ID recovery and storage
     useEffect(() => {
-        const init = async () => {
-            try {
-                const res = await fetch("/api/auth/session");
-                if (res.ok) {
-                    const { user } = await res.json();
-                    if (user?.role === "STUDENT") {
-                        setStudentId(user.id);
-                        setSessionLoading(false);
-                        return;
-                    }
-                    if (user) {
-                        // Logged in but wrong role — redirect to correct dashboard
-                        const map = { TUTOR: "/dashboard/tutor", INSTITUTE: "/dashboard/institute", ADMIN: "/dashboard/admin" };
-                        router.replace(map[user.role] || "/login");
-                        return;
-                    }
-                }
-            } catch {}
-            router.replace("/login");
-        };
-        init();
-    }, []);
+        const idFromUrl = searchParams.get("studentId");
+        if (idFromUrl) {
+            setStudentId(idFromUrl);
+            localStorage.setItem("ti_active_student_id", idFromUrl);
+        } else {
+            const savedId = localStorage.getItem("ti_active_student_id");
+            if (savedId) setStudentId(savedId);
+        }
+    }, [searchParams]);
 
     useEffect(() => {
         if (studentId) {
@@ -80,13 +64,12 @@ function StudentDashboardContent() {
             fetchUnlockedTutors();
             fetchActiveLeads();
             fetchChatSessions();
-            fetchTransactions();
         }
     }, [studentId]);
 
     const fetchStudentData = async () => {
         try {
-            const res = await fetch(`/api/user/info?id=${studentId}`);
+            const res = await fetch(`/api/user/info?id=${studentId}&viewerId=${studentId}`);
             if (res.ok) {
                 const data = await res.json();
                 setStudentData(data);
@@ -101,6 +84,7 @@ function StudentDashboardContent() {
             if (resUnlocked.ok) {
                 unlocked = await resUnlocked.json();
             }
+
             const resMatches = await fetch(`/api/matching/matches?id=${studentId}&role=STUDENT`);
             if (resMatches.ok) {
                 const matches = await resMatches.json();
@@ -110,10 +94,10 @@ function StudentDashboardContent() {
             } else {
                 setUnlockedTutors(unlocked);
             }
-        } catch (err) {
-            console.error("Match fetch error:", err);
-        } finally {
-            setLoading(false);
+        } catch (err) { 
+            console.error("Match sync error:", err); 
+        } finally { 
+            setLoading(false); 
         }
     };
 
@@ -138,429 +122,397 @@ function StudentDashboardContent() {
         } catch (err) { console.error(err); } finally { setLoadingChat(false); }
     };
 
-    const fetchTransactions = async () => {
-        try {
-            const res = await fetch(`/api/user/transactions?userId=${studentId}`);
-            if (res.ok) {
-                const data = await res.json();
-                setTransactions(data.transactions);
-            }
-        } catch (err) { console.error(err); }
+    const handleLogout = () => {
+        localStorage.removeItem("ti_active_student_id");
+        router.push("/");
     };
 
-    const makePayment = async () => {
-        // Razorpay logic
-    };
-
-    if (sessionLoading) {
+    if (!studentId) {
         return (
-            <div className="flex items-center justify-center min-h-screen bg-gray-50">
-                <Loader2 size={32} className="animate-spin text-blue-600" />
+            <div className="flex items-center justify-center min-h-screen bg-blue-50/30 p-4 font-sans relative overflow-hidden text-gray-900">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-[600px] bg-blue-600/5 rounded-full blur-[120px] -z-10 animate-pulse"></div>
+                <div className="bg-white p-10 rounded-[3rem] shadow-4xl shadow-blue-900/10 border border-gray-100 max-w-md w-full relative z-10 text-center">
+                    <div className="size-20 rounded-3xl bg-blue-600 text-white flex items-center justify-center mx-auto mb-8 shadow-2xl shadow-blue-600/20">
+                        <GraduationCap size={40} strokeWidth={1.5} />
+                    </div>
+                    <h2 className="text-3xl font-black mb-3 tracking-tighter uppercase italic leading-none">Student Hub.</h2>
+                    <p className="text-gray-400 mb-10 text-xs font-black uppercase tracking-[0.2em] leading-relaxed italic">Synchronize with your academic ID to access the dashboard terminal.</p>
+                    <input
+                        type="text"
+                        placeholder="STUDENT PROTOCOL ID"
+                        className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-5 text-gray-900 font-bold text-sm tracking-tight focus:ring-4 focus:ring-blue-100 focus:border-blue-600 outline-none transition-all placeholder:text-gray-300 mb-6 italic"
+                        onKeyDown={(e) => { if (e.key === 'Enter') setStudentId(e.target.value); }}
+                        id="studentInput"
+                    />
+                    <button
+                        className="w-full bg-blue-600 text-white font-black py-5 rounded-2xl hover:bg-gray-900 shadow-xl transition-all flex items-center justify-center gap-3 uppercase tracking-[0.3em] text-xs active:scale-95 leading-none"
+                        onClick={() => setStudentId(document.getElementById('studentInput').value)}>
+                        INITIATE PORTAL <ArrowRight size={16} strokeWidth={3} />
+                    </button>
+                    <Link href="/" className="inline-block mt-8 text-xs font-black uppercase tracking-[0.4em] text-gray-300 hover:text-blue-600 transition-colors italic">Bypass Hub</Link>
+                </div>
             </div>
         );
     }
 
-    const navItems = [
-        { id: "HOME", label: "Home", icon: LayoutDashboard },
-        { id: "REQUIREMENTS", label: "My Requests", icon: Briefcase },
-        { id: "MATCHES", label: "My Tutors", icon: Users },
-        { id: "CHAT", label: "Messages", icon: MessageCircle },
-        { id: "CONTACTS", label: "Contacts", icon: ShieldCheck },
-        { id: "BILLING", label: "Billing", icon: CreditCard },
-        { id: "SETTINGS", label: "Settings", icon: Settings },
-    ];
-
     return (
-        <div className="flex min-h-screen flex-col bg-gray-50">
+        <div className="relative flex min-h-screen flex-col bg-gray-50 font-sans text-gray-900 antialiased">
             <Script src="https://checkout.razorpay.com/v1/checkout.js" />
 
-            <DashboardHeader
-                user={studentData}
-                role="STUDENT"
-                credits={studentData?.credits}
-                onAddCredits={makePayment}
-                onLogout={async () => { await fetch("/api/auth/logout", { method: "POST" }); router.push("/login"); }}
+            <DashboardHeader 
+                user={studentData} 
+                role="STUDENT" 
+                credits={studentData?.credits} 
+                onLogout={handleLogout}
             />
 
-            <div className="flex flex-1 pt-16">
-                <aside className="fixed left-0 top-16 bottom-0 w-16 md:w-64 bg-white border-r border-gray-200 flex flex-col py-6 px-3 md:px-4 z-40">
-                    <nav className="flex-1 space-y-1">
-                        {navItems.map((item) => (
+            <div className="flex flex-1">
+                {/* Sidestream Navigation */}
+                <aside className="fixed left-0 top-[85px] bottom-0 w-24 md:w-80 bg-white border-r border-gray-100 flex flex-col items-center md:items-stretch py-8 px-4 md:px-10 z-50 shadow-sm">
+                    <div className="mb-12 hidden md:block px-6">
+                        <h4 className="text-xs font-black text-gray-300 uppercase tracking-[0.4em] mb-8 italic">Academy Command</h4>
+                    </div>
+
+                    <nav className="space-y-4 w-full">
+                        {[
+                            { id: "HOME", label: "DASHBOARD", icon: LayoutDashboard },
+                            { id: "REQUIREMENTS", label: "ACTIVE MANDATES", icon: Briefcase },
+                            { id: "MATCHES", label: "FACULTY MATCHES", icon: Users },
+                            { id: "CHAT", label: "MESSAGING HUB", icon: MessageCircle },
+                            { id: "CONTACTS", label: "SECURE DIRECTORY", icon: ShieldCheck },
+                        ].map((item) => (
                             <button
                                 key={item.id}
                                 onClick={() => setActiveTab(item.id)}
-                                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                                    activeTab === item.id
-                                        ? "bg-blue-600 text-white"
-                                        : "text-gray-600 hover:bg-gray-100"
+                                className={`w-full flex items-center gap-4 px-4 md:px-6 py-4 rounded-2xl font-black text-xs tracking-[0.2em] transition-all group relative overflow-hidden ${
+                                    activeTab === item.id 
+                                    ? "bg-blue-600 text-white shadow-2xl shadow-blue-600/20" 
+                                    : "text-gray-400 hover:bg-gray-50 hover:text-blue-600 border border-transparent hover:border-gray-100"
                                 }`}
                             >
-                                <item.icon size={18} />
+                                <item.icon size={20} strokeWidth={2.5} className={activeTab === item.id ? "opacity-100" : "opacity-40"} />
                                 <span className="hidden md:block">{item.label}</span>
+                                {activeTab === item.id && <div className="absolute right-0 top-0 bottom-0 w-1.5 bg-white md:hidden"></div>}
                             </button>
                         ))}
                     </nav>
-                    <button
-                        onClick={async () => { await fetch("/api/auth/logout", { method: "POST" }); router.push("/login"); }}
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-red-500 hover:bg-red-50 transition-colors"
+
+                    <button 
+                        onClick={handleLogout}
+                        className="mt-auto flex items-center justify-center md:justify-start gap-4 px-6 py-4 text-red-400 hover:text-red-600 text-[10px] font-black uppercase tracking-[0.5em] transition-all italic"
                     >
-                        <LogOut size={18} />
-                        <span className="hidden md:block">Logout</span>
+                        <LogOut size={16} strokeWidth={3} />
+                        <span className="hidden md:block text-xs">EXIT HUB</span>
                     </button>
                 </aside>
 
-                <main className="flex-1 ml-16 md:ml-64 p-6">
-                    <div className="max-w-5xl mx-auto">
+                <main className="flex-1 ml-24 md:ml-80 p-6 md:p-12 lg:p-16">
+                    <div className="max-w-7xl mx-auto">
 
+                        {/* Success Notification */}
                         {showSuccess && (
-                            <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-3">
-                                <CheckCircle2 size={20} className="text-emerald-600 shrink-0" />
-                                <div className="flex-1">
-                                    <p className="font-semibold text-emerald-800 text-sm">Requirement posted successfully!</p>
-                                    <p className="text-emerald-600 text-xs mt-0.5">
-                                        {highlightTutorId
-                                            ? "Your requirement is live. Check the My Tutors tab to connect with the tutor you were viewing."
-                                            : "Your request is live. Matching tutors will be shown in the My Tutors tab."}
-                                    </p>
+                            <div className="mb-12 animate-in zoom-in-95 duration-500">
+                                <div className="bg-emerald-50 border border-emerald-100 rounded-[3rem] p-8 md:p-12 relative overflow-hidden shadow-sm">
+                                    <div className="relative z-10 flex flex-col md:flex-row items-center gap-8 text-center md:text-left">
+                                        <div className="size-20 rounded-[2rem] bg-emerald-500 text-white flex items-center justify-center shadow-2xl shadow-emerald-500/30 animate-bounce">
+                                            <CheckCircle2 size={40} strokeWidth={3} />
+                                        </div>
+                                        <div>
+                                            <h2 className="text-3xl md:text-5xl font-black tracking-tighter uppercase italic leading-[0.85] mb-4 text-gray-900">Mandate <br/><span className="text-emerald-500">Active.</span></h2>
+                                            <p className="text-gray-500 font-medium text-lg leading-relaxed max-w-xl italic">
+                                                Your requirement has been synchronized with our verified faculty network. Expert mentors will contact you shortly.
+                                            </p>
+                                        </div>
+                                        <button onClick={() => setShowSuccess(false)} className="md:ml-auto p-4 text-gray-300 hover:text-gray-500 transition-colors">
+                                            <LogOut size={24} className="rotate-45" />
+                                        </button>
+                                    </div>
                                 </div>
-                                <button onClick={() => setShowSuccess(false)} className="text-emerald-400 hover:text-emerald-600 text-lg leading-none">×</button>
                             </div>
                         )}
 
-                        {activeTab === "SETTINGS" && <SettingsModule userData={studentData} onUpdate={fetchStudentData} />}
-                        {activeTab === "BILLING" && <BillingModule userData={studentData} userId={studentId} transactions={transactions} onRefresh={fetchStudentData} />}
-
                         {activeTab === "HOME" && (
-                            <div className="space-y-6">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <h1 className="text-2xl font-bold text-gray-900">
-                                            Welcome back, {studentData?.name || "Student"}
+                            <div className="space-y-24">
+                                <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-12">
+                                    <div className="max-w-2xl">
+                                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-full border border-blue-100 mb-8">
+                                            <span className="size-2 rounded-full bg-blue-600 animate-pulse"></span>
+                                            <span className="text-[10px] font-black text-blue-600 uppercase tracking-[0.3em] italic">Protocol: Neural Matching Active</span>
+                                        </div>
+                                        <h1 className="text-6xl md:text-8xl font-black tracking-tighter mb-8 uppercase italic leading-[0.85] text-gray-900">
+                                            Academic <br/><span className="text-blue-600 underline decoration-blue-600/10 decoration-8 underline-offset-8">Terminal.</span>
                                         </h1>
-                                        <p className="text-gray-500 text-sm mt-1">Manage your tutor search from here.</p>
+                                        <p className="text-xl text-gray-400 font-medium leading-relaxed max-w-xl italic">
+                                            Managing the academic trajectory of <span className="text-gray-900 font-black italic uppercase">{studentData?.name || "Candidate"}</span>.
+                                        </p>
                                     </div>
-                                    <Link
-                                        href="/register/student?step=2"
-                                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors whitespace-nowrap shrink-0"
-                                    >
-                                        + Post New Request
+                                    <Link href="/post-requirement" className="group relative flex items-center gap-4 px-12 py-6 bg-blue-600 text-white rounded-[2.5rem] font-black text-[10px] tracking-[0.3em] shadow-2xl shadow-blue-600/30 hover:bg-gray-900 transition-all uppercase leading-none italic h-fit">
+                                        <Target size={18} strokeWidth={3} />
+                                        DEPLOY NEW MANDATE
                                     </Link>
                                 </div>
-                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                                     {[
-                                        { label: "Active Requests", val: activeLeads.length, icon: Briefcase, color: "text-blue-600", bg: "bg-blue-50" },
-                                        { label: "Matched Tutors", val: unlockedTutors.length, icon: Users, color: "text-emerald-600", bg: "bg-emerald-50" },
-                                        { label: "Credits", val: studentData?.credits || 0, icon: Zap, color: "text-amber-600", bg: "bg-amber-50" },
+                                        { label: "Active Pipelines", val: activeLeads.length, icon: Briefcase, color: "text-blue-600", bg: "bg-blue-50" },
+                                        { label: "Acquired Matches", val: unlockedTutors.length, icon: Users, color: "text-emerald-600", bg: "bg-emerald-50" },
+                                        { label: "Secure Credits", val: studentData?.credits || 0, icon: Zap, color: "text-blue-600", bg: "bg-blue-50" }
                                     ].map((stat, i) => (
-                                        <div key={i} className="bg-white rounded-xl border border-gray-200 p-5">
-                                            <div className={`w-10 h-10 rounded-lg ${stat.bg} flex items-center justify-center mb-3`}>
-                                                <stat.icon size={20} className={stat.color} />
+                                        <div key={i} className="p-10 rounded-[3rem] bg-white border border-gray-100 shadow-sm hover:shadow-2xl hover:shadow-blue-900/5 transition-all group overflow-hidden relative">
+                                            <div className={`size-14 rounded-2xl ${stat.bg} ${stat.color} flex items-center justify-center mb-8 border border-transparent group-hover:border-current transition-all`}>
+                                                <stat.icon size={24} strokeWidth={2.5} />
                                             </div>
-                                            <p className="text-sm text-gray-500">{stat.label}</p>
-                                            <p className="text-2xl font-bold text-gray-900 mt-1">{stat.val}</p>
+                                            <p className="text-[10px] font-black text-gray-300 uppercase tracking-[0.4em] mb-2 italic">{stat.label}</p>
+                                            <p className="text-5xl font-black text-gray-900 italic tracking-tighter">{stat.val}</p>
                                         </div>
                                     ))}
                                 </div>
-
-                                {/* Getting Started — shown when no active leads */}
-                                {activeLeads.length === 0 && unlockedTutors.length === 0 && (
-                                    <div className="bg-blue-50 border border-blue-100 rounded-xl p-6 space-y-3">
-                                        <h3 className="font-semibold text-blue-900">Getting Started</h3>
-                                        <p className="text-sm text-blue-700">Welcome! Here's how to find your perfect tutor:</p>
-                                        <ol className="text-sm text-blue-700 space-y-2 list-decimal list-inside">
-                                            <li>Click <strong>"+ Post New Request"</strong> above to describe what you need.</li>
-                                            <li>Matching tutors will be notified and may <strong>unlock your contact</strong>.</li>
-                                            <li>You'll see them in the <strong>My Tutors</strong> tab — start a chat from there.</li>
-                                            <li>You can also <Link href="/search" className="underline font-medium">search for tutors</Link> directly.</li>
-                                        </ol>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-
-                        {activeTab === "REQUIREMENTS" && (
-                            <div className="space-y-6">
-                                <div>
-                                    <h1 className="text-2xl font-bold text-gray-900">My Requests</h1>
-                                    <p className="text-gray-500 text-sm mt-1">Your active tutor requests.</p>
-                                </div>
-                                {activeLeads.length > 0 ? (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {activeLeads.map((lead) => (
-                                            <div key={lead.id} className="bg-white rounded-xl border border-gray-200 p-6">
-                                                <div className="flex items-center justify-between mb-3">
-                                                    <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-semibold">
-                                                        {lead.subjects?.[0] || 'Unknown'}
-                                                    </span>
-                                                    <span className="text-xs text-emerald-600 font-medium capitalize">{lead.status?.toLowerCase()}</span>
-                                                </div>
-                                                <p className="text-gray-700 mb-4 line-clamp-3">"{lead.description}"</p>
-                                                <div className="grid grid-cols-2 gap-3 pt-3 border-t border-gray-100 text-sm">
-                                                    <div>
-                                                        <p className="text-gray-400 text-xs">Location</p>
-                                                        <p className="font-medium text-gray-700">{lead.locations?.[0] || 'Remote'}</p>
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-gray-400 text-xs">Grade / Level</p>
-                                                        <p className="font-medium text-gray-700">{lead.grades?.[0] || 'N/A'}</p>
-                                                    </div>
-                                                </div>
-                                                {lead.status === "OPEN" && (
-                                                    <div className="mt-3 flex gap-2">
-                                                        {!lead.isPremium && (
-                                                            <button
-                                                                onClick={() => {
-                                                                    if (!confirm("Boost this request for ₹49? It will be shown to more tutors with higher priority.")) return;
-                                                                    // Would integrate with Razorpay in production
-                                                                    fetch("/api/lead/boost", {
-                                                                        method: "POST",
-                                                                        headers: { "Content-Type": "application/json" },
-                                                                        body: JSON.stringify({ leadId: lead.id, studentId, premiumTier: 1 }),
-                                                                    }).then(r => { if (r.ok) fetchActiveLeads(); });
-                                                                }}
-                                                                className="flex-1 py-2 text-xs text-amber-600 border border-amber-200 rounded-lg hover:bg-amber-50 transition-colors font-medium flex items-center justify-center gap-1"
-                                                            >
-                                                                <Zap size={12} /> Boost ₹49
-                                                            </button>
-                                                        )}
-                                                        {lead.isPremium && (
-                                                            <span className="flex-1 py-2 text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg font-medium text-center">Boosted</span>
-                                                        )}
-                                                        <button
-                                                            onClick={async () => {
-                                                                if (!confirm("Close this request?")) return;
-                                                                try {
-                                                                    const res = await fetch("/api/lead/close", {
-                                                                        method: "POST",
-                                                                        headers: { "Content-Type": "application/json" },
-                                                                        body: JSON.stringify({ leadId: lead.id, studentId }),
-                                                                    });
-                                                                    if (res.ok) fetchActiveLeads();
-                                                                } catch (err) { console.error(err); }
-                                                            }}
-                                                            className="flex-1 py-2 text-xs text-red-500 border border-red-100 rounded-lg hover:bg-red-50 transition-colors font-medium"
-                                                        >
-                                                            Close
-                                                        </button>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <div className="text-center py-20 text-gray-400">
-                                        <Briefcase size={40} className="mx-auto mb-3 opacity-30" />
-                                        <p className="font-medium">No active requests.</p>
-                                        <Link href="/register/student?step=2" className="inline-block mt-3 text-blue-600 text-sm hover:underline">
-                                            Post your first request →
-                                        </Link>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-
-                        {activeTab === "MATCHES" && (
-                            <div className="space-y-6">
-                                <div>
-                                    <h1 className="text-2xl font-bold text-gray-900">My Tutors</h1>
-                                    <p className="text-gray-500 text-sm mt-1">Tutors matched or unlocked for you.</p>
-                                </div>
-                                {unlockedTutors.length > 0 ? (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                        {unlockedTutors.map((t) => (
-                                            <div key={t.id} className={`bg-white rounded-xl border p-6 ${t.id === highlightTutorId ? "border-blue-400 ring-2 ring-blue-100" : "border-gray-200"}`}>
-                                                <div className="flex items-center gap-3 mb-3">
-                                                    <div className="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-lg shrink-0">
-                                                        {t.name?.[0]}
-                                                    </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <h3 className="font-semibold text-gray-900 truncate">{t.name}</h3>
-                                                        <p className="text-xs text-gray-500">{t.tutorListing?.subjects?.[0] || "Tutor"}{t.tutorListing?.experience ? ` · ${t.tutorListing.experience} yrs exp` : ""}</p>
-                                                    </div>
-                                                    {t.matchScore > 0 && (
-                                                        <div className={`text-center shrink-0 px-2 py-1 rounded-lg text-xs font-bold ${
-                                                            t.matchScore >= 85 ? "bg-emerald-50 text-emerald-700" :
-                                                            t.matchScore >= 60 ? "bg-blue-50 text-blue-700" : "bg-gray-100 text-gray-600"
-                                                        }`}>
-                                                            {t.matchScore}%
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                {t.matchLabel && (
-                                                    <p className="text-xs text-gray-400 mb-3">{t.matchLabel}</p>
-                                                )}
-                                                <div className="flex gap-2">
-                                                    <button
-                                                        onClick={() => { setSelectedTutorForReview(t); setIsReviewOpen(true); }}
-                                                        className="flex-1 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 flex items-center justify-center gap-1.5 transition-colors"
-                                                    >
-                                                        <Star size={14} className="text-amber-500" /> Rate
-                                                    </button>
-                                                    <button
-                                                        onClick={async () => {
-                                                            setLoadingChat(true);
-                                                            try {
-                                                                const res = await fetch("/api/chat/session", {
-                                                                    method: "POST",
-                                                                    headers: { "Content-Type": "application/json" },
-                                                                    body: JSON.stringify({ studentId, tutorId: t.id, initiatorId: studentId })
-                                                                });
-                                                                if (res.ok) { await fetchChatSessions(); setActiveTab("CHAT"); }
-                                                            } catch (err) { console.error(err); } finally { setLoadingChat(false); }
-                                                        }}
-                                                        className="flex-1 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 flex items-center justify-center gap-1.5 transition-colors"
-                                                    >
-                                                        {loadingChat ? <Loader2 className="animate-spin" size={14} /> : <MessageCircle size={14} />}
-                                                        Chat
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <div className="text-center py-20 text-gray-400">
-                                        <Users size={40} className="mx-auto mb-3 opacity-30" />
-                                        <p className="font-medium">No tutors matched yet.</p>
-                                        <p className="text-sm mt-1">Post a request and tutors will be matched to you.</p>
-                                    </div>
-                                )}
                             </div>
                         )}
 
                         {activeTab === "CHAT" && (
-                            <div className="space-y-4">
-                                <h1 className="text-2xl font-bold text-gray-900">Messages</h1>
-                                <div className="flex flex-col md:flex-row h-[calc(100vh-220px)] bg-white rounded-xl border border-gray-200 overflow-hidden">
-                                    <div className="w-full md:w-72 border-b md:border-b-0 md:border-r border-gray-200 flex flex-col max-h-48 md:max-h-none">
-                                        <div className="p-4 border-b border-gray-100">
-                                            <h3 className="font-semibold text-gray-900 text-sm">Conversations</h3>
-                                            <p className="text-xs text-gray-500 mt-0.5">{chatSessions.length} active</p>
-                                        </div>
-                                        <div className="flex-1 overflow-y-auto">
-                                            {loadingChat ? (
-                                                <div className="flex items-center justify-center py-10 text-gray-400">
-                                                    <Loader2 className="animate-spin mr-2" size={16} /> Loading...
-                                                </div>
-                                            ) : chatSessions.length > 0 ? chatSessions.map((session) => {
-                                                const recipient = session.studentId === studentId ? session.tutor : session.student;
-                                                const lastMsg = session.messages?.[0];
-                                                return (
-                                                    <button
-                                                        key={session.id}
-                                                        onClick={() => setSelectedSession(session)}
-                                                        className={`w-full p-4 text-left flex items-center gap-3 transition-colors border-b border-gray-50 ${
-                                                            selectedSession?.id === session.id ? "bg-blue-50" : "hover:bg-gray-50"
-                                                        }`}
-                                                    >
-                                                        <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold text-sm shrink-0">
-                                                            {recipient?.name?.[0] || "?"}
-                                                        </div>
-                                                        <div className="flex-1 min-w-0">
-                                                            <p className="font-medium text-gray-900 text-sm truncate">{recipient?.name || "Unknown"}</p>
-                                                            <p className="text-xs text-gray-400 truncate">
-                                                                {lastMsg ? lastMsg.content.substring(0, 30) + "..." : "No messages yet"}
-                                                            </p>
-                                                        </div>
-                                                    </button>
-                                                );
-                                            }) : (
-                                                <div className="p-6 text-center text-gray-400 text-sm">No conversations yet.</div>
-                                            )}
-                                        </div>
+                            <div className="h-[75vh] grid grid-cols-1 lg:grid-cols-12 gap-10 animate-in fade-in duration-700">
+                                {/* Session Sidebar */}
+                                <div className="lg:col-span-4 bg-white rounded-[3rem] border border-gray-100 overflow-hidden flex flex-col shadow-sm">
+                                    <div className="p-8 border-b border-gray-50 flex items-center justify-between bg-gray-50/50">
+                                        <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.5em] italic">Active Protocols</h3>
+                                        <div className="size-8 rounded-lg bg-blue-600 text-white flex items-center justify-center font-black text-xs shadow-lg shadow-blue-600/20">{chatSessions.length}</div>
                                     </div>
-                                    <div className="flex-1">
-                                        {selectedSession ? (
-                                            <FacultyChat
-                                                sessionId={selectedSession.id}
-                                                currentUser={{ id: studentId, name: studentData?.name }}
-                                                recipientName={selectedSession.studentId === studentId ? selectedSession.tutor?.name : selectedSession.student?.name}
-                                            />
-                                        ) : (
-                                            <div className="h-full flex flex-col items-center justify-center text-gray-400">
-                                                <MessageCircle size={48} className="mb-3 opacity-30" />
-                                                <p className="font-medium">Select a conversation</p>
-                                                <p className="text-sm mt-1">Choose a chat from the left to start messaging.</p>
+                                    <div className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-hide">
+                                        {loadingChat ? (
+                                            <div className="flex flex-col items-center justify-center py-20 gap-4 opacity-30 italic">
+                                                <Loader2 className="animate-spin text-blue-600" size={24} />
+                                                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Scanning Network...</p>
                                             </div>
+                                        ) : chatSessions.length > 0 ? chatSessions.map((session) => {
+                                            const recipient = session.studentId === studentId ? session.tutor : session.student;
+                                            const isActive = selectedSession?.id === session.id;
+                                            const lastMsg = session.messages?.[0];
+
+                                            return (
+                                                <button
+                                                    key={session.id}
+                                                    onClick={() => setSelectedSession(session)}
+                                                    className={`w-full p-6 rounded-[2rem] flex items-center gap-4 transition-all border group overflow-hidden relative ${
+                                                        isActive ? "bg-blue-600 border-blue-600 text-white shadow-2xl shadow-blue-600/20" : "bg-gray-50 border-gray-100 hover:bg-white hover:border-blue-600"
+                                                    }`}
+                                                >
+                                                    <div className={`size-12 rounded-2xl flex items-center justify-center font-black text-lg italic shadow-sm transition-all ${
+                                                        isActive ? "bg-white text-blue-600" : "bg-blue-600 text-white"
+                                                    }`}>
+                                                        {recipient?.name?.[0] || "?"}
+                                                    </div>
+                                                    <div className="flex-1 text-left min-w-0">
+                                                        <p className={`text-[10px] font-black uppercase tracking-tight truncate italic leading-none mb-2 ${isActive ? "text-white" : "text-gray-900"}`}>
+                                                            {recipient?.name || "Anonymous Scholar"}
+                                                        </p>
+                                                        <p className={`text-[10px] font-medium tracking-wide truncate italic opacity-60 leading-none ${isActive ? "text-white/80" : "text-gray-400"}`}>
+                                                            {lastMsg ? lastMsg.content.substring(0, 20) : "Protocol Initialized"}
+                                                        </p>
+                                                    </div>
+                                                    {isActive && <div className="absolute right-0 top-0 bottom-0 w-1.5 bg-white"></div>}
+                                                </button>
+                                            )
+                                        }) : (
+                                            <div className="py-20 text-center opacity-30 italic font-black uppercase tracking-[0.3em] text-[10px] px-10 leading-relaxed text-gray-400">No active neural links discovered in the directory.</div>
                                         )}
                                     </div>
+                                </div>
+
+                                {/* Active Terminal */}
+                                <div className="lg:col-span-8 overflow-hidden rounded-[4rem] bg-white border border-gray-100 shadow-sm relative">
+                                    {selectedSession ? (
+                                        <FacultyChat 
+                                            sessionId={selectedSession.id} 
+                                            currentUser={{ id: studentId, name: studentData?.name }} 
+                                            recipientName={selectedSession.studentId === studentId ? selectedSession.tutor?.name : selectedSession.student?.name}
+                                        />
+                                    ) : (
+                                        <div className="h-full flex flex-col items-center justify-center space-y-8 p-12 text-center italic">
+                                            <div className="size-24 rounded-[3rem] bg-gray-50 border border-gray-100 flex items-center justify-center mb-8 shadow-inner shadow-blue-100/50">
+                                                <MessageCircle size={48} className="text-blue-600/20" />
+                                            </div>
+                                            <h2 className="text-4xl font-black uppercase tracking-tighter text-gray-900">Messaging Hub.</h2>
+                                            <p className="text-gray-400 max-w-sm mx-auto font-medium text-sm leading-relaxed uppercase tracking-[0.3em]">Select a protocol from the directory to initiate secure scholarly synchronization.</p>
+                                            <div className="px-8 py-3 bg-blue-50 border border-blue-100 rounded-full text-[10px] font-black text-blue-600 uppercase tracking-[0.4em] leading-none italic animate-pulse">STATUS: ENCRYPTED_STANDBY</div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === "REQUIREMENTS" && (
+                            <div className="space-y-12 animate-in fade-in duration-700">
+                                <h2 className="text-4xl font-black text-gray-900 uppercase italic tracking-tighter">My <span className="text-blue-600">Requirements.</span></h2>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    {activeLeads.length > 0 ? activeLeads.map((lead) => (
+                                        <div key={lead.id} className="bg-white border border-gray-100 p-12 rounded-[3.5rem] relative group hover:border-blue-600 transition-all text-gray-900 overflow-hidden shadow-sm border-b-8">
+                                            <div className="flex justify-between items-center mb-10 relative z-10">
+                                                <div className="px-5 py-2 bg-blue-50 text-blue-600 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] border border-blue-100 italic">{lead.subjects?.[0] || 'Unknown Subject'}</div>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="size-2 rounded-full bg-blue-600 animate-pulse"></span>
+                                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] italic">{lead.status}</p>
+                                                </div>
+                                            </div>
+                                            <p className="text-3xl font-black text-gray-900 italic leading-[1.1] mb-12 relative z-10 tracking-tighter uppercase line-clamp-3">"{lead.description}"</p>
+                                            <div className="grid grid-cols-2 gap-10 pt-10 border-t border-gray-50 relative z-10">
+                                                <div>
+                                                    <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest mb-2 italic">Faculty Zone</p>
+                                                    <p className="text-xs font-black text-gray-900 italic uppercase tracking-widest leading-none">{lead.locations?.[0] || 'Remote'}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest mb-2 italic">Neural Level</p>
+                                                    <p className="text-xs font-black text-gray-900 italic uppercase tracking-widest leading-none">{lead.grades?.[0] || 'Global'}</p>
+                                                </div>
+                                            </div>
+                                            <div className="absolute -bottom-16 -right-16 size-48 bg-blue-600/5 rounded-full blur-3xl group-hover:bg-blue-600/10 transition-all"></div>
+                                        </div>
+                                    )) : (
+                                        <div className="col-span-full py-40 text-center opacity-30 italic font-black uppercase tracking-[0.5em] border-4 border-dashed border-gray-200 rounded-[4rem] text-gray-300">No active mandates synchronized in the terminal.</div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === "MATCHES" && (
+                            <div className="space-y-12 animate-in fade-in duration-700">
+                                <h2 className="text-4xl font-black text-gray-900 uppercase italic tracking-tighter">Faculty <span className="text-emerald-500">Discovery.</span></h2>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                    {unlockedTutors.length > 0 ? unlockedTutors.map((t) => (
+                                        <div key={t.id} className="bg-white p-12 rounded-[3.5rem] border border-gray-100 hover:border-emerald-500 transition-all text-center group relative overflow-hidden shadow-sm border-b-8">
+                                             <div className="absolute top-0 right-0 p-8 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <div className="size-10 rounded-xl bg-emerald-50 text-emerald-500 flex items-center justify-center border border-emerald-100 shadow-sm"><CheckCircle2 size={20} /></div>
+                                            </div>
+                                            
+                                            <div className="size-24 rounded-[2.5rem] bg-gradient-to-br from-blue-500 to-blue-700 text-white flex items-center justify-center font-black text-4xl italic mx-auto mb-10 shadow-2xl relative">
+                                                {t.name?.[0]}
+                                            </div>
+                                            <h3 className="text-2xl font-black text-gray-900 uppercase italic tracking-tighter mb-2 leading-none">{t.name}</h3>
+                                            <p className="text-[10px] font-black text-blue-600 uppercase tracking-[0.3em] mb-12 italic leading-none">{t.tutorListing?.subjects?.[0] || "Academic Professional"}</p>
+                                            <div className="flex gap-3">
+                                                <button 
+                                                    onClick={() => {
+                                                        setSelectedTutorForReview(t);
+                                                        setIsReviewOpen(true);
+                                                    }}
+                                                    className="flex-1 py-5 bg-gray-50 border border-gray-100 rounded-2xl flex items-center justify-center gap-3 text-[10px] font-black text-gray-900 hover:bg-emerald-500 hover:text-white transition-all uppercase tracking-widest leading-none italic"
+                                                >
+                                                    Rate Performance <StarIcon size={14} className="fill-emerald-400 text-emerald-400 group-hover:fill-white group-hover:text-white" />
+                                                </button>
+                                                <button 
+                                                    onClick={async () => {
+                                                        setLoadingChat(true);
+                                                        try {
+                                                            const res = await fetch("/api/chat/session", {
+                                                                method: "POST",
+                                                                headers: { "Content-Type": "application/json" },
+                                                                body: JSON.stringify({ 
+                                                                    studentId, 
+                                                                    tutorId: t.id,
+                                                                    initiatorId: studentId
+                                                                })
+                                                            });
+                                                            if (res.ok) {
+                                                                await fetchChatSessions();
+                                                                setActiveTab("CHAT");
+                                                            }
+                                                        } catch (err) { console.error(err); } finally { setLoadingChat(false); }
+                                                    }}
+                                                    className="size-14 bg-blue-600 text-white rounded-2xl flex items-center justify-center hover:bg-gray-900 transition-all active:scale-95 shadow-xl shadow-blue-600/20"
+                                                >
+                                                    {loadingChat ? <Loader2 className="animate-spin" size={20} /> : <MessageCircle size={20} className="font-black" strokeWidth={3} />}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )) : (
+                                        <div className="col-span-full py-40 text-center opacity-30 italic font-black uppercase tracking-[0.5em] border-4 border-dashed border-gray-200 rounded-[4rem] text-gray-300">Establishing Match Pipeline...</div>
+                                    )}
                                 </div>
                             </div>
                         )}
 
                         {activeTab === "CONTACTS" && (
-                            <div className="space-y-6">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <h1 className="text-2xl font-bold text-gray-900">Contacts</h1>
-                                        <p className="text-gray-500 text-sm mt-1">Tutors you've unlocked or been matched with.</p>
-                                    </div>
-                                    <Link href="/search" className="text-sm text-blue-600 hover:underline">Find more tutors →</Link>
-                                </div>
-                                {unlockedTutors.length > 0 ? (
-                                    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                                        <table className="w-full text-left">
-                                            <thead className="bg-gray-50 border-b border-gray-200">
-                                                <tr>
-                                                    <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Tutor</th>
-                                                    <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Subject</th>
-                                                    <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                            <div className="space-y-12 animate-in fade-in duration-700">
+                                <Link 
+                                    href="/search"
+                                    className="inline-flex items-center gap-4 text-[10px] font-black text-gray-300 uppercase tracking-[0.4em] hover:text-blue-600 transition-all border border-gray-100 px-6 py-3 rounded-full hover:bg-white shadow-sm italic leading-none"
+                                >
+                                    <ArrowRight size={14} className="rotate-180" /> Back to Search Discovery
+                                </Link>
+                                <h2 className="text-5xl font-black text-gray-900 uppercase italic tracking-tighter">Secure <span className="text-blue-600 underline decoration-blue-600/10">Directory.</span></h2>
+                                <div className="bg-white border border-gray-100 rounded-[4rem] overflow-hidden shadow-2xl border-b-8">
+                                    <table className="w-full text-left">
+                                        <thead>
+                                            <tr className="border-b border-gray-50 bg-gray-50/50">
+                                                <th className="px-12 py-10 text-[10px] font-black uppercase tracking-[0.5em] text-gray-400 italic">Faculty Identity</th>
+                                                <th className="px-12 py-10 text-[10px] font-black uppercase tracking-[0.5em] text-gray-400 italic">Secure Line Protocol</th>
+                                                <th className="px-12 py-10 text-[10px] font-black uppercase tracking-[0.5em] text-gray-400 italic">Action Terminal</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-50">
+                                            {unlockedTutors.length > 0 ? unlockedTutors.map((t) => (
+                                                <tr key={t.id} className="group hover:bg-gray-50/50 transition-colors">
+                                                    <td className="px-12 py-10">
+                                                        <div className="flex items-center gap-8">
+                                                            <div className="size-20 rounded-[2rem] bg-blue-50 text-blue-600 flex items-center justify-center font-black text-4xl italic group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-sm border border-blue-100">
+                                                                {t.name[0]}
+                                                            </div>
+                                                            <div>
+                                                                <h4 className="text-xl font-black text-gray-900 uppercase italic tracking-tighter mb-1 leading-none">{t.name}</h4>
+                                                                <p className="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em] italic">{t.tutorListing?.subjects?.[0] || "Academic Professional"}</p>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-12 py-10">
+                                                        <div className="inline-flex items-center gap-3 px-5 py-2.5 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-xl shadow-inner-white">
+                                                            <BadgeCheck size={14} className="fill-emerald-100" />
+                                                            <span className="text-[10px] font-black uppercase tracking-[0.2em] italic leading-none">Established_Link</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-12 py-10">
+                                                        <div className="flex items-center gap-4">
+                                                            <a href={`tel:${t.phone}`} className="size-14 bg-blue-600 text-white rounded-2xl flex items-center justify-center hover:bg-gray-900 transition-all shadow-xl active:scale-95 shadow-blue-600/10">
+                                                                <Phone size={20} strokeWidth={3} />
+                                                            </a>
+                                                            <button 
+                                                                onClick={async () => {
+                                                                    setLoadingChat(true);
+                                                                    try {
+                                                                        const res = await fetch("/api/chat/session", {
+                                                                            method: "POST",
+                                                                            headers: { "Content-Type": "application/json" },
+                                                                            body: JSON.stringify({ 
+                                                                                studentId, 
+                                                                                tutorId: t.id,
+                                                                                initiatorId: studentId
+                                                                            })
+                                                                        });
+                                                                        if (res.ok) {
+                                                                            await fetchChatSessions();
+                                                                            setActiveTab("CHAT");
+                                                                        }
+                                                                    } catch (err) { console.error(err); } finally { setLoadingChat(false); }
+                                                                }}
+                                                                className="size-14 bg-gray-50 border border-gray-100 text-gray-900 rounded-2xl flex items-center justify-center hover:bg-white hover:border-blue-600 transition-all active:scale-95 shadow-sm"
+                                                            >
+                                                                {loadingChat ? <Loader2 className="animate-spin" size={20} /> : <MessageCircle size={20} className="font-black" strokeWidth={3} />}
+                                                            </button>
+                                                        </div>
+                                                    </td>
                                                 </tr>
-                                            </thead>
-                                            <tbody className="divide-y divide-gray-100">
-                                                {unlockedTutors.map((t) => (
-                                                    <tr key={t.id} className="hover:bg-gray-50">
-                                                        <td className="px-6 py-4">
-                                                            <div className="flex items-center gap-3">
-                                                                <div className="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold text-sm">
-                                                                    {t.name[0]}
-                                                                </div>
-                                                                <p className="font-medium text-gray-900 text-sm">{t.name}</p>
-                                                            </div>
-                                                        </td>
-                                                        <td className="px-6 py-4 text-sm text-gray-500">
-                                                            {t.tutorListing?.subjects?.[0] || "—"}
-                                                        </td>
-                                                        <td className="px-6 py-4">
-                                                            <div className="flex items-center gap-2">
-                                                                <a href={`tel:${t.phone}`} className="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors" title="Call">
-                                                                    <Phone size={16} />
-                                                                </a>
-                                                                <button
-                                                                    onClick={async () => {
-                                                                        setLoadingChat(true);
-                                                                        try {
-                                                                            const res = await fetch("/api/chat/session", {
-                                                                                method: "POST",
-                                                                                headers: { "Content-Type": "application/json" },
-                                                                                body: JSON.stringify({ studentId, tutorId: t.id, initiatorId: studentId })
-                                                                            });
-                                                                            if (res.ok) { await fetchChatSessions(); setActiveTab("CHAT"); }
-                                                                        } catch (err) { console.error(err); } finally { setLoadingChat(false); }
-                                                                    }}
-                                                                    className="p-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors" title="Message"
-                                                                >
-                                                                    {loadingChat ? <Loader2 className="animate-spin" size={16} /> : <MessageCircle size={16} />}
-                                                                </button>
-                                                                <button
-                                                                    onClick={() => { setSelectedTutorForReview(t); setIsReviewOpen(true); }}
-                                                                    className="p-2 bg-amber-50 text-amber-600 rounded-lg hover:bg-amber-100 transition-colors" title="Rate"
-                                                                >
-                                                                    <Star size={16} />
-                                                                </button>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                ) : (
-                                    <div className="text-center py-20 text-gray-400">
-                                        <Search size={40} className="mx-auto mb-3 opacity-30" />
-                                        <p className="font-medium">No contacts yet.</p>
-                                        <Link href="/search" className="inline-block mt-3 text-blue-600 text-sm hover:underline">Find a tutor →</Link>
-                                    </div>
-                                )}
+                                            )) : (
+                                                <tr>
+                                                    <td colSpan={3} className="px-12 py-40 text-center">
+                                                        <div className="flex flex-col items-center justify-center opacity-30 italic font-black uppercase tracking-[0.5em] text-gray-300">
+                                                            <div className="p-8 bg-gray-50 rounded-full border border-gray-100 mb-8"><Search size={48} strokeWidth={1} /></div>
+                                                            No verified nodes in secure directory.
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         )}
 
@@ -568,14 +520,22 @@ function StudentDashboardContent() {
                 </main>
             </div>
 
+            {/* Review Terminal Modal */}
             <ReviewModal
                 isOpen={isReviewOpen}
                 onClose={() => setIsReviewOpen(false)}
                 tutorId={selectedTutorForReview?.id}
                 tutorName={selectedTutorForReview?.name}
                 studentId={studentId}
-                onSuccess={() => { fetchUnlockedTutors(); }}
+                onSuccess={() => {
+                    fetchUnlockedTutors();
+                }}
             />
+
+            {/* Operational Guard */}
+            <div className="mt-auto px-12 py-12 flex items-center justify-center gap-4 text-[10px] font-black text-gray-300 uppercase tracking-[1em] italic leading-none border-t border-gray-50 bg-white">
+                <Activity size={12} strokeWidth={3} className="text-blue-600 animate-pulse" /> SECURE_ADULT_MONITORING_ACTIVE
+            </div>
         </div>
     );
 }
@@ -583,11 +543,13 @@ function StudentDashboardContent() {
 export default function StudentDashboard() {
     return (
         <Suspense fallback={
-            <div className="flex items-center justify-center min-h-screen bg-gray-50">
-                <div className="flex flex-col items-center gap-3 text-gray-400">
-                    <Loader2 size={32} className="animate-spin text-blue-600" />
-                    <p className="text-sm">Loading dashboard...</p>
-                </div>
+            <div className="flex items-center justify-center min-h-screen bg-gray-50 font-sans overflow-hidden italic text-blue-600">
+                 <div className="flex flex-col items-center gap-10">
+                    <div className="size-24 rounded-[3.5rem] bg-blue-50 border-2 border-blue-100 flex items-center justify-center animate-spin-slow shadow-3xl shadow-blue-900/10">
+                        <Zap size={32} className="animate-pulse" strokeWidth={3} />
+                    </div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.8em] animate-pulse">Establishing Portal Sync...</p>
+                 </div>
             </div>
         }>
             <StudentDashboardContent />

@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { verifyToken, COOKIE_NAME } from "@/lib/session";
 
 export const dynamic = 'force-dynamic';
 
@@ -8,45 +7,29 @@ export async function GET(request) {
     try {
         const { searchParams } = new URL(request.url);
         const id = searchParams.get("id");
+        const viewerId = searchParams.get("viewerId"); // Optional: for checking permission
 
         if (!id) {
             return NextResponse.json({ error: "Missing User ID" }, { status: 400 });
         }
 
-        // Verify caller is authenticated
-        const cookie = request.cookies.get(COOKIE_NAME);
-        const session = cookie ? verifyToken(cookie.value) : null;
-
-        if (!session) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
+        const isSelf = id === viewerId;
 
         const user = await prisma.user.findUnique({
             where: { id },
             select: {
                 id: true,
                 name: true,
+                image: true,
                 role: true,
-                credits: true,
                 isVerified: true,
                 isIdVerified: true,
                 subscriptionTier: true,
                 subscriptionStatus: true,
-                image: true,
-                notificationPrefs: true,
-                privacySettings: true,
-                isSuspended: true,
-                // Only return contact info if caller owns this record
-                ...(session.id === id ? { email: true, phone: true } : {}),
-                tutorListing: {
-                    select: {
-                        subjects: true, bio: true, rating: true, reviewCount: true,
-                        viewCount: true, hourlyRate: true, experience: true, gender: true,
-                        locations: true, grades: true, teachingModes: true, timings: true,
-                        boards: true, languages: true, expertiseLevel: true, type: true,
-                        title: true, isActive: true,
-                    },
-                },
+                // Only return PII/Credits if viewing self or authorized
+                email: isSelf,
+                phone: isSelf,
+                credits: isSelf,
             },
         });
 
