@@ -51,7 +51,7 @@ export default function GetStarted() {
             features: [
                 "List your institute with branch locations",
                 "Manage multiple tutors under one profile",
-                "Get institutional verification badge",
+                "Get a verified institute badge",
                 "Receive direct student enquiries"
             ]
         }

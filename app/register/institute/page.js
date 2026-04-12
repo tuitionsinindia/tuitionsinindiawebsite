@@ -58,7 +58,7 @@ export default function InstituteRegisterPage() {
                     currency: "INR",
                     receipt: `institute_${user?.id}_${Date.now()}`,
                     userId: user?.id,
-                    description: "Coaching Hub Plan — Monthly Subscription"
+                    description: "Institute Pro Plan — Monthly Subscription"
                 })
             });
             const order = await orderRes.json();
@@ -74,7 +74,7 @@ export default function InstituteRegisterPage() {
                 amount: order.amount,
                 currency: order.currency,
                 name: "TuitionsInIndia",
-                description: "Coaching Hub Plan",
+                description: "Institute Pro Plan",
                 order_id: order.id,
                 handler: async function (response) {
                     const verifyRes = await fetch("/api/payment/verify", {
@@ -201,7 +201,7 @@ export default function InstituteRegisterPage() {
 
                     {step === 3 && (
                         <div className="animate-in fade-in duration-500 space-y-6">
-                            {/* Coaching Hub plan card */}
+                            {/* Institute Pro plan card */}
                             <div className="border-2 border-blue-600 rounded-2xl p-6 bg-blue-50 relative">
                                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-xs font-semibold px-4 py-1 rounded-full">
                                     Recommended
@@ -209,7 +209,7 @@ export default function InstituteRegisterPage() {
                                 <div className="w-10 h-10 rounded-lg bg-blue-600 text-white flex items-center justify-center mb-4">
                                     <Crown size={20} />
                                 </div>
-                                <p className="font-bold text-gray-900 text-xl mb-1">Coaching Hub</p>
+                                <p className="font-bold text-gray-900 text-xl mb-1">Institute Pro</p>
                                 <p className="text-3xl font-bold text-gray-900 mb-1">
                                     ₹1,999
                                     <span className="text-sm font-normal text-gray-400 ml-1">/month</span>
@@ -270,12 +270,12 @@ export default function InstituteRegisterPage() {
                             <div>
                                 <h2 className="text-2xl font-bold text-gray-900 mb-2">You're all set!</h2>
                                 <p className="text-gray-500 text-sm max-w-sm mx-auto">
-                                    Your institute is live and your Coaching Hub plan is active. Students can find and contact you directly.
+                                    Your institute is live and your Institute Pro plan is active. Students can find and contact you directly.
                                 </p>
                             </div>
                             <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-between text-left">
                                 <div>
-                                    <p className="font-semibold text-gray-900 text-sm mb-0.5">Coaching Hub Active</p>
+                                    <p className="font-semibold text-gray-900 text-sm mb-0.5">Institute Pro Active</p>
                                     <p className="text-gray-400 text-xs">Up to 10 tutors · Bulk leads · Analytics</p>
                                 </div>
                                 <div className="w-9 h-9 rounded-lg bg-blue-600 text-white flex items-center justify-center">

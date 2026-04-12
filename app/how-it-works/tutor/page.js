@@ -152,7 +152,7 @@ export default function TutorHowItWorks() {
                 </div>
             </section>
 
-            {/* FAQ Terminal */}
+            {/* FAQ Section */}
             <section className="snap-section px-6 bg-gray-50">
                 <div className="max-w-4xl mx-auto">
                     <div className="text-center mb-16">

@@ -96,13 +96,13 @@ export default function TutorPricing() {
                         </Link>
                     </div>
 
-                    {/* Coaching Hub Tier */}
+                    {/* Institute Pro Tier */}
                     <div className="bg-white border border-gray-200 rounded-2xl p-8 flex flex-col">
                         <div className="mb-6">
                             <div className="w-10 h-10 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center mb-4">
                                 <Building2 size={20} className="text-gray-400" />
                             </div>
-                            <h3 className="text-xl font-semibold text-gray-900 mb-1">Coaching Hub</h3>
+                            <h3 className="text-xl font-semibold text-gray-900 mb-1">Institute Pro</h3>
                             <p className="text-sm text-gray-400">For institutes and academies</p>
                         </div>
                         <div className="text-4xl font-bold text-gray-900 mb-1">
