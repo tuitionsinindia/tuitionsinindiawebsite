@@ -267,11 +267,12 @@ function DashboardContent() {
                                     <p className="text-gray-500 text-sm mt-1">Manage your students and leads from here.</p>
                                 </div>
 
-                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                                     {[
                                         { label: "Credits", val: tutorData?.credits || 0, icon: Zap, color: "text-blue-600", bg: "bg-blue-50" },
                                         { label: "Student Leads", val: leads.length, icon: Users, color: "text-indigo-600", bg: "bg-indigo-50" },
-                                        { label: "Total Earnings", val: `₹${(transactions || []).reduce((sum, t) => sum + (t.amount || 0), 0)}`, icon: Wallet, color: "text-emerald-600", bg: "bg-emerald-50" }
+                                        { label: "Profile Views", val: tutorData?.tutorListing?.viewCount || 0, icon: Activity, color: "text-violet-600", bg: "bg-violet-50" },
+                                        { label: "Earnings", val: `₹${(transactions || []).filter(t => t.status === "SUCCESS").reduce((sum, t) => sum + (t.amount || 0), 0).toLocaleString("en-IN")}`, icon: Wallet, color: "text-emerald-600", bg: "bg-emerald-50" }
                                     ].map((stat, i) => (
                                         <div key={i} className="bg-white rounded-xl border border-gray-200 p-5">
                                             <div className={`w-10 h-10 rounded-lg ${stat.bg} flex items-center justify-center mb-3`}>
