@@ -197,8 +197,8 @@ function InstituteDashboardContent() {
                 <main className="flex-1 ml-20 md:ml-64 p-6 md:p-10">
                     <div className="max-w-5xl mx-auto">
 
-                        {activeTab === "settings" && <SettingsModule user={instituteData} onUpdate={fetchInstituteData} />}
-                        {activeTab === "billing" && <BillingModule user={instituteData} />}
+                        {activeTab === "settings" && <SettingsModule userData={instituteData} onUpdate={fetchInstituteData} />}
+                        {activeTab === "billing" && <BillingModule userData={instituteData} userId={instituteId} onRefresh={fetchInstituteData} />}
 
                         {activeTab === "chat" && (
                             <div className="h-[75vh] grid grid-cols-1 lg:grid-cols-12 gap-5">

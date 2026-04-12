@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { createNotification } from "@/lib/notifications";
 
 export const dynamic = 'force-dynamic';
 
@@ -67,6 +68,21 @@ export async function POST(request) {
                 await tx.lead.update({
                     where: { id: leadId },
                     data: { status: 'CLOSED' }
+                });
+            }
+
+            // Notify the student that a tutor has viewed their requirement
+            const leadWithStudent = await tx.lead.findUnique({
+                where: { id: leadId },
+                select: { studentId: true, subjects: true }
+            });
+            if (leadWithStudent?.studentId) {
+                const subject = leadWithStudent.subjects?.[0] || "your requirement";
+                createNotification(leadWithStudent.studentId, {
+                    type: "LEAD_UNLOCK",
+                    title: "A tutor is interested in your requirement",
+                    body: `A tutor has viewed your ${subject} requirement and may contact you soon.`,
+                    link: `/dashboard/student?studentId=${leadWithStudent.studentId}`,
                 });
             }
 

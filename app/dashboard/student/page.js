@@ -224,7 +224,7 @@ function StudentDashboardContent() {
                         )}
 
                         {activeTab === "SETTINGS" && <SettingsModule userData={studentData} onUpdate={fetchStudentData} />}
-                        {activeTab === "BILLING" && <BillingModule userData={studentData} transactions={transactions} />}
+                        {activeTab === "BILLING" && <BillingModule userData={studentData} userId={studentId} transactions={transactions} onRefresh={fetchStudentData} />}
 
                         {activeTab === "HOME" && (
                             <div className="space-y-6">
