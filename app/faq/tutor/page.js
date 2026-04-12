@@ -7,24 +7,24 @@ import { ArrowRight, CircleHelp, Zap, Mail, MessageSquare, Lock } from "lucide-r
 export default function TutorFAQ() {
     const questions = [
         {
-            question: "How do I receive student inquiries?",
-            answer: "Once your profile is verified, you will receive real-time notifications via your dashboard and registered email when students search for your subjects in your preferred geographic zones."
+            question: "How do I receive student enquiries?",
+            answer: "Once your profile is verified, you will receive real-time notifications on your dashboard and by email whenever a student searches for your subjects in your area."
         },
         {
             question: "Is there a subscription fee for tutors?",
-            answer: "Listing your profile is free under the 'Aspirant' tier. To unlock high-priority matching, elite verification, and unrestricted direct communication, you can upgrade to our 'Verified Expert' or 'Coaching Hub' tiers."
+            answer: "Listing your profile is free. To unlock priority matching, verification, and unlimited direct messaging, you can upgrade to our Expert or Institute plans."
         },
         {
-            question: "How does the platform handle payments from students?",
-            answer: "We offer a zero-commission protocol. You are free to negotiate and collect fees directly from students. We only facilitate the discovery and verification layer; we do not take a cut of your tuition fees."
+            question: "How does payment work?",
+            answer: "We operate a zero-commission model. You negotiate and collect fees directly from students. We only provide the discovery and verification service — we never take a cut of your earnings."
         },
         {
-            question: "What is the Verification Protocol?",
-            answer: "To ensure academic integrity, we manually audit government IDs and educational credentials. Profiles with a 'Verified' badge receive 4.5x more engagement compared to unverified profiles."
+            question: "How does the verification process work?",
+            answer: "We manually verify your government ID and educational certificates. Verified profiles receive 4.5x more student enquiries compared to unverified ones."
         },
         {
-            question: "Can I manage multiple subject clusters?",
-            answer: "Yes. Depending on your tier, you can register multiple subject specializations and geographic zones (Online or Local) to maximize your lead pipeline."
+            question: "Can I teach multiple subjects?",
+            answer: "Yes. You can list multiple subjects and locations — whether online or in-person — to reach as many relevant students as possible."
         }
     ];
 
@@ -38,16 +38,16 @@ export default function TutorFAQ() {
                 <div className="max-w-4xl mx-auto">
                     <div className="inline-flex items-center gap-3 px-4 py-2 bg-blue-50 rounded-full border border-blue-100 mb-8">
                         <Zap size={14} className="text-blue-600" />
-                        <span className="text-blue-700 text-[10px] font-black uppercase tracking-[0.3em] font-sans">Faculty Support Protocol</span>
+                        <span className="text-blue-700 text-xs font-black uppercase tracking-[0.3em] font-sans">Tutor Help</span>
                     </div>
-                    
+
                     <h1 className="text-5xl md:text-8xl font-black tracking-tighter mb-10 leading-[0.9] uppercase italic text-gray-900">
-                        Faculty <br />
-                        <span className="text-blue-600 font-serif lowercase tracking-normal not-italic px-4">Support</span> Terminal.
+                        Tutor <br />
+                        <span className="text-blue-600 font-serif lowercase tracking-normal not-italic px-4">FAQ</span>
                     </h1>
-                    
+
                     <p className="text-lg md:text-xl text-gray-500 font-medium max-w-2xl mx-auto mb-12 leading-relaxed italic">
-                        Detailed operational guidance for independent educators and institutions. Optimize your profile performance and lead conversion.
+                        Everything you need to know about listing and growing your tutoring business on TuitionsInIndia.
                     </p>
                 </div>
                 
@@ -84,21 +84,18 @@ export default function TutorFAQ() {
                     </p>
                     
                     <div className="flex flex-col sm:flex-row gap-6 justify-center">
-                        <Link 
-                            href="/register/tutor" 
+                        <Link
+                            href="/register/tutor"
                             className="bg-blue-600 text-white font-black px-12 py-6 rounded-2xl hover:bg-white hover:text-gray-900 active:scale-95 transition-all shadow-2xl shadow-blue-600/20 flex items-center justify-center gap-3 uppercase tracking-widest text-xs"
                         >
-                            Initialize Faculty Profile <ArrowRight size={18} />
+                            Create Your Profile <ArrowRight size={18} />
                         </Link>
-                        <button className="bg-transparent border border-white/20 text-white font-black px-12 py-6 rounded-2xl hover:bg-white/5 active:scale-95 transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-xs">
+                        <Link href="/contact" className="bg-transparent border border-white/20 text-white font-black px-12 py-6 rounded-2xl hover:bg-white/5 active:scale-95 transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-xs">
                             <Mail size={18} className="text-blue-500" />
-                            Strategy Counsel
-                        </button>
+                            Contact Us
+                        </Link>
                     </div>
 
-                    <div className="mt-20 flex items-center justify-center gap-2 text-[10px] font-black text-gray-500 uppercase tracking-[0.5em]">
-                        <Lock size={12} strokeWidth={3} /> Standard Security Protocols Active
-                    </div>
                 </div>
             </section>
         </div>
