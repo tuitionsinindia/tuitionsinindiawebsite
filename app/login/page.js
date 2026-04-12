@@ -39,7 +39,7 @@ export default function LoginPage() {
             const res = await fetch("/api/auth/otp/send", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ phone, role: ROLE_MAP[loginType] })
+                body: JSON.stringify({ phone, role: ROLE_MAP[loginType], isRegistration: false })
             });
             const data = await res.json();
             if (data.success) {
