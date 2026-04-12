@@ -31,7 +31,7 @@ import {
 function InstituteDashboardContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const [instituteId, setInstituteId] = useState(searchParams.get("instituteId") || "");
+    const [instituteId, setInstituteId] = useState("");
     const [leads, setLeads] = useState([]);
     const [recruitmentLeads, setRecruitmentLeads] = useState([]);
     const [courses, setCourses] = useState([]);
@@ -42,6 +42,30 @@ function InstituteDashboardContent() {
     const [chatSessions, setChatSessions] = useState([]);
     const [selectedSession, setSelectedSession] = useState(null);
     const [loadingChat, setLoadingChat] = useState(false);
+
+    useEffect(() => {
+        const init = async () => {
+            try {
+                const res = await fetch("/api/auth/session");
+                if (res.ok) {
+                    const { user } = await res.json();
+                    if (user?.role === "INSTITUTE") {
+                        setInstituteId(user.id);
+                        return;
+                    }
+                    if (user) {
+                        const map = { STUDENT: "/dashboard/student", TUTOR: "/dashboard/tutor", ADMIN: "/dashboard/admin" };
+                        router.replace(map[user.role] || "/login");
+                        return;
+                    }
+                }
+            } catch {}
+            const urlId = searchParams.get("instituteId");
+            if (urlId) { setInstituteId(urlId); return; }
+            router.replace("/login");
+        };
+        init();
+    }, []);
 
     useEffect(() => {
         if (instituteId) {
@@ -121,27 +145,8 @@ function InstituteDashboardContent() {
 
     if (!instituteId) {
         return (
-            <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 max-w-md w-full text-center">
-                    <div className="size-16 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 mx-auto mb-6">
-                        <Building2 size={32} />
-                    </div>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Institute Portal</h2>
-                    <p className="text-gray-500 text-sm mb-6">Enter your institute ID to access the dashboard.</p>
-                    <input
-                        type="text"
-                        placeholder="Enter institute ID"
-                        className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300 mb-4"
-                        onKeyDown={(e) => { if (e.key === 'Enter') setInstituteId(e.target.value); }}
-                        id="instInput"
-                    />
-                    <button
-                        className="w-full bg-blue-600 text-white font-semibold py-3 rounded-xl hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
-                        onClick={() => setInstituteId(document.getElementById('instInput').value)}>
-                        Access Dashboard <ArrowRight size={16} />
-                    </button>
-                    <Link href="/" className="inline-block mt-4 text-sm text-gray-400 hover:text-gray-600 transition-colors">Back to Home</Link>
-                </div>
+            <div className="flex items-center justify-center min-h-screen bg-gray-50">
+                <Loader2 size={32} className="animate-spin text-blue-600" />
             </div>
         );
     }
@@ -161,7 +166,7 @@ function InstituteDashboardContent() {
                 user={instituteData}
                 role="INSTITUTE"
                 credits={instituteData?.credits || 0}
-                onLogout={() => router.push("/")}
+                onLogout={async () => { await fetch("/api/auth/logout", { method: "POST" }); router.push("/login"); }}
             />
 
             <div className="flex flex-1">
@@ -185,7 +190,7 @@ function InstituteDashboardContent() {
                     </nav>
 
                     <button
-                        onClick={() => router.push("/")}
+                        onClick={async () => { await fetch("/api/auth/logout", { method: "POST" }); router.push("/login"); }}
                         className="mt-auto flex items-center justify-center md:justify-start gap-3 px-3 py-3 text-sm text-gray-400 hover:text-red-500 transition-colors w-full"
                     >
                         <LogOut size={16} className="shrink-0" />

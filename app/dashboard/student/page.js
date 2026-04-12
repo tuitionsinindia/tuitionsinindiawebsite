@@ -31,7 +31,8 @@ import BillingModule from "@/app/components/dashboard/BillingModule";
 function StudentDashboardContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const [studentId, setStudentId] = useState(searchParams.get("studentId") || "");
+    const [studentId, setStudentId] = useState("");
+    const [sessionLoading, setSessionLoading] = useState(true);
     const [activeTab, setActiveTab] = useState("HOME");
     const [loading, setLoading] = useState(true);
     const [studentData, setStudentData] = useState(null);
@@ -47,6 +48,34 @@ function StudentDashboardContent() {
 
     const [isReviewOpen, setIsReviewOpen] = useState(false);
     const [selectedTutorForReview, setSelectedTutorForReview] = useState(null);
+
+    // Resolve identity: session cookie first, URL param as fallback
+    useEffect(() => {
+        const init = async () => {
+            try {
+                const res = await fetch("/api/auth/session");
+                if (res.ok) {
+                    const { user } = await res.json();
+                    if (user?.role === "STUDENT") {
+                        setStudentId(user.id);
+                        setSessionLoading(false);
+                        return;
+                    }
+                    if (user) {
+                        // Logged in but wrong role — redirect to correct dashboard
+                        const map = { TUTOR: "/dashboard/tutor", INSTITUTE: "/dashboard/institute", ADMIN: "/dashboard/admin" };
+                        router.replace(map[user.role] || "/login");
+                        return;
+                    }
+                }
+            } catch {}
+            // Fallback: URL param (for email deep links)
+            const urlId = searchParams.get("studentId");
+            if (urlId) { setStudentId(urlId); setSessionLoading(false); return; }
+            router.replace("/login");
+        };
+        init();
+    }, []);
 
     useEffect(() => {
         if (studentId) {
@@ -126,32 +155,10 @@ function StudentDashboardContent() {
         // Razorpay logic
     };
 
-    if (!studentId) {
+    if (sessionLoading) {
         return (
-            <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-10 max-w-md w-full text-center">
-                    <div className="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center mx-auto mb-6">
-                        <GraduationCap size={32} className="text-blue-600" />
-                    </div>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Student Dashboard</h2>
-                    <p className="text-gray-500 text-sm mb-8">Enter your Student ID to access your dashboard.</p>
-                    <input
-                        type="text"
-                        placeholder="Enter your Student ID"
-                        className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 outline-none focus:border-blue-500 mb-4"
-                        onKeyDown={(e) => { if (e.key === 'Enter') setStudentId(e.target.value); }}
-                        id="studentInput"
-                    />
-                    <button
-                        className="w-full bg-blue-600 text-white font-semibold py-3 rounded-xl hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
-                        onClick={() => setStudentId(document.getElementById('studentInput').value)}
-                    >
-                        Access Dashboard <ArrowRight size={16} />
-                    </button>
-                    <Link href="/" className="inline-block mt-6 text-sm text-gray-400 hover:text-blue-600 transition-colors">
-                        ← Back to Home
-                    </Link>
-                </div>
+            <div className="flex items-center justify-center min-h-screen bg-gray-50">
+                <Loader2 size={32} className="animate-spin text-blue-600" />
             </div>
         );
     }
@@ -175,7 +182,7 @@ function StudentDashboardContent() {
                 role="STUDENT"
                 credits={studentData?.credits}
                 onAddCredits={makePayment}
-                onLogout={() => router.push("/")}
+                onLogout={async () => { await fetch("/api/auth/logout", { method: "POST" }); router.push("/login"); }}
             />
 
             <div className="flex flex-1 pt-16">
@@ -197,7 +204,7 @@ function StudentDashboardContent() {
                         ))}
                     </nav>
                     <button
-                        onClick={() => router.push("/")}
+                        onClick={async () => { await fetch("/api/auth/logout", { method: "POST" }); router.push("/login"); }}
                         className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-red-500 hover:bg-red-50 transition-colors"
                     >
                         <LogOut size={18} />

@@ -56,13 +56,29 @@ function DashboardContent() {
     const [upgradePrompt, setUpgradePrompt] = useState(false);
 
     useEffect(() => {
-        const savedId = localStorage.getItem("ti_active_tutor_id");
-        if (paramTutorId) {
-            setTutorId(paramTutorId);
-            localStorage.setItem("ti_active_tutor_id", paramTutorId);
-        } else if (savedId) {
-            setTutorId(savedId);
-        }
+        const init = async () => {
+            try {
+                const res = await fetch("/api/auth/session");
+                if (res.ok) {
+                    const { user } = await res.json();
+                    if (user?.role === "TUTOR" || user?.role === "INSTITUTE") {
+                        setTutorId(user.id);
+                        return;
+                    }
+                    if (user) {
+                        const map = { STUDENT: "/dashboard/student", INSTITUTE: "/dashboard/institute", ADMIN: "/dashboard/admin" };
+                        router.replace(map[user.role] || "/login");
+                        return;
+                    }
+                }
+            } catch {}
+            // Fallback: URL param or localStorage
+            if (paramTutorId) { setTutorId(paramTutorId); return; }
+            const savedId = localStorage.getItem("ti_active_tutor_id");
+            if (savedId) { setTutorId(savedId); return; }
+            router.replace("/login");
+        };
+        init();
     }, [paramTutorId]);
 
     useEffect(() => {
@@ -149,30 +165,8 @@ function DashboardContent() {
 
     if (!tutorId) {
         return (
-            <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
-                <div className="bg-white border border-gray-200 p-10 rounded-2xl shadow-sm max-w-md w-full text-center">
-                    <div className="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 mx-auto mb-6">
-                        <GraduationCap size={32} />
-                    </div>
-                    <h2 className="text-2xl font-bold mb-2 text-gray-900">Tutor Dashboard</h2>
-                    <p className="text-gray-500 text-sm mb-8">Enter your Tutor ID to access your dashboard.</p>
-                    <input
-                        type="text"
-                        placeholder="Enter your Tutor ID"
-                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 text-sm focus:border-blue-500 outline-none transition-colors mb-4"
-                        onKeyDown={(e) => { if (e.key === 'Enter') setTutorId(e.target.value); }}
-                        id="tutorInput"
-                    />
-                    <button
-                        className="w-full bg-blue-600 text-white font-semibold py-3 rounded-xl hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-sm"
-                        onClick={() => setTutorId(document.getElementById('tutorInput').value)}
-                    >
-                        Access Dashboard <ArrowRight size={16} />
-                    </button>
-                    <Link href="/" className="inline-block mt-6 text-sm text-gray-400 hover:text-blue-600 transition-colors">
-                        ← Back to Home
-                    </Link>
-                </div>
+            <div className="flex items-center justify-center min-h-screen bg-gray-50">
+                <Loader2 size={32} className="animate-spin text-blue-600" />
             </div>
         );
     }
@@ -192,9 +186,10 @@ function DashboardContent() {
                 user={tutorData}
                 role="TUTOR"
                 credits={tutorData?.credits || 0}
-                onLogout={() => {
+                onLogout={async () => {
                     localStorage.removeItem("ti_active_tutor_id");
-                    router.push("/");
+                    await fetch("/api/auth/logout", { method: "POST" });
+                    router.push("/login");
                 }}
             />
 
@@ -217,9 +212,10 @@ function DashboardContent() {
                         ))}
                     </nav>
                     <button
-                        onClick={() => {
+                        onClick={async () => {
                             localStorage.removeItem("ti_active_tutor_id");
-                            router.push("/");
+                            await fetch("/api/auth/logout", { method: "POST" });
+                            router.push("/login");
                         }}
                         className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-red-500 hover:bg-red-50 transition-colors"
                     >
@@ -231,7 +227,7 @@ function DashboardContent() {
                 <main className="flex-1 ml-16 md:ml-64 p-6">
                     <div className="max-w-5xl mx-auto">
 
-                        {activeTab === "SETTINGS" && <SettingsModule userData={tutorData} onUpdate={fetchTutorData} />}
+                        {activeTab === "SETTINGS" && <SettingsModule userData={tutorData} userId={tutorId} onUpdate={fetchTutorData} />}
                         {activeTab === "REVENUE" && <BillingModule userData={tutorData} transactions={transactions} userId={tutorId} onRefresh={fetchTutorData} />}
 
                         {upgradePrompt && (
