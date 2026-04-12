@@ -77,11 +77,17 @@ export async function POST(request) {
                 sendWelcomeEmail(email, name, "Student").catch(console.error);
             }
 
-            // Fetch active tutors to notify them about the new lead
+            // Fetch tutors whose listing subjects overlap with the lead
+            const leadSubjects = lead.subjects?.length ? lead.subjects.map(s => s.toUpperCase()) : [];
             prisma.user.findMany({
-                where: { role: 'TUTOR' },
+                where: {
+                    role: 'TUTOR',
+                    tutorListing: leadSubjects.length > 0
+                        ? { subjects: { hasSome: leadSubjects }, isActive: true }
+                        : { isActive: true },
+                },
                 select: { id: true, email: true, phone: true },
-                take: 50 // In production, filter by subject/location algorithm
+                take: 50,
             }).then(tutors => {
                 const tutorEmails = tutors.map(t => t.email).filter(Boolean);
                 if (tutorEmails.length > 0) {

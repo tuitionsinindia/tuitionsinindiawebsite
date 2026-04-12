@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { createNotifications } from "@/lib/notifications";
 
 export const dynamic = 'force-dynamic';
 
@@ -32,6 +33,20 @@ export async function POST(request) {
                 status: reason === 'admin' ? 'CLOSED_ADMIN' : 'CLOSED_STUDENT'
             }
         });
+
+        // Notify tutors who unlocked this lead that it's been closed
+        const unlocks = await prisma.leadUnlock.findMany({
+            where: { leadId },
+            select: { tutorId: true },
+        });
+        const tutorIds = unlocks.map(u => u.tutorId);
+        if (tutorIds.length > 0) {
+            createNotifications(tutorIds, {
+                type: "SYSTEM",
+                title: "Requirement closed",
+                body: "A student requirement you unlocked has been closed by the student.",
+            });
+        }
 
         return NextResponse.json({ success: true, status: updatedLead.status });
 

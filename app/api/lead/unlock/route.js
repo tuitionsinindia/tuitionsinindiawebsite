@@ -76,15 +76,21 @@ export async function POST(request) {
                 where: { id: leadId },
                 select: { studentId: true, subjects: true }
             });
+            const subject = leadWithStudent?.subjects?.[0] || "your requirement";
             if (leadWithStudent?.studentId) {
-                const subject = leadWithStudent.subjects?.[0] || "your requirement";
                 createNotification(leadWithStudent.studentId, {
                     type: "LEAD_UNLOCK",
                     title: "A tutor is interested in your requirement",
                     body: `A tutor has viewed your ${subject} requirement and may contact you soon.`,
-                    link: `/dashboard/student?studentId=${leadWithStudent.studentId}`,
                 });
             }
+
+            // Confirm to the tutor that they've successfully unlocked
+            createNotification(tutorId, {
+                type: "LEAD_UNLOCK",
+                title: "Lead unlocked successfully",
+                body: `You've unlocked a ${subject} lead. ${creditCost} credit${creditCost > 1 ? "s" : ""} used. Check the student's contact details.`,
+            });
 
             return NextResponse.json({ success: true });
         });

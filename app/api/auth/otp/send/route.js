@@ -5,7 +5,7 @@ import { otpStore } from "@/lib/otpStore";
 
 export async function POST(request) {
     try {
-        const { name, phone, role } = await request.json();
+        const { name, phone, role, isRegistration } = await request.json();
 
         if (!phone || !role) {
             return NextResponse.json({ error: "Phone and Role are required" }, { status: 400 });
@@ -20,20 +20,23 @@ export async function POST(request) {
             expires: Date.now() + 10 * 60 * 1000
         });
 
-        // Update or create user record
-        const user = await prisma.user.upsert({
-            where: { phone: phone },
-            update: {
-                name: name || undefined,
-                role: role
-            },
-            create: {
-                phone: phone,
-                name: name || "Anonymous",
-                role: role,
-                phoneVerified: false
+        let user;
+        if (isRegistration) {
+            // Registration flow — create or update user
+            user = await prisma.user.upsert({
+                where: { phone },
+                update: { name: name || undefined, role },
+                create: { phone, name: name || "User", role, phoneVerified: false },
+            });
+        } else {
+            // Login flow — only find existing user, don't create
+            user = await prisma.user.findUnique({ where: { phone } });
+            if (!user) {
+                return NextResponse.json({
+                    error: "No account found with this phone number. Please register first.",
+                }, { status: 404 });
             }
-        });
+        }
 
         // Send OTP via Twilio (falls back to console log if keys not set)
         const formattedPhone = "+91" + phone.replace(/\D/g, '').slice(-10);
