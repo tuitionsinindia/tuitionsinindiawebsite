@@ -84,7 +84,7 @@ export async function GET(request) {
             include: { tutorListing: true } 
         }) : null;
         
-        const isPremiumTutor = ['PRO', 'ELITE', 'INSTITUTE'].includes(requester?.subscriptionTier);
+        const isPremiumTutor = ['PRO', 'ELITE'].includes(requester?.subscriptionTier);
 
         const requesterCriterion = requester?.tutorListing ? {
             subjects: requester.tutorListing.subjects,

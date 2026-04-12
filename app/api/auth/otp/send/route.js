@@ -31,7 +31,8 @@ export async function POST(request) {
                 phone: phone,
                 name: name || "Anonymous",
                 role: role,
-                phoneVerified: false
+                phoneVerified: false,
+                credits: role === "TUTOR" ? 5 : 0  // Free tutors get 5 starter credits
             }
         });
 

@@ -38,7 +38,7 @@ export default function TutorPricing() {
                         <ul className="space-y-4 mb-8 flex-1">
                             {[
                                 "Basic tutor profile",
-                                "Up to 5 student leads/month",
+                                "5 leads included to get started",
                                 "1 subject category",
                                 "Access to student directory"
                             ].map((feature, i) => (

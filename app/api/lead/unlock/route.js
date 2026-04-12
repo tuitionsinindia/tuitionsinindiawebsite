@@ -26,8 +26,29 @@ export async function POST(request) {
         return await prisma.$transaction(async (tx) => {
             const tutor = await tx.user.findUnique({
                 where: { id: tutorId },
-                select: { credits: true }
+                select: { credits: true, subscriptionTier: true }
             });
+
+            // PRO/ELITE tutors see contacts for free — block unlock attempt (they shouldn't need it)
+            if (tutor && ['PRO', 'ELITE'].includes(tutor.subscriptionTier)) {
+                return NextResponse.json({ error: "Premium tutors access contacts directly from the lead list." }, { status: 400 });
+            }
+
+            // Enforce free tier monthly unlock limit (5 per month)
+            const startOfMonth = new Date();
+            startOfMonth.setDate(1);
+            startOfMonth.setHours(0, 0, 0, 0);
+
+            const monthlyUnlocks = await tx.leadUnlock.count({
+                where: { tutorId, createdAt: { gte: startOfMonth } }
+            });
+
+            if (tutor?.subscriptionTier === 'FREE' && monthlyUnlocks >= 5) {
+                return NextResponse.json({
+                    error: "Free plan limit reached. Upgrade to Expert to unlock unlimited leads.",
+                    upgradeRequired: true
+                }, { status: 403 });
+            }
 
             const lead = await tx.lead.findUnique({
                 where: { id: leadId },

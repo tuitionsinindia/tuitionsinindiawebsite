@@ -127,7 +127,7 @@ function TutorRegisterInner() {
                             razorpay_signature: response.razorpay_signature,
                             userId: user?.id,
                             creditsToAdd: 50,
-                            subscriptionTier: "EXPERT"
+                            subscriptionTier: "PRO"
                         })
                     });
                     const result = await verifyRes.json();
