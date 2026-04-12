@@ -280,18 +280,33 @@ function DashboardContent() {
                                     ))}
                                 </div>
 
-                                {/* Getting Started — shown only for new users with no leads unlocked */}
-                                {leads.length === 0 && (tutorData?.credits || 0) >= 5 && (
+                                {/* Getting Started — shown for new users */}
+                                {!tutorData?.isProfileComplete && (
                                     <div className="bg-blue-50 border border-blue-100 rounded-xl p-6 space-y-3">
                                         <h3 className="font-semibold text-blue-900">Getting Started</h3>
-                                        <p className="text-sm text-blue-700">Welcome! Here's how to get your first students:</p>
+                                        <p className="text-sm text-blue-700">Welcome! Here's how to get students on TuitionsInIndia:</p>
                                         <ol className="text-sm text-blue-700 space-y-2 list-decimal list-inside">
-                                            <li>Your profile is now <strong>live in search</strong> — students can find you.</li>
-                                            <li>Browse <strong>Student Leads</strong> tab to see students looking for your subjects.</li>
-                                            <li><strong>Unlock</strong> a lead (costs 1 credit) to see the student's contact info.</li>
-                                            <li>Start a <strong>chat</strong> to introduce yourself and arrange classes.</li>
+                                            <li>Your profile is <strong>live in search</strong> — students can find and contact you.</li>
+                                            <li>Students who post matching requirements will appear in the <strong>Student Leads</strong> tab.</li>
+                                            <li>To <strong>unlock a lead</strong> and initiate contact, you'll need credits.</li>
+                                            <li>Upgrade to <strong>PRO</strong> for unlimited access, verified badge, and priority ranking.</li>
                                         </ol>
-                                        <p className="text-sm text-blue-600 font-medium">You have {tutorData?.credits || 0} free credits to get started!</p>
+                                    </div>
+                                )}
+
+                                {/* Upgrade banner for FREE users */}
+                                {tutorData?.subscriptionTier === "FREE" && (
+                                    <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl p-5 flex items-center justify-between text-white">
+                                        <div>
+                                            <h3 className="font-semibold text-sm">Upgrade to PRO</h3>
+                                            <p className="text-xs text-blue-100 mt-1">Unlock student contacts, get verified badge, and priority in search results.</p>
+                                        </div>
+                                        <button
+                                            onClick={() => setActiveTab("REVENUE")}
+                                            className="px-4 py-2 bg-white text-blue-700 rounded-lg text-xs font-bold hover:bg-blue-50 transition-colors shrink-0"
+                                        >
+                                            View Plans
+                                        </button>
                                     </div>
                                 )}
 
