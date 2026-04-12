@@ -2,11 +2,18 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { Resend } from "resend";
 import crypto from "crypto";
+import { passwordResetTemplate } from "@/lib/emailTemplates";
+import { checkRateLimit } from "@/lib/rateLimit";
 
 const resend = new Resend(process.env.RESEND_API_KEY || "re_dummy_key");
 
 export async function POST(request) {
     try {
+        const { limited } = checkRateLimit(request, "password-reset", 3, 300000);
+        if (limited) {
+            return NextResponse.json({ error: "Too many attempts. Please wait 5 minutes." }, { status: 429 });
+        }
+
         const { email } = await request.json();
 
         if (!email) {
@@ -45,14 +52,7 @@ export async function POST(request) {
                 from: "Tuitions in India <noreply@tuitionsinindia.com>",
                 to: email,
                 subject: "Reset your password — Tuitions in India",
-                html: `
-                    <div style="font-family: sans-serif; max-width: 480px; margin: auto; padding: 32px; border: 1px solid #e5e7eb; border-radius: 12px;">
-                        <h2 style="color: #111827; margin-bottom: 8px;">Reset your password</h2>
-                        <p style="color: #6b7280;">Click the button below to set a new password. This link expires in 1 hour.</p>
-                        <a href="${resetLink}" style="display: inline-block; margin: 24px 0; padding: 12px 28px; background: #2563eb; color: white; text-decoration: none; border-radius: 8px; font-weight: 600;">Reset Password</a>
-                        <p style="color: #9ca3af; font-size: 12px;">If you didn't request this, you can safely ignore this email.</p>
-                    </div>
-                `,
+                html: passwordResetTemplate(resetLink),
             });
         }
 

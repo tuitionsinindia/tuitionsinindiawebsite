@@ -152,12 +152,24 @@ export async function GET(request) {
             })
             .filter(tutor => (lat && lng) ? tutor.distance <= radius : true);
 
+        // Fetch active SEARCH_TOP ad slots to boost featured tutors
+        const now = new Date();
+        const featuredAds = await prisma.adSlot.findMany({
+            where: { type: "SEARCH_TOP", isActive: true, startTime: { lte: now }, endTime: { gte: now } },
+            select: { userId: true },
+        });
+        const featuredIds = new Set(featuredAds.map(a => a.userId));
+
         tutors.sort((a, b) => {
+            // Featured tutors always come first
+            const aFeatured = featuredIds.has(a.id) ? 1 : 0;
+            const bFeatured = featuredIds.has(b.id) ? 1 : 0;
+            if (aFeatured !== bFeatured) return bFeatured - aFeatured;
+
             if (sortBy === "price_low") return (a.tutorListing?.hourlyRate || 0) - (b.tutorListing?.hourlyRate || 0);
             if (sortBy === "price_high") return (b.tutorListing?.hourlyRate || 0) - (a.tutorListing?.hourlyRate || 0);
             if (sortBy === "distance" && lat && lng) return a.distance - b.distance;
-            
-            // Relevance Score (Subscription > Verified > Newest)
+
             const tierScore = { 'ELITE': 3, 'PRO': 2, 'FREE': 1 };
             const aScore = (tierScore[a.subscriptionTier] || 0) + (a.isVerified ? 1 : 0);
             const bScore = (tierScore[b.subscriptionTier] || 0) + (b.isVerified ? 1 : 0);
@@ -207,7 +219,8 @@ export async function GET(request) {
                 boards: t.tutorListing?.boards || [],
                 matchScore: match.score,
                 matchLabel: match.label,
-                matchFactors: match.factors
+                matchFactors: match.factors,
+                isFeatured: featuredIds.has(t.id),
             };
         }));
 
