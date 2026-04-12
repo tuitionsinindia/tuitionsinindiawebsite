@@ -15,8 +15,6 @@ export default function Home() {
     const [searchSubject, setSearchSubject] = useState("");
     const [searchGrade, setSearchGrade] = useState("");
     const [searchLocation, setSearchLocation] = useState("");
-    const [filteredSubjects, setFilteredSubjects] = useState([]);
-    const [showSubjectSuggestions, setShowSubjectSuggestions] = useState(false);
     const [activeTab, setActiveTab] = useState("TUTOR");
     const [openFaq, setOpenFaq] = useState(null);
 
@@ -24,16 +22,7 @@ export default function Home() {
 
     const router = useRouter();
 
-    useEffect(() => {
-        if (searchSubject.length >= 1) {
-            const q = searchSubject.toLowerCase();
-            const filtered = availableSubjects.filter(s => s.toLowerCase().includes(q)).slice(0, 8);
-            setFilteredSubjects(filtered);
-            setShowSubjectSuggestions(filtered.length > 0);
-        } else {
-            setShowSubjectSuggestions(false);
-        }
-    }, [searchSubject, searchCategory]);
+    // Subject list updates when category changes
 
     const handleSearch = () => {
         const params = new URLSearchParams();
@@ -105,26 +94,15 @@ export default function Home() {
                                     {BROAD_CATEGORIES.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
                                 </select>
 
-                                {/* Subject (autocomplete) */}
-                                <div className="relative">
-                                    <input
-                                        className="w-full h-11 px-3 border border-gray-200 rounded-lg bg-gray-50 text-sm text-gray-700 outline-none focus:border-blue-500 focus:bg-white transition-all"
-                                        placeholder="Subject"
-                                        value={searchSubject}
-                                        onChange={e => setSearchSubject(e.target.value)}
-                                        onFocus={() => { if (searchSubject.length >= 1) setShowSubjectSuggestions(true); }}
-                                    />
-                                    {showSubjectSuggestions && filteredSubjects.length > 0 && (
-                                        <div className="absolute top-full mt-1 left-0 w-56 bg-white border border-gray-200 rounded-xl shadow-lg z-50 py-1 max-h-48 overflow-y-auto">
-                                            {filteredSubjects.map((s, i) => (
-                                                <div key={i} onMouseDown={() => { setSearchSubject(s); setShowSubjectSuggestions(false); }}
-                                                    className="px-4 py-2.5 hover:bg-blue-50 cursor-pointer text-sm text-gray-700 hover:text-blue-700">
-                                                    {s}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
+                                {/* Subject (dropdown filtered by category) */}
+                                <select
+                                    value={searchSubject}
+                                    onChange={(e) => setSearchSubject(e.target.value)}
+                                    className="h-11 px-3 border border-gray-200 rounded-lg bg-gray-50 text-sm text-gray-700 outline-none focus:border-blue-500 cursor-pointer"
+                                >
+                                    <option value="">Subject</option>
+                                    {availableSubjects.map(s => <option key={s} value={s}>{s}</option>)}
+                                </select>
 
                                 {/* Level */}
                                 <select
@@ -218,7 +196,7 @@ export default function Home() {
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
                         {BROAD_CATEGORIES.map((cat) => (
-                            <Link key={cat.id} href={`/categories?category=${cat.id}`}
+                            <Link key={cat.id} href={`/browse?category=${cat.id}`}
                                 className="flex flex-col items-center gap-3 p-6 rounded-xl border border-gray-100 hover:border-blue-500 hover:bg-blue-50 cursor-pointer transition-all group text-center">
                                 <div className="size-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors">
                                     <cat.icon size={24} strokeWidth={1.5} />

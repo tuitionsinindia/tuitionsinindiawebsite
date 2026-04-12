@@ -1,16 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { BookOpen, MapPin, ArrowRight, ArrowLeft, Loader2, ChevronDown, User, Mail, Navigation } from "lucide-react";
-import { BROAD_CATEGORIES, getSubjectsForCategory, getCategoryForSubject, GRADE_OPTIONS, CITY_OPTIONS, ALL_SUBJECTS } from "@/lib/subjects";
+import { BookOpen, MapPin, ArrowRight, ArrowLeft, Loader2, User, Mail, Navigation } from "lucide-react";
+import { BROAD_CATEGORIES, getSubjectsForCategory, getCategoryForSubject, GRADE_OPTIONS, CITY_OPTIONS } from "@/lib/subjects";
 
 export default function RequirementForm({ user, prefill = {}, onStepChange, onComplete }) {
     const [loading, setLoading] = useState(false);
     const [isDetecting, setIsDetecting] = useState(false);
     const [step, setStep] = useState(1);
-    const [subjectQuery, setSubjectQuery] = useState("");
-    const [showSuggestions, setShowSuggestions] = useState(false);
-
     // Auto-detect category from pre-filled subject
     const initialCategory = prefill.subject ? getCategoryForSubject(prefill.subject) : "";
 
@@ -35,19 +32,7 @@ export default function RequirementForm({ user, prefill = {}, onStepChange, onCo
     // Subjects filtered by selected category
     const availableSubjects = form.category
         ? getSubjectsForCategory(form.category)
-        : ALL_SUBJECTS;
-
-    const filteredSuggestions = subjectQuery.length >= 1
-        ? availableSubjects.filter(s => s.toLowerCase().includes(subjectQuery.toLowerCase()) && !form.subjects.includes(s)).slice(0, 8)
-        : [];
-
-    const addSubject = (subject) => {
-        if (!form.subjects.includes(subject)) {
-            setForm(f => ({ ...f, subjects: [...f.subjects, subject] }));
-        }
-        setSubjectQuery("");
-        setShowSuggestions(false);
-    };
+        : getSubjectsForCategory("academics"); // default to academics if no category
 
     const goToStep = (s) => {
         setStep(s);
@@ -126,43 +111,17 @@ export default function RequirementForm({ user, prefill = {}, onStepChange, onCo
                         </select>
                     </div>
 
-                    {/* Subject (autocomplete) */}
+                    {/* Subject (dropdown filtered by category) */}
                     <div className="space-y-1.5">
                         <label className="text-xs font-medium text-gray-500">Subject</label>
-                        <div className="relative">
-                            <BookOpen className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300 z-10" size={16} />
-                            <input
-                                className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:border-blue-500 outline-none transition-all"
-                                placeholder={form.category ? `Search ${BROAD_CATEGORIES.find(c => c.id === form.category)?.label || ""} subjects...` : "Start typing — e.g. Maths, Physics, NEET"}
-                                value={subjectQuery}
-                                onChange={(e) => { setSubjectQuery(e.target.value); setShowSuggestions(true); }}
-                                onFocus={() => setShowSuggestions(true)}
-                                onKeyDown={(e) => {
-                                    if (e.key === "Enter" && subjectQuery.trim()) { e.preventDefault(); addSubject(subjectQuery.trim()); }
-                                    if (e.key === "Escape") setShowSuggestions(false);
-                                }}
-                            />
-                            {showSuggestions && filteredSuggestions.length > 0 && (
-                                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-20 max-h-48 overflow-y-auto">
-                                    {filteredSuggestions.map(s => (
-                                        <button key={s} type="button"
-                                            onMouseDown={(e) => { e.preventDefault(); addSubject(s); }}
-                                            className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors first:rounded-t-xl last:rounded-b-xl"
-                                        >{s}</button>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                        {form.subjects.length > 0 && (
-                            <div className="flex flex-wrap gap-2">
-                                {form.subjects.map(s => (
-                                    <span key={s} className="inline-flex items-center gap-1 px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-medium">
-                                        {s}
-                                        <button onClick={() => setForm(f => ({ ...f, subjects: f.subjects.filter(x => x !== s) }))} className="ml-1 text-blue-400 hover:text-red-500">x</button>
-                                    </span>
-                                ))}
-                            </div>
-                        )}
+                        <select
+                            value={form.subjects[0] || ""}
+                            onChange={(e) => setForm(f => ({ ...f, subjects: e.target.value ? [e.target.value] : [] }))}
+                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-blue-500 cursor-pointer"
+                        >
+                            <option value="">Select subject</option>
+                            {availableSubjects.map(s => <option key={s} value={s}>{s}</option>)}
+                        </select>
                     </div>
 
                     {/* Level / Grade */}

@@ -20,6 +20,7 @@ import {
     Building2,
     Users
 } from "lucide-react";
+import { BROAD_CATEGORIES, getSubjectsForCategory } from "@/lib/subjects";
 
 export default function TutorListingForm({ user, onComplete }) {
     const [loading, setLoading] = useState(false);
@@ -29,6 +30,7 @@ export default function TutorListingForm({ user, onComplete }) {
     const [form, setForm] = useState({
         title: "",
         bio: "",
+        category: "",
         subjects: [],
         grades: [],
         locations: [],
@@ -207,33 +209,43 @@ export default function TutorListingForm({ user, onComplete }) {
             {step === 2 && (
                 <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-500">
                     <div className="space-y-3">
-                        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Subjects you teach (press Enter to add)</label>
-                        <div className="relative">
-                            <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                            <input
-                                className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-sm"
-                                placeholder="e.g. Mathematics, Physics, Chemistry..."
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter' && e.target.value.trim()) {
-                                        e.preventDefault();
-                                        const val = e.target.value.trim();
-                                        if (!form.subjects.includes(val)) {
-                                            toggleItem('subjects', val);
-                                        }
-                                        e.target.value = '';
-                                    }
-                                }}
-                            />
-                        </div>
+                        <label className="text-xs font-medium text-gray-500">Category</label>
+                        <select
+                            value={form.category}
+                            onChange={(e) => setForm({ ...form, category: e.target.value, subjects: [] })}
+                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-blue-500 cursor-pointer"
+                        >
+                            <option value="">Select category</option>
+                            {BROAD_CATEGORIES.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
+                        </select>
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-xs font-medium text-gray-500">Subjects you teach</label>
+                        <select
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                if (val && !form.subjects.includes(val)) {
+                                    setForm(f => ({ ...f, subjects: [...f.subjects, val] }));
+                                }
+                                e.target.value = "";
+                            }}
+                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-blue-500 cursor-pointer"
+                        >
+                            <option value="">Add a subject...</option>
+                            {(form.category ? getSubjectsForCategory(form.category) : []).filter(s => !form.subjects.includes(s)).map(s => (
+                                <option key={s} value={s}>{s}</option>
+                            ))}
+                        </select>
                         {form.subjects.length > 0 && (
                             <div className="flex flex-wrap gap-2">
                                 {form.subjects.map(s => (
                                     <button
                                         key={s}
                                         onClick={() => toggleItem('subjects', s)}
-                                        className="px-3 py-1.5 bg-gray-900 text-white rounded-lg text-xs font-medium flex items-center gap-1.5 hover:bg-gray-700 transition-colors"
+                                        className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-xs font-medium flex items-center gap-1.5 hover:bg-red-50 hover:text-red-600 transition-colors"
                                     >
-                                        {s} <span className="opacity-60">×</span>
+                                        {s} <span>×</span>
                                     </button>
                                 ))}
                             </div>
