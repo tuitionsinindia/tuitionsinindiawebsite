@@ -49,7 +49,7 @@ export default function TutorPricing() {
                             ))}
                         </ul>
                         <Link
-                            href="/register/tutor"
+                            href="/register/tutor?plan=free"
                             className="w-full py-3 border border-gray-200 text-gray-700 font-medium rounded-lg hover:border-blue-500 hover:text-blue-600 transition-colors text-center text-sm"
                         >
                             Get Started Free
@@ -89,7 +89,7 @@ export default function TutorPricing() {
                             ))}
                         </ul>
                         <Link
-                            href="/register/tutor"
+                            href="/register/tutor?plan=expert"
                             className="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors text-center text-sm"
                         >
                             Start as Expert
@@ -125,7 +125,7 @@ export default function TutorPricing() {
                             ))}
                         </ul>
                         <Link
-                            href="/register/tutor"
+                            href="/register/institute"
                             className="w-full py-3 border border-gray-200 text-gray-700 font-medium rounded-lg hover:border-blue-500 hover:text-blue-600 transition-colors text-center text-sm"
                         >
                             Register as Institute
