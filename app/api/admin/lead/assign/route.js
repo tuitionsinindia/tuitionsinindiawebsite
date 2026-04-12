@@ -16,7 +16,7 @@ export async function POST(request) {
         });
 
         if (!admin || admin.role !== "ADMIN") {
-            return NextResponse.json({ error: "ACCESS_DENIED: ADMINISTRATIVE_PRIVILEGE_REQUIRED" }, { status: 403 });
+            return NextResponse.json({ error: "Admin access required" }, { status: 403 });
         }
 
         // 2. Execute Admin Override Pair
@@ -50,12 +50,12 @@ export async function POST(request) {
         });
 
         if (result.alreadyPaired) {
-            return NextResponse.json({ error: "Faculty member already assigned to this mandate." }, { status: 400 });
+            return NextResponse.json({ error: "Tutor already assigned to this lead." }, { status: 400 });
         }
 
         return NextResponse.json({ 
             success: true, 
-            message: "ADMIN_OVERRIDE_SUCCESS: FACULTY_PAIRED",
+            message: "Tutor assigned to lead successfully.",
             sessionId: result.sessionId
         });
 
