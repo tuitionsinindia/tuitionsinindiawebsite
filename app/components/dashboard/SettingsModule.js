@@ -20,6 +20,25 @@ export default function SettingsModule({ userData, onUpdate }) {
 
     const [isSaving, setIsSaving] = useState(false);
     const [message, setMessage] = useState(null);
+    const [resetSent, setResetSent] = useState(false);
+    const [resetLoading, setResetLoading] = useState(false);
+
+    const handlePasswordReset = async () => {
+        if (!userData?.email) return;
+        setResetLoading(true);
+        try {
+            await fetch("/api/auth/password-reset", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: userData.email }),
+            });
+            setResetSent(true);
+        } catch {
+            // silently fail — user sees nothing unexpected
+        } finally {
+            setResetLoading(false);
+        }
+    };
 
     const handleSave = async () => {
         setIsSaving(true);
@@ -196,11 +215,18 @@ export default function SettingsModule({ userData, onUpdate }) {
                     <Lock size={16} className="text-amber-500 shrink-0" />
                     <div>
                         <p className="text-sm font-semibold text-amber-800">Change Password</p>
-                        <p className="text-xs text-amber-600 mt-0.5">Send a password reset link to your email.</p>
+                        <p className="text-xs text-amber-600 mt-0.5">
+                            {resetSent ? `Reset link sent to ${userData?.email}` : "Send a password reset link to your email."}
+                        </p>
                     </div>
                 </div>
-                <button className="px-4 py-2 bg-amber-500 text-white rounded-xl text-xs font-semibold hover:bg-amber-600 transition-colors">
-                    Send Reset Link
+                <button
+                    onClick={handlePasswordReset}
+                    disabled={resetLoading || resetSent}
+                    className="px-4 py-2 bg-amber-500 text-white rounded-xl text-xs font-semibold hover:bg-amber-600 transition-colors disabled:opacity-60 flex items-center gap-1.5"
+                >
+                    {resetLoading ? <Loader2 size={13} className="animate-spin" /> : null}
+                    {resetSent ? "Email Sent" : "Send Reset Link"}
                 </button>
             </div>
 
