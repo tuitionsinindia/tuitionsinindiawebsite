@@ -51,6 +51,22 @@ export default async function TutorProfilePage({ params }) {
     const tutor = listing.tutor;
     const isPremium = ["PRO", "ELITE"].includes(tutor.subscriptionTier);
 
+    // Fetch similar tutors (same subjects, different tutor)
+    let similarTutors = [];
+    try {
+        const similar = await prisma.listing.findMany({
+            where: {
+                isActive: true,
+                subjects: { hasSome: listing.subjects || [] },
+                tutorId: { not: tutor.id },
+            },
+            include: { tutor: { select: { id: true, name: true, isVerified: true } } },
+            take: 4,
+            orderBy: { rating: "desc" },
+        });
+        similarTutors = similar;
+    } catch {}
+
     return (
         <div className="min-h-screen bg-gray-50">
             {/* Header */}
@@ -217,6 +233,47 @@ export default async function TutorProfilePage({ params }) {
                             </div>
                         )}
 
+                        {/* Availability / Timings */}
+                        {listing.timings?.length > 0 && (
+                            <div className="bg-white rounded-2xl border border-gray-200 p-6">
+                                <h3 className="text-sm font-semibold text-gray-900 mb-3">Availability</h3>
+                                <div className="flex flex-wrap gap-2">
+                                    {listing.timings.map(t => (
+                                        <span key={t} className="px-3 py-1 bg-emerald-50 text-emerald-700 rounded-lg text-xs font-medium">
+                                            {t}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Expertise Level */}
+                        {listing.expertiseLevel && (
+                            <div className="bg-white rounded-2xl border border-gray-200 p-6">
+                                <h3 className="text-sm font-semibold text-gray-900 mb-2">Expertise Level</h3>
+                                <span className="px-3 py-1.5 bg-violet-50 text-violet-700 rounded-lg text-sm font-medium">
+                                    {listing.expertiseLevel === "PRIMARY" ? "Primary (Class 1-5)" :
+                                     listing.expertiseLevel === "SECONDARY" ? "Secondary (Class 6-10)" :
+                                     listing.expertiseLevel === "SENIOR" ? "Senior Secondary (Class 11-12)" :
+                                     listing.expertiseLevel === "COMPETITIVE" ? "Competitive Exams" :
+                                     listing.expertiseLevel}
+                                </span>
+                            </div>
+                        )}
+
+                        {/* Group Class Info */}
+                        {listing.type === "GROUP" && (
+                            <div className="bg-white rounded-2xl border border-gray-200 p-6">
+                                <h3 className="text-sm font-semibold text-gray-900 mb-2">Group Classes</h3>
+                                <div className="flex items-center gap-3">
+                                    <Users size={16} className="text-blue-500" />
+                                    <p className="text-sm text-gray-700">
+                                        {listing.enrolledCount || 0} / {listing.maxSeats || "N/A"} seats filled
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+
                         {/* CTA */}
                         <div className="bg-blue-50 border border-blue-100 rounded-2xl p-6 text-center">
                             <p className="text-sm font-semibold text-blue-900 mb-2">Interested in this tutor?</p>
@@ -230,6 +287,34 @@ export default async function TutorProfilePage({ params }) {
                         </div>
                     </div>
                 </div>
+
+                {/* Similar Tutors */}
+                {similarTutors.length > 0 && (
+                    <div className="bg-white rounded-2xl border border-gray-200 p-6">
+                        <h2 className="text-base font-semibold text-gray-900 mb-4">Similar Tutors</h2>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            {similarTutors.map(s => (
+                                <Link key={s.id} href={`/search/${s.tutorId}`} className="block p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                                    <div className="flex items-center gap-3 mb-2">
+                                        <div className="size-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold text-sm shrink-0">
+                                            {s.tutor?.name?.[0]}
+                                        </div>
+                                        <div className="min-w-0">
+                                            <p className="text-sm font-semibold text-gray-900 truncate">{s.tutor?.name}</p>
+                                            {s.tutor?.isVerified && <p className="text-[10px] text-blue-500 font-medium">Verified</p>}
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-wrap gap-1 mb-2">
+                                        {s.subjects?.slice(0, 2).map(sub => (
+                                            <span key={sub} className="px-2 py-0.5 bg-blue-50 text-blue-600 rounded text-[10px] font-medium">{sub}</span>
+                                        ))}
+                                    </div>
+                                    {s.hourlyRate > 0 && <p className="text-xs text-gray-500">₹{s.hourlyRate}/hr</p>}
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

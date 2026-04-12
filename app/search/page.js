@@ -43,6 +43,7 @@ function SearchResultsContent() {
     const [error, setError] = useState(null);
     const [viewMode, setViewMode] = useState("list"); // list, map
     const [filtersOpen, setFiltersOpen] = useState(false); // mobile filter drawer
+    const [visibleCount, setVisibleCount] = useState(12); // pagination
 
     // Filter & Sort State
     const [grade, setGrade] = useState(searchParams.get("grade") || "");
@@ -302,6 +303,56 @@ function SearchResultsContent() {
                         <input type="checkbox" checked={verifiedOnly} onChange={(e) => setVerifiedOnly(e.target.checked)} className="hidden" />
                     </label>
 
+                    <div className="border-t border-gray-100" />
+
+                    {/* Board */}
+                    <div className="space-y-2">
+                        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide">Board</label>
+                        <select
+                            value={board}
+                            onChange={(e) => setBoard(e.target.value)}
+                            className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 bg-white outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                        >
+                            <option value="">All Boards</option>
+                            {["CBSE", "ICSE", "IB", "IGCSE", "State Board"].map(b => <option key={b} value={b}>{b}</option>)}
+                        </select>
+                    </div>
+
+                    <div className="border-t border-gray-100" />
+
+                    {/* Gender Preference */}
+                    <div className="space-y-2">
+                        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide">Gender</label>
+                        <select
+                            value={gender}
+                            onChange={(e) => setGender(e.target.value)}
+                            className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 bg-white outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                        >
+                            <option value="">Any Gender</option>
+                            <option value="MALE">Male</option>
+                            <option value="FEMALE">Female</option>
+                            <option value="OTHER">Other</option>
+                        </select>
+                    </div>
+
+                    <div className="border-t border-gray-100" />
+
+                    {/* Min Experience */}
+                    <div className="space-y-2">
+                        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide">Min Experience</label>
+                        <select
+                            value={experience}
+                            onChange={(e) => setExperience(e.target.value)}
+                            className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 bg-white outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                        >
+                            <option value="">Any</option>
+                            <option value="1">1+ years</option>
+                            <option value="3">3+ years</option>
+                            <option value="5">5+ years</option>
+                            <option value="10">10+ years</option>
+                        </select>
+                    </div>
+
                 </div>
             </aside>
 
@@ -393,8 +444,9 @@ function SearchResultsContent() {
                                     </button>
                                 </div>
                             ) : results.length > 0 ? (
-                                /* Result Cards */
-                                results.map((item, idx) => (
+                                <>
+                                {/* Result Cards */}
+                                {results.slice(0, visibleCount).map((item, idx) => (
                                     <div
                                         key={idx}
                                         className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow p-5 flex flex-col md:flex-row gap-5"
@@ -438,9 +490,18 @@ function SearchResultsContent() {
                                                                 <ShieldCheck size={11} /> Verified
                                                             </span>
                                                         )}
-                                                        {item.subscriptionTier !== "FREE" && (
+                                                        {item.isFeatured && (
                                                             <span className="inline-flex items-center gap-1 text-xs text-amber-700 font-medium bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100">
-                                                                Premium
+                                                                Featured
+                                                            </span>
+                                                        )}
+                                                        {item.matchScore > 0 && (
+                                                            <span className={`inline-flex items-center text-xs font-bold px-2 py-0.5 rounded-full ${
+                                                                item.matchScore >= 85 ? "bg-emerald-50 text-emerald-700 border border-emerald-200" :
+                                                                item.matchScore >= 60 ? "bg-blue-50 text-blue-700 border border-blue-200" :
+                                                                "bg-gray-50 text-gray-600 border border-gray-200"
+                                                            }`}>
+                                                                {item.matchScore}% match
                                                             </span>
                                                         )}
                                                     </div>
@@ -451,6 +512,9 @@ function SearchResultsContent() {
                                                         {item.location && (
                                                             <span className="inline-flex items-center gap-1.5 text-xs text-gray-500">
                                                                 <MapPin size={12} /> {item.location}
+                                                                {item.distance && item.distance < 100 && (
+                                                                    <span className="text-emerald-600 font-medium">({item.distance.toFixed(1)} km)</span>
+                                                                )}
                                                             </span>
                                                         )}
                                                     </div>
@@ -524,7 +588,18 @@ function SearchResultsContent() {
                                             </div>
                                         </div>
                                     </div>
-                                ))
+                                ))}
+
+                                {/* Load More */}
+                                {visibleCount < results.length && (
+                                    <button
+                                        onClick={() => setVisibleCount(prev => prev + 12)}
+                                        className="w-full py-3 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-blue-600 hover:bg-blue-50 hover:border-blue-200 transition-colors mt-4"
+                                    >
+                                        Show More ({results.length - visibleCount} remaining)
+                                    </button>
+                                )}
+                            </>
                             ) : (
                                 /* Empty State */
                                 <div className="bg-white border border-gray-200 rounded-xl p-12 text-center mt-4">
