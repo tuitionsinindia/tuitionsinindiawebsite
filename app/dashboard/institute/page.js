@@ -25,7 +25,11 @@ import {
     LogOut,
     Settings,
     UserPlus,
-    Box
+    Box,
+    LayoutDashboard,
+    TrendingUp,
+    GraduationCap,
+    Wallet
 } from "lucide-react";
 
 function InstituteDashboardContent() {
@@ -35,9 +39,10 @@ function InstituteDashboardContent() {
     const [leads, setLeads] = useState([]);
     const [recruitmentLeads, setRecruitmentLeads] = useState([]);
     const [courses, setCourses] = useState([]);
+    const [transactions, setTransactions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [instituteData, setInstituteData] = useState(null);
-    const [activeTab, setActiveTab] = useState("leads");
+    const [activeTab, setActiveTab] = useState("home");
 
     const [chatSessions, setChatSessions] = useState([]);
     const [selectedSession, setSelectedSession] = useState(null);
@@ -71,9 +76,10 @@ function InstituteDashboardContent() {
         if (instituteId) {
             fetchInstituteData();
             fetchChatSessions();
-            if (activeTab === "leads") fetchLeads();
+            fetchTransactions();
+            if (activeTab === "leads" || activeTab === "home") fetchLeads();
             if (activeTab === "recruitment") fetchRecruitmentLeads();
-            if (activeTab === "courses") fetchCourses();
+            if (activeTab === "courses" || activeTab === "home") fetchCourses();
         }
     }, [instituteId, activeTab]);
 
@@ -114,6 +120,16 @@ function InstituteDashboardContent() {
         } catch (err) { console.error(err); } finally { setLoading(false); }
     };
 
+    const fetchTransactions = async () => {
+        try {
+            const res = await fetch(`/api/user/transactions?userId=${instituteId}`);
+            if (res.ok) {
+                const data = await res.json();
+                setTransactions(data.transactions || []);
+            }
+        } catch (err) { console.error(err); }
+    };
+
     const fetchChatSessions = async () => {
         setLoadingChat(true);
         try {
@@ -152,6 +168,7 @@ function InstituteDashboardContent() {
     }
 
     const NAV_ITEMS = [
+        { id: "home", label: "Overview", icon: LayoutDashboard },
         { id: "leads", label: "Student Leads", icon: Users },
         { id: "recruitment", label: "Hire Tutors", icon: UserPlus },
         { id: "chat", label: "Messages", icon: MessageCircle },
@@ -204,6 +221,84 @@ function InstituteDashboardContent() {
 
                         {activeTab === "settings" && <SettingsModule userData={instituteData} onUpdate={fetchInstituteData} />}
                         {activeTab === "billing" && <BillingModule userData={instituteData} userId={instituteId} onRefresh={fetchInstituteData} />}
+
+                        {activeTab === "home" && (
+                            <div className="space-y-6">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <h1 className="text-2xl font-bold text-gray-900">
+                                            Welcome, {instituteData?.name || "Institute"}
+                                        </h1>
+                                        <p className="text-gray-500 text-sm mt-1">Your institute overview at a glance.</p>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                    {[
+                                        { label: "Student Leads", val: leads.length, icon: Users, color: "text-blue-600", bg: "bg-blue-50" },
+                                        { label: "Active Courses", val: courses.filter(c => c.isActive).length, icon: Box, color: "text-violet-600", bg: "bg-violet-50" },
+                                        { label: "Total Enrolled", val: courses.reduce((sum, c) => sum + (c.enrolledCount || 0), 0), icon: GraduationCap, color: "text-emerald-600", bg: "bg-emerald-50" },
+                                        { label: "Credits", val: instituteData?.credits || 0, icon: Zap, color: "text-amber-600", bg: "bg-amber-50" },
+                                    ].map((stat, i) => (
+                                        <div key={i} className="bg-white rounded-xl border border-gray-200 p-5">
+                                            <div className={`w-10 h-10 rounded-lg ${stat.bg} flex items-center justify-center mb-3`}>
+                                                <stat.icon size={20} className={stat.color} />
+                                            </div>
+                                            <p className="text-sm text-gray-500">{stat.label}</p>
+                                            <p className="text-2xl font-bold text-gray-900 mt-1">{stat.val}</p>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Recent Leads */}
+                                <div className="bg-white rounded-xl border border-gray-200 p-6">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h2 className="text-base font-semibold text-gray-900">Recent Student Leads</h2>
+                                        <button onClick={() => setActiveTab("leads")} className="text-sm text-blue-600 hover:underline">View all →</button>
+                                    </div>
+                                    {leads.length > 0 ? (
+                                        <div className="space-y-3">
+                                            {leads.slice(0, 3).map(lead => (
+                                                <div key={lead.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                                    <div>
+                                                        <p className="text-sm font-medium text-gray-900">{lead.subjects?.[0] || "General"}</p>
+                                                        <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">{lead.description}</p>
+                                                    </div>
+                                                    <span className={`text-xs font-medium px-2 py-1 rounded-full ${lead.isUnlocked ? "bg-emerald-50 text-emerald-700" : "bg-blue-50 text-blue-700"}`}>
+                                                        {lead.isUnlocked ? "Unlocked" : "New"}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p className="text-sm text-gray-400 text-center py-6">No leads yet. They'll appear here when students post requirements.</p>
+                                    )}
+                                </div>
+
+                                {/* Courses snapshot */}
+                                <div className="bg-white rounded-xl border border-gray-200 p-6">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h2 className="text-base font-semibold text-gray-900">Your Courses</h2>
+                                        <button onClick={() => setActiveTab("courses")} className="text-sm text-blue-600 hover:underline">View all →</button>
+                                    </div>
+                                    {courses.length > 0 ? (
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                            {courses.slice(0, 4).map(course => (
+                                                <div key={course.id} className="p-4 bg-gray-50 rounded-lg flex items-center justify-between">
+                                                    <div>
+                                                        <p className="text-sm font-medium text-gray-900 truncate max-w-[140px]">{course.title}</p>
+                                                        <p className="text-xs text-gray-500 mt-0.5">{course.enrolledCount}/{course.maxSeats} seats</p>
+                                                    </div>
+                                                    <span className="text-sm font-bold text-gray-700">₹{course.price?.toLocaleString("en-IN")}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p className="text-sm text-gray-400 text-center py-6">No courses yet.</p>
+                                    )}
+                                </div>
+                            </div>
+                        )}
 
                         {activeTab === "chat" && (
                             <div className="h-[75vh] grid grid-cols-1 lg:grid-cols-12 gap-5">
