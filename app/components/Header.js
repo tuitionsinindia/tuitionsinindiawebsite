@@ -134,24 +134,24 @@ export default function Header() {
                 </nav>
 
                 {/* Secure Actions */}
-                <div className="flex items-center gap-5 relative z-10">
-                    <Link 
-                        href="/login" 
+                <div className="flex items-center gap-3 sm:gap-5 relative z-10">
+                    <Link
+                        href="/login"
                         className={`hidden sm:inline-flex font-black text-[10px] uppercase tracking-[0.2em] px-6 py-3 rounded-2xl transition-all ${scrolled ? 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' : 'text-white/90 hover:bg-white/10 hover:text-white'}`}
                     >
                         Log In
                     </Link>
                     <Link
                         href="/register"
-                        className={`px-5 sm:px-8 py-3 sm:py-3.5 font-black text-[10px] uppercase tracking-[0.2em] rounded-2xl transition-all shadow-xl active:scale-95 whitespace-nowrap ${scrolled ? 'bg-blue-600 text-white hover:bg-gray-900 shadow-blue-600/20' : 'bg-white text-blue-700 hover:bg-blue-50 shadow-white/10'}`}
+                        className={`hidden sm:inline-flex px-5 sm:px-8 py-3 sm:py-3.5 font-black text-[10px] uppercase tracking-[0.2em] rounded-2xl transition-all shadow-xl active:scale-95 whitespace-nowrap ${scrolled ? 'bg-blue-600 text-white hover:bg-gray-900 shadow-blue-600/20' : 'bg-white text-blue-700 hover:bg-blue-50 shadow-white/10'}`}
                     >
                         Sign Up Free
                     </Link>
-                    
-                    {/* Mobile Terminal Toggle */}
-                    <button 
+
+                    {/* Mobile menu toggle — shown below lg; Sign Up/Log In are inside the slide-in panel */}
+                    <button
                         onClick={() => setMobileMenuOpen(true)}
-                        className={`lg:hidden w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${scrolled ? 'text-gray-900 bg-gray-100' : 'text-white bg-white/20 hover:bg-white/30'}`}
+                        className={`lg:hidden w-11 h-11 rounded-2xl flex items-center justify-center transition-all ${scrolled ? 'text-gray-900 bg-gray-100' : 'text-white bg-white/20 hover:bg-white/30'}`}
                     >
                         <Menu size={20} />
                     </button>
