@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+Disallow: /dashboard/
+Disallow: /admin/
+Disallow: /messages/
+Disallow: /api/
+Disallow: /production-audit/
+
+Sitemap: https://www.tuitionsinindia.com/sitemap.xml
