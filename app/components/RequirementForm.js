@@ -51,19 +51,20 @@ export default function RequirementForm({ user, onComplete }) {
         if (e) e.preventDefault();
         setLoading(true);
         try {
-            const res = await fetch("/api/lead/post", {
+            const res = await fetch("/api/leads/create", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     studentId: user.id,
-                    name: user.name,
-                    phone: user.phone,
-                    email: user.email || `${user.phone}@tuitionsinindia.com`,
-                    subject: form.subjects[0] || "",
-                    grade: form.grades[0] || "",
-                    location: form.locations[0] || "",
+                    subjects: form.subjects,
+                    grades: form.grades,
+                    boards: form.boards,
+                    locations: form.locations,
+                    modes: form.modes,
+                    timings: form.timings,
                     budget: parseInt(form.budget) || 0,
-                    description: `Preferences: ${form.genderPreference} Tutor | ${form.groupPreference} | Boards: ${form.boards.join(', ')}\n\n${form.description}`
+                    genderPreference: form.genderPreference,
+                    description: `Session: ${form.groupPreference} | Tutor gender: ${form.genderPreference}\n\n${form.description}`
                 })
             });
             if (res.ok) onComplete();
