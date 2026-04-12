@@ -64,8 +64,8 @@ export default function InstituteListingForm({ user, onComplete }) {
                     <CheckCircle2 size={40} />
                 </div>
                 <div>
-                    <h2 className="text-4xl font-black text-gray-900 tracking-tighter uppercase italic mb-2 leading-none">Center Deployed.</h2>
-                    <p className="text-gray-400 font-bold text-xs uppercase tracking-widest leading-relaxed">Your institute profile is now live. Students can find you in search.</p>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Profile Saved!</h2>
+                    <p className="text-gray-500 text-sm">Your institute profile has been set up. Redirecting to dashboard...</p>
                 </div>
             </div>
         );
