@@ -13,7 +13,7 @@ export async function GET(request) {
 
     try {
         if (phase === '1') {
-            // PHASE 1: Seed Free Nodes
+            // Create test users
             await prisma.user.deleteMany({ where: { email: { contains: '_prod_audit@test.com' } } });
 
             const student = await prisma.user.create({
@@ -54,7 +54,7 @@ export async function GET(request) {
                     lng: 72.8800,
                     tutorListing: {
                         create: {
-                            title: "Algebraic Protocol Expert",
+                            title: "Maths Specialist — Ph.D Applied Mathematics",
                             bio: "Ph.D in Applied Mathematics with 20 years experience.",
                             subjects: ["Mathematics", "Calculus"],
                             grades: ["High School (9-10)", "Higher Secondary (11-12)"],
@@ -94,7 +94,7 @@ export async function GET(request) {
 
             return NextResponse.json({
                 success: true,
-                message: "PHASE_1: Free Node Triad Seeded",
+                message: "Test users created (student, tutor, institute).",
                 studentId: student.id,
                 tutorId: tutor.id,
                 instituteId: institute.id
@@ -107,16 +107,16 @@ export async function GET(request) {
                 where: { email: { contains: '_prod_audit@test.com' } },
                 data: { subscriptionTier: "PRO" }
             });
-            return NextResponse.json({ success: true, message: "PHASE_2: All Audit Nodes Upgraded to PRO" });
+            return NextResponse.json({ success: true, message: "Test users upgraded to PRO." });
         }
 
         if (phase === '0') {
             // PHASE 0: Cleanup
             await prisma.user.deleteMany({ where: { email: { contains: '_prod_audit@test.com' } } });
-            return NextResponse.json({ success: true, message: "PHASE_0: Audit Nodes Scrubbed" });
+            return NextResponse.json({ success: true, message: "Test users deleted." });
         }
 
-        return NextResponse.json({ error: "INVALID_PHASE" }, { status: 400 });
+        return NextResponse.json({ error: "Invalid phase. Use 1, 2, or 0." }, { status: 400 });
 
     } catch (error) {
         console.error("❌ AUDIT_SEED FAILED:", error);

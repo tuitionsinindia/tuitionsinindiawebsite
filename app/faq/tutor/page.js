@@ -80,7 +80,7 @@ export default function TutorFAQ() {
                     </h2>
                     
                     <p className="text-xl text-gray-400 font-medium mb-12 italic max-w-xl mx-auto leading-relaxed">
-                        Join India's most advanced educator network. Our support counsel is available 24/7 for technical and pedagogical strategy.
+                        Our support team is here to help you grow your tutoring business on TuitionsInIndia.
                     </p>
                     
                     <div className="flex flex-col sm:flex-row gap-6 justify-center">

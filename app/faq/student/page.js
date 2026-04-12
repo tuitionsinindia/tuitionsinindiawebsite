@@ -69,18 +69,17 @@ export default function StudentFAQ() {
                 </div>
             </section>
 
-            {/* Support Hub Section */}
+            {/* Support Section */}
             <section className="snap-section px-6">
-                <div className="max-w-4xl mx-auto bg-gray-900 rounded-[3.5rem] p-12 md:p-24 text-center relative overflow-hidden shadow-4xl text-white">
-                    <div className="absolute -right-20 -bottom-20 size-96 bg-blue-600/10 rounded-full blur-3xl -z-10 animate-pulse"></div>
-                    
-                    <h2 className="text-3xl md:text-5xl font-black tracking-tighter uppercase italic mb-8 leading-tight">
-                        Queries still <br />
-                        <span className="text-blue-500 font-serif lowercase tracking-normal not-italic px-4">unresolved</span>?
+                <div className="max-w-4xl mx-auto bg-gray-900 rounded-3xl p-12 md:p-20 text-center relative overflow-hidden shadow-xl text-white">
+                    <div className="absolute -right-20 -bottom-20 size-96 bg-blue-600/10 rounded-full blur-3xl -z-10"></div>
+
+                    <h2 className="text-3xl md:text-4xl font-bold mb-6 leading-tight">
+                        Still have questions?
                     </h2>
-                    
-                    <p className="text-xl text-gray-400 font-medium mb-12 italic max-w-xl mx-auto leading-relaxed">
-                        Our institutional support team is standing by to provide technical and pedagogical assistance for your learning journey.
+
+                    <p className="text-lg text-gray-400 mb-10 max-w-lg mx-auto leading-relaxed">
+                        Our support team is here to help you with anything related to finding a tutor or using the platform.
                     </p>
                     
                     <div className="flex flex-col sm:flex-row gap-6 justify-center">
