@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { calculateMatchScore } from "@/lib/matchEngine";
 
 export const dynamic = 'force-dynamic';
 
@@ -44,18 +45,41 @@ export async function GET(request) {
                 }
             });
 
-            // Harmonize to return user-first objects (like unlocked-tutors)
-            const matches = listings.map(l => ({
-                ...l.tutor,
-                tutorListing: {
-                    id: l.id,
+            // Build a combined criterion from all student leads
+            const criterion = {
+                subjects: uniqueSubjects,
+                locations: uniqueLocations,
+                modes: [...new Set(studentLeads.flatMap(l => l.modes || []))],
+            };
+
+            // Calculate match scores and sort by best match
+            const matches = listings.map(l => {
+                const { score, label, factors } = calculateMatchScore(criterion, {
                     subjects: l.subjects,
-                    hourlyRate: l.hourlyRate,
-                    bio: l.bio,
-                    type: l.type,
-                    isInstitute: l.isInstitute
-                }
-            }));
+                    locations: l.locations,
+                    teachingModes: l.teachingModes,
+                    lat: l.tutor?.lat, lng: l.tutor?.lng,
+                    type: l.type, isInstitute: l.isInstitute,
+                    isVerified: l.tutor?.isVerified, rating: l.rating,
+                    maxSeats: l.maxSeats, enrolledCount: l.enrolledCount,
+                });
+                return {
+                    ...l.tutor,
+                    matchScore: score,
+                    matchLabel: label,
+                    matchFactors: factors,
+                    tutorListing: {
+                        id: l.id,
+                        subjects: l.subjects,
+                        hourlyRate: l.hourlyRate,
+                        bio: l.bio,
+                        type: l.type,
+                        isInstitute: l.isInstitute,
+                        rating: l.rating,
+                        experience: l.experience,
+                    },
+                };
+            }).sort((a, b) => b.matchScore - a.matchScore);
 
             return NextResponse.json(matches);
         } else {

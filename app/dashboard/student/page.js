@@ -347,12 +347,27 @@ function StudentDashboardContent() {
                                 {unlockedTutors.length > 0 ? (
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                         {unlockedTutors.map((t) => (
-                                            <div key={t.id} className={`bg-white rounded-xl border p-6 text-center ${t.id === highlightTutorId ? "border-blue-400 ring-2 ring-blue-100" : "border-gray-200"}`}>
-                                                <div className="w-16 h-16 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-2xl mx-auto mb-4">
-                                                    {t.name?.[0]}
+                                            <div key={t.id} className={`bg-white rounded-xl border p-6 ${t.id === highlightTutorId ? "border-blue-400 ring-2 ring-blue-100" : "border-gray-200"}`}>
+                                                <div className="flex items-center gap-3 mb-3">
+                                                    <div className="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-lg shrink-0">
+                                                        {t.name?.[0]}
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <h3 className="font-semibold text-gray-900 truncate">{t.name}</h3>
+                                                        <p className="text-xs text-gray-500">{t.tutorListing?.subjects?.[0] || "Tutor"}{t.tutorListing?.experience ? ` · ${t.tutorListing.experience} yrs exp` : ""}</p>
+                                                    </div>
+                                                    {t.matchScore > 0 && (
+                                                        <div className={`text-center shrink-0 px-2 py-1 rounded-lg text-xs font-bold ${
+                                                            t.matchScore >= 85 ? "bg-emerald-50 text-emerald-700" :
+                                                            t.matchScore >= 60 ? "bg-blue-50 text-blue-700" : "bg-gray-100 text-gray-600"
+                                                        }`}>
+                                                            {t.matchScore}%
+                                                        </div>
+                                                    )}
                                                 </div>
-                                                <h3 className="font-semibold text-gray-900 mb-1">{t.name}</h3>
-                                                <p className="text-sm text-blue-600 mb-4">{t.tutorListing?.subjects?.[0] || "Tutor"}</p>
+                                                {t.matchLabel && (
+                                                    <p className="text-xs text-gray-400 mb-3">{t.matchLabel}</p>
+                                                )}
                                                 <div className="flex gap-2">
                                                     <button
                                                         onClick={() => { setSelectedTutorForReview(t); setIsReviewOpen(true); }}
