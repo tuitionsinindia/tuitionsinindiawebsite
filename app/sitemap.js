@@ -46,7 +46,7 @@ export default async function sitemap() {
         });
 
         const tutorRoutes = tutors.map((tutor) => ({
-            url: `${baseUrl}/tutor/${tutor.id}`,
+            url: `${baseUrl}/search/${tutor.id}`,
             lastModified: tutor.updatedAt || new Date(),
             changeFrequency: 'monthly',
             priority: 0.7,
@@ -59,23 +59,33 @@ export default async function sitemap() {
             take: 2000
         });
 
+        // Subject-only pages (/tutors/maths)
+        const uniqueSubjects = new Set();
         const citySubjectPairs = new Set();
         listings.forEach(l => {
             (l.subjects || []).forEach(sub => {
+                uniqueSubjects.add(sub.toLowerCase());
                 (l.locations || []).forEach(city => {
                     citySubjectPairs.add(`${sub.toLowerCase()}/${city.toLowerCase()}`);
                 });
             });
         });
 
+        const subjectRoutes = Array.from(uniqueSubjects).map(sub => ({
+            url: `${baseUrl}/tutors/${sub}`,
+            lastModified: new Date(),
+            changeFrequency: 'weekly',
+            priority: 0.8,
+        }));
+
         const directoryRoutes = Array.from(citySubjectPairs).map(pair => ({
             url: `${baseUrl}/tutors/${pair}`,
             lastModified: new Date(),
             changeFrequency: 'weekly',
-            priority: 0.6
+            priority: 0.6,
         }));
 
-        return [...routes, ...tutorRoutes, ...directoryRoutes];
+        return [...routes, ...tutorRoutes, ...subjectRoutes, ...directoryRoutes];
     } catch (error) {
         console.error("Sitemap generation error:", error);
         // Fallback to returning just the static routes if DB fails during build

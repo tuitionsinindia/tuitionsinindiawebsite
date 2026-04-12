@@ -28,7 +28,7 @@ export async function GET(request) {
             
             // Array-based intersection logic for Leads (Students)
             if (subject) {
-                where.subjects = { hasSome: [subject, subject.toUpperCase(), subject.toLowerCase(), "Maths", "Mathematics"] };
+                where.subjects = { hasSome: [subject, subject.toUpperCase(), subject.toLowerCase(), subject.charAt(0).toUpperCase() + subject.slice(1).toLowerCase()] };
             }
             if (grade) {
                 where.grades = { hasSome: [grade, grade.toUpperCase()] };
@@ -107,7 +107,7 @@ export async function GET(request) {
 
         if (subject) {
             where.tutorListing.subjects = {
-                hasSome: [subject, subject.toUpperCase(), subject.toLowerCase(), "Maths", "Mathematics"]
+                hasSome: [subject, subject.toUpperCase(), subject.toLowerCase(), subject.charAt(0).toUpperCase() + subject.slice(1).toLowerCase()]
             };
         }
 
