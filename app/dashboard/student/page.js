@@ -306,22 +306,43 @@ function StudentDashboardContent() {
                                                     </div>
                                                 </div>
                                                 {lead.status === "OPEN" && (
-                                                    <button
-                                                        onClick={async () => {
-                                                            if (!confirm("Close this request? Tutors will no longer be able to unlock it.")) return;
-                                                            try {
-                                                                const res = await fetch("/api/lead/close", {
-                                                                    method: "POST",
-                                                                    headers: { "Content-Type": "application/json" },
-                                                                    body: JSON.stringify({ leadId: lead.id, studentId }),
-                                                                });
-                                                                if (res.ok) fetchActiveLeads();
-                                                            } catch (err) { console.error(err); }
-                                                        }}
-                                                        className="mt-3 w-full py-2 text-xs text-red-500 border border-red-100 rounded-lg hover:bg-red-50 transition-colors font-medium"
-                                                    >
-                                                        Close Request
-                                                    </button>
+                                                    <div className="mt-3 flex gap-2">
+                                                        {!lead.isPremium && (
+                                                            <button
+                                                                onClick={() => {
+                                                                    if (!confirm("Boost this request for ₹49? It will be shown to more tutors with higher priority.")) return;
+                                                                    // Would integrate with Razorpay in production
+                                                                    fetch("/api/lead/boost", {
+                                                                        method: "POST",
+                                                                        headers: { "Content-Type": "application/json" },
+                                                                        body: JSON.stringify({ leadId: lead.id, studentId, premiumTier: 1 }),
+                                                                    }).then(r => { if (r.ok) fetchActiveLeads(); });
+                                                                }}
+                                                                className="flex-1 py-2 text-xs text-amber-600 border border-amber-200 rounded-lg hover:bg-amber-50 transition-colors font-medium flex items-center justify-center gap-1"
+                                                            >
+                                                                <Zap size={12} /> Boost ₹49
+                                                            </button>
+                                                        )}
+                                                        {lead.isPremium && (
+                                                            <span className="flex-1 py-2 text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg font-medium text-center">Boosted</span>
+                                                        )}
+                                                        <button
+                                                            onClick={async () => {
+                                                                if (!confirm("Close this request?")) return;
+                                                                try {
+                                                                    const res = await fetch("/api/lead/close", {
+                                                                        method: "POST",
+                                                                        headers: { "Content-Type": "application/json" },
+                                                                        body: JSON.stringify({ leadId: lead.id, studentId }),
+                                                                    });
+                                                                    if (res.ok) fetchActiveLeads();
+                                                                } catch (err) { console.error(err); }
+                                                            }}
+                                                            className="flex-1 py-2 text-xs text-red-500 border border-red-100 rounded-lg hover:bg-red-50 transition-colors font-medium"
+                                                        >
+                                                            Close
+                                                        </button>
+                                                    </div>
                                                 )}
                                             </div>
                                         ))}

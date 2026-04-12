@@ -2,9 +2,16 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { sendOTP } from "@/lib/sms";
 import { otpStore } from "@/lib/otpStore";
+import { checkRateLimit } from "@/lib/rateLimit";
 
 export async function POST(request) {
     try {
+        // Rate limit: 5 OTP requests per minute per IP
+        const { limited } = checkRateLimit(request, "otp-send", 5, 60000);
+        if (limited) {
+            return NextResponse.json({ error: "Too many requests. Please wait a minute and try again." }, { status: 429 });
+        }
+
         const { name, phone, role, isRegistration } = await request.json();
 
         if (!phone || !role) {

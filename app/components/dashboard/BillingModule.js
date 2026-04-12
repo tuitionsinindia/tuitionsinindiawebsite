@@ -185,6 +185,44 @@ export default function BillingModule({ userData, transactions = [], userId, onR
                 </div>
             </div>
 
+            {/* Feature My Profile */}
+            {userData?.role !== "STUDENT" && (
+                <div className="bg-white border border-gray-200 rounded-2xl p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center">
+                            <Star size={18} className="text-amber-500" />
+                        </div>
+                        <div>
+                            <h3 className="text-base font-semibold text-gray-900">Feature My Profile</h3>
+                            <p className="text-xs text-gray-400 mt-0.5">Appear at the top of search results with a "Featured" badge.</p>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <button
+                            onClick={() => handlePayment(199, "Featured Listing - 1 Week", 0, currentTier).then(() =>
+                                fetch("/api/ad/purchase", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId, type: "SEARCH_TOP", duration: "week" }) })
+                            )}
+                            disabled={paymentLoading}
+                            className="p-4 border-2 border-gray-200 rounded-xl hover:border-amber-300 transition-colors text-left"
+                        >
+                            <p className="text-sm font-semibold text-gray-900">1 Week</p>
+                            <p className="text-lg font-bold text-amber-600 mt-1">₹199</p>
+                        </button>
+                        <button
+                            onClick={() => handlePayment(499, "Featured Listing - 1 Month", 0, currentTier).then(() =>
+                                fetch("/api/ad/purchase", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId, type: "SEARCH_TOP", duration: "month" }) })
+                            )}
+                            disabled={paymentLoading}
+                            className="p-4 border-2 border-amber-300 bg-amber-50 rounded-xl hover:border-amber-400 transition-colors text-left relative"
+                        >
+                            <span className="absolute -top-2 right-3 bg-amber-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">Best Value</span>
+                            <p className="text-sm font-semibold text-gray-900">1 Month</p>
+                            <p className="text-lg font-bold text-amber-600 mt-1">₹499</p>
+                        </button>
+                    </div>
+                </div>
+            )}
+
             {/* Quick Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6">

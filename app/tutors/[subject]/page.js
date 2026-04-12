@@ -21,7 +21,7 @@ export default async function SubjectDirectory({ params }) {
         where: {
             isActive: true,
             subjects: {
-                hasSome: [capitalizedSubject],
+                hasSome: [capitalizedSubject, decodedSubject.toUpperCase(), decodedSubject.toLowerCase()],
             }
         },
         include: {

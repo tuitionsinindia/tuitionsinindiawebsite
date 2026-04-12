@@ -4,8 +4,8 @@ import prisma from "@/lib/prisma";
 export const dynamic = 'force-dynamic';
 
 // POST /api/cron/reset-credits
-// Secured by AUDIT_SEED_KEY header. Run on the 1st of each month.
-// Resets FREE-tier tutors to 5 credits.
+// Secured by x-cron-key header. Run on the 1st of each month.
+// Refreshes subscription credits: PRO → 30, ELITE → 100. FREE stays unchanged.
 export async function POST(request) {
     const authHeader = request.headers.get("x-cron-key");
     if (!authHeader || authHeader !== process.env.AUDIT_SEED_KEY) {
@@ -13,20 +13,22 @@ export async function POST(request) {
     }
 
     try {
-        const result = await prisma.user.updateMany({
-            where: {
-                role: "TUTOR",
-                subscriptionTier: "FREE"
-            },
-            data: {
-                credits: 5
-            }
-        });
+        const [proResult, eliteResult] = await Promise.all([
+            prisma.user.updateMany({
+                where: { subscriptionTier: "PRO", subscriptionStatus: "ACTIVE" },
+                data: { credits: 30 },
+            }),
+            prisma.user.updateMany({
+                where: { subscriptionTier: "ELITE", subscriptionStatus: "ACTIVE" },
+                data: { credits: 100 },
+            }),
+        ]);
 
         return NextResponse.json({
             success: true,
-            resetCount: result.count,
-            message: `Reset credits to 5 for ${result.count} FREE tutors`
+            proReset: proResult.count,
+            eliteReset: eliteResult.count,
+            message: `Monthly credit refresh: ${proResult.count} PRO users → 30 credits, ${eliteResult.count} ELITE users → 100 credits`,
         });
     } catch (error) {
         console.error("Credit reset error:", error);
