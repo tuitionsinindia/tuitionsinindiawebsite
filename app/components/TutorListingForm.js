@@ -162,6 +162,18 @@ export default function TutorListingForm({ user, onComplete }) {
                     </div>
 
                     <div className="space-y-2">
+                        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">About You</label>
+                        <textarea
+                            value={form.bio || ""}
+                            onChange={(e) => setForm({ ...form, bio: e.target.value })}
+                            rows={3}
+                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-sm resize-none"
+                            placeholder="Tell students about your teaching style, qualifications, and what makes you stand out..."
+                        />
+                        <p className="text-xs text-gray-400">This will appear on your public profile.</p>
+                    </div>
+
+                    <div className="space-y-2">
                         <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Languages you teach in</label>
                         <div className="flex flex-wrap gap-2">
                             {["ENGLISH", "HINDI", "MARATHI", "BENGALI", "TAMIL", "FRENCH"].map(lang => (
