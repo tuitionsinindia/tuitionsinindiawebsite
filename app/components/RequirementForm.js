@@ -44,11 +44,20 @@ export default function RequirementForm({ user, prefill = {}, onStepChange, onCo
         setIsDetecting(true);
         if ("geolocation" in navigator) {
             navigator.geolocation.getCurrentPosition(async (pos) => {
+                const { latitude, longitude } = pos.coords;
                 try {
-                    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`);
+                    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
                     const data = await res.json();
                     const city = data.address.city || data.address.town || data.address.state_district || "";
                     if (city) setForm(f => ({ ...f, location: city }));
+                    // Save lat/lng to user record for map-based distance sorting
+                    if (user?.id) {
+                        fetch("/api/user/update", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ userId: user.id, lat: latitude, lng: longitude }),
+                        }).catch(() => {});
+                    }
                 } catch {} finally { setIsDetecting(false); }
             }, () => setIsDetecting(false));
         }

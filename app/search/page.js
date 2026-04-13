@@ -32,13 +32,20 @@ import MapComponent from "../components/MapComponent";
 import { trackSearch, trackViewProfile } from "@/lib/analytics";
 
 // ─── Sign-up Modal ─────────────────────────────────────────────────────────────
-function SignupModal({ onClose, onSuccess, prefill = {} }) {
+// signupRole: "STUDENT" when searching for tutors, "TUTOR" when searching for students
+function SignupModal({ onClose, onSuccess, prefill = {}, signupRole = "STUDENT" }) {
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [phone, setPhone] = useState("");
     const [otp, setOtp] = useState("");
     const [userId, setUserId] = useState(null);
+
+    const roleLabel = signupRole === "TUTOR" ? "tutor" : "student";
+    const roleTitle = signupRole === "TUTOR" ? "Sign up as a Tutor" : "Sign up to contact tutors";
+    const roleDesc = signupRole === "TUTOR"
+        ? "Create your free tutor account to connect with students."
+        : "Create your free student account to unlock tutor contact details.";
 
     const handleSendOTP = async (e) => {
         e.preventDefault();
@@ -48,7 +55,7 @@ function SignupModal({ onClose, onSuccess, prefill = {} }) {
             const res = await fetch("/api/auth/otp/send", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ phone, role: "STUDENT", isRegistration: true }),
+                body: JSON.stringify({ phone, role: signupRole, isRegistration: true }),
             });
             const data = await res.json();
             if (data.success) { setUserId(data.userId); setStep(2); }
@@ -89,13 +96,10 @@ function SignupModal({ onClose, onSuccess, prefill = {} }) {
                         <GraduationCap size={20} className="text-blue-600" />
                     </div>
                     <h2 className="text-lg font-bold text-gray-900">
-                        {step === 1 ? "Sign up to contact tutors" : "Enter OTP"}
+                        {step === 1 ? roleTitle : "Enter OTP"}
                     </h2>
                     <p className="text-sm text-gray-500 mt-1">
-                        {step === 1
-                            ? "Create your free student account to unlock tutor contact details."
-                            : `Enter the 6-digit code sent to +91 ${phone}`
-                        }
+                        {step === 1 ? roleDesc : `Enter the 6-digit code sent to +91 ${phone}`}
                     </p>
                     {prefill.subject && (
                         <div className="mt-2 inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 text-xs font-medium px-3 py-1 rounded-full">
@@ -202,6 +206,14 @@ function SearchResultsContent() {
     const [loggedInUser, setLoggedInUser] = useState(null);
     const [signupModal, setSignupModal] = useState({ open: false, targetTutor: null });
 
+    // User's geolocation (for map + distance sort)
+    const [userLat, setUserLat] = useState(queryLat ? parseFloat(queryLat) : null);
+    const [userLng, setUserLng] = useState(queryLng ? parseFloat(queryLng) : null);
+    const [isLocating, setIsLocating] = useState(false);
+
+    // Sign-up role: if searching for tutors → sign up as student, and vice versa
+    const signupRole = queryRole === "STUDENT" ? "TUTOR" : "STUDENT";
+
     // Filter & Sort State
     const [grade, setGrade] = useState(searchParams.get("grade") || "");
     const [maxRate, setMaxRate] = useState(10000);
@@ -226,6 +238,34 @@ function SearchResultsContent() {
             .catch(() => {});
     }, []);
 
+    const detectLocation = () => {
+        if (!("geolocation" in navigator)) return;
+        setIsLocating(true);
+        navigator.geolocation.getCurrentPosition(
+            async (pos) => {
+                const { latitude, longitude } = pos.coords;
+                setUserLat(latitude);
+                setUserLng(longitude);
+                // Save to user record if logged in
+                if (loggedInUser?.id) {
+                    fetch("/api/user/update", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ userId: loggedInUser.id, lat: latitude, lng: longitude }),
+                    }).catch(() => {});
+                }
+                // Re-fetch with coordinates for distance sorting
+                const p = new URLSearchParams(searchParams.toString());
+                p.set("lat", latitude.toString());
+                p.set("lng", longitude.toString());
+                p.set("sortBy", "distance");
+                router.push(`/search?${p.toString()}`);
+                setIsLocating(false);
+            },
+            () => setIsLocating(false)
+        );
+    };
+
     useEffect(() => {
         try {
             if (querySubject) localStorage.setItem("last_browsed_subject", querySubject);
@@ -233,7 +273,7 @@ function SearchResultsContent() {
             if (queryLocation) localStorage.setItem("last_browsed_location", queryLocation);
         } catch (e) {}
         fetchResults();
-    }, [querySubject, queryLocation, queryRole, queryLat, queryLng, grade, maxRate, sortBy, verifiedOnly, gender, experience, teachingMode, board, listingType]);
+    }, [querySubject, queryLocation, queryRole, queryLat, queryLng, grade, maxRate, sortBy, verifiedOnly, gender, experience, teachingMode, board, listingType, userLat, userLng]);
 
     const fetchResults = async () => {
         setLoading(true);
@@ -244,8 +284,10 @@ function SearchResultsContent() {
                 grade, maxRate: maxRate.toString(), sortBy,
                 verified: verifiedOnly.toString(), gender, experience, teachingMode, board, listingType
             });
-            if (queryLat) params.set("lat", queryLat);
-            if (queryLng) params.set("lng", queryLng);
+            const effectiveLat = userLat || queryLat;
+            const effectiveLng = userLng || queryLng;
+            if (effectiveLat) params.set("lat", effectiveLat.toString());
+            if (effectiveLng) params.set("lng", effectiveLng.toString());
             const res = await fetch(`/api/search/tutors?${params.toString()}`);
             const data = await res.json();
             if (res.ok && Array.isArray(data)) {
@@ -321,6 +363,7 @@ function SearchResultsContent() {
                     onClose={() => setSignupModal({ open: false, targetTutor: null })}
                     onSuccess={handleSignupSuccess}
                     prefill={{ subject: querySubject, grade }}
+                    signupRole={signupRole}
                 />
             )}
 
@@ -681,18 +724,35 @@ function SearchResultsContent() {
                 </div>
 
                 {/* ── RIGHT: STICKY MAP ── */}
-                <div className="hidden xl:flex flex-col w-[380px] shrink-0 sticky top-16 h-[calc(100vh-4rem)] p-3 gap-3">
-                    <div className="flex-1 min-h-0">
-                        <MapComponent tutors={results} />
+                <div className="hidden lg:flex flex-col w-[360px] xl:w-[420px] shrink-0 sticky top-16 h-[calc(100vh-4rem)] p-3 gap-2">
+                    {/* Map header row */}
+                    <div className="flex items-center justify-between px-1">
+                        <p className="text-xs font-semibold text-gray-500">
+                            {results.length > 0 ? `${results.length} tutors on map` : "Map view"}
+                        </p>
+                        <button
+                            onClick={detectLocation}
+                            disabled={isLocating}
+                            className="flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
+                        >
+                            {isLocating
+                                ? <><div className="w-3 h-3 border-2 border-blue-300 border-t-blue-600 rounded-full animate-spin" /> Locating...</>
+                                : <><MapPin size={12} /> Near me</>
+                            }
+                        </button>
                     </div>
-                    {/* Post requirement shortcut */}
+                    <div className="flex-1 min-h-0">
+                        <MapComponent tutors={results} userLat={userLat} userLng={userLng} />
+                    </div>
                     {!loggedInUser && (
-                        <div className="bg-white border border-gray-200 rounded-xl p-4">
-                            <p className="text-sm font-semibold text-gray-800 mb-1">Looking for a tutor?</p>
-                            <p className="text-xs text-gray-500 mb-3">Sign up free and post your requirement to get tutor responses directly.</p>
+                        <div className="bg-white border border-gray-200 rounded-xl p-3 flex items-center justify-between gap-3">
+                            <div className="min-w-0">
+                                <p className="text-xs font-semibold text-gray-800">Post your requirement free</p>
+                                <p className="text-xs text-gray-400">Let tutors come to you</p>
+                            </div>
                             <button onClick={() => setSignupModal({ open: true, targetTutor: null })}
-                                className="w-full py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors">
-                                Sign Up Free
+                                className="px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 transition-colors shrink-0">
+                                Sign Up
                             </button>
                         </div>
                     )}
