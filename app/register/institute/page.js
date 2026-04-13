@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Building2, ArrowLeft, ShieldCheck, Building, Users, Crown, Loader2, CheckCircle2 } from "lucide-react";
 import LeadCaptureFlow from "../../components/LeadCaptureFlow";
@@ -20,6 +20,7 @@ function loadRazorpayScript() {
 
 export default function InstituteRegisterPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [user, setUser] = useState(null);
     const [step, setStep] = useState(1); // 1: Capture, 2: Listing, 3: Payment, 4: Done
     const [paymentLoading, setPaymentLoading] = useState(false);
@@ -132,7 +133,7 @@ export default function InstituteRegisterPage() {
             <div className="max-w-2xl mx-auto px-4 py-12">
 
                 <Link
-                    href="/register"
+                    href={searchParams.get("subject") || searchParams.get("location") ? "/search" : "/register"}
                     className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-gray-700 transition-colors mb-10"
                 >
                     <ArrowLeft size={16} />
