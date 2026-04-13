@@ -28,6 +28,7 @@ import {
 import { ALL_SUBJECTS } from "../../lib/subjects";
 import SkeletonLoader from "../components/SkeletonLoader";
 import MapComponent from "../components/MapComponent";
+import { trackSearch, trackViewProfile } from "@/lib/analytics";
 
 function SearchResultsContent() {
     const searchParams = useSearchParams();
@@ -102,6 +103,7 @@ function SearchResultsContent() {
 
             if (res.ok && Array.isArray(data)) {
                 setResults(data);
+                trackSearch({ subject: querySubject, location: queryLocation, role: queryRole, results_count: data.length });
             } else if (data && data.error) {
                 setError(data.error);
                 setResults([]);

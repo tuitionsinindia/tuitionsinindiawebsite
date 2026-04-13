@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Phone, ArrowRight, Loader2, ArrowLeft, ShieldCheck } from "lucide-react";
+import { trackSignUp } from "@/lib/analytics";
 
 export default function LeadCaptureFlow({ initialRole = "STUDENT", onComplete }) {
     const [step, setStep] = useState(1);
@@ -39,7 +40,7 @@ export default function LeadCaptureFlow({ initialRole = "STUDENT", onComplete })
                 body: JSON.stringify({ userId, phone, otp }),
             });
             const data = await res.json();
-            if (data.success) { onComplete(data.user); }
+            if (data.success) { trackSignUp(initialRole); onComplete(data.user); }
             else { setError(data.error || "Invalid OTP."); }
         } catch { setError("Verification failed. Please try again."); }
         finally { setLoading(false); }

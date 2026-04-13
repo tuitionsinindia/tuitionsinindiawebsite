@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { BookOpen, MapPin, ArrowRight, ArrowLeft, Loader2, User, Mail, Navigation } from "lucide-react";
 import { BROAD_CATEGORIES, getSubjectsForCategory, getCategoryForSubject, GRADE_OPTIONS, CITY_OPTIONS } from "@/lib/subjects";
+import { trackEnquiry } from "@/lib/analytics";
 
 export default function RequirementForm({ user, prefill = {}, onStepChange, onComplete }) {
     const [loading, setLoading] = useState(false);
@@ -81,7 +82,7 @@ export default function RequirementForm({ user, prefill = {}, onStepChange, onCo
                     description: form.description || `Looking for a ${form.subjects.join(", ")} tutor${form.location ? ` in ${form.location}` : ""}.`,
                 }),
             });
-            if (res.ok) onComplete();
+            if (res.ok) { trackEnquiry(user?.id, form.subjects.join(", ")); onComplete(); }
         } catch (err) { console.error(err); }
         finally { setLoading(false); }
     };

@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Script from "next/script";
+import { trackPurchase, trackBeginCheckout } from "@/lib/analytics";
 import {
     LayoutDashboard,
     Search,
@@ -27,7 +28,9 @@ import {
     Users,
     Zap,
     Sparkles,
-    Crown
+    Crown,
+    Copy,
+    Gift
 } from "lucide-react";
 import DashboardHeader from "@/app/components/DashboardHeader";
 import Chat from "@/app/components/chat/Chat";
@@ -62,6 +65,8 @@ function DashboardContent() {
     const [showBatchForm, setShowBatchForm] = useState(false);
     const [processingPayment, setProcessingPayment] = useState(null);
     const [activeAds, setActiveAds] = useState([]);
+    const [referralData, setReferralData] = useState(null);
+    const [copiedRef, setCopiedRef] = useState(false);
 
     useEffect(() => {
         const savedId = localStorage.getItem("ti_active_tutor_id");
@@ -79,6 +84,7 @@ function DashboardContent() {
             fetchChatSessions();
             fetchTransactions();
             fetchActiveAds();
+            fetchReferralData();
             if (activeTab === "HOME" || activeTab === "LEADS") fetchLeads();
             if (activeTab === "BATCHES") fetchCourses();
         }
@@ -144,6 +150,20 @@ function DashboardContent() {
         } catch (err) { console.error(err); }
     };
 
+    const fetchReferralData = async () => {
+        try {
+            const res = await fetch("/api/referral");
+            if (res.ok) setReferralData(await res.json());
+        } catch {}
+    };
+
+    const copyReferralLink = () => {
+        if (!referralData?.referralLink) return;
+        navigator.clipboard.writeText(referralData.referralLink);
+        setCopiedRef(true);
+        setTimeout(() => setCopiedRef(false), 2000);
+    };
+
     const handleUnlock = async (leadId) => {
         if (!confirm("This will use 1 credit to unlock this student's contact. Continue?")) return;
         try {
@@ -164,6 +184,7 @@ function DashboardContent() {
 
     const handleCreditPurchase = async (pack) => {
         setProcessingPayment(pack.id);
+        trackBeginCheckout(pack.price / 100, "INR", `${pack.credits} Credits`);
         try {
             const orderRes = await fetch("/api/payment/order", {
                 method: "POST",
@@ -198,6 +219,7 @@ function DashboardContent() {
                     });
                     const result = await verifyRes.json();
                     if (result.success) {
+                        trackPurchase(pack.price / 100, "INR", `${pack.credits} Credits`);
                         fetchTutorData();
                         fetchTransactions();
                         alert(`${pack.credits} credits added successfully!`);
@@ -223,6 +245,7 @@ function DashboardContent() {
 
     const handleFeaturedPurchase = async (option) => {
         setProcessingPayment(option.id);
+        trackBeginCheckout(option.price / 100, "INR", `Featured - ${option.label}`);
         try {
             const orderRes = await fetch("/api/payment/order", {
                 method: "POST",
@@ -257,6 +280,7 @@ function DashboardContent() {
                     });
                     const result = await verifyRes.json();
                     if (result.success) {
+                        trackPurchase(option.price / 100, "INR", `Featured - ${option.label}`);
                         await fetch("/api/ad/purchase", {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
@@ -501,6 +525,63 @@ function DashboardContent() {
                                         ))}
                                     </div>
                                 </div>
+
+                                {/* Refer & Earn Section */}
+                                {referralData && (
+                                    <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
+                                        <div className="flex items-center gap-3 mb-5">
+                                            <div className="size-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                                                <Gift size={20} />
+                                            </div>
+                                            <div>
+                                                <h3 className="text-lg font-bold text-gray-900">Refer and Earn</h3>
+                                                <p className="text-sm text-gray-400">Refer 3 tutors and get 1 month of Pro free</p>
+                                            </div>
+                                        </div>
+
+                                        {/* Referral link */}
+                                        <div className="flex items-center gap-2 mb-4">
+                                            <div className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-600 truncate">
+                                                {referralData.referralLink}
+                                            </div>
+                                            <button
+                                                onClick={copyReferralLink}
+                                                className="px-4 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors flex items-center gap-2 shrink-0"
+                                            >
+                                                <Copy size={14} /> {copiedRef ? "Copied!" : "Copy"}
+                                            </button>
+                                        </div>
+
+                                        {/* Stats */}
+                                        <div className="grid grid-cols-2 gap-4 mb-4">
+                                            <div className="bg-gray-50 rounded-xl p-4 text-center">
+                                                <p className="text-2xl font-bold text-gray-900">{referralData.totalReferrals}</p>
+                                                <p className="text-xs text-gray-500 mt-1">Tutors Referred</p>
+                                            </div>
+                                            <div className="bg-gray-50 rounded-xl p-4 text-center">
+                                                <p className="text-2xl font-bold text-emerald-600">{Math.floor(referralData.totalReferrals / 3)}</p>
+                                                <p className="text-xs text-gray-500 mt-1">Free Pro Months Earned</p>
+                                            </div>
+                                        </div>
+
+                                        {/* Progress to next reward */}
+                                        {referralData.totalReferrals % 3 !== 0 && (
+                                            <div className="bg-blue-50 rounded-lg p-3 text-sm text-blue-700">
+                                                {3 - (referralData.totalReferrals % 3)} more referral{3 - (referralData.totalReferrals % 3) > 1 ? "s" : ""} to earn your next free Pro month!
+                                            </div>
+                                        )}
+
+                                        {/* WhatsApp share */}
+                                        <a
+                                            href={`https://wa.me/?text=${encodeURIComponent(`Join TuitionsInIndia and grow your tutoring career — zero commission, direct student contact! Sign up here: ${referralData.referralLink}`)}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="mt-4 w-full py-3 bg-emerald-600 text-white rounded-xl text-sm font-semibold hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2"
+                                        >
+                                            Share on WhatsApp
+                                        </a>
+                                    </div>
+                                )}
 
                                 {/* Upgrade CTA */}
                                 {tutorData?.subscriptionTier === 'FREE' && (

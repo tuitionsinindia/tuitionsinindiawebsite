@@ -6,6 +6,7 @@ import {
     Phone, Mail, ArrowLeft, Briefcase, Languages, Users
 } from "lucide-react";
 import { WhatsAppShareButton, ShareButton } from "@/app/components/ShareButtons";
+import TrackProfileView from "@/app/components/TrackProfileView";
 
 export async function generateMetadata({ params }) {
     const { id } = await params;
@@ -48,6 +49,7 @@ export default async function TutorProfilePage({ params }) {
 
     if (!listing) notFound();
 
+    const trackSubject = listing.subjects?.[0] || "Unknown";
     const tutor = listing.tutor;
     const isPremium = ["PRO", "ELITE"].includes(tutor.subscriptionTier);
 
@@ -69,6 +71,7 @@ export default async function TutorProfilePage({ params }) {
 
     return (
         <div className="min-h-screen bg-gray-50">
+            <TrackProfileView tutorId={listing.id} subject={trackSubject} />
             {/* Header */}
             <div className="bg-white border-b border-gray-100">
                 <div className="max-w-4xl mx-auto px-6 py-4">

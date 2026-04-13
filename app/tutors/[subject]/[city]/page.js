@@ -1,3 +1,4 @@
+import prisma from "@/lib/prisma";
 import DirectoryLayout from "@/components/DirectoryLayout";
 import { calculateMatchScore } from "@/lib/matchEngine";
 

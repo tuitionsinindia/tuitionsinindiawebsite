@@ -85,7 +85,19 @@ export default async function sitemap() {
             priority: 0.6,
         }));
 
-        return [...routes, ...tutorRoutes, ...subjectRoutes, ...directoryRoutes];
+        // Blog posts
+        const blogPosts = await prisma.blogPost.findMany({
+            where: { isPublished: true },
+            select: { slug: true, updatedAt: true },
+        });
+        const blogRoutes = blogPosts.map(post => ({
+            url: `${baseUrl}/blog/${post.slug}`,
+            lastModified: post.updatedAt || new Date(),
+            changeFrequency: 'weekly',
+            priority: 0.7,
+        }));
+
+        return [...routes, ...tutorRoutes, ...subjectRoutes, ...directoryRoutes, ...blogRoutes];
     } catch (error) {
         console.error("Sitemap generation error:", error);
         // Fallback to returning just the static routes if DB fails during build

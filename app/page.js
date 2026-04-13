@@ -52,10 +52,10 @@ export default function Home() {
                         India's #1 Tutor Marketplace
                     </span>
                     <h1 className="text-3xl md:text-5xl font-bold text-white mb-3 leading-tight">
-                        Find the Right Tutor, <span className="text-yellow-300">Near You</span>
+                        Find the Right Tutor <span className="text-yellow-300">Near You</span>
                     </h1>
                     <p className="text-blue-100 text-sm md:text-base mb-6 max-w-xl mx-auto">
-                        Connect with verified tutors for home tuition, online classes, or coaching centres across India.
+                        Free to search. No commission. Connect directly with verified tutors for home tuition, online classes, or coaching centres across India.
                     </p>
 
                     {/* Search Box */}

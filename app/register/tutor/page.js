@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Award, ArrowLeft, CheckCircle2 } from "lucide-react";
 import LeadCaptureFlow from "../../components/LeadCaptureFlow";
@@ -9,8 +9,21 @@ import TutorListingForm from "../../components/TutorListingForm";
 
 export default function TutorRegisterPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const refCode = searchParams.get("ref");
     const [user, setUser] = useState(null);
     const [step, setStep] = useState(1);
+
+    const applyReferral = async (userId) => {
+        if (!refCode) return;
+        try {
+            await fetch("/api/referral", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ userId, referralCode: refCode }),
+            });
+        } catch {}
+    };
 
     return (
         <div className="min-h-screen bg-gray-50 pt-28 pb-16">
@@ -55,7 +68,7 @@ export default function TutorRegisterPage() {
                 {/* Form Card */}
                 <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm">
                     {step === 1 && (
-                        <LeadCaptureFlow initialRole="TUTOR" onComplete={(verifiedUser) => { setUser(verifiedUser); setStep(2); }} />
+                        <LeadCaptureFlow initialRole="TUTOR" onComplete={(verifiedUser) => { setUser(verifiedUser); applyReferral(verifiedUser.id); setStep(2); }} />
                     )}
                     {step === 2 && (
                         <TutorListingForm user={user} onComplete={() => setStep(3)} />
