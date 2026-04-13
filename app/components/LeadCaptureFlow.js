@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Phone, ArrowRight, Loader2, ArrowLeft, ShieldCheck } from "lucide-react";
+import { Phone, ArrowRight, Loader2, ArrowLeft, ShieldCheck, Mail } from "lucide-react";
 import { trackSignUp } from "@/lib/analytics";
 
 export default function LeadCaptureFlow({ initialRole = "STUDENT", onComplete }) {
@@ -9,6 +9,7 @@ export default function LeadCaptureFlow({ initialRole = "STUDENT", onComplete })
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [phone, setPhone] = useState("");
+    const [email, setEmail] = useState("");
     const [otp, setOtp] = useState("");
     const [userId, setUserId] = useState(null);
 
@@ -40,7 +41,17 @@ export default function LeadCaptureFlow({ initialRole = "STUDENT", onComplete })
                 body: JSON.stringify({ userId, phone, otp }),
             });
             const data = await res.json();
-            if (data.success) { trackSignUp(initialRole); onComplete(data.user); }
+            if (data.success) {
+                trackSignUp(initialRole);
+                if (email && data.user?.id) {
+                    fetch("/api/user/update", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ userId: data.user.id, email }),
+                    }).catch(() => {});
+                }
+                onComplete(data.user);
+            }
             else { setError(data.error || "Invalid OTP."); }
         } catch { setError("Verification failed. Please try again."); }
         finally { setLoading(false); }
@@ -68,6 +79,18 @@ export default function LeadCaptureFlow({ initialRole = "STUDENT", onComplete })
                                 className="w-full pl-[4.5rem] pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
                                 placeholder="10-digit number"
                                 autoFocus
+                            />
+                        </div>
+                    </div>
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-medium text-gray-500">Email (optional — for notifications)</label>
+                        <div className="relative">
+                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" size={16} />
+                            <input
+                                type="email" value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+                                placeholder="your@email.com"
                             />
                         </div>
                     </div>
