@@ -7,14 +7,18 @@ export const metadata = {
     description: "Tips for students, parents, and tutors. Exam preparation guides, study advice, and how to find the right tutor in India.",
 };
 
-export const revalidate = 3600; // revalidate every hour
+export const dynamic = "force-dynamic";
 
 export default async function BlogPage() {
-    const posts = await prisma.blogPost.findMany({
-        where: { isPublished: true },
-        orderBy: { publishedAt: "desc" },
-        take: 20,
-    });
+    let posts = [];
+    try {
+        posts = await prisma.blogPost.findMany({
+            where: { isPublished: true },
+            orderBy: { publishedAt: "desc" },
+            take: 20,
+        });
+    } catch {}
+
 
     const categories = [...new Set(posts.map(p => p.category))];
 

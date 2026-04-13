@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { getSession } from "@/lib/session";
+import { verifyToken, COOKIE_NAME } from "@/lib/session";
 
 // GET — list blog posts (public: published only, admin: all)
 export async function GET(req) {
@@ -8,7 +8,8 @@ export async function GET(req) {
     const all = searchParams.get("all") === "true";
 
     if (all) {
-        const session = await getSession(req);
+        const cookie = req.cookies.get(COOKIE_NAME);
+        const session = cookie ? verifyToken(cookie.value) : null;
         const user = session?.userId ? await prisma.user.findUnique({ where: { id: session.userId }, select: { role: true } }) : null;
         if (user?.role !== "ADMIN") {
             return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
@@ -27,7 +28,8 @@ export async function GET(req) {
 // POST — create a blog post (admin only)
 export async function POST(req) {
     try {
-        const session = await getSession(req);
+        const cookie = req.cookies.get(COOKIE_NAME);
+        const session = cookie ? verifyToken(cookie.value) : null;
         const user = session?.userId ? await prisma.user.findUnique({ where: { id: session.userId }, select: { role: true } }) : null;
         if (user?.role !== "ADMIN") {
             return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
@@ -68,7 +70,8 @@ export async function POST(req) {
 // PUT — update a blog post (admin only)
 export async function PUT(req) {
     try {
-        const session = await getSession(req);
+        const cookie = req.cookies.get(COOKIE_NAME);
+        const session = cookie ? verifyToken(cookie.value) : null;
         const user = session?.userId ? await prisma.user.findUnique({ where: { id: session.userId }, select: { role: true } }) : null;
         if (user?.role !== "ADMIN") {
             return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
