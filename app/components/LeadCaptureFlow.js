@@ -1,10 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Phone, ArrowRight, Loader2, ArrowLeft, ShieldCheck, Mail, User } from "lucide-react";
+import { Phone, ArrowRight, Loader2, ArrowLeft, ShieldCheck, Mail, User, CheckCircle2 } from "lucide-react";
 import { trackSignUp } from "@/lib/analytics";
 
-// Inline Google "G" SVG — no external dependency
 function GoogleIcon({ size = 18 }) {
     return (
         <svg width={size} height={size} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -17,44 +16,59 @@ function GoogleIcon({ size = 18 }) {
 }
 
 export default function LeadCaptureFlow({ initialRole = "STUDENT", onComplete }) {
-    const [step, setStep] = useState(1); // 1=entry, 2=OTP verify, 3=Google phone verify
+    // Steps: 1=phone, 2=OTP, 3=complete profile (Google or manual)
+    const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [phone, setPhone] = useState("");
-    const [email, setEmail] = useState("");
     const [otp, setOtp] = useState("");
     const [userId, setUserId] = useState(null);
-    const [googleUser, setGoogleUser] = useState(null); // { id, name, email, image, ... }
+    const [verifiedUser, setVerifiedUser] = useState(null);
 
-    // Listen for Google OAuth popup messages
+    // Profile completion (step 3)
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
+    const [googleConnected, setGoogleConnected] = useState(false);
+
+    // Listen for Google OAuth popup messages (step 3)
     const handleGoogleMessage = useCallback((event) => {
         if (event.origin !== window.location.origin) return;
-        const data = event.data;
-
-        if (data.type === "GOOGLE_AUTH_SUCCESS") {
-            const user = data.user;
-            if (user.phoneVerified && user.phone) {
-                // Returning Google user — already verified, go straight to complete
-                trackSignUp(initialRole);
-                onComplete(user);
-            } else {
-                // New Google user — needs phone verification
-                setGoogleUser(user);
-                setUserId(user.id);
-                setEmail(user.email || "");
-                setStep(3);
+        if (event.data.type === "GOOGLE_AUTH_SUCCESS") {
+            const gUser = event.data.user;
+            // Link Google to existing phone-verified user
+            if (verifiedUser?.id) {
+                fetch("/api/user/update", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        userId: verifiedUser.id,
+                        name: gUser.name || undefined,
+                        email: gUser.email || undefined,
+                    }),
+                }).catch(() => {});
             }
-        } else if (data.type === "GOOGLE_AUTH_ERROR") {
-            setError(data.error || "Google sign-in failed.");
+            setName(gUser.name || "");
+            setEmail(gUser.email || "");
+            setGoogleConnected(true);
+            // Auto-complete — Google filled everything
+            trackSignUp(initialRole);
+            onComplete({
+                ...verifiedUser,
+                name: gUser.name || verifiedUser.name,
+                email: gUser.email || verifiedUser.email,
+                image: gUser.image || verifiedUser.image,
+            });
+        } else if (event.data.type === "GOOGLE_AUTH_ERROR") {
+            setError(event.data.error || "Google sign-in failed.");
         }
-    }, [initialRole, onComplete]);
+    }, [initialRole, onComplete, verifiedUser]);
 
     useEffect(() => {
         window.addEventListener("message", handleGoogleMessage);
         return () => window.removeEventListener("message", handleGoogleMessage);
     }, [handleGoogleMessage]);
 
-    const handleGoogleSignUp = () => {
+    const handleGoogleConnect = () => {
         setError("");
         const w = 500, h = 600;
         const left = window.screenX + (window.outerWidth - w) / 2;
@@ -74,18 +88,14 @@ export default function LeadCaptureFlow({ initialRole = "STUDENT", onComplete })
         setLoading(true);
         setError("");
         try {
-            const body = { phone, role: initialRole, isRegistration: true };
-            // If Google user is verifying phone, pass their userId
-            if (googleUser?.id) body.userId = googleUser.id;
-
             const res = await fetch("/api/auth/otp/send", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(body),
+                body: JSON.stringify({ phone, role: initialRole, isRegistration: true }),
             });
             const data = await res.json();
             if (data.success) {
-                if (!googleUser) setUserId(data.userId); // phone flow sets userId from response
+                setUserId(data.userId);
                 setStep(2);
             } else {
                 setError(data.error || "Failed to send OTP.");
@@ -106,16 +116,8 @@ export default function LeadCaptureFlow({ initialRole = "STUDENT", onComplete })
             });
             const data = await res.json();
             if (data.success) {
-                trackSignUp(initialRole);
-                // Save email if provided (phone flow) and not already set
-                if (email && data.user?.id && !googleUser) {
-                    fetch("/api/user/update", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ userId: data.user.id, email }),
-                    }).catch(() => {});
-                }
-                onComplete(data.user);
+                setVerifiedUser(data.user);
+                setStep(3); // Go to profile completion
             } else {
                 setError(data.error || "Invalid OTP.");
             }
@@ -123,45 +125,88 @@ export default function LeadCaptureFlow({ initialRole = "STUDENT", onComplete })
         finally { setLoading(false); }
     };
 
-    // ─── Step 3: Google user verifying phone ────────────────────────────────────
-    if (step === 3 && googleUser) {
+    const handleManualComplete = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+            if (verifiedUser?.id && (name || email)) {
+                await fetch("/api/user/update", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        userId: verifiedUser.id,
+                        name: name || undefined,
+                        email: email || undefined,
+                    }),
+                });
+            }
+            trackSignUp(initialRole);
+            onComplete({ ...verifiedUser, name: name || verifiedUser.name, email: email || verifiedUser.email });
+        } catch {
+            trackSignUp(initialRole);
+            onComplete(verifiedUser);
+        } finally { setLoading(false); }
+    };
+
+    // ─── Step 3: Complete your profile ──────────────────────────────────────────
+    if (step === 3 && verifiedUser) {
         return (
             <div className="space-y-5">
-                {/* Google profile confirmation */}
-                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
-                    {googleUser.image ? (
-                        <img src={googleUser.image} alt="" className="w-10 h-10 rounded-full" referrerPolicy="no-referrer" />
-                    ) : (
-                        <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                            <User size={18} className="text-blue-600" />
-                        </div>
-                    )}
-                    <div className="min-w-0">
-                        <p className="text-sm font-semibold text-gray-900 truncate">{googleUser.name}</p>
-                        <p className="text-xs text-gray-500 truncate">{googleUser.email}</p>
+                {/* Verified confirmation */}
+                <div className="flex items-center gap-2.5 p-3 bg-emerald-50 rounded-xl border border-emerald-100">
+                    <CheckCircle2 size={18} className="text-emerald-600 shrink-0" />
+                    <div>
+                        <p className="text-sm font-semibold text-emerald-900">Phone verified</p>
+                        <p className="text-xs text-emerald-600">+91 {phone}</p>
                     </div>
                 </div>
 
                 <div>
-                    <h2 className="text-lg font-bold text-gray-900">Verify your mobile number</h2>
-                    <p className="text-sm text-gray-500 mt-1">Almost done! We need your phone number for tutors to contact you.</p>
+                    <h2 className="text-lg font-bold text-gray-900">Complete your profile</h2>
+                    <p className="text-sm text-gray-500 mt-1">Connect Google to auto-fill your details, or enter them manually.</p>
                 </div>
 
-                {/* If OTP sent, show OTP input */}
-                {step === 3 && otp !== "" || false ? null : null}
+                {/* Google Connect */}
+                <button
+                    type="button"
+                    onClick={handleGoogleConnect}
+                    className="w-full py-3 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all flex items-center justify-center gap-3 shadow-sm"
+                >
+                    <GoogleIcon size={18} />
+                    Connect with Google
+                </button>
 
-                <form onSubmit={handleSendOTP} className="space-y-4">
+                {/* Divider */}
+                <div className="flex items-center gap-3">
+                    <div className="flex-1 h-px bg-gray-200" />
+                    <span className="text-xs text-gray-400 font-medium">or fill manually</span>
+                    <div className="flex-1 h-px bg-gray-200" />
+                </div>
+
+                {/* Manual name + email */}
+                <form onSubmit={handleManualComplete} className="space-y-4">
                     <div className="space-y-1.5">
-                        <label className="text-xs font-medium text-gray-500">Mobile Number</label>
+                        <label className="text-xs font-medium text-gray-500">Your Name</label>
                         <div className="relative">
-                            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" size={16} />
-                            <span className="absolute left-9 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium border-r border-gray-200 pr-2">+91</span>
+                            <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" size={16} />
                             <input
-                                required type="tel" pattern="[0-9]{10}" value={phone}
-                                onChange={(e) => setPhone(e.target.value)}
-                                className="w-full pl-[4.5rem] pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
-                                placeholder="10-digit number"
+                                type="text" value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+                                placeholder="Full name"
                                 autoFocus
+                            />
+                        </div>
+                    </div>
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-medium text-gray-500">Email</label>
+                        <div className="relative">
+                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" size={16} />
+                            <input
+                                type="email" value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+                                placeholder="your@email.com"
                             />
                         </div>
                     </div>
@@ -170,18 +215,27 @@ export default function LeadCaptureFlow({ initialRole = "STUDENT", onComplete })
                         disabled={loading} type="submit"
                         className="w-full py-3 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
                     >
-                        {loading ? <Loader2 className="animate-spin" size={16} /> : <>Send OTP <ArrowRight size={16} /></>}
+                        {loading ? <Loader2 className="animate-spin" size={16} /> : <>Continue <ArrowRight size={16} /></>}
                     </button>
                 </form>
+
+                {/* Skip option */}
+                <button
+                    type="button"
+                    onClick={() => { trackSignUp(initialRole); onComplete(verifiedUser); }}
+                    className="w-full text-sm text-gray-400 hover:text-blue-600 transition-colors font-medium"
+                >
+                    Skip for now
+                </button>
             </div>
         );
     }
 
-    // ─── Step 2: OTP verify (shared by phone and Google-phone flows) ────────────
+    // ─── Step 2: OTP verify ─────────────────────────────────────────────────────
     if (step === 2) {
         return (
             <div className="space-y-5">
-                <button onClick={() => { setStep(googleUser ? 3 : 1); setOtp(""); setError(""); }} className="text-gray-400 hover:text-blue-600 transition-colors">
+                <button onClick={() => { setStep(1); setOtp(""); setError(""); }} className="text-gray-400 hover:text-blue-600 transition-colors">
                     <ArrowLeft size={18} />
                 </button>
                 <div className="text-center">
@@ -206,13 +260,13 @@ export default function LeadCaptureFlow({ initialRole = "STUDENT", onComplete })
                     </button>
                 </form>
                 <p className="text-center text-xs text-gray-400">
-                    Didn't receive it? <button onClick={() => { setStep(googleUser ? 3 : 1); setError(""); setOtp(""); }} className="text-blue-600 hover:underline font-medium">Change number</button>
+                    Didn't receive it? <button onClick={() => { setStep(1); setError(""); setOtp(""); }} className="text-blue-600 hover:underline font-medium">Change number</button>
                 </p>
             </div>
         );
     }
 
-    // ─── Step 1: Entry — Google + Phone ─────────────────────────────────────────
+    // ─── Step 1: Phone only ─────────────────────────────────────────────────────
     return (
         <div className="space-y-5">
             <div className="flex items-center gap-2 text-xs text-emerald-600 font-medium">
@@ -221,23 +275,6 @@ export default function LeadCaptureFlow({ initialRole = "STUDENT", onComplete })
             <div>
                 <h2 className="text-lg font-bold text-gray-900">Enter your mobile number</h2>
                 <p className="text-sm text-gray-500 mt-1">We'll send a 6-digit OTP to verify your number.</p>
-            </div>
-
-            {/* Google Sign-up */}
-            <button
-                type="button"
-                onClick={handleGoogleSignUp}
-                className="w-full py-3 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all flex items-center justify-center gap-3 shadow-sm"
-            >
-                <GoogleIcon size={18} />
-                Continue with Google
-            </button>
-
-            {/* Divider */}
-            <div className="flex items-center gap-3">
-                <div className="flex-1 h-px bg-gray-200" />
-                <span className="text-xs text-gray-400 font-medium">or sign up with phone</span>
-                <div className="flex-1 h-px bg-gray-200" />
             </div>
 
             <form onSubmit={handleSendOTP} className="space-y-4">
@@ -251,18 +288,7 @@ export default function LeadCaptureFlow({ initialRole = "STUDENT", onComplete })
                             onChange={(e) => setPhone(e.target.value)}
                             className="w-full pl-[4.5rem] pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
                             placeholder="10-digit number"
-                        />
-                    </div>
-                </div>
-                <div className="space-y-1.5">
-                    <label className="text-xs font-medium text-gray-500">Email (optional — for notifications)</label>
-                    <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" size={16} />
-                        <input
-                            type="email" value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
-                            placeholder="your@email.com"
+                            autoFocus
                         />
                     </div>
                 </div>
