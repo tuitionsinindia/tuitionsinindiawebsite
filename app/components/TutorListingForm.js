@@ -67,7 +67,9 @@ export default function TutorListingForm({ user, onComplete }) {
         timings: [],
         boards: [],
         type: "PRIVATE",
-        maxSeats: 1
+        maxSeats: 1,
+        offersTrialClass: false,
+        trialDuration: 30,
     });
 
     const BOARDS = ["CBSE", "ICSE", "IB", "State Board", "IGCSE"];
@@ -444,6 +446,45 @@ export default function TutorListingForm({ user, onComplete }) {
                                 className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-sm font-semibold text-blue-600"
                             />
                         </div>
+                    </div>
+
+                    {/* Trial Class Toggle */}
+                    <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <Clock size={16} className="text-emerald-600" />
+                                <div>
+                                    <p className="text-sm font-semibold text-gray-900 leading-none">Offer a free trial class</p>
+                                    <p className="text-xs text-gray-500 leading-none mt-0.5">Students can book a free 30-min session to get started</p>
+                                </div>
+                            </div>
+                            <label className={`w-12 h-7 rounded-full p-0.5 flex items-center transition-all cursor-pointer shrink-0 ${form.offersTrialClass ? 'bg-emerald-500' : 'bg-gray-200'}`}>
+                                <div className={`size-6 bg-white rounded-full shadow transition-transform ${form.offersTrialClass ? 'translate-x-5' : 'translate-x-0'}`} />
+                                <input
+                                    type="checkbox"
+                                    className="hidden"
+                                    checked={form.offersTrialClass}
+                                    onChange={e => setForm({ ...form, offersTrialClass: e.target.checked })}
+                                />
+                            </label>
+                        </div>
+                        {form.offersTrialClass && (
+                            <div className="pt-2 border-t border-emerald-100 space-y-2">
+                                <p className="text-xs font-semibold text-emerald-700">Trial duration</p>
+                                <div className="flex gap-2">
+                                    {[30, 45, 60].map(d => (
+                                        <button
+                                            key={d}
+                                            type="button"
+                                            onClick={() => setForm({ ...form, trialDuration: d })}
+                                            className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-all ${form.trialDuration === d ? 'bg-emerald-500 text-white' : 'bg-white border border-emerald-200 text-emerald-700 hover:bg-emerald-100'}`}
+                                        >
+                                            {d} min
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     <button

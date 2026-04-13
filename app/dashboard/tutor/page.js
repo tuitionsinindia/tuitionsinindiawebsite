@@ -67,6 +67,9 @@ function DashboardContent() {
     const [activeAds, setActiveAds] = useState([]);
     const [referralData, setReferralData] = useState(null);
     const [copiedRef, setCopiedRef] = useState(false);
+    const [trials, setTrials] = useState([]);
+    const [trialLoading, setTrialLoading] = useState(false);
+    const [trialActionLoading, setTrialActionLoading] = useState(null);
 
     useEffect(() => {
         const savedId = localStorage.getItem("ti_active_tutor_id");
@@ -87,6 +90,7 @@ function DashboardContent() {
             fetchReferralData();
             if (activeTab === "HOME" || activeTab === "LEADS") fetchLeads();
             if (activeTab === "BATCHES") fetchCourses();
+            if (activeTab === "TRIALS") fetchTrials();
         }
     }, [tutorId, activeTab]);
 
@@ -162,6 +166,31 @@ function DashboardContent() {
         navigator.clipboard.writeText(referralData.referralLink);
         setCopiedRef(true);
         setTimeout(() => setCopiedRef(false), 2000);
+    };
+
+    const fetchTrials = async () => {
+        setTrialLoading(true);
+        try {
+            const res = await fetch("/api/trial/list");
+            if (res.ok) {
+                const data = await res.json();
+                setTrials(data.trials || []);
+            }
+        } catch (err) { console.error(err); } finally { setTrialLoading(false); }
+    };
+
+    const handleTrialAction = async (trialId, status, note) => {
+        setTrialActionLoading(trialId);
+        try {
+            const res = await fetch(`/api/trial/${trialId}/status`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ status, tutorNote: note }),
+            });
+            if (res.ok) {
+                setTrials(prev => prev.map(t => t.id === trialId ? { ...t, status } : t));
+            }
+        } catch (err) { console.error(err); } finally { setTrialActionLoading(null); }
     };
 
     const handleUnlock = async (leadId) => {
@@ -353,6 +382,7 @@ function DashboardContent() {
     const navItems = [
         { id: "HOME", label: "Dashboard", icon: LayoutDashboard },
         { id: "LEADS", label: "Student Leads", icon: Search },
+        { id: "TRIALS", label: "Trial Requests", icon: Zap },
         { id: "BATCHES", label: "Batch Classes", icon: Box },
         { id: "CHAT", label: "Messages", icon: MessageCircle },
         { id: "BILLING", label: "Billing", icon: CreditCard },
@@ -825,6 +855,118 @@ function DashboardContent() {
                                         </div>
                                     )}
                                 </div>
+                            </div>
+                        )}
+
+                        {activeTab === "TRIALS" && (
+                            <div className="p-6 space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <h2 className="text-lg font-bold text-gray-900">Trial Class Requests</h2>
+                                        <p className="text-sm text-gray-500 mt-0.5">Students who want a free trial with you</p>
+                                    </div>
+                                    {!tutorData?.tutorListing?.offersTrialClass && (
+                                        <div className="text-right">
+                                            <p className="text-xs text-gray-400">Trial classes are off</p>
+                                            <button
+                                                onClick={async () => {
+                                                    await fetch("/api/trial/settings", {
+                                                        method: "PATCH",
+                                                        headers: { "Content-Type": "application/json" },
+                                                        body: JSON.stringify({ offersTrialClass: true, trialDuration: 30 }),
+                                                    });
+                                                    fetchTutorData();
+                                                }}
+                                                className="text-xs font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
+                                            >
+                                                Turn on trials
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {trialLoading ? (
+                                    <div className="flex items-center justify-center py-16">
+                                        <Loader2 size={24} className="animate-spin text-blue-400" />
+                                    </div>
+                                ) : trials.length === 0 ? (
+                                    <div className="bg-white border border-gray-200 rounded-xl p-12 text-center">
+                                        <div className="w-14 h-14 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <Zap size={24} className="text-emerald-400" />
+                                        </div>
+                                        <h3 className="text-base font-semibold text-gray-700 mb-1">No trial requests yet</h3>
+                                        <p className="text-sm text-gray-400">
+                                            {tutorData?.tutorListing?.offersTrialClass
+                                                ? "Students will see a \"Free Trial\" button on your profile. Requests will appear here."
+                                                : "Enable trial classes so students can book a free session with you."
+                                            }
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {trials.map(trial => (
+                                            <div key={trial.id} className="bg-white border border-gray-200 rounded-xl p-4 space-y-3">
+                                                <div className="flex items-start justify-between gap-3">
+                                                    <div className="space-y-1">
+                                                        <div className="flex items-center gap-2 flex-wrap">
+                                                            <p className="font-semibold text-gray-900">{trial.student?.name || "Student"}</p>
+                                                            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                                                                trial.status === "PENDING" ? "bg-amber-50 text-amber-700 border border-amber-100" :
+                                                                trial.status === "CONFIRMED" ? "bg-emerald-50 text-emerald-700 border border-emerald-100" :
+                                                                trial.status === "COMPLETED" ? "bg-blue-50 text-blue-700 border border-blue-100" :
+                                                                "bg-gray-100 text-gray-500"
+                                                            }`}>
+                                                                {trial.status === "PENDING" ? "Waiting for your response" :
+                                                                 trial.status === "CONFIRMED" ? "Confirmed" :
+                                                                 trial.status === "COMPLETED" ? "Completed" :
+                                                                 trial.status === "DECLINED" ? "Declined" : "Cancelled"}
+                                                            </span>
+                                                        </div>
+                                                        <p className="text-sm text-gray-600">Subject: <span className="font-medium">{trial.subject}</span></p>
+                                                        <p className="text-sm text-gray-500">Preferred time: {trial.preferredTime}</p>
+                                                        {trial.message && <p className="text-sm text-gray-400 italic">&ldquo;{trial.message}&rdquo;</p>}
+                                                    </div>
+                                                    <div className="text-right shrink-0">
+                                                        <p className="text-xs text-gray-400">{new Date(trial.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}</p>
+                                                        <p className="text-xs text-emerald-600 font-medium">{trial.duration} min · Free</p>
+                                                    </div>
+                                                </div>
+
+                                                {trial.status === "PENDING" && (
+                                                    <div className="flex items-center gap-2 pt-1 border-t border-gray-100">
+                                                        <button
+                                                            disabled={trialActionLoading === trial.id}
+                                                            onClick={() => handleTrialAction(trial.id, "CONFIRMED")}
+                                                            className="flex-1 py-2 bg-emerald-600 text-white text-sm font-semibold rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
+                                                        >
+                                                            {trialActionLoading === trial.id ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
+                                                            Accept
+                                                        </button>
+                                                        <button
+                                                            disabled={trialActionLoading === trial.id}
+                                                            onClick={() => handleTrialAction(trial.id, "DECLINED")}
+                                                            className="flex-1 py-2 border border-gray-200 text-gray-600 text-sm font-semibold rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+                                                        >
+                                                            Decline
+                                                        </button>
+                                                    </div>
+                                                )}
+                                                {trial.status === "CONFIRMED" && (
+                                                    <div className="flex items-center gap-2 pt-1 border-t border-gray-100">
+                                                        <button
+                                                            disabled={trialActionLoading === trial.id}
+                                                            onClick={() => handleTrialAction(trial.id, "COMPLETED")}
+                                                            className="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                                                        >
+                                                            Mark as Done
+                                                        </button>
+                                                        <p className="text-xs text-gray-400">Coordinate the exact time with the student via chat.</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         )}
 
