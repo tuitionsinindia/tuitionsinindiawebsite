@@ -14,6 +14,8 @@ model User {
   email              String?            @unique
   emailVerified      DateTime?
   image              String?
+  googleId           String?            @unique
+  provider           String?            @default("phone")
   role               Role               @default(STUDENT)
   phone              String?            @unique
   phoneVerified      Boolean            @default(false)

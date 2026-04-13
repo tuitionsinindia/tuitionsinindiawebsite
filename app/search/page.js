@@ -23,7 +23,6 @@ import {
     RefreshCw,
     X,
     Phone,
-    BookOpen,
     FileText
 } from "lucide-react";
 import { SUBJECT_CATEGORIES } from "../../lib/subjects";
@@ -31,127 +30,18 @@ import SkeletonLoader from "../components/SkeletonLoader";
 import MapComponent from "../components/MapComponent";
 import { trackSearch, trackViewProfile } from "@/lib/analytics";
 
-// ─── Sign-up Modal ─────────────────────────────────────────────────────────────
-// signupRole: "STUDENT" when searching for tutors, "TUTOR" when searching for students
-function SignupModal({ onClose, onSuccess, prefill = {}, signupRole = "STUDENT" }) {
-    const [step, setStep] = useState(1);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
-    const [phone, setPhone] = useState("");
-    const [otp, setOtp] = useState("");
-    const [userId, setUserId] = useState(null);
+// ─── Sign-up Modal (wraps LeadCaptureFlow) ──────────────────────────────────
+import LeadCaptureFlow from "../components/LeadCaptureFlow";
 
-    const roleLabel = signupRole === "TUTOR" ? "tutor" : "student";
-    const roleTitle = signupRole === "TUTOR" ? "Sign up as a Tutor" : "Sign up to contact tutors";
-    const roleDesc = signupRole === "TUTOR"
-        ? "Create your free tutor account to connect with students."
-        : "Create your free student account to unlock tutor contact details.";
-
-    const handleSendOTP = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        setError("");
-        try {
-            const res = await fetch("/api/auth/otp/send", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ phone, role: signupRole, isRegistration: true }),
-            });
-            const data = await res.json();
-            if (data.success) { setUserId(data.userId); setStep(2); }
-            else setError(data.error || "Failed to send OTP.");
-        } catch { setError("Something went wrong. Please try again."); }
-        finally { setLoading(false); }
-    };
-
-    const handleVerifyOTP = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        setError("");
-        try {
-            const res = await fetch("/api/auth/otp/verify", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ userId, phone, otp }),
-            });
-            const data = await res.json();
-            if (data.success) onSuccess(data.user);
-            else setError(data.error || "Invalid OTP.");
-        } catch { setError("Verification failed. Please try again."); }
-        finally { setLoading(false); }
-    };
-
+function SignupModal({ onClose, onSuccess, signupRole = "STUDENT" }) {
     return (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-            <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 space-y-5">
-                {/* Close */}
-                <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors">
+            <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+                <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors z-10">
                     <X size={20} />
                 </button>
-
-                {/* Header */}
-                <div className="pr-8">
-                    <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center mb-3">
-                        <GraduationCap size={20} className="text-blue-600" />
-                    </div>
-                    <h2 className="text-lg font-bold text-gray-900">
-                        {step === 1 ? roleTitle : "Enter OTP"}
-                    </h2>
-                    <p className="text-sm text-gray-500 mt-1">
-                        {step === 1 ? roleDesc : `Enter the 6-digit code sent to +91 ${phone}`}
-                    </p>
-                    {prefill.subject && (
-                        <div className="mt-2 inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 text-xs font-medium px-3 py-1 rounded-full">
-                            <BookOpen size={11} /> {prefill.subject}
-                            {prefill.grade ? ` · ${prefill.grade}` : ""}
-                        </div>
-                    )}
-                </div>
-
-                {step === 1 ? (
-                    <form onSubmit={handleSendOTP} className="space-y-4">
-                        <div className="space-y-1.5">
-                            <label className="text-xs font-medium text-gray-500">Mobile Number</label>
-                            <div className="relative flex items-center border border-gray-200 rounded-xl bg-gray-50 focus-within:bg-white focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
-                                <Phone size={15} className="text-gray-400 ml-3 shrink-0" />
-                                <span className="text-gray-500 text-sm font-medium px-2 border-r border-gray-200">+91</span>
-                                <input
-                                    required type="tel" pattern="[0-9]{10}" value={phone}
-                                    onChange={e => setPhone(e.target.value)}
-                                    placeholder="10-digit number"
-                                    className="flex-1 bg-transparent px-3 py-3 text-sm outline-none text-gray-900"
-                                    autoFocus
-                                />
-                            </div>
-                        </div>
-                        {error && <p className="text-sm text-red-600 bg-red-50 p-3 rounded-lg">{error}</p>}
-                        <button type="submit" disabled={loading}
-                            className="w-full py-3 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50">
-                            {loading ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <>Send OTP <ArrowRight size={15} /></>}
-                        </button>
-                        <p className="text-xs text-gray-400 text-center">
-                            Already have an account? <Link href="/login" className="text-blue-600 hover:underline font-medium">Log in</Link>
-                        </p>
-                    </form>
-                ) : (
-                    <form onSubmit={handleVerifyOTP} className="space-y-4">
-                        <input
-                            required type="text" maxLength="6" value={otp}
-                            onChange={e => setOtp(e.target.value)}
-                            className="w-full text-center text-2xl tracking-[0.5em] font-bold py-4 bg-gray-50 border-2 border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
-                            placeholder="------" autoFocus
-                        />
-                        {error && <p className="text-sm text-red-600 bg-red-50 p-3 rounded-lg text-center">{error}</p>}
-                        <button type="submit" disabled={loading}
-                            className="w-full py-3 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50">
-                            {loading ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <>Verify & Continue <ArrowRight size={15} /></>}
-                        </button>
-                        <p className="text-center text-xs text-gray-400">
-                            Wrong number? <button type="button" onClick={() => { setStep(1); setOtp(""); setError(""); }} className="text-blue-600 hover:underline font-medium">Change</button>
-                        </p>
-                    </form>
-                )}
+                <LeadCaptureFlow initialRole={signupRole} onComplete={onSuccess} />
             </div>
         </div>
     );

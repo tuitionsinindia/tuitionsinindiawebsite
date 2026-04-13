@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { otpStore } from "@/lib/otpStore";
+import { createSessionToken, makeSessionCookie } from "@/lib/session";
 
 export async function POST(request) {
     try {
@@ -27,22 +28,38 @@ export async function POST(request) {
 
         otpStore.delete(phone);
 
-        // Find user - by userId if provided, otherwise by phone
-        const whereClause = userId ? { id: userId } : { phone: phone };
+        // Build update data — always verify phone; also set phone if user doesn't have one (Google users)
+        const updateData = { phoneVerified: true };
+        const whereClause = userId ? { id: userId } : { phone };
+
+        // If userId is provided (Google flow), also set the phone number on the user
+        if (userId) {
+            updateData.phone = phone;
+        }
+
         const user = await prisma.user.update({
             where: whereClause,
-            data: { phoneVerified: true }
+            data: updateData,
         });
 
-        return NextResponse.json({
+        // Set session cookie so user is authenticated going forward
+        const token = createSessionToken(user);
+        const cookie = makeSessionCookie(token);
+
+        const response = NextResponse.json({
             success: true,
             user: {
                 id: user.id,
                 name: user.name,
                 role: user.role,
-                phone: user.phone
+                phone: user.phone,
+                email: user.email,
+                image: user.image,
             }
         });
+
+        response.headers.set("Set-Cookie", cookie);
+        return response;
 
     } catch (error) {
         console.error("OTP Verification Error:", error);
