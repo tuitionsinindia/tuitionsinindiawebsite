@@ -3,7 +3,7 @@ import prisma from "@/lib/prisma";
 
 export async function POST(request) {
     try {
-        const { userId, name, phone, bio, gender, preferredContact, notificationPrefs } = await request.json();
+        const { userId, name, phone, email, bio, gender, preferredContact, notificationPrefs, lat, lng } = await request.json();
 
         if (!userId) {
             return NextResponse.json({ error: "userId is required" }, { status: 400 });
@@ -11,7 +11,12 @@ export async function POST(request) {
 
         await prisma.$transaction(async (tx) => {
             // Build the user update data
-            const userData = { name, phone };
+            const userData = {};
+            if (name !== undefined) userData.name = name;
+            if (phone !== undefined) userData.phone = phone;
+            if (email !== undefined) userData.email = email;
+            if (lat !== undefined && !isNaN(lat)) userData.lat = lat;
+            if (lng !== undefined && !isNaN(lng)) userData.lng = lng;
 
             if (preferredContact) {
                 userData.privacySettings = {

@@ -221,6 +221,8 @@ export async function GET(request) {
                 matchLabel: match.label,
                 matchFactors: match.factors,
                 isFeatured: featuredIds.has(t.id),
+                lat: t.lat,
+                lng: t.lng,
             };
         }));
 
