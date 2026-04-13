@@ -1,14 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { 
-    Building2, 
-    ShieldCheck, 
-    Users, 
-    BarChart3, 
+import {
+    Building2,
+    ShieldCheck,
+    Users,
+    BarChart3,
     ArrowRight,
     Globe,
-    Zap,
     Lock
 } from "lucide-react";
 
@@ -16,163 +15,142 @@ export default function InstituteHowItWorks() {
     const steps = [
         {
             step: "01",
-            title: "Register Your Institute",
-            desc: "Onboard your coaching centre or academy. Deploy a master profile highlighting your faculty strength, infrastructure, and subjects.",
+            title: "Register your institute",
+            desc: "Create a profile for your coaching centre or academy. Add your subjects, teaching staff, locations, and a description of what you offer.",
             icon: Building2,
             color: "text-blue-600",
-            bg: "bg-blue-50/50"
+            bg: "bg-blue-50"
         },
         {
             step: "02",
-            title: "Institutional Audit",
-            desc: "Submit registration credentials for verification. Earn the trusted 'Verified Institute' seal for high-fidelity discovery.",
+            title: "Get verified",
+            desc: "Submit your registration documents for verification. Earn a Verified Institute badge so students and parents can trust your listing.",
             icon: ShieldCheck,
             color: "text-emerald-600",
-            bg: "bg-emerald-50/50"
+            bg: "bg-emerald-50"
         },
         {
             step: "03",
-            title: "Market Capture",
-            desc: "Appear at the top of local search hierarchies. Our engine prioritizes verified institutions for student distribution.",
+            title: "Appear in search results",
+            desc: "Your institute will show up when students search for tutors and coaching centres in your area. Verified institutes get higher visibility.",
             icon: Globe,
             color: "text-indigo-600",
-            bg: "bg-indigo-50/50"
+            bg: "bg-indigo-50"
         },
         {
             step: "04",
-            title: "Efficiency Analytics",
-            desc: "Monitor enquiry pipelines and profile performance. Scale your student intake with data-driven actionable insights.",
+            title: "Track enquiries",
+            desc: "View incoming student enquiries and profile visits from your dashboard. Use these insights to understand what students are looking for.",
             icon: BarChart3,
             color: "text-blue-600",
-            bg: "bg-blue-50/50"
+            bg: "bg-blue-50"
         }
     ];
 
     const faqs = [
         { q: "What type of institutes can register?", a: "Any coaching centre, tuition academy, training institute, or school can register. Whether you offer a single subject or a full curriculum, you are welcome." },
         { q: "Can I list multiple branches?", a: "Yes. You can add multiple branch locations under a single institute profile, making it easy for students in different areas to find you." },
-        { q: "How does the pricing work?", a: "Listing your institute is free. You can optionally purchase premium placement credits to boost your visibility in search results and attract more enquiries." }
+        { q: "How does the pricing work?", a: "Listing your institute is free. You can optionally purchase credits to boost your visibility in search results and attract more enquiries." }
     ];
 
     return (
-        <div className="snap-container bg-white text-gray-900 antialiased selection:bg-blue-200">
-            
+        <div className="bg-white text-gray-900 antialiased">
+
             {/* Hero Section */}
-            <section className="snap-section px-6 relative text-center">
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-sky-100/30 blur-[120px] rounded-full -z-10 animate-pulse"></div>
-                
-                <div className="max-w-4xl mx-auto">
-                    <div className="inline-flex items-center gap-3 px-4 py-2 bg-blue-50 rounded-full border border-blue-100 mb-8">
+            <section className="px-6 py-24 text-center bg-gray-50 border-b border-gray-100">
+                <div className="max-w-3xl mx-auto">
+                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-full border border-blue-100 mb-6">
                         <Users size={14} className="text-blue-600" />
-                        <span className="text-blue-700 text-xs font-black uppercase tracking-[0.3em]">How It Works for Institutes</span>
+                        <span className="text-blue-700 text-xs font-semibold">How it works for institutes</span>
                     </div>
-                    
-                    <h1 className="text-5xl md:text-8xl font-black tracking-tighter mb-10 leading-[0.9] uppercase italic text-gray-900">
-                        Maximize <br />
-                        <span className="text-blue-600 font-serif lowercase tracking-normal not-italic px-4">enrolment</span> infrastructure.
+                    <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 text-gray-900 leading-tight">
+                        Reach more students with your institute listing
                     </h1>
-                    
-                    <p className="text-lg md:text-xl text-gray-500 font-medium max-w-2xl mx-auto mb-12 leading-relaxed italic">
-                        Deploy your academy's presence on India's most trusted academic directory. Fill your classrooms with precision-matched students.
+                    <p className="text-lg text-gray-500 max-w-2xl mx-auto mb-10 leading-relaxed">
+                        List your coaching centre or academy on TuitionsInIndia and connect with students looking for courses in your area.
                     </p>
-                    
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <Link href="/register/institute" className="px-10 py-5 bg-blue-600 text-white rounded-2xl font-black shadow-2xl shadow-blue-600/30 hover:bg-black active:scale-95 transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-xs">
-                            Register Institute <ArrowRight size={20} />
-                        </Link>
-                    </div>
-                </div>
-                
-                <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce opacity-20">
-                    <div className="w-px h-12 bg-gray-400"></div>
+                    <Link href="/register/institute" className="inline-flex items-center gap-2 px-8 py-4 bg-blue-600 text-white rounded-xl font-semibold shadow-sm hover:bg-blue-700 active:scale-95 transition-all text-sm">
+                        Register your institute <ArrowRight size={18} />
+                    </Link>
                 </div>
             </section>
 
-            {/* Steps - Procedural Layout */}
-            {steps.map((item, i) => (
-                <section key={i} className="snap-section px-6">
-                    <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
-                        <div className={i % 2 === 0 ? "lg:order-1" : "lg:order-2"}>
-                            <div className="flex items-center gap-4 mb-8">
-                                <div className="size-16 rounded-3xl bg-gray-900 text-white flex items-center justify-center font-black text-2xl shadow-xl">
-                                    {item.step}
+            {/* Steps */}
+            <section className="px-6 py-20">
+                <div className="max-w-5xl mx-auto space-y-16">
+                    {steps.map((item, i) => (
+                        <div key={i} className="grid lg:grid-cols-2 gap-10 items-center">
+                            <div className={i % 2 === 0 ? "lg:order-1" : "lg:order-2"}>
+                                <div className="flex items-center gap-3 mb-5">
+                                    <div className="size-12 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-sm">
+                                        {item.step}
+                                    </div>
+                                    <div className="h-px w-10 bg-gray-200"></div>
                                 </div>
-                                <div className="h-px w-12 bg-gray-200"></div>
+                                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight mb-4">
+                                    {item.title}
+                                </h2>
+                                <p className="text-gray-500 text-lg leading-relaxed">
+                                    {item.desc}
+                                </p>
                             </div>
-                            
-                            <h2 className="text-4xl md:text-6xl font-black text-gray-900 tracking-tighter uppercase italic mb-6 leading-none">
-                                {item.title.split(' ')[0]} <br />
-                                <span className="text-blue-600">{item.title.split(' ').slice(1).join(' ')}</span>
-                            </h2>
-                            
-                            <p className="text-xl text-gray-500 font-medium leading-relaxed mb-10 italic">
-                                {item.desc}
-                            </p>
-                        </div>
-                        
-                        <div className={`relative ${i % 2 === 0 ? "lg:order-2" : "lg:order-1"}`}>
-                            <div className={`aspect-square rounded-[3rem] ${item.bg} flex items-center justify-center transition-transform hover:scale-105 duration-700 border-2 border-gray-50`}>
-                                <item.icon size={120} strokeWidth={1} className={item.color} />
+                            <div className={`relative ${i % 2 === 0 ? "lg:order-2" : "lg:order-1"}`}>
+                                <div className={`aspect-square rounded-2xl ${item.bg} flex items-center justify-center border border-gray-100`}>
+                                    <item.icon size={100} strokeWidth={1.2} className={item.color} />
+                                </div>
                             </div>
-                            <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-blue-50 blur-3xl opacity-30 rounded-full"></div>
                         </div>
-                    </div>
-                </section>
-            ))}
+                    ))}
+                </div>
+            </section>
 
-            {/* Scale Section */}
-            <section className="snap-section px-6">
-                <div className="max-w-5xl mx-auto bg-gray-900 rounded-[4rem] p-12 md:p-24 text-center relative overflow-hidden shadow-4xl text-white">
-                    <div className="absolute top-0 right-0 p-20 opacity-5 -z-10 rotate-12">
-                        <Building2 size={400} />
+            {/* Reach Section */}
+            <section className="px-6 py-16 bg-gray-50 border-t border-gray-100">
+                <div className="max-w-4xl mx-auto bg-white rounded-2xl border border-gray-200 p-10 md:p-16 text-center shadow-sm">
+                    <div className="size-14 rounded-2xl bg-blue-50 flex items-center justify-center mx-auto mb-6">
+                        <Building2 size={28} className="text-blue-600" />
                     </div>
-                    
-                    <h2 className="text-4xl md:text-7xl font-black tracking-tighter uppercase italic mb-10 leading-none">
-                        Global <span className="text-blue-500 font-serif lowercase tracking-normal not-italic px-4">reach</span> Local Presence.
+                    <h2 className="text-3xl font-bold text-gray-900 tracking-tight mb-4">
+                        Grow your student base
                     </h2>
-                    
-                    <p className="text-xl text-gray-400 font-medium mb-12 italic max-w-2xl mx-auto">
-                        We connect your physical branches with digital intent. Be the first choice for parents in your geographic and academic domain.
+                    <p className="text-gray-500 text-lg mb-10 max-w-xl mx-auto leading-relaxed">
+                        Students search for local coaching centres every day. Make sure your institute shows up when they do.
                     </p>
-                    
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-8 text-left border-t border-white/10 pt-12">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left border-t border-gray-100 pt-10">
                         {[
-                            { label: "Market Dominance", val: "#1", sub: "Category Lead" },
-                            { label: "Branch Support", val: "Unlimited", sub: "Scalable Hubs" },
-                            { label: "Discovery Rate", val: "High", sub: "Verified Boost" }
+                            { label: "Search visibility", val: "High", sub: "For verified institutes" },
+                            { label: "Branch support", val: "Multiple", sub: "Add all your locations" },
+                            { label: "Enquiry tracking", val: "Built-in", sub: "From your dashboard" }
                         ].map((stat, i) => (
                             <div key={i} className="space-y-1">
-                                <p className="text-xs font-black uppercase tracking-widest text-gray-500">{stat.label}</p>
-                                <p className="text-3xl font-black text-white">{stat.val}</p>
-                                <p className="text-xs font-bold text-blue-500 italic uppercase">{stat.sub}</p>
+                                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">{stat.label}</p>
+                                <p className="text-2xl font-bold text-gray-900">{stat.val}</p>
+                                <p className="text-sm text-blue-600 font-medium">{stat.sub}</p>
                             </div>
                         ))}
                     </div>
                 </div>
             </section>
 
-            {/* FAQ Area */}
-            <section className="snap-section px-6 bg-gray-50">
-                <div className="max-w-4xl mx-auto">
-                    <div className="text-center mb-16">
-                        <h2 className="text-4xl font-black tracking-tighter uppercase italic text-gray-900">Institutional <span className="text-blue-600">FAQ</span></h2>
-                    </div>
-                    
-                    <div className="grid gap-6">
+            {/* FAQ Section */}
+            <section className="px-6 py-20">
+                <div className="max-w-3xl mx-auto">
+                    <h2 className="text-3xl font-bold tracking-tight text-gray-900 mb-10 text-center">
+                        Questions about listing your institute
+                    </h2>
+                    <div className="space-y-4">
                         {faqs.map((faq, i) => (
-                            <div key={i} className="bg-white border border-gray-100 rounded-3xl p-8 shadow-sm group hover:shadow-xl transition-all hover:border-blue-100">
-                                <h3 className="font-black text-gray-900 text-xl mb-4 italic flex items-center gap-4">
-                                    <span className="text-blue-600 font-serif text-2xl lowercase">q.</span> {faq.q}
-                                </h3>
-                                <p className="text-gray-500 font-medium leading-relaxed pl-12 italic">
+                            <div key={i} className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:border-blue-200 transition-all">
+                                <h3 className="font-semibold text-gray-900 text-lg mb-3">{faq.q}</h3>
+                                <p className="text-gray-500 leading-relaxed">
                                     {faq.a}
                                 </p>
                             </div>
                         ))}
                     </div>
-                </div>
-                <div className="mt-20 text-center flex items-center justify-center gap-2 text-xs font-black text-gray-300 uppercase tracking-[0.5em]">
-                    <Lock size={12} strokeWidth={3} /> Your data is secure
+                    <div className="mt-12 text-center flex items-center justify-center gap-2 text-xs text-gray-400">
+                        <Lock size={12} /> Your data is secure
+                    </div>
                 </div>
             </section>
         </div>

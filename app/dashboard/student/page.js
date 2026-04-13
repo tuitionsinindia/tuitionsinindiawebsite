@@ -473,21 +473,45 @@ function StudentDashboardContent() {
                                 <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Tutor Matches</h2>
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                     {unlockedTutors.length > 0 ? unlockedTutors.map((t) => (
-                                        <div key={t.id} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all text-center">
-                                            <div className="size-16 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-bold text-2xl mx-auto mb-4">
-                                                {t.name?.[0]}
+                                        <div key={t.id} className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-all">
+                                            <div className="flex items-start gap-4 mb-4">
+                                                <div className="size-12 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-lg shrink-0">
+                                                    {t.name?.[0]}
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <h3 className="font-bold text-gray-900 truncate">{t.name}</h3>
+                                                    <p className="text-sm text-blue-600 font-medium">{t.tutorListing?.subjects?.slice(0, 2).join(", ") || "Tutor"}</p>
+                                                </div>
                                             </div>
-                                            <h3 className="text-lg font-bold text-gray-900 mb-1">{t.name}</h3>
-                                            <p className="text-sm text-blue-600 font-medium mb-4">{t.tutorListing?.subjects?.[0] || "Tutor"}</p>
+                                            <div className="flex flex-wrap gap-x-4 gap-y-1 mb-4 text-xs text-gray-500">
+                                                {t.tutorListing?.hourlyRate && (
+                                                    <span className="font-semibold text-gray-900">₹{t.tutorListing.hourlyRate}/hr</span>
+                                                )}
+                                                {t.tutorListing?.locations?.[0] && (
+                                                    <span>{t.tutorListing.locations[0]}</span>
+                                                )}
+                                                {t.tutorListing?.experience && (
+                                                    <span>{t.tutorListing.experience} yrs exp</span>
+                                                )}
+                                                {t.tutorListing?.rating && (
+                                                    <span>★ {t.tutorListing.rating.toFixed(1)}</span>
+                                                )}
+                                            </div>
                                             <div className="flex gap-2">
+                                                <Link
+                                                    href={`/search/${t.id}`}
+                                                    className="flex-1 py-2 bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-center gap-1.5 text-xs font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all"
+                                                >
+                                                    View Profile
+                                                </Link>
                                                 <button
                                                     onClick={() => {
                                                         setSelectedTutorForReview(t);
                                                         setIsReviewOpen(true);
                                                     }}
-                                                    className="flex-1 py-3 bg-gray-50 border border-gray-100 rounded-xl flex items-center justify-center gap-2 text-sm font-medium text-gray-700 hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200 transition-all"
+                                                    className="py-2 px-3 bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-center text-xs font-semibold text-gray-700 hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200 transition-all"
                                                 >
-                                                    <Star size={14} /> Rate
+                                                    <Star size={13} />
                                                 </button>
                                                 <button
                                                     onClick={async () => {
@@ -508,9 +532,9 @@ function StudentDashboardContent() {
                                                             }
                                                         } catch (err) { console.error(err); } finally { setLoadingChat(false); }
                                                     }}
-                                                    className="size-12 bg-blue-600 text-white rounded-xl flex items-center justify-center hover:bg-blue-700 transition-all"
+                                                    className="size-9 bg-blue-600 text-white rounded-xl flex items-center justify-center hover:bg-blue-700 transition-all"
                                                 >
-                                                    {loadingChat ? <Loader2 className="animate-spin" size={16} /> : <MessageCircle size={16} />}
+                                                    {loadingChat ? <Loader2 className="animate-spin" size={14} /> : <MessageCircle size={14} />}
                                                 </button>
                                             </div>
                                         </div>

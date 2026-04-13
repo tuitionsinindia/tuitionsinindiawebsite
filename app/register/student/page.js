@@ -117,7 +117,7 @@ function StudentRegisterContent() {
                             prefill={prefill}
                             onStepChange={(formStep) => setStep(formStep + 1)} // formStep 1=req, 2=pref, 3=contact → page step 2,3,4
                             onComplete={() => {
-                                router.push(`/dashboard/student?success=true${prefill.tutorId ? `&highlightTutor=${prefill.tutorId}` : ""}`);
+                                router.push(`/dashboard/student?success=true&studentId=${user.id}${prefill.tutorId ? `&highlightTutor=${prefill.tutorId}` : ""}`);
                             }}
                         />
                     )}

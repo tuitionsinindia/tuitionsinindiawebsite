@@ -1,170 +1,137 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import { 
-    Mail, 
-    MessageSquare, 
-    MapPin, 
-    Phone, 
-    ShieldCheck, 
-    Send, 
-    CheckCircle2, 
-    ArrowRight,
-    Search,
-    Zap,
-    Building2,
-    Users
-} from "lucide-react";
+import { Mail, Phone, MapPin, Send, CheckCircle2, MessageSquare } from "lucide-react";
 
 export default function ContactPage() {
-    const [formState, setFormState] = useState("IDLE"); // IDLE, SUBMITTING, SUCCESS
+    const [formState, setFormState] = useState("idle"); // idle, submitting, success
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setFormState("SUBMITTING");
-        // Simulate high-fidelity API sequence
-        setTimeout(() => setFormState("SUCCESS"), 1500);
+        setFormState("submitting");
+        setTimeout(() => setFormState("success"), 1500);
     };
 
     return (
-        <div className="min-h-screen bg-background-dark font-sans text-on-background-dark antialiased pt-40 pb-32 selection:bg-primary/30">
-            {/* Redundant Header/Footer removed (in RootLayout) */}
+        <div className="min-h-screen bg-white pt-24 pb-20">
+            <main className="max-w-5xl mx-auto px-6">
 
-            <main className="px-6 max-w-7xl mx-auto space-y-32">
-                
-                {/* Hero Section */}
-                <section className="text-center relative overflow-hidden max-w-4xl mx-auto">
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-primary/5 blur-[120px] rounded-full -z-10"></div>
-                    
-                    <div className="inline-flex items-center gap-3 px-4 py-2 bg-primary/10 rounded-full border border-primary/20 mb-8">
-                        <MessageSquare size={14} className="text-primary" />
-                        <span className="text-primary text-xs font-black uppercase tracking-[0.3em]">Academic Support Hub</span>
-                    </div>
-
-                    <h1 className="text-6xl md:text-8xl font-black italic tracking-tighter leading-[0.9] text-white uppercase mb-12">
-                        Consult with the <br />
-                        <span className="text-primary font-serif lowercase tracking-normal not-italic px-4">strategy</span> team.
-                    </h1>
-
-                    <p className="text-xl md:text-2xl text-on-background-dark/40 font-medium leading-relaxed italic max-w-2xl mx-auto">
-                        Whether you are an ambitious student seeking the perfect mentor or an elite educator looking to scale your practice, our team is here to architect your success.
+                {/* Header */}
+                <div className="mb-12">
+                    <h1 className="text-4xl font-bold text-gray-900 mb-3">Contact us</h1>
+                    <p className="text-gray-500 text-lg">
+                        Have a question or need help? We'll get back to you within 24 hours.
                     </p>
-                </section>
+                </div>
 
-                <div className="grid lg:grid-cols-2 gap-24 items-start">
-                    
-                    {/* Contact Form */}
-                    <section className="bg-surface-dark p-12 md:p-20 rounded-[4rem] border border-border-dark shadow-4xl relative overflow-hidden group">
-                        <div className="absolute inset-0 bg-primary/5 blur-3xl opacity-50 -z-10 group-hover:scale-110 transition-transform duration-1000"></div>
-                        
-                        {formState === "SUCCESS" ? (
-                            <div className="relative z-10 text-center py-24 animate-in fade-in zoom-in duration-500">
-                                <div className="size-24 rounded-[2rem] bg-primary/10 text-primary flex items-center justify-center mx-auto mb-10 shadow-2xl shadow-primary/20">
-                                    <CheckCircle2 size={48} />
+                <div className="grid lg:grid-cols-2 gap-12 items-start">
+
+                    {/* Contact form */}
+                    <div className="bg-white border border-gray-200 rounded-2xl p-8">
+                        {formState === "success" ? (
+                            <div className="text-center py-12">
+                                <div className="size-16 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-4">
+                                    <CheckCircle2 size={32} className="text-green-600" />
                                 </div>
-                                <h2 className="text-4xl font-black text-white uppercase italic tracking-tighter mb-6">Inquiry Received</h2>
-                                <p className="text-on-surface-dark/60 font-medium italic mb-12 text-lg">Our academic strategy counsel will contact you within 24 business hours.</p>
-                                <button 
-                                    onClick={() => setFormState("IDLE")}
-                                    className="text-primary font-black uppercase text-xs tracking-[0.4em] border-b-2 border-primary/20 hover:border-primary transition-all pb-2"
+                                <h2 className="text-xl font-bold text-gray-900 mb-2">Message sent</h2>
+                                <p className="text-gray-500 mb-6">We'll reply to you within 24 hours.</p>
+                                <button
+                                    onClick={() => setFormState("idle")}
+                                    className="text-blue-600 font-semibold text-sm hover:underline"
                                 >
-                                    Start New Enquiry
+                                    Send another message
                                 </button>
                             </div>
                         ) : (
-                            <form onSubmit={handleSubmit} className="relative z-10 space-y-10">
-                                <div className="space-y-4">
-                                    <label className="text-xs font-black uppercase tracking-[0.3em] text-on-surface-dark/20 ml-6 italic">Full Identity</label>
-                                    <input 
+                            <form onSubmit={handleSubmit} className="space-y-5">
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Your name</label>
+                                    <input
                                         required
-                                        type="text" 
-                                        placeholder="eg. Dr. Aarav Mehta"
-                                        className="w-full bg-background-dark p-7 rounded-3xl border border-border-dark focus:border-primary transition-all font-medium italic outline-none text-white text-lg placeholder:text-on-surface-dark/10"
+                                        type="text"
+                                        placeholder="e.g. Priya Sharma"
+                                        className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
                                     />
                                 </div>
-                                <div className="grid md:grid-cols-2 gap-8">
-                                    <div className="space-y-4">
-                                        <label className="text-xs font-black uppercase tracking-[0.3em] text-on-surface-dark/20 ml-6 italic">Electronic Mail</label>
-                                        <input 
+                                <div className="grid md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-semibold text-gray-700 mb-1.5">Email</label>
+                                        <input
                                             required
-                                            type="email" 
-                                            placeholder="aarav@university.edu"
-                                            className="w-full bg-background-dark p-7 rounded-3xl border border-border-dark focus:border-primary transition-all font-medium italic outline-none text-white text-lg placeholder:text-on-surface-dark/10"
+                                            type="email"
+                                            placeholder="priya@example.com"
+                                            className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
                                         />
                                     </div>
-                                    <div className="space-y-4">
-                                        <label className="text-xs font-black uppercase tracking-[0.3em] text-on-surface-dark/20 ml-6 italic">What do you need help with?</label>
-                                        <div className="relative">
-                                            <select className="w-full bg-background-dark p-7 rounded-3xl border border-border-dark focus:border-primary transition-all font-medium italic outline-none appearance-none text-white text-lg">
-                                                <option>Institutional Membership</option>
-                                                <option>Student Matching Services</option>
-                                                <option>Technical Infrastructure</option>
-                                                <option>Academic Partnerships</option>
-                                            </select>
-                                            <div className="absolute right-7 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-dark/20">
-                                                <Zap size={16} />
-                                            </div>
-                                        </div>
+                                    <div>
+                                        <label className="block text-sm font-semibold text-gray-700 mb-1.5">What do you need help with?</label>
+                                        <select className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors">
+                                            <option>Finding a tutor</option>
+                                            <option>Listing as a tutor</option>
+                                            <option>Billing or credits</option>
+                                            <option>Technical issue</option>
+                                            <option>Other</option>
+                                        </select>
                                     </div>
                                 </div>
-                                <div className="space-y-4">
-                                    <label className="text-xs font-black uppercase tracking-[0.3em] text-on-surface-dark/20 ml-6 italic">Requirement Context</label>
-                                    <textarea 
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Your message</label>
+                                    <textarea
                                         required
                                         rows="5"
-                                        placeholder="Describe your academic objectives or technical legacy concerns..."
-                                        className="w-full bg-background-dark p-7 rounded-3xl border border-border-dark focus:border-primary transition-all font-medium italic outline-none resize-none text-white text-lg placeholder:text-on-surface-dark/10"
+                                        placeholder="Tell us what you need help with..."
+                                        className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors resize-none"
                                     ></textarea>
                                 </div>
-                                <button 
-                                    disabled={formState === "SUBMITTING"}
-                                    className="w-full py-7 bg-primary text-white rounded-3xl font-black uppercase text-xs tracking-[0.4em] shadow-2xl shadow-primary/40 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-4"
+                                <button
+                                    disabled={formState === "submitting"}
+                                    className="w-full py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                                 >
-                                    {formState === "SUBMITTING" ? (
-                                        <span className="animate-pulse italic">Synchronizing Batch...</span>
+                                    {formState === "submitting" ? (
+                                        <span>Sending...</span>
                                     ) : (
-                                        <>Dispatch Inquiry <Send size={16} strokeWidth={3} /></>
+                                        <>Send message <Send size={15} /></>
                                     )}
                                 </button>
                             </form>
                         )}
-                    </section>
+                    </div>
 
-                    {/* Channel Intelligence */}
-                    <div className="space-y-16 py-12">
-                        <section className="space-y-12">
-                            <h3 className="text-4xl font-black uppercase italic tracking-tighter text-white">Direct <span className="text-primary font-serif lowercase tracking-normal not-italic px-4">channels</span>.</h3>
-                            <div className="space-y-10">
-                                {[
-                                    { label: "Institutional HQ", value: "Cyber Hub, Level 14, Gurugram, Bharat", icon: Building2 },
-                                    { label: "Strategic Support", value: "counsel@tuitionsinindia.com", icon: Mail },
-                                    { label: "Support Line", value: "+91 (800) ACAD-ELITE", icon: Phone }
-                                ].map((info, i) => (
-                                    <div key={i} className="flex gap-8 items-start group">
-                                        <div className="size-16 rounded-2xl bg-surface-dark border border-border-dark text-on-surface-dark/40 flex items-center justify-center shrink-0 group-hover:text-primary group-hover:border-primary/30 transition-all">
-                                            <info.icon size={28} />
-                                        </div>
-                                        <div className="pt-2">
-                                            <p className="text-xs font-black uppercase tracking-[0.3em] text-on-surface-dark/20 mb-2 italic">{info.label}</p>
-                                            <p className="text-2xl font-black italic text-white tracking-tight">{info.value}</p>
-                                        </div>
-                                    </div>
-                                ))}
+                    {/* Contact details */}
+                    <div className="space-y-6">
+                        <div className="bg-gray-50 border border-gray-200 rounded-xl p-6">
+                            <div className="flex gap-4 items-start">
+                                <div className="size-10 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
+                                    <Mail size={18} className="text-blue-600" />
+                                </div>
+                                <div>
+                                    <p className="font-semibold text-gray-900 mb-0.5">Email</p>
+                                    <p className="text-gray-500 text-sm">support@tuitionsinindia.com</p>
+                                </div>
                             </div>
-                        </section>
-
-                        {/* Contact Info */}
-                        <section className="p-16 bg-surface-dark rounded-[4rem] border border-border-dark shadow-4xl relative overflow-hidden group">
-                            <div className="absolute inset-0 bg-primary/5 opacity-50 -z-10 group-hover:scale-110 transition-transform duration-700"></div>
-                            <div className="relative z-10 space-y-8">
-                                <ShieldCheck size={56} className="text-primary group-hover:scale-110 transition-transform" />
-                                <h4 className="text-2xl font-black uppercase italic text-white tracking-tight">Need Priority Support?</h4>
-                                <p className="text-lg text-on-surface-dark/60 font-medium leading-relaxed italic opacity-80">
-                                    All inquiries are handled with absolute confidentiality and prioritized by our academic advisory board. Expect a high-fidelity response from a senior strategist within 24 hours.
-                                </p>
+                        </div>
+                        <div className="bg-gray-50 border border-gray-200 rounded-xl p-6">
+                            <div className="flex gap-4 items-start">
+                                <div className="size-10 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
+                                    <MapPin size={18} className="text-blue-600" />
+                                </div>
+                                <div>
+                                    <p className="font-semibold text-gray-900 mb-0.5">Location</p>
+                                    <p className="text-gray-500 text-sm">Gurugram, Haryana, India</p>
+                                </div>
                             </div>
-                        </section>
+                        </div>
+                        <div className="bg-gray-50 border border-gray-200 rounded-xl p-6">
+                            <div className="flex gap-4 items-start">
+                                <div className="size-10 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
+                                    <MessageSquare size={18} className="text-blue-600" />
+                                </div>
+                                <div>
+                                    <p className="font-semibold text-gray-900 mb-1">Response time</p>
+                                    <p className="text-gray-500 text-sm">We typically reply within 24 hours on working days.</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </main>

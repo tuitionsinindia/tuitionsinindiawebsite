@@ -42,6 +42,10 @@ export async function GET(request) {
                         tutorListing: {
                             select: {
                                 subjects: true,
+                                hourlyRate: true,
+                                locations: true,
+                                experience: true,
+                                rating: true,
                             }
                         }
                     }
