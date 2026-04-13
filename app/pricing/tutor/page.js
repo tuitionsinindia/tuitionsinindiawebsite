@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { CheckCircle2, ShieldCheck, Briefcase, Building2, Crown, Info, ArrowRight } from "lucide-react";
+import { CheckCircle2, ShieldCheck, Building2, Crown, Info, ArrowRight, CreditCard } from "lucide-react";
 
 export default function TutorPricing() {
     return (
@@ -10,11 +10,11 @@ export default function TutorPricing() {
             {/* Header */}
             <section className="py-16 px-6 text-center border-b border-gray-100">
                 <div className="max-w-2xl mx-auto">
-                    <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+                    <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 tracking-tight">
                         Simple, Transparent Pricing
                     </h1>
                     <p className="text-lg text-gray-500">
-                        No commission. Keep 100% of what you earn.
+                        No commission. Keep 100% of what you earn from students.
                     </p>
                 </div>
             </section>
@@ -27,20 +27,21 @@ export default function TutorPricing() {
                     <div className="bg-white border border-gray-200 rounded-2xl p-8 flex flex-col">
                         <div className="mb-6">
                             <div className="w-10 h-10 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center mb-4">
-                                <Briefcase size={20} className="text-gray-400" />
+                                <CreditCard size={20} className="text-gray-400" />
                             </div>
                             <h3 className="text-xl font-semibold text-gray-900 mb-1">Free</h3>
                             <p className="text-sm text-gray-400">Get started at no cost</p>
                         </div>
-                        <div className="text-4xl font-bold text-gray-900 mb-8">
-                            Free
+                        <div className="text-4xl font-bold text-gray-900 mb-1">
+                            ₹0
                         </div>
+                        <p className="text-xs text-gray-400 mb-8">No credits included</p>
                         <ul className="space-y-4 mb-8 flex-1">
                             {[
                                 "Basic tutor profile",
-                                "Up to 5 student leads/month",
+                                "Receive student enquiries",
                                 "1 subject category",
-                                "Access to student directory"
+                                "Buy credit packs as needed"
                             ].map((feature, i) => (
                                 <li key={i} className="flex items-center gap-3 text-sm text-gray-600">
                                     <CheckCircle2 size={16} className="text-blue-500 shrink-0" />
@@ -56,7 +57,7 @@ export default function TutorPricing() {
                         </Link>
                     </div>
 
-                    {/* Expert Tier - Recommended */}
+                    {/* Pro Tier - Recommended */}
                     <div className="bg-white border-2 border-blue-600 rounded-2xl p-8 flex flex-col relative shadow-lg shadow-blue-100">
                         <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-xs font-semibold px-4 py-1 rounded-full">
                             Recommended
@@ -65,22 +66,22 @@ export default function TutorPricing() {
                             <div className="w-10 h-10 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center mb-4">
                                 <Crown size={20} className="text-blue-600" />
                             </div>
-                            <h3 className="text-xl font-semibold text-gray-900 mb-1">Expert</h3>
+                            <h3 className="text-xl font-semibold text-gray-900 mb-1">Pro</h3>
                             <p className="text-sm text-gray-400">For individual tutors</p>
                         </div>
                         <div className="text-4xl font-bold text-gray-900 mb-1">
                             ₹499
                             <span className="text-base font-normal text-gray-400 ml-1">/month</span>
                         </div>
-                        <p className="text-xs text-blue-600 font-medium mb-8">Billed monthly, cancel anytime</p>
+                        <p className="text-xs text-blue-600 font-medium mb-8">30 credits included every month</p>
                         <ul className="space-y-4 mb-8 flex-1">
                             {[
                                 "Verified badge on your profile",
-                                "Unlimited student leads",
-                                "AI-powered student matching",
-                                "Up to 5 subject categories",
+                                "30 credits per month",
                                 "Priority search ranking",
-                                "Direct student messaging"
+                                "Direct student messaging",
+                                "Up to 5 subject categories",
+                                "Cancel anytime"
                             ].map((feature, i) => (
                                 <li key={i} className="flex items-center gap-3 text-sm text-gray-700">
                                     <ShieldCheck size={16} className="text-blue-600 shrink-0" />
@@ -92,31 +93,32 @@ export default function TutorPricing() {
                             href="/register/tutor"
                             className="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors text-center text-sm"
                         >
-                            Start as Expert
+                            Start with Pro
                         </Link>
                     </div>
 
-                    {/* Institute Pro Tier */}
+                    {/* Elite Tier */}
                     <div className="bg-white border border-gray-200 rounded-2xl p-8 flex flex-col">
                         <div className="mb-6">
                             <div className="w-10 h-10 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center mb-4">
                                 <Building2 size={20} className="text-gray-400" />
                             </div>
-                            <h3 className="text-xl font-semibold text-gray-900 mb-1">Institute Pro</h3>
-                            <p className="text-sm text-gray-400">For institutes and academies</p>
+                            <h3 className="text-xl font-semibold text-gray-900 mb-1">Elite</h3>
+                            <p className="text-sm text-gray-400">For institutes and top tutors</p>
                         </div>
                         <div className="text-4xl font-bold text-gray-900 mb-1">
                             ₹1,999
                             <span className="text-base font-normal text-gray-400 ml-1">/month</span>
                         </div>
-                        <p className="text-xs text-gray-400 mb-8">Up to 10 tutors included</p>
+                        <p className="text-xs text-gray-400 mb-8">100 credits included every month</p>
                         <ul className="space-y-4 mb-8 flex-1">
                             {[
-                                "Institute profile with branding",
-                                "Manage up to 10 tutors",
-                                "Bulk lead management",
-                                "Custom institute page",
-                                "Performance analytics dashboard"
+                                "Everything in Pro",
+                                "100 credits per month",
+                                "Featured listing in search",
+                                "Top search ranking",
+                                "Dedicated support",
+                                "Unlimited subject categories"
                             ].map((feature, i) => (
                                 <li key={i} className="flex items-center gap-3 text-sm text-gray-600">
                                     <CheckCircle2 size={16} className="text-blue-500 shrink-0" />
@@ -128,10 +130,33 @@ export default function TutorPricing() {
                             href="/register/tutor"
                             className="w-full py-3 border border-gray-200 text-gray-700 font-medium rounded-lg hover:border-blue-500 hover:text-blue-600 transition-colors text-center text-sm"
                         >
-                            Register as Institute
+                            Start with Elite
                         </Link>
                     </div>
 
+                </div>
+            </section>
+
+            {/* Credit Packs */}
+            <section className="py-16 px-6 bg-gray-50">
+                <div className="max-w-3xl mx-auto text-center">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-3 tracking-tight">Or buy credits as you go</h2>
+                    <p className="text-gray-500 mb-10">No subscription needed. Buy credit packs and use them to unlock student contacts.</p>
+                    <div className="grid grid-cols-3 gap-4">
+                        {[
+                            { credits: 10, price: 99 },
+                            { credits: 30, price: 249 },
+                            { credits: 60, price: 449 }
+                        ].map((pack, i) => (
+                            <div key={i} className="bg-white border border-gray-200 rounded-2xl p-6 text-center">
+                                <p className="text-3xl font-bold text-gray-900 mb-1">{pack.credits}</p>
+                                <p className="text-sm text-gray-400 mb-3">credits</p>
+                                <p className="text-xl font-bold text-blue-600">₹{pack.price}</p>
+                                <p className="text-xs text-gray-400 mt-1">₹{Math.round(pack.price / pack.credits)} per credit</p>
+                            </div>
+                        ))}
+                    </div>
+                    <p className="text-sm text-gray-400 mt-6">Credits can be purchased from your tutor dashboard after signing up.</p>
                 </div>
             </section>
 
@@ -154,7 +179,6 @@ export default function TutorPricing() {
                     </Link>
                 </div>
             </section>
-
         </div>
     );
 }

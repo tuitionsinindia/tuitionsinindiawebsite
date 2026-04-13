@@ -4,31 +4,33 @@ export async function GET() {
     const plans = [
         {
             id: "plan_pro_monthly",
-            name: "Pro Tutor",
+            name: "Pro",
             tier: "PRO",
-            price: 999,
+            price: 499,
             interval: "month",
-            credits: 15,
+            credits: 30,
             features: [
-                "Highlighted Search Profile",
-                "15 Free Lead Credits/mo",
-                "Verified Badge",
-                "Direct Message Dashboard"
+                "Verified badge on your profile",
+                "30 credits per month",
+                "Priority search ranking",
+                "Direct student messaging",
+                "Up to 5 subject categories"
             ]
         },
         {
-            id: "plan_elite_yearly",
-            name: "Elite Expert",
+            id: "plan_elite_monthly",
+            name: "Elite",
             tier: "ELITE",
-            price: 8999,
-            interval: "year",
-            credits: 200,
+            price: 1999,
+            interval: "month",
+            credits: 100,
             features: [
-                "Top Tier Search Ranking",
-                "200 Free Lead Credits/yr",
-                "Elite Expert Badge",
-                "Dedicated Support",
-                "Profile Promotion in Newsletters"
+                "Everything in Pro",
+                "100 credits per month",
+                "Featured listing in search",
+                "Top search ranking",
+                "Dedicated support",
+                "Unlimited subject categories"
             ]
         }
     ];

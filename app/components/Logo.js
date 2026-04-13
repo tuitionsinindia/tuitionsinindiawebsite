@@ -11,7 +11,7 @@ export default function Logo({ light = false, className = "", iconOnly = false }
             </div>
             {!iconOnly && (
                 <span className={`text-base font-bold tracking-tight ${light ? 'text-white' : 'text-gray-900'}`}>
-                    Tuitions<span className="text-blue-600">in</span>India
+                    Tuitions<span className={light ? 'text-white/70' : 'text-blue-600'}>in</span>India
                 </span>
             )}
         </Link>

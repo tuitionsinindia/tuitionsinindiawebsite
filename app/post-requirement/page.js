@@ -3,19 +3,21 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { 
-    GraduationCap, 
-    ArrowRight, 
-    ArrowLeft, 
-    CheckCircle2, 
-    ShieldCheck, 
-    Zap, 
-    MapPin, 
-    School, 
+import {
+    GraduationCap,
+    ArrowRight,
+    ArrowLeft,
+    CheckCircle2,
+    ShieldCheck,
+    Zap,
+    MapPin,
+    School,
     PlusCircle,
     CheckCircle,
     Award,
-    Activity
+    Monitor,
+    Home,
+    Building2
 } from "lucide-react";
 import LeadCaptureFlow from "../components/LeadCaptureFlow";
 
@@ -26,9 +28,26 @@ export default function PostRequirement() {
         subject: "",
         grade: "",
         location: "",
+        modes: [],
         budget: "",
         description: "",
     });
+
+    const tuitionModes = [
+        { id: "ONLINE", label: "Online", icon: Monitor },
+        { id: "STUDENT_HOME", label: "At Student's Home", icon: Home },
+        { id: "TUTOR_HOME", label: "At Tutor's Place", icon: MapPin },
+        { id: "CENTER", label: "At Institute", icon: Building2 },
+    ];
+
+    const toggleMode = (modeId) => {
+        setFormData(prev => ({
+            ...prev,
+            modes: prev.modes.includes(modeId)
+                ? prev.modes.filter(m => m !== modeId)
+                : [...prev.modes, modeId]
+        }));
+    };
 
     const [isSuccess, setIsSuccess] = useState(false);
 
@@ -41,7 +60,6 @@ export default function PostRequirement() {
 
     const handleVerificationComplete = async (user) => {
         try {
-            // Submit Lead with verified user data
             const res = await fetch("/api/lead/post", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -49,7 +67,7 @@ export default function PostRequirement() {
                     ...formData,
                     name: user.name,
                     phone: user.phone,
-                    email: user.email || `${user.phone}@tuitionsinindia.com`, // Fallback for email
+                    email: user.email || `${user.phone}@tuitionsinindia.com`,
                     studentId: user.id
                 }),
             });
@@ -66,48 +84,47 @@ export default function PostRequirement() {
 
     if (isSuccess) {
         return (
-            <div className="min-h-screen bg-blue-50/50 flex items-center justify-center p-6 text-center">
-                <div className="max-w-xl bg-white rounded-[4rem] p-16 shadow-4xl shadow-blue-900/10 border border-blue-100 relative overflow-hidden">
-                    <div className="absolute inset-0 bg-blue-600/5"></div>
-                    <div className="relative z-10">
-                        <div className="w-24 h-24 bg-blue-600/10 rounded-[2rem] flex items-center justify-center text-blue-600 mx-auto mb-10 shadow-2xl shadow-blue-600/20">
-                            <CheckCircle size={48} strokeWidth={3} />
-                        </div>
-                        <h1 className="text-4xl md:text-5xl font-black text-gray-900 mb-6 italic uppercase tracking-tighter">Broadcast Live</h1>
-                        <p className="text-gray-400 font-medium mb-12 leading-relaxed italic">
-                            Your academic requirement has been synchronized with our verified faculty network. Expert mentors will contact you shortly.
-                        </p>
-                        <button 
-                            className="w-full bg-blue-600 text-white py-6 rounded-2xl font-black text-xs shadow-2xl shadow-blue-600/30 hover:bg-gray-900 transition-all uppercase tracking-[0.3em]"
-                            onClick={() => router.push('/search')}
-                        >
-                            Explore Global Directory
-                        </button>
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6 text-center">
+                <div className="max-w-md bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+                    <div className="size-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 mx-auto mb-6">
+                        <CheckCircle size={36} />
                     </div>
+                    <h1 className="text-2xl font-bold text-gray-900 mb-3">Request Submitted</h1>
+                    <p className="text-gray-500 text-sm mb-8 leading-relaxed">
+                        Your tutor requirement has been posted successfully. Tutors in your area will contact you shortly.
+                    </p>
+                    <button
+                        className="w-full bg-blue-600 text-white py-3.5 rounded-xl font-bold text-sm shadow-sm hover:bg-blue-700 transition-all"
+                        onClick={() => router.push('/search')}
+                    >
+                        Browse Tutors
+                    </button>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-blue-50/50 font-sans text-gray-900 antialiased pt-32 pb-32">
-            
-            <Link href="/" className="mb-16 flex items-center gap-4 group max-w-7xl mx-auto px-6">
-                <div className="size-14 bg-white rounded-2xl border border-gray-100 flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform shadow-sm">
-                    <GraduationCap size={28} strokeWidth={3} />
+        <div className="min-h-screen bg-gray-50 font-sans text-gray-900 antialiased pt-28 pb-20">
+
+            <Link href="/" className="mb-10 flex items-center gap-3 group max-w-3xl mx-auto px-6">
+                <div className="size-10 bg-white rounded-xl border border-gray-100 flex items-center justify-center text-blue-600 shadow-sm">
+                    <GraduationCap size={22} />
                 </div>
                 <div>
-                   <span className="text-2xl font-black italic tracking-tighter text-gray-900 uppercase group-hover:text-blue-600 transition-colors leading-none">TuitionsInIndia</span>
-                   <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] italic">Requirement Placement Hub</p>
+                    <span className="text-lg font-bold text-gray-900 tracking-tight group-hover:text-blue-600 transition-colors leading-none">
+                        Tuitions<span className="text-blue-600">in</span>India
+                    </span>
+                    <p className="text-xs font-semibold text-gray-400">Post a Requirement</p>
                 </div>
             </Link>
 
-            <div className="w-full max-w-4xl mx-auto container px-6">
+            <div className="w-full max-w-3xl mx-auto px-6">
                 {/* Stepper Progress */}
-                <div className="mb-20 relative">
-                    <div className="absolute top-1/2 left-0 right-0 h-1.5 bg-gray-100 -translate-y-1/2 rounded-full overflow-hidden z-0">
+                <div className="mb-12 relative">
+                    <div className="absolute top-1/2 left-0 right-0 h-1 bg-gray-100 -translate-y-1/2 rounded-full overflow-hidden z-0">
                         <div
-                            className="absolute top-0 left-0 h-full bg-blue-600 transition-all duration-1000 ease-out shadow-[0_0_15px_rgba(37,99,235,0.3)]"
+                            className="absolute top-0 left-0 h-full bg-blue-600 transition-all duration-700 ease-out"
                             style={{ width: `${((step - 1) / 3) * 100}%` }}
                         ></div>
                     </div>
@@ -115,11 +132,11 @@ export default function PostRequirement() {
                     <div className="flex justify-between relative z-10">
                         {[1, 2, 3, 4].map((s) => (
                             <div key={s} className="flex flex-col items-center">
-                                <div className={`size-12 rounded-2xl flex items-center justify-center font-black text-xs transition-all duration-500 border-4 border-white italic ${step > s ? 'bg-blue-600 text-white scale-90 opacity-40' :
-                                    step === s ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/30 scale-110' :
+                                <div className={`size-10 rounded-xl flex items-center justify-center font-bold text-sm transition-all duration-500 border-2 border-white ${step > s ? 'bg-blue-600 text-white scale-90 opacity-50' :
+                                    step === s ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' :
                                         'bg-gray-100 text-gray-300'
                                     }`}>
-                                    {step > s ? <CheckCircle2 size={16} strokeWidth={3} /> : `0${s}`}
+                                    {step > s ? <CheckCircle2 size={16} /> : s}
                                 </div>
                             </div>
                         ))}
@@ -127,30 +144,27 @@ export default function PostRequirement() {
                 </div>
 
                 {/* Main Form Card */}
-                <div className="bg-white rounded-[4rem] shadow-4xl shadow-blue-900/5 border border-gray-100 overflow-hidden relative group">
-                    <div className="absolute inset-0 bg-blue-600/2"></div>
-                    <div className="absolute top-0 left-0 w-full h-2 bg-blue-600/10"></div>
-
-                    <div className="p-10 md:p-20">
+                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                    <div className="p-6 md:p-8">
                         {step === 1 && (
-                            <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 space-y-12">
-                                <div className="space-y-4">
-                                    <h2 className="text-5xl font-black text-gray-900 italic tracking-tighter uppercase leading-none">Target <span className="text-blue-600 font-serif lowercase tracking-normal not-italic px-2">academic</span> Interest.</h2>
-                                    <p className="text-gray-400 italic font-medium">Specify the subject domain you wish to synchronize.</p>
+                            <div className="space-y-6">
+                                <div className="space-y-2">
+                                    <h2 className="text-2xl font-bold text-gray-900 tracking-tight">What subject do you need help with?</h2>
+                                    <p className="text-gray-500 text-sm">Tell us the subject you're looking for a tutor in.</p>
                                 </div>
 
-                                <div className="space-y-8">
-                                    <div className="space-y-4">
-                                        <label className="block text-xs font-black text-gray-400 uppercase tracking-[0.3em] ml-6 italic">Subject / Field of Study</label>
+                                <div className="space-y-5">
+                                    <div className="space-y-2">
+                                        <label className="block text-sm font-semibold text-gray-700">Subject</label>
                                         <div className="relative">
-                                            <School className="absolute left-8 top-1/2 -translate-y-1/2 text-blue-600/40" size={20} />
+                                            <School className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
                                             <input
                                                 type="text"
                                                 name="subject"
-                                                placeholder="e.g. Advanced Calculus, Physics..."
+                                                placeholder="e.g. Maths, Physics, English..."
                                                 value={formData.subject}
                                                 onChange={handleChange}
-                                                className="w-full bg-gray-50 border border-gray-100 focus:bg-white focus:border-blue-600 rounded-2xl px-16 py-6 font-medium outline-none transition-all italic text-gray-900 placeholder:text-gray-200"
+                                                className="w-full bg-gray-50 border border-gray-200 focus:bg-white focus:border-blue-500 rounded-xl px-12 py-4 text-sm font-medium outline-none transition-all text-gray-900 placeholder:text-gray-300 focus:ring-2 focus:ring-blue-500/10"
                                                 required
                                                 autoFocus
                                             />
@@ -159,74 +173,100 @@ export default function PostRequirement() {
 
                                     <button
                                         type="button"
-                                        className="w-full bg-blue-600 text-white py-6 rounded-2xl font-black text-xs shadow-2xl shadow-blue-600/30 hover:bg-gray-900 transition-all flex items-center justify-center gap-6 disabled:opacity-20 uppercase tracking-[0.3em]"
+                                        className="w-full bg-blue-600 text-white py-3.5 rounded-xl font-bold text-sm shadow-sm hover:bg-blue-700 transition-all flex items-center justify-center gap-3 disabled:opacity-30"
                                         onClick={nextStep}
                                         disabled={!formData.subject}>
-                                        Continue <ArrowRight size={16} strokeWidth={3} />
+                                        Continue <ArrowRight size={16} />
                                     </button>
                                 </div>
                             </div>
                         )}
 
                         {step === 2 && (
-                            <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 space-y-12">
-                                <div className="space-y-4">
-                                    <h2 className="text-5xl font-black text-gray-900 italic tracking-tighter uppercase leading-none">Level & <span className="text-blue-600 font-serif lowercase tracking-normal not-italic px-2">geographic</span> Hub.</h2>
-                                    <p className="text-gray-400 italic font-medium">Define your academic grade and physical location coords.</p>
+                            <div className="space-y-6">
+                                <div className="space-y-2">
+                                    <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Grade level and location</h2>
+                                    <p className="text-gray-500 text-sm">Select your grade and enter your city.</p>
                                 </div>
 
-                                <div className="space-y-8">
-                                    <div className="space-y-4">
-                                        <label className="block text-xs font-black text-gray-400 uppercase tracking-[0.3em] ml-6 italic">Academic Grade Tier</label>
+                                <div className="space-y-5">
+                                    <div className="space-y-2">
+                                        <label className="block text-sm font-semibold text-gray-700">Grade / Level</label>
                                         <div className="relative">
-                                            <PlusCircle className="absolute left-8 top-1/2 -translate-y-1/2 text-blue-600/40" size={20} />
+                                            <PlusCircle className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
                                             <select
                                                 name="grade"
                                                 value={formData.grade}
                                                 onChange={handleChange}
                                                 required
-                                                className="w-full bg-gray-50 border border-gray-100 focus:bg-white focus:border-blue-600 rounded-2xl px-16 py-6 font-medium outline-none transition-all italic text-gray-900 appearance-none cursor-pointer">
-                                                <option value="" disabled>Select Level</option>
+                                                className="w-full bg-gray-50 border border-gray-200 focus:bg-white focus:border-blue-500 rounded-xl px-12 py-4 text-sm font-medium outline-none transition-all text-gray-900 appearance-none cursor-pointer focus:ring-2 focus:ring-blue-500/10">
+                                                <option value="" disabled>Select level</option>
                                                 <option value="Primary (1-5)">Primary (1-5)</option>
                                                 <option value="Middle (6-8)">Middle (6-8)</option>
                                                 <option value="High School (9-10)">High School (9-10)</option>
                                                 <option value="Higher Secondary (11-12)">Higher Secondary (11-12)</option>
-                                                <option value="Undergraduate">Undergraduate Degree</option>
+                                                <option value="Undergraduate">Undergraduate</option>
                                                 <option value="Competitive Exams">Competitive Exams</option>
-                                                <option value="Other">Custom Skills</option>
+                                                <option value="Other">Other</option>
                                             </select>
                                         </div>
                                     </div>
 
-                                    <div className="space-y-4">
-                                        <label className="block text-xs font-black text-gray-400 uppercase tracking-[0.3em] ml-6 italic">Deployment Area (City)</label>
+                                    <div className="space-y-2">
+                                        <label className="block text-sm font-semibold text-gray-700">City / Location</label>
                                         <div className="relative">
-                                            <MapPin className="absolute left-8 top-1/2 -translate-y-1/2 text-blue-600/40" size={20} />
+                                            <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
                                             <input
                                                 type="text"
                                                 name="location"
-                                                placeholder="e.g. Mumbai, Online Hub..."
+                                                placeholder="e.g. Mumbai, Delhi, Online..."
                                                 value={formData.location}
                                                 onChange={handleChange}
                                                 required
-                                                className="w-full bg-gray-50 border border-gray-100 focus:bg-white focus:border-blue-600 rounded-2xl px-16 py-6 font-medium outline-none transition-all italic text-gray-900 placeholder:text-gray-200"
+                                                className="w-full bg-gray-50 border border-gray-200 focus:bg-white focus:border-blue-500 rounded-xl px-12 py-4 text-sm font-medium outline-none transition-all text-gray-900 placeholder:text-gray-300 focus:ring-2 focus:ring-blue-500/10"
                                             />
                                         </div>
                                     </div>
 
-                                    <div className="flex gap-6">
+                                    {/* Tuition Mode Preference */}
+                                    <div className="space-y-2">
+                                        <label className="block text-sm font-semibold text-gray-700">Tuition mode preference</label>
+                                        <p className="text-xs text-gray-400">Select all that work for you</p>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {tuitionModes.map((mode) => {
+                                                const selected = formData.modes.includes(mode.id);
+                                                return (
+                                                    <button
+                                                        key={mode.id}
+                                                        type="button"
+                                                        onClick={() => toggleMode(mode.id)}
+                                                        className={`flex items-center gap-3 p-3 rounded-xl border text-sm font-medium text-left transition-all ${
+                                                            selected
+                                                                ? "border-blue-500 bg-blue-50 text-blue-700"
+                                                                : "border-gray-200 bg-gray-50 text-gray-600 hover:border-blue-300 hover:bg-blue-50/50"
+                                                        }`}
+                                                    >
+                                                        <mode.icon size={16} className={selected ? "text-blue-600" : "text-gray-400"} />
+                                                        {mode.label}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+
+                                    <div className="flex gap-3">
                                         <button
                                             type="button"
-                                            className="px-8 py-6 rounded-2xl font-black text-gray-300 hover:text-blue-600 transition-all uppercase tracking-[0.3em] text-xs"
+                                            className="px-6 py-3.5 rounded-xl font-semibold text-gray-400 hover:text-blue-600 transition-all text-sm"
                                             onClick={prevStep}>
                                             Back
                                         </button>
                                         <button
                                             type="button"
-                                            className="flex-1 bg-blue-600 text-white py-6 rounded-2xl font-black text-xs shadow-2xl shadow-blue-600/30 hover:bg-gray-900 transition-all flex items-center justify-center gap-6 disabled:opacity-20 uppercase tracking-[0.3em]"
+                                            className="flex-1 bg-blue-600 text-white py-3.5 rounded-xl font-bold text-sm shadow-sm hover:bg-blue-700 transition-all flex items-center justify-center gap-3 disabled:opacity-30"
                                             onClick={nextStep}
                                             disabled={!formData.grade || !formData.location}>
-                                            Authorize Hub <ArrowRight size={16} strokeWidth={3} />
+                                            Continue <ArrowRight size={16} />
                                         </button>
                                     </div>
                                 </div>
@@ -234,52 +274,52 @@ export default function PostRequirement() {
                         )}
 
                         {step === 3 && (
-                            <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 space-y-12">
-                                <div className="space-y-4">
-                                    <h2 className="text-5xl font-black text-gray-900 italic tracking-tighter uppercase leading-none">Budget & <span className="text-blue-600 font-serif lowercase tracking-normal not-italic px-2">delivery</span> Constraints.</h2>
-                                    <p className="text-gray-400 italic font-medium">Fine-tune your hourly allocation and detailed requirements.</p>
+                            <div className="space-y-6">
+                                <div className="space-y-2">
+                                    <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Budget and details</h2>
+                                    <p className="text-gray-500 text-sm">Set your budget and describe what you need.</p>
                                 </div>
 
-                                <div className="space-y-8">
-                                    <div className="space-y-4">
-                                        <label className="block text-xs font-black text-gray-400 uppercase tracking-[0.3em] ml-6 italic">Hourly Budget (₹)</label>
+                                <div className="space-y-5">
+                                    <div className="space-y-2">
+                                        <label className="block text-sm font-semibold text-gray-700">Hourly Budget (₹)</label>
                                         <div className="relative">
-                                            <span className="absolute left-8 top-1/2 -translate-y-1/2 text-blue-600 font-black italic">₹</span>
+                                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₹</span>
                                             <input
                                                 type="text"
                                                 name="budget"
-                                                placeholder="e.g. 1000/hr"
+                                                placeholder="e.g. 500, 1000"
                                                 value={formData.budget}
                                                 onChange={handleChange}
-                                                className="w-full bg-gray-50 border border-gray-100 focus:bg-white focus:border-blue-600 rounded-2xl px-16 py-6 font-medium outline-none transition-all italic text-gray-900 placeholder:text-gray-200"
+                                                className="w-full bg-gray-50 border border-gray-200 focus:bg-white focus:border-blue-500 rounded-xl px-12 py-4 text-sm font-medium outline-none transition-all text-gray-900 placeholder:text-gray-300 focus:ring-2 focus:ring-blue-500/10"
                                             />
                                         </div>
                                     </div>
 
-                                    <div className="space-y-4">
-                                        <label className="block text-xs font-black text-gray-400 uppercase tracking-[0.3em] ml-6 italic">Detailed Specification</label>
+                                    <div className="space-y-2">
+                                        <label className="block text-sm font-semibold text-gray-700">Additional details</label>
                                         <textarea
                                             name="description"
                                             rows="4"
-                                            placeholder="State your academic objectives and expectations..."
+                                            placeholder="Describe what you're looking for in a tutor..."
                                             value={formData.description}
                                             onChange={handleChange}
-                                            className="w-full bg-gray-50 border border-gray-100 focus:bg-white focus:border-blue-600 rounded-[2rem] px-10 py-8 font-medium outline-none transition-all resize-none leading-relaxed italic text-gray-900 placeholder:text-gray-200"
+                                            className="w-full bg-gray-50 border border-gray-200 focus:bg-white focus:border-blue-500 rounded-xl px-4 py-4 text-sm font-medium outline-none transition-all resize-none leading-relaxed text-gray-900 placeholder:text-gray-300 focus:ring-2 focus:ring-blue-500/10"
                                         ></textarea>
                                     </div>
 
-                                    <div className="flex gap-6">
+                                    <div className="flex gap-3">
                                         <button
                                             type="button"
-                                            className="px-8 py-6 rounded-2xl font-black text-gray-300 hover:text-blue-600 transition-all uppercase tracking-[0.3em] text-xs"
+                                            className="px-6 py-3.5 rounded-xl font-semibold text-gray-400 hover:text-blue-600 transition-all text-sm"
                                             onClick={prevStep}>
                                             Back
                                         </button>
                                         <button
                                             type="button"
-                                            className="flex-1 bg-blue-600 text-white py-6 rounded-2xl font-black text-xs shadow-2xl shadow-blue-600/30 hover:bg-gray-900 transition-all flex items-center justify-center gap-6 disabled:opacity-20 uppercase tracking-[0.3em]"
+                                            className="flex-1 bg-blue-600 text-white py-3.5 rounded-xl font-bold text-sm shadow-sm hover:bg-blue-700 transition-all flex items-center justify-center gap-3"
                                             onClick={nextStep}>
-                                            Begin Sync <ArrowRight size={16} strokeWidth={3} />
+                                            Next <ArrowRight size={16} />
                                         </button>
                                     </div>
                                 </div>
@@ -287,48 +327,43 @@ export default function PostRequirement() {
                         )}
 
                         {step === 4 && (
-                            <div className="animate-in zoom-in-95 duration-700 space-y-12">
-                                <div className="space-y-4 text-center">
-                                    <h2 className="text-4xl font-black text-gray-900 italic uppercase tracking-tighter">Identity <span className="text-blue-600">Verification.</span></h2>
-                                    <p className="text-gray-400 italic font-medium">Authenticate your placement request via secure identity protocol.</p>
+                            <div className="space-y-6">
+                                <div className="space-y-2 text-center">
+                                    <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Verify your identity</h2>
+                                    <p className="text-gray-500 text-sm">Confirm your phone number to submit your requirement.</p>
                                 </div>
-                                <div className="bg-gray-50 p-8 md:p-12 rounded-[3.5rem] border border-gray-100 shadow-inner">
+                                <div className="bg-gray-50 p-5 rounded-2xl border border-gray-100">
                                     <LeadCaptureFlow initialRole="STUDENT" onComplete={handleVerificationComplete} />
                                 </div>
                                 <button
                                     type="button"
-                                    className="w-full text-xs font-black text-gray-300 hover:text-blue-600 transition-all uppercase tracking-[0.4em] italic leading-none"
+                                    className="w-full text-sm font-semibold text-gray-400 hover:text-blue-600 transition-colors"
                                     onClick={prevStep}>
-                                    Refine Requirements
+                                    Back
                                 </button>
                             </div>
                         )}
                     </div>
                 </div>
             </div>
-            
-            {/* Professional Hub Context */}
-            <div className="max-w-4xl mx-auto mt-20 grid grid-cols-1 md:grid-cols-3 gap-10 px-6">
+
+            {/* Bottom stats */}
+            <div className="max-w-3xl mx-auto mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 px-6">
                 {[
                     { label: "Verified Tutors", value: "24k+", icon: Award },
-                    { label: "Sync Velocity", value: "Avg 15m", icon: Zap },
+                    { label: "Response Time", value: "Avg 15 min", icon: Zap },
                     { label: "Secure Payments", icon: ShieldCheck }
                 ].map((stat, i) => (
-                    <div key={i} className="flex flex-col items-center text-center space-y-3 group">
-                        <div className="size-10 bg-white rounded-xl border border-gray-100 flex items-center justify-center text-blue-600/30 group-hover:text-blue-600 transition-colors shadow-sm">
-                            <stat.icon size={18} />
+                    <div key={i} className="flex flex-col items-center text-center space-y-2 group">
+                        <div className="size-9 bg-white rounded-xl border border-gray-100 flex items-center justify-center text-gray-300 group-hover:text-blue-600 transition-colors shadow-sm">
+                            <stat.icon size={16} />
                         </div>
                         <div>
-                           <p className="text-xl font-black text-gray-900 italic tracking-tighter">{stat.value}</p>
-                           <p className="text-[10px] font-black uppercase text-gray-400 tracking-[0.3em]">{stat.label}</p>
+                            <p className="text-lg font-bold text-gray-900">{stat.value}</p>
+                            <p className="text-xs font-semibold text-gray-400">{stat.label}</p>
                         </div>
                     </div>
                 ))}
-            </div>
-
-            {/* Static operational indicator */}
-            <div className="mt-16 text-center flex items-center justify-center gap-2 text-[10px] font-black text-gray-300 uppercase tracking-[0.8em] italic">
-                <Activity size={12} strokeWidth={3} className="text-blue-600 animate-pulse" /> BROADCAST_STATION_ACTIVE
             </div>
         </div>
     );
