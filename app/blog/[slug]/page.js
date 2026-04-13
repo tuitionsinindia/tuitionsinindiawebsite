@@ -22,11 +22,15 @@ export async function generateMetadata({ params }) {
 }
 
 export async function generateStaticParams() {
-    const posts = await prisma.blogPost.findMany({
-        where: { isPublished: true },
-        select: { slug: true },
-    });
-    return posts.map(p => ({ slug: p.slug }));
+    try {
+        const posts = await prisma.blogPost.findMany({
+            where: { isPublished: true },
+            select: { slug: true },
+        });
+        return posts.map(p => ({ slug: p.slug }));
+    } catch {
+        return [];
+    }
 }
 
 export const revalidate = 3600;
