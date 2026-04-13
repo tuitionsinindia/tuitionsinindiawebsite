@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { getSession } from "@/lib/session";
+import { verifyToken, COOKIE_NAME } from "@/lib/session";
 
 function generateCode() {
     const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -12,7 +12,8 @@ function generateCode() {
 // GET — fetch referral info for logged-in user
 export async function GET(req) {
     try {
-        const session = await getSession(req);
+        const cookie = req.cookies.get(COOKIE_NAME);
+        const session = cookie ? verifyToken(cookie.value) : null;
         if (!session?.userId) {
             return NextResponse.json({ error: "Not logged in" }, { status: 401 });
         }
