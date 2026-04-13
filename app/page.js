@@ -8,27 +8,37 @@ import {
     MessageSquare, ArrowRight, CheckCircle2, Users,
     GraduationCap, Zap, BookOpen, Phone
 } from "lucide-react";
-import { ALL_SUBJECTS, BROAD_CATEGORIES, getSubjectsForCategory, GRADE_OPTIONS, CITY_OPTIONS } from "../lib/subjects";
+import { ALL_SUBJECTS, BROAD_CATEGORIES, SUBJECT_CATEGORIES, getSubjectsForCategory, GRADE_OPTIONS, CITY_OPTIONS } from "../lib/subjects";
+
+// School sub-categories that need a level step before showing subjects
+const SCHOOL_SUB_CATEGORIES = SUBJECT_CATEGORIES.filter(sc =>
+    ["school_k5", "school_6_10", "school_11_12_sci", "school_11_12_comm", "school_11_12_hum", "college_uni"].includes(sc.id)
+);
 
 export default function Home() {
     const [searchCategory, setSearchCategory] = useState("");
+    const [searchSchoolLevel, setSearchSchoolLevel] = useState(""); // only used when category = "academics"
     const [searchSubject, setSearchSubject] = useState("");
     const [searchGrade, setSearchGrade] = useState("");
     const [searchLocation, setSearchLocation] = useState("");
     const [activeTab, setActiveTab] = useState("TUTOR");
     const [openFaq, setOpenFaq] = useState(null);
 
-    const availableSubjects = searchCategory ? getSubjectsForCategory(searchCategory) : ALL_SUBJECTS;
+    const isAcademics = searchCategory === "academics";
+
+    // For academics: subjects come from the chosen school level; for others: filtered by broad category
+    const availableSubjects = isAcademics
+        ? (searchSchoolLevel ? (SUBJECT_CATEGORIES.find(sc => sc.id === searchSchoolLevel)?.subjects || []) : [])
+        : (searchCategory ? getSubjectsForCategory(searchCategory) : ALL_SUBJECTS);
 
     const router = useRouter();
-
-    // Subject list updates when category changes
 
     const handleSearch = () => {
         const params = new URLSearchParams();
         if (searchCategory) params.set("category", searchCategory);
+        if (searchSchoolLevel) params.set("grade", searchSchoolLevel);
+        else if (searchGrade) params.set("grade", searchGrade);
         if (searchSubject) params.set("subject", searchSubject);
-        if (searchGrade) params.set("grade", searchGrade);
         params.set("role", activeTab);
         if (searchLocation) params.set("location", searchLocation);
         router.push(`/search?${params.toString()}`);
@@ -87,31 +97,43 @@ export default function Home() {
                                 {/* Category */}
                                 <select
                                     value={searchCategory}
-                                    onChange={(e) => { setSearchCategory(e.target.value); setSearchSubject(""); }}
+                                    onChange={(e) => { setSearchCategory(e.target.value); setSearchSubject(""); setSearchSchoolLevel(""); setSearchGrade(""); }}
                                     className="h-11 px-3 border border-gray-200 rounded-lg bg-gray-50 text-sm text-gray-700 outline-none focus:border-blue-500 cursor-pointer"
                                 >
                                     <option value="">All Categories</option>
                                     {BROAD_CATEGORIES.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
                                 </select>
 
-                                {/* Subject (dropdown filtered by category) */}
+                                {/* Level — for School & Academics: show school sub-levels; for others: generic grade */}
+                                {isAcademics ? (
+                                    <select
+                                        value={searchSchoolLevel}
+                                        onChange={(e) => { setSearchSchoolLevel(e.target.value); setSearchSubject(""); }}
+                                        className="h-11 px-3 border border-gray-200 rounded-lg bg-gray-50 text-sm text-gray-700 outline-none focus:border-blue-500 cursor-pointer"
+                                    >
+                                        <option value="">Select Level</option>
+                                        {SCHOOL_SUB_CATEGORIES.map(sc => <option key={sc.id} value={sc.id}>{sc.name}</option>)}
+                                    </select>
+                                ) : (
+                                    <select
+                                        value={searchGrade}
+                                        onChange={(e) => setSearchGrade(e.target.value)}
+                                        className="h-11 px-3 border border-gray-200 rounded-lg bg-gray-50 text-sm text-gray-700 outline-none focus:border-blue-500 cursor-pointer"
+                                    >
+                                        <option value="">Level</option>
+                                        {GRADE_OPTIONS.map(g => <option key={g} value={g}>{g}</option>)}
+                                    </select>
+                                )}
+
+                                {/* Subject — filtered by category+level */}
                                 <select
                                     value={searchSubject}
                                     onChange={(e) => setSearchSubject(e.target.value)}
-                                    className="h-11 px-3 border border-gray-200 rounded-lg bg-gray-50 text-sm text-gray-700 outline-none focus:border-blue-500 cursor-pointer"
+                                    disabled={isAcademics && !searchSchoolLevel}
+                                    className="h-11 px-3 border border-gray-200 rounded-lg bg-gray-50 text-sm text-gray-700 outline-none focus:border-blue-500 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    <option value="">Subject</option>
+                                    <option value="">{isAcademics && !searchSchoolLevel ? "Pick level first" : "Subject"}</option>
                                     {availableSubjects.map(s => <option key={s} value={s}>{s}</option>)}
-                                </select>
-
-                                {/* Level */}
-                                <select
-                                    value={searchGrade}
-                                    onChange={(e) => setSearchGrade(e.target.value)}
-                                    className="h-11 px-3 border border-gray-200 rounded-lg bg-gray-50 text-sm text-gray-700 outline-none focus:border-blue-500 cursor-pointer"
-                                >
-                                    <option value="">Level</option>
-                                    {GRADE_OPTIONS.map(g => <option key={g} value={g}>{g}</option>)}
                                 </select>
 
                                 {/* City */}
