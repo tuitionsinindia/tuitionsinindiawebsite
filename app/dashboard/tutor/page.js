@@ -372,20 +372,40 @@ function DashboardContent() {
             <div className="flex flex-1">
                 <aside className="fixed left-0 top-[73px] bottom-0 w-20 md:w-64 bg-white border-r border-gray-100 flex flex-col items-center md:items-stretch py-6 px-2 md:px-6 z-50">
                     <nav className="space-y-1 w-full mt-4">
-                        {navItems.map((item) => (
-                            <button
-                                key={item.id}
-                                onClick={() => setActiveTab(item.id)}
-                                className={`w-full flex items-center gap-3 px-3 md:px-4 py-3 rounded-xl font-medium text-sm transition-all ${
-                                    activeTab === item.id
-                                    ? "bg-blue-600 text-white shadow-sm"
-                                    : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
-                                }`}
-                            >
-                                <item.icon size={18} />
-                                <span className="hidden md:block">{item.label}</span>
-                            </button>
-                        ))}
+                        {navItems.map((item) => {
+                            const unread = item.id === "CHAT"
+                                ? chatSessions.filter(s => {
+                                    const last = s.messages?.[0];
+                                    return last && !last.isRead && last.senderId !== tutorId;
+                                }).length
+                                : 0;
+                            return (
+                                <button
+                                    key={item.id}
+                                    onClick={() => setActiveTab(item.id)}
+                                    className={`w-full flex items-center gap-3 px-3 md:px-4 py-3 rounded-xl font-medium text-sm transition-all ${
+                                        activeTab === item.id
+                                        ? "bg-blue-600 text-white shadow-sm"
+                                        : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
+                                    }`}
+                                >
+                                    <div className="relative">
+                                        <item.icon size={18} />
+                                        {unread > 0 && (
+                                            <span className="absolute -top-1.5 -right-1.5 size-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                                                {unread > 9 ? "9+" : unread}
+                                            </span>
+                                        )}
+                                    </div>
+                                    <span className="hidden md:block">{item.label}</span>
+                                    {unread > 0 && activeTab !== item.id && (
+                                        <span className="hidden md:flex ml-auto size-5 bg-red-500 text-white text-[9px] font-bold rounded-full items-center justify-center">
+                                            {unread > 9 ? "9+" : unread}
+                                        </span>
+                                    )}
+                                </button>
+                            );
+                        })}
                     </nav>
 
                     <button
@@ -431,6 +451,33 @@ function DashboardContent() {
                                         </div>
                                     ))}
                                 </div>
+
+                                {/* Verification Guide — shown only when not verified */}
+                                {!tutorData?.isVerified && (
+                                    <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex gap-4 items-start">
+                                        <div className="size-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
+                                            <ShieldCheck size={20} />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <h3 className="font-bold text-gray-900 mb-1">Complete your verification</h3>
+                                            <p className="text-sm text-gray-600 mb-3">
+                                                Verified tutors get a badge on their profile, appear higher in search results, and receive more student enquiries.
+                                            </p>
+                                            <p className="text-xs font-semibold text-gray-700 mb-2">What to upload:</p>
+                                            <ul className="text-xs text-gray-500 space-y-1 mb-3">
+                                                <li>• A government-issued photo ID (Aadhaar, PAN, Passport, or Driving Licence)</li>
+                                                <li>• Your highest qualification certificate (degree, marksheet, or diploma)</li>
+                                            </ul>
+                                            <p className="text-xs text-gray-400 mb-3">Expected timeline: 2–3 working days after documents are submitted.</p>
+                                            <a
+                                                href="mailto:support@tuitionsinindia.com?subject=Verification Documents&body=Hi, I would like to complete my tutor verification. My tutor ID is: "
+                                                className="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-lg text-xs font-semibold hover:bg-amber-700 transition-colors"
+                                            >
+                                                Send Documents to Support
+                                            </a>
+                                        </div>
+                                    </div>
+                                )}
 
                                 {/* Buy Credits Section */}
                                 <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">

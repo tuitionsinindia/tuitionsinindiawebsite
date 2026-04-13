@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -17,13 +17,16 @@ import {
     Award,
     Monitor,
     Home,
-    Building2
+    Building2,
+    Loader2
 } from "lucide-react";
 import LeadCaptureFlow from "../components/LeadCaptureFlow";
 
 export default function PostRequirement() {
     const [step, setStep] = useState(1);
     const router = useRouter();
+    const [loggedInUser, setLoggedInUser] = useState(null);
+    const [submitting, setSubmitting] = useState(false);
     const [formData, setFormData] = useState({
         subject: "",
         grade: "",
@@ -32,6 +35,14 @@ export default function PostRequirement() {
         budget: "",
         description: "",
     });
+
+    // Check if the user is already logged in via session cookie
+    useEffect(() => {
+        fetch("/api/auth/me")
+            .then(r => r.ok ? r.json() : null)
+            .then(data => { if (data?.id) setLoggedInUser(data); })
+            .catch(() => {});
+    }, []);
 
     const tuitionModes = [
         { id: "ONLINE", label: "Online", icon: Monitor },
@@ -58,7 +69,8 @@ export default function PostRequirement() {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleVerificationComplete = async (user) => {
+    const submitLead = async (user) => {
+        setSubmitting(true);
         try {
             const res = await fetch("/api/lead/post", {
                 method: "POST",
@@ -68,10 +80,10 @@ export default function PostRequirement() {
                     name: user.name,
                     phone: user.phone,
                     email: user.email || `${user.phone}@tuitionsinindia.com`,
-                    studentId: user.id
+                    studentId: user.id,
+                    modes: formData.modes.length > 0 ? formData.modes : ["BOTH"],
                 }),
             });
-
             if (res.ok) {
                 setIsSuccess(true);
             } else {
@@ -79,8 +91,12 @@ export default function PostRequirement() {
             }
         } catch (error) {
             console.error("Submission error:", error);
+        } finally {
+            setSubmitting(false);
         }
     };
+
+    const handleVerificationComplete = (user) => submitLead(user);
 
     if (isSuccess) {
         return (
@@ -328,19 +344,48 @@ export default function PostRequirement() {
 
                         {step === 4 && (
                             <div className="space-y-6">
-                                <div className="space-y-2 text-center">
-                                    <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Verify your identity</h2>
-                                    <p className="text-gray-500 text-sm">Confirm your phone number to submit your requirement.</p>
-                                </div>
-                                <div className="bg-gray-50 p-5 rounded-2xl border border-gray-100">
-                                    <LeadCaptureFlow initialRole="STUDENT" onComplete={handleVerificationComplete} />
-                                </div>
-                                <button
-                                    type="button"
-                                    className="w-full text-sm font-semibold text-gray-400 hover:text-blue-600 transition-colors"
-                                    onClick={prevStep}>
-                                    Back
-                                </button>
+                                {loggedInUser ? (
+                                    // Already logged in — skip OTP, submit directly
+                                    <div className="text-center space-y-5 py-4">
+                                        <div className="size-14 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 mx-auto">
+                                            <CheckCircle2 size={28} />
+                                        </div>
+                                        <div>
+                                            <h2 className="text-xl font-bold text-gray-900">Ready to submit</h2>
+                                            <p className="text-sm text-gray-500 mt-1">
+                                                Submitting as <span className="font-semibold text-gray-700">{loggedInUser.name}</span>
+                                            </p>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => submitLead(loggedInUser)}
+                                            disabled={submitting}
+                                            className="w-full bg-blue-600 text-white py-3.5 rounded-xl font-bold text-sm shadow-sm hover:bg-blue-700 transition-all flex items-center justify-center gap-2 disabled:opacity-60"
+                                        >
+                                            {submitting ? <Loader2 size={16} className="animate-spin" /> : <>Submit Requirement <ArrowRight size={16} /></>}
+                                        </button>
+                                        <button type="button" className="w-full text-sm font-semibold text-gray-400 hover:text-blue-600 transition-colors" onClick={prevStep}>
+                                            Back
+                                        </button>
+                                    </div>
+                                ) : (
+                                    // Not logged in — show OTP verification
+                                    <>
+                                        <div className="space-y-2 text-center">
+                                            <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Verify your phone</h2>
+                                            <p className="text-gray-500 text-sm">Confirm your phone number to submit your requirement.</p>
+                                        </div>
+                                        <div className="bg-gray-50 p-5 rounded-2xl border border-gray-100">
+                                            <LeadCaptureFlow initialRole="STUDENT" onComplete={handleVerificationComplete} />
+                                        </div>
+                                        <button
+                                            type="button"
+                                            className="w-full text-sm font-semibold text-gray-400 hover:text-blue-600 transition-colors"
+                                            onClick={prevStep}>
+                                            Back
+                                        </button>
+                                    </>
+                                )}
                             </div>
                         )}
                     </div>

@@ -236,20 +236,40 @@ function StudentDashboardContent() {
             <div className="flex flex-1">
                 <aside className="fixed left-0 top-[73px] bottom-0 w-20 md:w-64 bg-white border-r border-gray-100 flex flex-col items-center md:items-stretch py-6 px-2 md:px-6 z-50">
                     <nav className="space-y-1 w-full mt-4">
-                        {navItems.map((item) => (
-                            <button
-                                key={item.id}
-                                onClick={() => setActiveTab(item.id)}
-                                className={`w-full flex items-center gap-3 px-3 md:px-4 py-3 rounded-xl font-medium text-sm transition-all ${
-                                    activeTab === item.id
-                                    ? "bg-blue-600 text-white shadow-sm"
-                                    : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
-                                }`}
-                            >
-                                <item.icon size={18} />
-                                <span className="hidden md:block">{item.label}</span>
-                            </button>
-                        ))}
+                        {navItems.map((item) => {
+                            const unread = item.id === "CHAT"
+                                ? chatSessions.filter(s => {
+                                    const last = s.messages?.[0];
+                                    return last && !last.isRead && last.senderId !== studentId;
+                                }).length
+                                : 0;
+                            return (
+                                <button
+                                    key={item.id}
+                                    onClick={() => setActiveTab(item.id)}
+                                    className={`w-full flex items-center gap-3 px-3 md:px-4 py-3 rounded-xl font-medium text-sm transition-all ${
+                                        activeTab === item.id
+                                        ? "bg-blue-600 text-white shadow-sm"
+                                        : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
+                                    }`}
+                                >
+                                    <div className="relative">
+                                        <item.icon size={18} />
+                                        {unread > 0 && (
+                                            <span className="absolute -top-1.5 -right-1.5 size-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                                                {unread > 9 ? "9+" : unread}
+                                            </span>
+                                        )}
+                                    </div>
+                                    <span className="hidden md:block">{item.label}</span>
+                                    {unread > 0 && activeTab !== item.id && (
+                                        <span className="hidden md:flex ml-auto size-5 bg-red-500 text-white text-[9px] font-bold rounded-full items-center justify-center">
+                                            {unread > 9 ? "9+" : unread}
+                                        </span>
+                                    )}
+                                </button>
+                            );
+                        })}
                     </nav>
 
                     <button

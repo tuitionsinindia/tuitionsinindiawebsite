@@ -106,7 +106,7 @@ export async function GET(request) {
                     subjects: lead.subjects,
                     grades: lead.grades,
                     locations: lead.locations,
-                    teachingModes: lead.mode ? [lead.mode] : ["BOTH"],
+                    teachingModes: lead.modes?.length > 0 ? lead.modes : ["BOTH"],
                     lat: lead.lat,
                     lng: lead.lng
                 });

@@ -24,7 +24,7 @@ export async function GET(req) {
                 messages: {
                     orderBy: { createdAt: 'desc' },
                     take: 1,
-                    include: { sender: { select: { name: true } } }
+                    select: { id: true, content: true, isRead: true, senderId: true, createdAt: true, sender: { select: { name: true } } }
                 }
             },
             orderBy: { updatedAt: 'desc' }

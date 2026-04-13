@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(request) {
     try {
         const body = await request.json();
-        let { name, email, phone, subject, location, budget, description, grade } = body;
+        let { name, email, phone, subject, location, budget, description, grade, modes } = body;
 
         // Validation
         if (!email || !name || !phone) {
@@ -61,6 +61,7 @@ export async function POST(request) {
                 subjects: subject ? [subject] : [],
                 grades: grade ? [grade] : [],
                 locations: location ? [location] : [],
+                modes: Array.isArray(modes) && modes.length > 0 ? modes : ["BOTH"],
                 budget: budget,
                 description: description,
                 status: 'OPEN',
