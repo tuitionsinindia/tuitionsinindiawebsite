@@ -12,7 +12,7 @@ export async function POST(request) {
             return NextResponse.json({ error: "Too many requests. Please wait a minute and try again." }, { status: 429 });
         }
 
-        const { name, phone, role, isRegistration } = await request.json();
+        const { name, phone, role, isRegistration, userId } = await request.json();
 
         if (!phone || !role) {
             return NextResponse.json({ error: "Phone and role are required." }, { status: 400 });
@@ -28,7 +28,21 @@ export async function POST(request) {
         });
 
         let user;
-        if (isRegistration) {
+
+        if (userId) {
+            // Google OAuth flow: user already exists, just need to verify their phone
+            user = await prisma.user.findUnique({ where: { id: userId } });
+            if (!user) {
+                return NextResponse.json({ error: "User not found." }, { status: 404 });
+            }
+            // Check if this phone belongs to a different user
+            const phoneOwner = await prisma.user.findUnique({ where: { phone } });
+            if (phoneOwner && phoneOwner.id !== userId) {
+                return NextResponse.json({
+                    error: "This phone number is already registered to another account. Please use a different number.",
+                }, { status: 409 });
+            }
+        } else if (isRegistration) {
             // Registration: create if new, update name if existing
             const existing = await prisma.user.findUnique({ where: { phone } });
             if (existing) {
