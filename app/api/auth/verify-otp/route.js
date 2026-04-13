@@ -20,12 +20,17 @@ export async function POST(req) {
             return NextResponse.json({ error: "OTP has expired. Please request a new one." }, { status: 400 });
         }
 
-        if (storedData.code !== otp.toString()) {
-            return NextResponse.json({ error: "Invalid OTP code." }, { status: 400 });
+        // TEST BYPASS: phones starting with 9999 accept OTP 000000
+        const isTestPhone = phone.replace(/\D/g, "").startsWith("9999");
+        const isTestOtp = otp.toString() === "000000";
+        if (isTestPhone && isTestOtp) {
+            otpStore.delete(phone);
+        } else {
+            if (storedData.code !== otp.toString()) {
+                return NextResponse.json({ error: "Invalid OTP code." }, { status: 400 });
+            }
+            otpStore.delete(phone);
         }
-
-        // OTP is correct
-        otpStore.delete(phone);
 
         return NextResponse.json({ success: true, message: "OTP Verified Successfully" });
     } catch (error) {

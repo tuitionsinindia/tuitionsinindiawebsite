@@ -65,11 +65,17 @@ export async function POST(request) {
             }
         }
 
-        // Send OTP via Twilio
-        const formattedPhone = "+91" + phone.replace(/\D/g, "").slice(-10);
-        await sendOTP(formattedPhone, otp);
-
-        console.log(`[AUTH] OTP ${otp} dispatched to ${phone}`);
+        // Send OTP via Twilio (skip for test phones starting with 9999)
+        const isTestPhone = phone.replace(/\D/g, "").startsWith("9999");
+        if (isTestPhone) {
+            // For test numbers, always use 000000 as OTP
+            otpStore.set(phone, { code: "000000", expires: Date.now() + 10 * 60 * 1000 });
+            console.log(`[AUTH][TEST] Test phone ${phone} — OTP bypassed, use 000000`);
+        } else {
+            const formattedPhone = "+91" + phone.replace(/\D/g, "").slice(-10);
+            await sendOTP(formattedPhone, otp);
+            console.log(`[AUTH] OTP ${otp} dispatched to ${phone}`);
+        }
 
         return NextResponse.json({
             success: true,
