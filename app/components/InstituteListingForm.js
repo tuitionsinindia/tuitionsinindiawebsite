@@ -10,6 +10,7 @@ export default function InstituteListingForm({ user, onComplete }) {
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
     const [step, setStep] = useState(1);
+    const [isDetecting, setIsDetecting] = useState(false);
 
     const [form, setForm] = useState({
         instituteName: "",
@@ -27,6 +28,29 @@ export default function InstituteListingForm({ user, onComplete }) {
 
     const TIMING_SLOTS = ["Morning (7 AM - 12 PM)", "Afternoon (12 PM - 4 PM)", "Evening (4 PM - 8 PM)", "Late Night (8 PM+)", "Weekends"];
     const BOARDS = ["CBSE", "ICSE", "IB", "State Board", "IGCSE"];
+
+    const detectLocation = () => {
+        if (!("geolocation" in navigator)) return;
+        setIsDetecting(true);
+        navigator.geolocation.getCurrentPosition(async (pos) => {
+            const { latitude, longitude } = pos.coords;
+            try {
+                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+                const data = await res.json();
+                const city = data.address.city || data.address.town || data.address.state_district || "";
+                if (city && !form.locations.includes(city)) {
+                    setForm(f => ({ ...f, locations: [...f.locations, city] }));
+                }
+                if (user?.id) {
+                    fetch("/api/user/update", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ userId: user.id, lat: latitude, lng: longitude }),
+                    }).catch(() => {});
+                }
+            } catch {} finally { setIsDetecting(false); }
+        }, () => setIsDetecting(false));
+    };
 
     const toggleItem = (field, item) => {
         setForm(f => ({
@@ -271,7 +295,13 @@ export default function InstituteListingForm({ user, onComplete }) {
                         </div>
 
                         <div className="space-y-3">
-                            <label className="text-xs font-medium text-gray-500">Locations Served</label>
+                            <div className="flex items-center justify-between">
+                                <label className="text-xs font-medium text-gray-500">Locations Served</label>
+                                <button type="button" onClick={detectLocation} disabled={isDetecting}
+                                    className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700 disabled:opacity-50 transition-colors">
+                                    <MapPin size={11} /> {isDetecting ? "Detecting..." : "Detect my location"}
+                                </button>
+                            </div>
                             <div className="relative">
                                 <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" size={16} />
                                 <input
