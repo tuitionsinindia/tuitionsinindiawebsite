@@ -223,6 +223,8 @@ export async function GET(request) {
                 isFeatured: featuredIds.has(t.id),
                 lat: t.lat,
                 lng: t.lng,
+                offersTrialClass: t.tutorListing?.offersTrialClass || false,
+                trialDuration: t.tutorListing?.trialDuration || 30,
             };
         }));
 

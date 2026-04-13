@@ -48,35 +48,56 @@ model User {
   reviewsReceived    Review[]           @relation("ReviewTarget")
   transactions       Transaction[]
   notifications      Notification[]
+  studentTrials      TrialBooking[]     @relation("StudentTrials")
+  tutorTrials        TrialBooking[]     @relation("TutorTrials")
 }
 
 model Listing {
-  id             String      @id @default(cuid())
-  tutorId        String      @unique
-  title          String
-  bio            String
-  subjects       String[]
-  grades         String[]
-  locations      String[]
-  hourlyRate     Int?
-  rating         Float       @default(0)
-  reviewCount    Int         @default(0)
-  viewCount      Int         @default(0)
-  isActive       Boolean     @default(true)
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
-  boards         String[]
-  experience     Int?
-  gender         String?
-  teachingModes  String[]
-  timings        String[]
-  languages      String[]
-  expertiseLevel String?
-  type           ListingType @default(PRIVATE)
-  maxSeats       Int?        @default(1)
-  enrolledCount  Int         @default(0)
-  isInstitute    Boolean     @default(false)
-  tutor          User        @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+  id                String      @id @default(cuid())
+  tutorId           String      @unique
+  title             String
+  bio               String
+  subjects          String[]
+  grades            String[]
+  locations         String[]
+  hourlyRate        Int?
+  rating            Float       @default(0)
+  reviewCount       Int         @default(0)
+  viewCount         Int         @default(0)
+  isActive          Boolean     @default(true)
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  boards            String[]
+  experience        Int?
+  gender            String?
+  teachingModes     String[]
+  timings           String[]
+  languages         String[]
+  expertiseLevel    String?
+  type              ListingType @default(PRIVATE)
+  maxSeats          Int?        @default(1)
+  enrolledCount     Int         @default(0)
+  isInstitute       Boolean     @default(false)
+  offersTrialClass  Boolean     @default(false)
+  trialDuration     Int         @default(30)
+  tutor             User        @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+}
+
+model TrialBooking {
+  id            String      @id @default(cuid())
+  studentId     String
+  tutorId       String
+  subject       String
+  preferredTime String
+  message       String?
+  duration      Int         @default(30)
+  status        TrialStatus @default(PENDING)
+  tutorNote     String?
+  cancelReason  String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  student       User        @relation("StudentTrials", fields: [studentId], references: [id], onDelete: Cascade)
+  tutor         User        @relation("TutorTrials", fields: [tutorId], references: [id], onDelete: Cascade)
 }
 
 model Lead {
@@ -272,4 +293,12 @@ enum ListingType {
 enum LeadType {
   ACADEMIC
   RECRUITMENT
+}
+
+enum TrialStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  DECLINED
+  CANCELLED
 }

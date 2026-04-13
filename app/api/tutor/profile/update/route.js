@@ -28,7 +28,9 @@ export async function POST(request) {
             expertiseLevel,
             gender,
             type,
-            maxSeats
+            maxSeats,
+            offersTrialClass,
+            trialDuration,
         } = body;
 
         const targetId = userId || tutorId;
@@ -73,7 +75,9 @@ export async function POST(request) {
             expertiseLevel,
             gender,
             type: type || "PRIVATE",
-            maxSeats: parseInt(maxSeats) || 1
+            maxSeats: parseInt(maxSeats) || 1,
+            offersTrialClass: offersTrialClass === true || offersTrialClass === "true",
+            trialDuration: parseInt(trialDuration) || 30,
         };
 
         // 4. Upsert Listing

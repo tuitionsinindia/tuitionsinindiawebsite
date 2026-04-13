@@ -23,7 +23,8 @@ import {
     RefreshCw,
     X,
     Phone,
-    FileText
+    FileText,
+    Clock
 } from "lucide-react";
 import { SUBJECT_CATEGORIES } from "../../lib/subjects";
 import SkeletonLoader from "../components/SkeletonLoader";
@@ -32,6 +33,7 @@ import { trackSearch, trackViewProfile } from "@/lib/analytics";
 
 // ─── Sign-up Modal (wraps LeadCaptureFlow) ──────────────────────────────────
 import LeadCaptureFlow from "../components/LeadCaptureFlow";
+import TrialBookingModal from "../components/TrialBookingModal";
 
 function SignupModal({ onClose, onSuccess, signupRole = "STUDENT" }) {
     return (
@@ -95,6 +97,7 @@ function SearchResultsContent() {
     // Auth state
     const [loggedInUser, setLoggedInUser] = useState(null);
     const [signupModal, setSignupModal] = useState({ open: false, targetTutor: null });
+    const [trialModal, setTrialModal] = useState({ open: false, tutor: null });
 
     // User's geolocation (for map + distance sort)
     const [userLat, setUserLat] = useState(queryLat ? parseFloat(queryLat) : null);
@@ -254,6 +257,15 @@ function SearchResultsContent() {
                     onSuccess={handleSignupSuccess}
                     prefill={{ subject: querySubject, grade }}
                     signupRole={signupRole}
+                />
+            )}
+
+            {trialModal.open && trialModal.tutor && (
+                <TrialBookingModal
+                    tutor={trialModal.tutor}
+                    defaultSubject={querySubject}
+                    onClose={() => setTrialModal({ open: false, tutor: null })}
+                    onSuccess={() => {}}
                 />
             )}
 
@@ -575,11 +587,25 @@ function SearchResultsContent() {
                                             )}
 
                                             {/* Actions */}
-                                            <div className="flex items-center gap-2">
+                                            <div className="flex items-center gap-2 flex-wrap">
                                                 <button onClick={() => handleContactTutor(item)}
                                                     className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 active:scale-95 transition-all">
                                                     {loggedInUser ? <><Lock size={12} /> Unlock Contact</> : <><Phone size={12} /> Contact Tutor</>}
                                                 </button>
+                                                {item.offersTrialClass && (
+                                                    <button
+                                                        onClick={() => {
+                                                            if (!loggedInUser) {
+                                                                setSignupModal({ open: true, targetTutor: item });
+                                                            } else {
+                                                                setTrialModal({ open: true, tutor: item });
+                                                            }
+                                                        }}
+                                                        className="flex items-center gap-1.5 px-4 py-2 bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm font-semibold rounded-lg hover:bg-emerald-100 active:scale-95 transition-all"
+                                                    >
+                                                        <Clock size={12} /> Free Trial
+                                                    </button>
+                                                )}
                                                 <Link href={`/search/${item.id || item.userId || "#"}`}
                                                     onClick={() => trackViewProfile(item.id)}
                                                     className="flex items-center gap-1.5 px-4 py-2 border border-gray-200 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-50 transition-all">

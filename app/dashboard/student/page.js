@@ -21,7 +21,8 @@ import {
     Loader2,
     Star,
     Zap,
-    CreditCard
+    CreditCard,
+    Clock
 } from "lucide-react";
 import ReviewModal from "@/app/components/ReviewModal";
 
@@ -41,6 +42,8 @@ function StudentDashboardContent() {
     const [isReviewOpen, setIsReviewOpen] = useState(false);
     const [selectedTutorForReview, setSelectedTutorForReview] = useState(null);
     const [boostingLead, setBoostingLead] = useState(null);
+    const [trials, setTrials] = useState([]);
+    const [trialLoading, setTrialLoading] = useState(false);
 
     useEffect(() => {
         const idFromUrl = searchParams.get("studentId");
@@ -59,6 +62,7 @@ function StudentDashboardContent() {
             fetchUnlockedTutors();
             fetchActiveLeads();
             fetchChatSessions();
+            fetchTrials();
         }
     }, [studentId]);
 
@@ -114,6 +118,28 @@ function StudentDashboardContent() {
                 setChatSessions(data.sessions);
             }
         } catch (err) { console.error(err); } finally { setLoadingChat(false); }
+    };
+
+    const fetchTrials = async () => {
+        setTrialLoading(true);
+        try {
+            const res = await fetch("/api/trial/list");
+            if (res.ok) {
+                const data = await res.json();
+                setTrials(data.trials || []);
+            }
+        } catch (err) { console.error(err); } finally { setTrialLoading(false); }
+    };
+
+    const handleCancelTrial = async (trialId) => {
+        try {
+            await fetch(`/api/trial/${trialId}/status`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ status: "CANCELLED" }),
+            });
+            setTrials(prev => prev.map(t => t.id === trialId ? { ...t, status: "CANCELLED" } : t));
+        } catch (err) { console.error(err); }
     };
 
     const handleBoostLead = async (lead) => {
@@ -219,6 +245,7 @@ function StudentDashboardContent() {
         { id: "HOME", label: "Dashboard", icon: LayoutDashboard },
         { id: "REQUIREMENTS", label: "My Requirements", icon: Briefcase },
         { id: "MATCHES", label: "Tutor Matches", icon: Users },
+        { id: "TRIALS", label: "Trial Classes", icon: Clock },
         { id: "CHAT", label: "Messages", icon: MessageCircle },
         { id: "CONTACTS", label: "Contacts", icon: ShieldCheck },
     ];
@@ -646,6 +673,86 @@ function StudentDashboardContent() {
                                         </tbody>
                                     </table>
                                 </div>
+                            </div>
+                        )}
+
+                        {activeTab === "TRIALS" && (
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Trial Classes</h2>
+                                        <p className="text-sm text-gray-500 mt-1">Free 30-min sessions you have booked with tutors</p>
+                                    </div>
+                                    <Link href="/search" className="text-sm font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1">
+                                        <Search size={14} /> Find Tutors
+                                    </Link>
+                                </div>
+
+                                {trialLoading ? (
+                                    <div className="flex items-center justify-center py-16">
+                                        <Loader2 size={24} className="animate-spin text-blue-400" />
+                                    </div>
+                                ) : trials.length === 0 ? (
+                                    <div className="bg-white border border-gray-200 rounded-xl p-12 text-center">
+                                        <div className="w-14 h-14 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <Clock size={24} className="text-emerald-400" />
+                                        </div>
+                                        <h3 className="text-base font-semibold text-gray-700 mb-1">No trial classes yet</h3>
+                                        <p className="text-sm text-gray-400 mb-5">Look for tutors with a "Free Trial" button on the search page and book a session before committing.</p>
+                                        <Link href="/search"
+                                            className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white text-sm font-semibold rounded-lg hover:bg-emerald-700 transition-colors">
+                                            Find Tutors with Free Trial
+                                        </Link>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {trials.map(trial => (
+                                            <div key={trial.id} className="bg-white border border-gray-200 rounded-xl p-4 space-y-3">
+                                                <div className="flex items-start justify-between gap-3">
+                                                    <div className="space-y-1">
+                                                        <div className="flex items-center gap-2 flex-wrap">
+                                                            <p className="font-semibold text-gray-900">{trial.tutor?.name || "Tutor"}</p>
+                                                            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                                                                trial.status === "PENDING" ? "bg-amber-50 text-amber-700 border border-amber-100" :
+                                                                trial.status === "CONFIRMED" ? "bg-emerald-50 text-emerald-700 border border-emerald-100" :
+                                                                trial.status === "COMPLETED" ? "bg-blue-50 text-blue-700 border border-blue-100" :
+                                                                "bg-gray-100 text-gray-500"
+                                                            }`}>
+                                                                {trial.status === "PENDING" ? "Waiting for tutor" :
+                                                                 trial.status === "CONFIRMED" ? "Confirmed — contact tutor to schedule" :
+                                                                 trial.status === "COMPLETED" ? "Completed" :
+                                                                 trial.status === "DECLINED" ? "Not accepted" : "Cancelled"}
+                                                            </span>
+                                                        </div>
+                                                        <p className="text-sm text-gray-600">Subject: <span className="font-medium">{trial.subject}</span></p>
+                                                        <p className="text-sm text-gray-500">Preferred: {trial.preferredTime}</p>
+                                                    </div>
+                                                    <div className="text-right shrink-0">
+                                                        <p className="text-xs text-gray-400">{new Date(trial.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}</p>
+                                                        <p className="text-xs text-emerald-600 font-medium">{trial.duration} min · Free</p>
+                                                    </div>
+                                                </div>
+
+                                                {trial.status === "PENDING" && (
+                                                    <div className="pt-2 border-t border-gray-100">
+                                                        <button
+                                                            onClick={() => handleCancelTrial(trial.id)}
+                                                            className="text-xs text-gray-400 hover:text-red-600 transition-colors font-medium"
+                                                        >
+                                                            Cancel request
+                                                        </button>
+                                                    </div>
+                                                )}
+                                                {trial.status === "CONFIRMED" && (
+                                                    <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
+                                                        <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+                                                        <p className="text-xs text-emerald-700 font-medium">The tutor will reach out to schedule your session. You can also message them directly.</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
