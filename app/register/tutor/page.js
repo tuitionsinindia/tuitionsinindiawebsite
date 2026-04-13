@@ -83,7 +83,7 @@ export default function TutorRegisterPage() {
                                 <p className="text-sm text-gray-500">Your tutor profile is now live. Students can find you in search results.</p>
                             </div>
                             <button
-                                onClick={() => router.push("/dashboard/tutor")}
+                                onClick={() => router.push(`/dashboard/tutor?success=true&tutorId=${user?.id}`)}
                                 className="w-full py-3 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors"
                             >
                                 Go to Dashboard

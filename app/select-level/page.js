@@ -3,13 +3,13 @@
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { 
-    ChevronRight, 
-    ArrowLeft, 
-    BookOpen, 
-    GraduationCap, 
-    Award, 
-    Zap, 
+import {
+    ChevronRight,
+    ArrowLeft,
+    BookOpen,
+    GraduationCap,
+    Award,
+    Zap,
     Target,
     Users
 } from "lucide-react";
@@ -19,8 +19,8 @@ const GRADES_OPTIONS = [
     { id: "m8", label: "Middle (6-8)", desc: "Core subjects and conceptual understanding." },
     { id: "h10", label: "High School (9-10)", desc: "Board preparation and secondary excellence." },
     { id: "s12", label: "Higher Secondary (11-12)", desc: "Stream-specific focus and board exams." },
-    { id: "ug", label: "Undergraduate", desc: "College-level specialized learning." },
-    { id: "comp", label: "Competitive Exams", desc: "IIT JEE, NEET, UPSC, and Entrance prep." },
+    { id: "ug", label: "Undergraduate", desc: "College-level specialised learning." },
+    { id: "comp", label: "Competitive Exams", desc: "IIT JEE, NEET, UPSC, and entrance prep." },
     { id: "hobby", label: "Hobby / Skill-based", desc: "Extracurriculars and creative learning." }
 ];
 
@@ -62,23 +62,23 @@ function SelectLevelContent() {
     return (
         <div className="min-h-screen bg-gray-50 font-sans text-gray-800 antialiased pt-32 pb-20">
             <div className="max-w-4xl mx-auto px-6">
-                
-                {/* Header Context */}
-                <div className="text-center mb-16 space-y-4">
-                    <button onClick={() => router.back()} className="inline-flex items-center gap-2 text-sm font-bold text-gray-400 hover:text-blue-600 transition-all mb-4">
-                        <ArrowLeft size={16} /> Change Subject
+
+                {/* Header */}
+                <div className="text-center mb-12 space-y-4">
+                    <button onClick={() => router.back()} className="inline-flex items-center gap-2 text-sm font-semibold text-gray-400 hover:text-blue-600 transition-all mb-4">
+                        <ArrowLeft size={16} /> Change subject
                     </button>
-                    <div className="flex items-center justify-center gap-4 mb-2">
-                        <div className="size-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-lg shadow-blue-100">
+                    <div className="flex items-center justify-center gap-3 mb-2">
+                        <div className="size-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-md">
                             <BookOpen size={24} />
                         </div>
-                        <span className="text-blue-600 font-black uppercase text-sm tracking-widest">Excellence in {subject}</span>
+                        <span className="text-blue-600 font-semibold text-sm">{subject} tutors</span>
                     </div>
-                    <h1 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tight leading-none">
-                        Which <span className="text-blue-600">Level</span> are you looking for?
+                    <h1 className="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight leading-tight">
+                        Which level are you looking for?
                     </h1>
                     <p className="text-gray-500 text-lg font-medium max-w-xl mx-auto leading-relaxed">
-                        We found {Object.values(gradeCounts).reduce((a, b) => a + b, 0)} experts specializes in {subject}. Please select your target level.
+                        We found {Object.values(gradeCounts).reduce((a, b) => a + b, 0)} tutors for {subject}. Select the level that matches your needs.
                     </p>
                 </div>
 
@@ -90,20 +90,20 @@ function SelectLevelContent() {
                             <button
                                 key={opt.id}
                                 onClick={() => handleSelectLevel(opt.label)}
-                                className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm hover:border-blue-500 hover:shadow-xl hover:shadow-blue-50 transition-all text-left flex items-start gap-5 group"
+                                className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm hover:border-blue-500 hover:shadow-lg transition-all text-left flex items-start gap-5 group"
                             >
-                                <div className="size-12 rounded-2xl bg-gray-50 text-gray-400 group-hover:bg-blue-50 group-hover:text-blue-600 flex items-center justify-center transition-colors shrink-0">
-                                    {opt.id === 'comp' ? <Trophy size={22} /> : opt.id === 'hobby' ? <Zap size={22} /> : <GraduationCap size={22} />}
+                                <div className="size-12 rounded-xl bg-gray-50 text-gray-400 group-hover:bg-blue-50 group-hover:text-blue-600 flex items-center justify-center transition-colors shrink-0">
+                                    {opt.id === 'comp' ? <Award size={22} /> : opt.id === 'hobby' ? <Zap size={22} /> : <GraduationCap size={22} />}
                                 </div>
                                 <div className="space-y-1 w-full">
                                     <div className="flex items-center justify-between gap-2">
                                         <div className="flex items-center gap-2">
-                                            <h3 className="font-black text-gray-900 text-lg group-hover:text-blue-600 transition-colors tracking-tight">{opt.label}</h3>
+                                            <h3 className="font-semibold text-gray-900 text-lg group-hover:text-blue-600 transition-colors">{opt.label}</h3>
                                             <ChevronRight size={16} className="text-gray-300 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                                         </div>
                                         {!loading && (
-                                            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-black uppercase tracking-wider group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                                                <Users size={12} /> {count} 
+                                            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-semibold group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                                                <Users size={12} /> {count}
                                             </span>
                                         )}
                                     </div>
@@ -114,29 +114,25 @@ function SelectLevelContent() {
                     })}
                 </div>
 
-                {/* Help/Inquiry Footer */}
-                <div className="mt-16 bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm flex flex-col md:flex-row items-center justify-between gap-8 text-center md:text-left">
+                {/* Help Footer */}
+                <div className="mt-12 bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
                     <div className="space-y-2">
                         <div className="flex items-center gap-2 justify-center md:justify-start">
                             <Target size={18} className="text-amber-500" />
-                            <span className="text-amber-600 font-bold uppercase text-xs tracking-widest">Need more precision?</span>
+                            <span className="text-amber-600 font-semibold text-sm">Need a more specific match?</span>
                         </div>
-                        <h4 className="text-xl font-bold text-gray-900">Get a tailored search</h4>
-                        <p className="text-gray-500 text-sm font-medium">Post your specific requirements and let tutors reach out to you.</p>
+                        <h4 className="text-xl font-bold text-gray-900">Post your requirement</h4>
+                        <p className="text-gray-500 text-sm font-medium">Share your exact needs and let tutors reach out to you directly.</p>
                     </div>
                     <div className="flex gap-4">
-                        <Link href="/post-requirement" className="px-8 py-4 bg-gray-900 text-white rounded-2xl font-bold text-sm hover:bg-black transition-all shadow-lg hover:shadow-gray-200">
-                            Post Requirement
+                        <Link href="/post-requirement" className="px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 transition-all shadow-sm">
+                            Post requirement
                         </Link>
                     </div>
                 </div>
             </div>
         </div>
     );
-}
-
-function Trophy({ size, className }) {
-    return <Award size={size} className={className} />;
 }
 
 export default function SelectLevelPage() {

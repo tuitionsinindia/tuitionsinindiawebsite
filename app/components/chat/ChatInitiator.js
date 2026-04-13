@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { MessageSquare, Loader2, Lock, Zap, ArrowRight, MessageCircle } from "lucide-react";
+import { MessageSquare, Loader2, Lock, ArrowRight, MessageCircle } from "lucide-react";
 
-export default function ChatInitiator({ studentId, tutorId, currentUser, recipientRole, label = "DIRECT MESSAGE" }) {
+export default function ChatInitiator({ studentId, tutorId, currentUser, recipientRole, label = "Send message" }) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
 
@@ -14,9 +14,9 @@ export default function ChatInitiator({ studentId, tutorId, currentUser, recipie
 
     const handleInitiate = async () => {
         if (!studentId || !tutorId || !currentUser) return;
-        
+
         if (!canInitiate) {
-            router.push('/pricing'); // Redirect to upgrade protocol
+            router.push('/pricing');
             return;
         }
 
@@ -25,25 +25,25 @@ export default function ChatInitiator({ studentId, tutorId, currentUser, recipie
             const res = await fetch("/api/chat/session", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ 
-                    studentId, 
-                    tutorId, 
-                    initiatorId: currentUser.id 
+                body: JSON.stringify({
+                    studentId,
+                    tutorId,
+                    initiatorId: currentUser.id
                 })
             });
 
             if (res.ok) {
-                const redirectPath = recipientRole === 'TUTOR' 
+                const redirectPath = recipientRole === 'TUTOR'
                     ? `/dashboard/student?studentId=${studentId}&activeTab=CHAT`
                     : `/dashboard/tutor?tutorId=${tutorId}&activeTab=CHAT`;
-                
+
                 router.push(redirectPath);
             } else if (res.status === 403) {
                 const data = await res.json();
                 alert(`Access restricted: ${data.details}`);
             } else {
                 const data = await res.json();
-                alert(`System Error: ${data.error || "Connection failed."}`);
+                alert(data.error || "Something went wrong. Please try again.");
             }
         } catch (err) {
             console.error("Failed to initiate chat:", err);
@@ -55,18 +55,19 @@ export default function ChatInitiator({ studentId, tutorId, currentUser, recipie
 
     if (!canInitiate) {
         return (
-            <div className="space-y-4">
-                <button 
+            <div className="space-y-3">
+                <button
                     onClick={handleInitiate}
-                    className="w-full bg-white border border-gray-100 py-7 rounded-[2rem] font-black text-[10px] tracking-[0.4em] uppercase flex items-center justify-center gap-4 text-gray-300 hover:text-blue-600 hover:border-blue-600/20 transition-all group italic shadow-sm"
+                    className="w-full bg-white border border-gray-200 py-3 px-4 rounded-xl font-medium text-sm flex items-center justify-center gap-2 text-gray-400 hover:text-blue-600 hover:border-blue-300 transition-all"
                 >
-                    <Lock size={16} strokeWidth={3} className="text-blue-600/30 group-hover:text-blue-600 transition-colors" />
-                    Unlock Expert Dialogue
-                    <ArrowRight size={14} className="opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                    <Lock size={15} className="text-gray-300" />
+                    Contact tutor
+                    <ArrowRight size={14} />
                 </button>
-                <div className="px-6 py-4 bg-blue-50/50 rounded-2xl border border-blue-100/50">
-                    <p className="text-[9px] font-black text-blue-600/60 uppercase tracking-widest text-center leading-relaxed italic">
-                        Proactive neural links require <br/> <span className="text-blue-600 underline">Premium Registry Access.</span>
+                <div className="px-4 py-3 bg-blue-50 rounded-lg border border-blue-100">
+                    <p className="text-xs text-blue-600 text-center leading-relaxed">
+                        Upgrade your plan to contact tutors directly.{" "}
+                        <span className="font-semibold underline cursor-pointer" onClick={() => router.push('/pricing')}>View plans</span>
                     </p>
                 </div>
             </div>
@@ -74,14 +75,14 @@ export default function ChatInitiator({ studentId, tutorId, currentUser, recipie
     }
 
     return (
-        <button 
+        <button
             onClick={handleInitiate}
             disabled={loading}
-            className="w-full bg-blue-600 border border-blue-600 py-7 rounded-[2rem] font-black text-[10px] tracking-[0.4em] uppercase flex items-center justify-center gap-4 transition-all text-white hover:bg-gray-900 hover:border-gray-900 hover:shadow-4xl hover:shadow-blue-900/20 shadow-2xl shadow-blue-600/20 group disabled:opacity-50 italic active:scale-95"
+            className="w-full bg-blue-600 py-3 px-4 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 text-white hover:bg-blue-700 transition-colors disabled:opacity-50"
         >
-            {loading ? <Loader2 className="animate-spin" size={20} /> : (
+            {loading ? <Loader2 className="animate-spin" size={18} /> : (
                 <>
-                    <MessageCircle size={20} strokeWidth={3} className="group-hover:rotate-12 transition-transform" />
+                    <MessageCircle size={18} />
                     {label}
                 </>
             )}

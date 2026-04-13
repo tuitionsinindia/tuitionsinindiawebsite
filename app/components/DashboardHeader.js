@@ -17,6 +17,9 @@ export default function DashboardHeader({
     onLogout = null
 }) {
     const roleLabel = role === "ADMIN" ? "Admin" : role === "TUTOR" ? "Tutor" : role === "INSTITUTE" ? "Institute" : "Student";
+    const displayName = user?.name
+        ? user.name.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(" ")
+        : "Member";
 
     return (
         <header className="fixed top-0 left-0 right-0 z-[60] w-full border-b border-gray-100 bg-white/80 backdrop-blur-xl px-6 md:px-12 py-4 flex items-center justify-between shadow-sm">
@@ -44,7 +47,7 @@ export default function DashboardHeader({
 
                 <div className="flex items-center gap-3 pl-6 border-l border-gray-100">
                     <div className="hidden lg:flex flex-col text-right leading-none">
-                        <span className="text-sm font-semibold text-gray-900 leading-none mb-1">{user?.name || "Member"}</span>
+                        <span className="text-sm font-semibold text-gray-900 leading-none mb-1">{displayName}</span>
                         <span className="text-xs font-medium text-gray-400">{roleLabel}</span>
                     </div>
                     <div className="relative group/profile">

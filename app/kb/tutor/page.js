@@ -1,74 +1,66 @@
 "use client";
 
 import Link from "next/link";
-import { 
-    Users, 
-    BarChart3, 
-    Briefcase, 
-    TrendingUp, 
-    ShieldCheck, 
-    Zap,
-    Search,
-    UserCheck,
-    MessageSquare,
+import {
+    Briefcase,
+    BarChart3,
+    TrendingUp,
     PlayCircle,
-    UserPlus,
-    LayoutDashboard
+    UserPlus
 } from "lucide-react";
 
 export default function TutorKB() {
     const categories = [
         {
-            title: "Tutor Onboarding",
+            title: "Getting started",
             icon: UserPlus,
-            topics: ["Setting up your expert profile", "Identity verification process", "Adding your academic credentials"]
+            topics: ["Setting up your tutor profile", "Identity verification steps", "Adding your qualifications"]
         },
         {
-            title: "Lead Management",
+            title: "Managing leads",
             icon: BarChart3,
-            topics: ["How to unlock student leads", "Optimizing your response time", "Qualifying student requirements"]
+            topics: ["How to unlock student contacts", "Improving your response time", "Understanding student requirements"]
         },
         {
-            title: "Teaching Business",
+            title: "Running your teaching",
             icon: Briefcase,
-            topics: ["Setting competitive hourly rates", "Managing your schedule", "Professional communication ethics"]
+            topics: ["Setting competitive hourly rates", "Managing your schedule", "Professional communication tips"]
         },
         {
-            title: "Platform Growth",
+            title: "Growing your profile",
             icon: TrendingUp,
-            topics: ["How to get more profile views", "Understanding your analytics", "Collecting student reviews"]
+            topics: ["How to get more profile views", "Reading your analytics", "Collecting student reviews"]
         }
     ];
 
     return (
-        <div className="min-h-screen bg-background-dark font-sans text-on-background-dark antialiased pt-40 pb-32 selection:bg-primary/30">
-            <div className="max-w-7xl mx-auto px-6">
-                <div className="text-center mb-24 space-y-6">
-                    <div className="inline-flex items-center gap-3 px-4 py-2 bg-primary/10 rounded-full border border-primary/20 mb-8">
-                        <Briefcase size={14} className="text-primary" />
-                        <span className="text-primary text-xs font-black uppercase tracking-[0.3em]">Tutor Help Centre</span>
+        <div className="min-h-screen bg-gray-50 font-sans text-gray-900 antialiased pt-24 pb-24">
+            <div className="max-w-6xl mx-auto px-6">
+                <div className="text-center mb-12 space-y-4">
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50 rounded-full border border-blue-100 mb-4">
+                        <Briefcase size={14} className="text-blue-600" />
+                        <span className="text-blue-600 text-xs font-semibold">Tutor help centre</span>
                     </div>
-                    <h1 className="text-6xl md:text-8xl font-black text-white italic tracking-tighter leading-none uppercase">
-                        Expert <br />
-                        <span className="text-primary font-serif lowercase tracking-normal not-italic px-4">guidance</span>.
+                    <h1 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">
+                        Guides for tutors
                     </h1>
-                    <p className="text-on-background-dark/40 font-medium text-xl max-w-2xl mx-auto leading-relaxed italic">
-                        Actionable insights and professional training to help you build a successful and sustainable tutoring brand.
+                    <p className="text-gray-500 text-lg max-w-xl mx-auto leading-relaxed">
+                        Practical tips to help you set up your profile, manage student leads, and grow your tutoring business.
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-32">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
                     {categories.map((cat, idx) => (
-                        <div key={idx} className="bg-surface-dark p-10 rounded-[3rem] border border-border-dark shadow-4xl hover:border-primary/30 transition-all group">
-                            <div className="size-14 rounded-2xl bg-background-dark border border-border-dark flex items-center justify-center mb-8 text-primary group-hover:scale-110 transition-transform">
-                                <cat.icon size={24} />
+                        <div key={idx} className="bg-white p-6 rounded-xl border border-gray-200 hover:border-blue-300 transition-all">
+                            <div className="size-10 rounded-lg bg-blue-50 flex items-center justify-center mb-5 text-blue-600">
+                                <cat.icon size={20} />
                             </div>
-                            <h2 className="text-xl font-black text-white mb-6 uppercase italic tracking-tight">{cat.title}</h2>
-                            <ul className="space-y-4">
+                            <h2 className="text-base font-semibold text-gray-900 mb-4">{cat.title}</h2>
+                            <ul className="space-y-3">
                                 {cat.topics.map((topic, i) => (
                                     <li key={i}>
-                                        <Link href="#" className="text-xs font-black uppercase tracking-widest text-on-surface-dark/40 hover:text-primary transition-colors flex items-center gap-3 group/link">
-                                            <div className="size-1.5 rounded-full bg-primary/20 group-hover/link:bg-primary transition-colors"></div>
+                                        <Link href="#" className="text-sm text-gray-500 hover:text-blue-600 transition-colors flex items-center gap-2">
+                                            <div className="size-1.5 rounded-full bg-gray-300 shrink-0"></div>
                                             {topic}
                                         </Link>
                                     </li>
@@ -78,17 +70,16 @@ export default function TutorKB() {
                     ))}
                 </div>
 
-                {/* Masterclass CTA */}
-                <div className="p-16 md:p-24 bg-surface-dark border-4 border-primary rounded-[5rem] text-white text-center shadow-4xl relative overflow-hidden group">
-                    <div className="absolute inset-0 bg-primary/5 opacity-50"></div>
-                    <div className="absolute -right-32 -bottom-32 size-[600px] bg-primary/10 rounded-full blur-[120px] group-hover:scale-110 transition-transform duration-1000"></div>
-                    
-                    <div className="relative z-10 space-y-10 max-w-3xl mx-auto">
-                        <PlayCircle size={48} className="mx-auto mb-8 text-primary" />
-                        <h2 className="text-4xl md:text-6xl font-black uppercase italic tracking-tighter leading-none"> Ready to double your <span className="text-primary font-serif lowercase tracking-normal not-italic px-4">leads?</span></h2>
-                        <p className="text-xl text-on-background-dark/40 font-medium italic leading-relaxed">Our exclusive tutor masterclass reveals the secrets to profile architecture and student conversion protocols.</p>
-                        <button className="bg-primary text-white font-black px-12 py-5 rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-xl shadow-primary/20 uppercase tracking-[0.3em] text-xs">
-                            Watch Masterclass
+                {/* CTA */}
+                <div className="bg-white border border-gray-200 rounded-2xl p-8 md:p-12 text-center">
+                    <div className="max-w-2xl mx-auto space-y-5">
+                        <PlayCircle size={36} className="mx-auto text-blue-600" />
+                        <h2 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">Ready to get more students?</h2>
+                        <p className="text-gray-500 leading-relaxed">
+                            Watch our free tutor guide to learn how to build a strong profile and attract more student enquiries.
+                        </p>
+                        <button className="bg-blue-600 text-white font-semibold px-8 py-3 rounded-xl hover:bg-blue-700 transition-colors text-sm">
+                            Watch the guide
                         </button>
                     </div>
                 </div>

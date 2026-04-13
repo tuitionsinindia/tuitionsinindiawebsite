@@ -165,7 +165,12 @@ function DashboardContent() {
     };
 
     const handleUnlock = async (leadId) => {
-        if (!confirm("This will use 1 credit to unlock this student's contact. Continue?")) return;
+        const balance = tutorData?.credits || 0;
+        if (balance < 1) {
+            alert("You don't have enough credits. Buy credits to unlock student contacts.");
+            return;
+        }
+        if (!confirm(`Unlock for 1 credit? You have ${balance} credit${balance !== 1 ? "s" : ""} remaining.`)) return;
         try {
             const res = await fetch("/api/lead/unlock", {
                 method: "POST",
@@ -611,18 +616,20 @@ function DashboardContent() {
                                         <div key={lead.id} className="bg-white border border-gray-100 rounded-2xl p-6 hover:shadow-md transition-all shadow-sm">
                                             <div className="flex justify-between items-center mb-4">
                                                 <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-lg text-xs font-semibold border border-blue-100">{lead.subjects?.[0] || 'General'}</span>
-                                                <div className="flex items-center gap-1.5 text-emerald-600 text-xs font-semibold">
-                                                    <Star size={12} fill="currentColor" />
-                                                    {lead.matchScore}% match
-                                                </div>
+                                                {lead.matchScore > 0 && (
+                                                    <div className="flex items-center gap-1.5 text-emerald-600 text-xs font-semibold">
+                                                        <Star size={12} fill="currentColor" />
+                                                        {lead.matchScore}% match
+                                                    </div>
+                                                )}
                                             </div>
                                             <p className="text-gray-900 font-medium mb-4 leading-relaxed line-clamp-3">{lead.description}</p>
 
                                             {lead.isUnlocked ? (
                                                 <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 flex items-center gap-4">
-                                                    <div className="size-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold">{lead.student?.name?.[0]}</div>
+                                                    <div className="size-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold">{lead.student?.name?.[0]?.toUpperCase()}</div>
                                                     <div className="flex-1 min-w-0">
-                                                        <h4 className="font-bold text-gray-900 text-sm">{lead.student?.name}</h4>
+                                                        <h4 className="font-bold text-gray-900 text-sm">{lead.student?.name?.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(" ")}</h4>
                                                         <p className="text-xs text-gray-400">Contact unlocked</p>
                                                     </div>
                                                     <button
@@ -655,13 +662,16 @@ function DashboardContent() {
                                                         <MapPin size={14} className="text-gray-400" />
                                                         <span className="text-sm text-gray-500">{lead.locations?.[0] || 'Online'}</span>
                                                     </div>
-                                                    <button
-                                                        onClick={() => handleUnlock(lead.id)}
-                                                        className="px-5 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-all flex items-center gap-2"
-                                                        disabled={loading}
-                                                    >
-                                                        <Zap size={14} /> Unlock (1 credit)
-                                                    </button>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-xs text-gray-400">{tutorData?.credits || 0} credits left</span>
+                                                        <button
+                                                            onClick={() => handleUnlock(lead.id)}
+                                                            className="px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-all flex items-center gap-1.5"
+                                                            disabled={loading}
+                                                        >
+                                                            <Zap size={13} /> Unlock (1 credit)
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             )}
                                         </div>

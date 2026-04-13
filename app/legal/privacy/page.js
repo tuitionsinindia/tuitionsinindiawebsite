@@ -1,90 +1,93 @@
 "use client";
 
 import Link from "next/link";
-import { ShieldCheck, Lock, ArrowLeft, FileText, ScrollText, CheckCircle2 } from "lucide-react";
+import { ShieldCheck, Lock, ArrowLeft, ScrollText, CheckCircle2 } from "lucide-react";
 
 export default function PrivacyPolicy() {
     return (
-        <div className="min-h-screen bg-white text-gray-900 font-sans selection:bg-blue-600/10 selection:text-blue-600 pb-32 pt-10">
-            {/* Minimal Header */}
-            <div className="max-w-7xl mx-auto px-6 py-12 flex items-center justify-between border-b border-gray-50 mb-24">
-                <Link href="/" className="flex items-center gap-4 text-xs font-black uppercase tracking-[0.4em] text-gray-400 hover:text-blue-600 transition-all hover:-translate-x-2">
-                    <ArrowLeft size={16} /> Return to Grid
+        <div className="min-h-screen bg-gray-50 text-gray-900 font-sans pb-24 pt-10">
+            {/* Back link */}
+            <div className="max-w-5xl mx-auto px-6 py-8 flex items-center justify-between border-b border-gray-200 mb-12">
+                <Link href="/" className="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors">
+                    <ArrowLeft size={16} /> Back to home
                 </Link>
-                <div className="flex items-center gap-4 text-blue-600">
-                    <ShieldCheck size={28} strokeWidth={1.5} />
-                    <span className="text-xs font-black uppercase tracking-[0.2em] italic">Privacy Policy</span>
+                <div className="flex items-center gap-2 text-blue-600">
+                    <ShieldCheck size={22} />
+                    <span className="text-sm font-semibold">Privacy Policy</span>
                 </div>
             </div>
 
-            <main className="max-w-4xl mx-auto px-6 lg:px-12">
-                {/* Hero Header */}
-                <div className="mb-28">
-                    <div className="inline-flex items-center gap-3 px-5 py-2 bg-blue-50 text-blue-600 rounded-full border border-blue-100 mb-10">
-                         <div className="size-2 bg-blue-600 rounded-full animate-pulse"></div>
-                         <span className="text-xs font-black uppercase tracking-[0.3em] italic">Standard v5.2 Active</span>
+            <main className="max-w-4xl mx-auto px-6">
+                {/* Page heading */}
+                <div className="mb-12">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-600 rounded-full border border-blue-100 mb-6">
+                        <ShieldCheck size={14} />
+                        <span className="text-xs font-semibold">Privacy Policy</span>
                     </div>
-                    <h1 className="text-6xl md:text-8xl lg:text-9xl font-black text-gray-900 tracking-tighter uppercase italic leading-[0.8] mb-12">
-                        Privacy Policy
+                    <h1 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight mb-4">
+                        How we handle your information
                     </h1>
-                    <p className="text-xl md:text-2xl text-gray-400 font-medium italic leading-relaxed max-w-2xl opacity-80">
-                        This document explains how we collect, use, and protect your personal information. Last Audit: April 2026.
+                    <p className="text-gray-500 leading-relaxed max-w-2xl">
+                        This page explains what information we collect, how we use it, and how we keep it safe. Last updated: April 2026.
                     </p>
                 </div>
 
-                {/* Privacy Details */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-24 mb-32">
-                    <div className="space-y-8 flex flex-col items-start group">
-                        <div className="size-20 rounded-3xl bg-gray-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-inner border border-gray-100">
-                            <Lock size={32} strokeWidth={1} />
+                {/* Sections */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+                    <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-3">
+                        <div className="size-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
+                            <Lock size={20} />
                         </div>
-                        <h2 className="text-2xl font-black text-gray-900 uppercase italic tracking-tighter underline decoration-blue-600/10 decoration-8 underline-offset-4">01. Data Security</h2>
-                        <p className="text-gray-500 leading-relaxed font-medium italic text-lg">
-                            We collect only the information necessary to connect students with tutors. Your data is encrypted and never shared without your consent.
+                        <h2 className="text-lg font-semibold text-gray-900">Data security</h2>
+                        <p className="text-gray-500 leading-relaxed text-sm">
+                            We collect only the information needed to connect students with tutors. Your data is kept secure and is never shared without your consent.
                         </p>
                     </div>
 
-                    <div className="space-y-8 flex flex-col items-start group">
-                        <div className="size-20 rounded-3xl bg-gray-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-inner border border-gray-100">
-                            <ScrollText size={32} strokeWidth={1} />
+                    <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-3">
+                        <div className="size-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
+                            <ScrollText size={20} />
                         </div>
-                        <h2 className="text-2xl font-black text-gray-900 uppercase italic tracking-tighter underline decoration-blue-600/10 decoration-8 underline-offset-4">02. Acquisition Audit</h2>
-                        <p className="text-gray-500 leading-relaxed font-medium italic text-lg">
-                            We acquire identifiers (Identity, Credentials, Contact Vectors) solely for node verification. Academic histories are audited via multi-staged pipelines.
+                        <h2 className="text-lg font-semibold text-gray-900">What we collect</h2>
+                        <p className="text-gray-500 leading-relaxed text-sm">
+                            We collect your name, contact details, and qualifications only to verify your identity and match you with the right tutors or students.
                         </p>
                     </div>
 
-                    <div className="space-y-8 flex flex-col items-start group">
-                        <div className="size-20 rounded-3xl bg-gray-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-inner border border-gray-100">
-                            <CheckCircle2 size={32} strokeWidth={1} />
+                    <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-3">
+                        <div className="size-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
+                            <CheckCircle2 size={20} />
                         </div>
-                        <h2 className="text-2xl font-black text-gray-900 uppercase italic tracking-tighter underline decoration-blue-600/10 decoration-8 underline-offset-4">03. How We Use Your Data</h2>
-                        <p className="text-gray-500 leading-relaxed font-medium italic text-lg">
-                            Explicit contact fields remain encrypted until a formal link protocol is initialized. TuitionsInIndia does not participate in financial tolls or store payment assets.
+                        <h2 className="text-lg font-semibold text-gray-900">How we use your data</h2>
+                        <p className="text-gray-500 leading-relaxed text-sm">
+                            Your contact details are kept private until you choose to share them. We do not store payment card information — payments are handled securely by Razorpay.
                         </p>
                     </div>
 
-                    <div className="space-y-8 flex flex-col items-start group">
-                        <div className="size-20 rounded-3xl bg-gray-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-inner border border-gray-100">
-                            <ShieldCheck size={32} strokeWidth={1} />
+                    <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-3">
+                        <div className="size-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
+                            <ShieldCheck size={20} />
                         </div>
-                        <h2 className="text-2xl font-black text-gray-900 uppercase italic tracking-tighter underline decoration-blue-600/10 decoration-8 underline-offset-4">04. Sovereignty Rights</h2>
-                        <p className="text-gray-500 leading-relaxed font-medium italic text-lg">
-                            Matchmaking profiles (nodes) are user-governed. You maintain 100% control over profile deactivation and discovery status within the live network grid.
+                        <h2 className="text-lg font-semibold text-gray-900">Your rights</h2>
+                        <p className="text-gray-500 leading-relaxed text-sm">
+                            You are in full control of your profile. You can update your information, hide your profile from search results, or delete your account at any time.
                         </p>
                     </div>
                 </div>
 
-                {/* Contact Us */}
-                <div className="p-16 md:p-24 bg-gray-50/50 rounded-[4rem] border border-gray-100 flex flex-col lg:flex-row items-center justify-between gap-16 group transition-all hover:border-blue-600/20 hover:bg-white relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-2 h-full bg-blue-600 opacity-10"></div>
-                    <div className="space-y-6 relative z-10 max-w-xl">
-                        <h3 className="text-xs font-black uppercase tracking-[0.5em] text-blue-600/40 group-hover:text-blue-600 transition-colors italic">Data Sovereignty Console</h3>
-                        <p className="text-3xl md:text-5xl font-black text-gray-900 uppercase italic tracking-tighter leading-none mb-6">Questions About Privacy?</p>
-                        <p className="text-gray-400 font-medium italic text-lg leading-relaxed">For protocol inquiries or data sovereignty audits, contact the network counsel at <span className="text-blue-600 font-bold border-b border-blue-600/10 pb-1">privacy@tuitionsinindia.com</span></p>
+                {/* Contact section */}
+                <div className="bg-white rounded-xl border border-gray-200 p-8 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+                    <div className="space-y-2">
+                        <h3 className="text-lg font-semibold text-gray-900">Questions about privacy?</h3>
+                        <p className="text-gray-500 text-sm leading-relaxed">
+                            If you have any questions about how we handle your data, please contact us at{" "}
+                            <a href="mailto:privacy@tuitionsinindia.com" className="text-blue-600 font-medium hover:underline">
+                                privacy@tuitionsinindia.com
+                            </a>
+                        </p>
                     </div>
-                    <div className="size-32 md:size-40 rounded-[3rem] bg-white border border-gray-100 flex items-center justify-center text-blue-600 shadow-2xl group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 shrink-0">
-                        <ShieldCheck size={56} strokeWidth={0.5} />
+                    <div className="shrink-0 size-14 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600">
+                        <ShieldCheck size={28} />
                     </div>
                 </div>
             </main>

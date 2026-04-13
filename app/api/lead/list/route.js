@@ -90,6 +90,7 @@ export async function GET(request) {
             subjects: requester.tutorListing.subjects,
             grades: requester.tutorListing.grades,
             locations: requester.tutorListing.locations,
+            modes: requester.tutorListing.teachingModes || [],
             lat: requester.lat,
             lng: requester.lng
         } : null;
@@ -98,13 +99,14 @@ export async function GET(request) {
         const sanitizedLeads = leads.map(lead => {
             const isUnlockedByCredit = lead.unlockedBy.length > 0;
             const isUnlocked = isUnlockedByCredit || isPremiumTutor;
-            
+
             let match = { score: 0, label: "Analyzing...", factors: [] };
             if (requesterCriterion) {
                 match = calculateMatchScore(requesterCriterion, {
                     subjects: lead.subjects,
                     grades: lead.grades,
                     locations: lead.locations,
+                    teachingModes: lead.mode ? [lead.mode] : ["BOTH"],
                     lat: lead.lat,
                     lng: lead.lng
                 });
