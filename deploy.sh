@@ -28,10 +28,17 @@ ssh -o StrictHostKeyChecking=no ${VPS_USER}@${VPS_HOST} "cd ${APP_DIR} && docker
 echo "🧹 Pruning old images..."
 ssh -o StrictHostKeyChecking=no ${VPS_USER}@${VPS_HOST} "docker image prune -f"
 
-echo "⏰ Step 4: Setting up daily email drip cron job..."
-CRON_LINE="0 9 * * * curl -s 'https://tuitionsinindia.com/api/cron/email-drip?secret=aa389dfe348c4c1979b8b0366b1601a1715c161500df5f8ef675f01463afedcd' > /dev/null 2>&1"
-ssh -o StrictHostKeyChecking=no ${VPS_USER}@${VPS_HOST} "(crontab -l 2>/dev/null | grep -qF 'email-drip') && echo 'Cron job already set.' || (crontab -l 2>/dev/null; echo \"$CRON_LINE\") | crontab -"
-echo "✅ Cron job configured (runs daily at 9:00 AM server time)."
+echo "⏰ Step 4: Setting up cron jobs..."
+ssh -o StrictHostKeyChecking=no ${VPS_USER}@${VPS_HOST} "
+  # Daily email drip — 9:00 AM server time
+  DRIP_JOB='0 9 * * * curl -s \"http://localhost:3000/api/cron/email-drip?secret=\${CRON_SECRET}\" >> /var/log/drip.log 2>&1'
+  # Monthly credit reset — 1st of each month at 6:00 AM
+  CREDITS_JOB='0 6 1 * * curl -s -X POST -H \"x-cron-key: \${AUDIT_SEED_KEY}\" \"http://localhost:3000/api/cron/reset-credits\" >> /var/log/credits.log 2>&1'
+
+  (crontab -l 2>/dev/null | grep -v 'email-drip\|reset-credits'; echo \"\$DRIP_JOB\"; echo \"\$CREDITS_JOB\") | crontab -
+  echo 'Cron jobs configured.'
+  crontab -l | grep -E 'drip|credits'
+"
 
 echo "✅ Deployment complete! Monitoring logs..."
 ssh -o StrictHostKeyChecking=no ${VPS_USER}@${VPS_HOST} "docker logs --tail 50 tuitionsinindia-web"

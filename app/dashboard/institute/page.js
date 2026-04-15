@@ -30,7 +30,7 @@ import {
 function InstituteDashboardContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const [instituteId, setInstituteId] = useState(searchParams.get("instituteId") || "");
+    const [instituteId, setInstituteId] = useState(searchParams.get("instId") || searchParams.get("instituteId") || "");
     const [leads, setLeads] = useState([]);
     const [recruitmentLeads, setRecruitmentLeads] = useState([]);
     const [courses, setCourses] = useState([]);
@@ -46,6 +46,17 @@ function InstituteDashboardContent() {
 
     // Course Form State
     const [showCourseForm, setShowCourseForm] = useState(false);
+
+    useEffect(() => {
+        const idFromUrl = searchParams.get("instId") || searchParams.get("instituteId");
+        if (idFromUrl) {
+            setInstituteId(idFromUrl);
+            localStorage.setItem("ti_active_institute_id", idFromUrl);
+        } else {
+            const saved = localStorage.getItem("ti_active_institute_id");
+            if (saved) setInstituteId(saved);
+        }
+    }, [searchParams]);
 
     useEffect(() => {
         if (instituteId) {
@@ -201,7 +212,7 @@ function InstituteDashboardContent() {
                     </nav>
 
                     <button
-                        onClick={() => router.push("/")}
+                        onClick={() => { localStorage.removeItem("ti_active_institute_id"); router.push("/"); }}
                         className="mt-auto flex items-center justify-center md:justify-start gap-3 px-3 md:px-4 py-3 text-red-400 hover:text-red-600 text-sm font-semibold transition-colors"
                     >
                         <LogOut size={16} strokeWidth={2} />
@@ -222,8 +233,8 @@ function InstituteDashboardContent() {
                         )}
 
                         <div>
-                            {activeTab === "settings" && <SettingsModule user={instituteData} onUpdate={fetchInstituteData} />}
-                            {activeTab === "billing" && <BillingModule user={instituteData} />}
+                            {activeTab === "settings" && <SettingsModule userData={instituteData} onUpdate={fetchInstituteData} />}
+                            {activeTab === "billing" && <BillingModule userData={instituteData} />}
 
                             {activeTab === "chat" && (
                                 <div className="h-[75vh] grid grid-cols-1 lg:grid-cols-12 gap-5">
