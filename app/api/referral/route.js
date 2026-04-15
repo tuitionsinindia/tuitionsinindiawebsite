@@ -14,12 +14,12 @@ export async function GET(req) {
     try {
         const cookie = req.cookies.get(COOKIE_NAME);
         const session = cookie ? verifyToken(cookie.value) : null;
-        if (!session?.userId) {
+        if (!session?.id) {
             return NextResponse.json({ error: "Not logged in" }, { status: 401 });
         }
 
         let user = await prisma.user.findUnique({
-            where: { id: session.userId },
+            where: { id: session.id },
             select: {
                 id: true,
                 referralCode: true,
@@ -38,7 +38,7 @@ export async function GET(req) {
                 code = generateCode();
             }
             user = await prisma.user.update({
-                where: { id: session.userId },
+                where: { id: session.id },
                 data: { referralCode: code },
                 select: {
                     id: true,

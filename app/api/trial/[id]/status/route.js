@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { verifyToken } from "@/lib/session";
+import { sendTrialNotificationEmail } from "@/lib/email";
 
 export async function PATCH(request, { params }) {
     try {
@@ -51,6 +52,12 @@ export async function PATCH(request, { params }) {
             },
         });
 
+        // Fetch both parties for email
+        const [student, tutor] = await Promise.all([
+            prisma.user.findUnique({ where: { id: trial.studentId }, select: { email: true, name: true } }),
+            prisma.user.findUnique({ where: { id: trial.tutorId }, select: { email: true, name: true } }),
+        ]);
+
         // Notify the other party
         const notifyUserId = isTutor ? trial.studentId : trial.tutorId;
         const statusMessages = {
@@ -73,6 +80,26 @@ export async function PATCH(request, { params }) {
                         : `/dashboard/tutor?tab=TRIALS`,
                 },
             }).catch(() => {});
+
+            // Send email to the other party (non-blocking)
+            const siteUrl = "https://tuitionsinindia.com";
+            if (isTutor && student?.email) {
+                // Tutor took action — notify student
+                sendTrialNotificationEmail(student.email, student.name, {
+                    status,
+                    subject: trial.subject,
+                    otherPartyName: tutor?.name || "your tutor",
+                    dashboardLink: `${siteUrl}/dashboard/student?tab=TRIALS`,
+                }).catch(() => {});
+            } else if (isStudent && tutor?.email) {
+                // Student cancelled — notify tutor
+                sendTrialNotificationEmail(tutor.email, tutor.name, {
+                    status: "CANCELLED",
+                    subject: trial.subject,
+                    otherPartyName: student?.name || "the student",
+                    dashboardLink: `${siteUrl}/dashboard/tutor?tab=TRIALS`,
+                }).catch(() => {});
+            }
         }
 
         return NextResponse.json({ success: true, trial: updated });

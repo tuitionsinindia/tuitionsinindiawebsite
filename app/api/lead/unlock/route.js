@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { createNotification } from "@/lib/notifications";
+import { sendTutorUnlockedEmail } from "@/lib/email";
 
 export const dynamic = 'force-dynamic';
 
@@ -76,6 +77,14 @@ export async function POST(request) {
                 title: "A tutor is interested in your requirement",
                 body: `A tutor has viewed your ${subject} requirement and may contact you soon.`,
             });
+
+            // Email student
+            prisma.user.findUnique({ where: { id: lead.studentId }, select: { email: true, name: true } })
+                .then(student => {
+                    if (student?.email) {
+                        sendTutorUnlockedEmail(student.email, { name: student.name || "there" });
+                    }
+                }).catch(() => {});
         }
 
         createNotification(tutorId, {

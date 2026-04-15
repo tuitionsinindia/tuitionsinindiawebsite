@@ -32,9 +32,19 @@ function AdminDashboardContent() {
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState("overview");
 
+    // Users tab state
+    const [users, setUsers] = useState([]);
+    const [usersLoading, setUsersLoading] = useState(false);
+    const [userSearch, setUserSearch] = useState("");
+    const [userActionLoading, setUserActionLoading] = useState(null);
+
     useEffect(() => {
         fetchMetrics();
     }, []);
+
+    useEffect(() => {
+        if (activeTab === "users") fetchUsers();
+    }, [activeTab]);
 
     const fetchMetrics = async () => {
         setLoading(true);
@@ -48,6 +58,59 @@ function AdminDashboardContent() {
             console.error("Failed to load metrics", err);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchUsers = async (search = userSearch) => {
+        setUsersLoading(true);
+        try {
+            const params = new URLSearchParams({ search });
+            const res = await fetch(`/api/admin/users?${params}`);
+            const json = await res.json();
+            if (json.success) setUsers(json.users || []);
+        } catch (err) {
+            console.error("Failed to load users", err);
+        } finally {
+            setUsersLoading(false);
+        }
+    };
+
+    const handleSuspend = async (userId, suspend) => {
+        setUserActionLoading(userId + "-suspend");
+        try {
+            const res = await fetch("/api/admin/user/suspend", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ userId, suspend }),
+            });
+            const json = await res.json();
+            if (json.success) {
+                setUsers(prev => prev.map(u => u.id === userId ? { ...u, isSuspended: json.isSuspended } : u));
+            }
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setUserActionLoading(null);
+        }
+    };
+
+    const handleAddCredits = async (userId, amount) => {
+        if (!amount) return;
+        setUserActionLoading(userId + "-credits");
+        try {
+            const res = await fetch("/api/admin/user/credits", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ userId, amount }),
+            });
+            const json = await res.json();
+            if (json.success) {
+                setUsers(prev => prev.map(u => u.id === userId ? { ...u, credits: json.credits } : u));
+            }
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setUserActionLoading(null);
         }
     };
 
@@ -239,43 +302,91 @@ function AdminDashboardContent() {
                                         <h3 className="font-bold text-lg text-gray-900">User Directory</h3>
                                         <div className="relative">
                                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" size={14} />
-                                            <input placeholder="Search users..." className="pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-blue-100 outline-none w-56" />
+                                            <input
+                                                placeholder="Search by name, phone, email..."
+                                                value={userSearch}
+                                                onChange={e => { setUserSearch(e.target.value); fetchUsers(e.target.value); }}
+                                                className="pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-blue-100 outline-none w-64"
+                                            />
                                         </div>
                                     </div>
+                                    {usersLoading ? (
+                                        <div className="flex items-center justify-center py-16">
+                                            <div className="size-8 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
+                                        </div>
+                                    ) : (
                                     <div className="overflow-x-auto">
                                         <table className="w-full text-left">
                                             <thead>
                                                 <tr className="border-b border-gray-200 bg-gray-50">
-                                                    <th className="pb-3 pt-2 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider rounded-tl-xl">Name</th>
-                                                    <th className="pb-3 pt-2 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Role</th>
-                                                    <th className="pb-3 pt-2 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                                                    <th className="pb-3 pt-2 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider rounded-tr-xl">Action</th>
+                                                    <th className="pb-3 pt-2 px-4 text-xs font-semibold text-gray-500 rounded-tl-xl">Name</th>
+                                                    <th className="pb-3 pt-2 px-4 text-xs font-semibold text-gray-500">Role</th>
+                                                    <th className="pb-3 pt-2 px-4 text-xs font-semibold text-gray-500">Credits</th>
+                                                    <th className="pb-3 pt-2 px-4 text-xs font-semibold text-gray-500">Status</th>
+                                                    <th className="pb-3 pt-2 px-4 text-xs font-semibold text-gray-500 rounded-tr-xl">Actions</th>
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-gray-100">
-                                                {[1, 2, 3, 4, 5].map((_, i) => (
-                                                    <tr key={i} className="hover:bg-gray-50 transition-colors">
+                                                {users.map(u => (
+                                                    <tr key={u.id} className="hover:bg-gray-50 transition-colors">
                                                         <td className="py-4 px-4">
                                                             <div className="flex items-center gap-3">
-                                                                <div className="size-8 bg-gray-100 rounded-lg flex items-center justify-center font-semibold text-gray-400 text-xs">U</div>
+                                                                <div className="size-8 bg-blue-50 rounded-lg flex items-center justify-center font-bold text-blue-400 text-xs">
+                                                                    {u.name?.[0] || "?"}
+                                                                </div>
                                                                 <div>
-                                                                    <p className="font-semibold text-sm text-gray-900">User {i + 1}</p>
-                                                                    <p className="text-xs text-gray-400">user{i + 1}@tuitionsinindia.com</p>
+                                                                    <p className="font-semibold text-sm text-gray-900">{u.name || "—"}</p>
+                                                                    <p className="text-xs text-gray-400">{u.phone || u.email || "—"}</p>
                                                                 </div>
                                                             </div>
                                                         </td>
-                                                        <td className="py-4 px-4 text-xs font-semibold text-gray-500">Tutor</td>
                                                         <td className="py-4 px-4">
-                                                            <span className="px-2.5 py-1 bg-emerald-50 text-emerald-600 rounded-full text-xs font-semibold border border-emerald-100">Active</span>
+                                                            <span className={`px-2 py-0.5 rounded text-xs font-semibold ${u.role === "TUTOR" ? "bg-blue-50 text-blue-600" : u.role === "STUDENT" ? "bg-amber-50 text-amber-600" : "bg-gray-100 text-gray-500"}`}>
+                                                                {u.role}
+                                                            </span>
                                                         </td>
                                                         <td className="py-4 px-4">
-                                                            <button className="p-1.5 text-gray-300 hover:text-blue-600 transition-colors"><Settings size={15} strokeWidth={2} /></button>
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-sm font-semibold text-gray-700">{u.credits}</span>
+                                                                <button
+                                                                    onClick={() => {
+                                                                        const amt = prompt(`Add credits to ${u.name}? (use negative to remove)`, "5");
+                                                                        if (amt !== null && !isNaN(parseInt(amt))) handleAddCredits(u.id, parseInt(amt));
+                                                                    }}
+                                                                    disabled={userActionLoading === u.id + "-credits"}
+                                                                    className="text-xs px-2 py-0.5 border border-gray-200 rounded-lg text-blue-600 hover:border-blue-300 transition-colors"
+                                                                >
+                                                                    {userActionLoading === u.id + "-credits" ? "..." : "+/-"}
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                        <td className="py-4 px-4">
+                                                            {u.isSuspended ? (
+                                                                <span className="px-2.5 py-1 bg-red-50 text-red-500 rounded-full text-xs font-semibold border border-red-100">Suspended</span>
+                                                            ) : u.isVerified ? (
+                                                                <span className="px-2.5 py-1 bg-emerald-50 text-emerald-600 rounded-full text-xs font-semibold border border-emerald-100">Active</span>
+                                                            ) : (
+                                                                <span className="px-2.5 py-1 bg-gray-50 text-gray-400 rounded-full text-xs font-semibold border border-gray-200">Pending</span>
+                                                            )}
+                                                        </td>
+                                                        <td className="py-4 px-4">
+                                                            <button
+                                                                onClick={() => handleSuspend(u.id, !u.isSuspended)}
+                                                                disabled={userActionLoading === u.id + "-suspend"}
+                                                                className={`text-xs px-3 py-1.5 rounded-lg font-semibold border transition-all ${u.isSuspended ? "bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100" : "bg-red-50 text-red-500 border-red-100 hover:bg-red-100"}`}
+                                                            >
+                                                                {userActionLoading === u.id + "-suspend" ? "..." : u.isSuspended ? "Reinstate" : "Suspend"}
+                                                            </button>
                                                         </td>
                                                     </tr>
                                                 ))}
+                                                {users.length === 0 && (
+                                                    <tr><td colSpan={5} className="py-12 text-center text-gray-400 text-sm">No users found.</td></tr>
+                                                )}
                                             </tbody>
                                         </table>
                                     </div>
+                                    )}
                                 </div>
                             )}
 
@@ -298,12 +409,24 @@ function AdminDashboardContent() {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <button
-                                                    onClick={() => handleApproveTutor(tutor.id)}
-                                                    className="px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 shadow-sm transition-all"
-                                                >
-                                                    Approve
-                                                </button>
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        onClick={() => handleApproveTutor(tutor.id)}
+                                                        className="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 shadow-sm transition-all flex items-center gap-1.5"
+                                                    >
+                                                        <CheckCircle2 size={14} /> Approve
+                                                    </button>
+                                                    <button
+                                                        onClick={async () => {
+                                                            if (!confirm(`Reject ${tutor.name}?`)) return;
+                                                            setData(prev => ({ ...prev, pendingTutors: prev.pendingTutors.filter(t => t.id !== tutor.id) }));
+                                                            await fetch("/api/admin/tutor/approve", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ tutorId: tutor.id, isApproved: false }) });
+                                                        }}
+                                                        className="px-4 py-2 bg-white text-red-500 border border-red-100 text-sm font-semibold rounded-xl hover:bg-red-50 transition-all flex items-center gap-1.5"
+                                                    >
+                                                        <XCircle size={14} /> Reject
+                                                    </button>
+                                                </div>
                                             </div>
                                         ))}
                                         {(!data?.pendingTutors || data.pendingTutors.length === 0) && (
