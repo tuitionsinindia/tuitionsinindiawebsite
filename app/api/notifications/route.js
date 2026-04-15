@@ -51,9 +51,17 @@ export async function PATCH(request) {
             return NextResponse.json({ error: "userId required" }, { status: 400 });
         }
 
+        // Verify caller owns these notifications
+        const cookie = request.cookies.get(COOKIE_NAME);
+        const session = cookie ? verifyToken(cookie.value) : null;
+        if (!session || session.id !== userId) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
         if (notificationId) {
-            await prisma.notification.update({
-                where: { id: notificationId },
+            // Scope update to notifications owned by this user — prevents cross-user marking
+            await prisma.notification.updateMany({
+                where: { id: notificationId, userId },
                 data: { isRead: true },
             });
         } else {

@@ -44,7 +44,7 @@ echo "🔍 Step 5: Checking required env vars on VPS..."
 ssh -o StrictHostKeyChecking=no ${VPS_USER}@${VPS_HOST} "
   ENV_FILE=${APP_DIR}/.env.production
   MISSING=()
-  for VAR in GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET NEXT_PUBLIC_BASE_URL CRON_SECRET AUDIT_SEED_KEY RESEND_API_KEY JWT_SECRET; do
+  for VAR in GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET NEXT_PUBLIC_BASE_URL CRON_SECRET AUDIT_SEED_KEY RESEND_API_KEY SESSION_SECRET; do
     if ! grep -q \"^\${VAR}=\" \"\$ENV_FILE\" 2>/dev/null || grep -q \"^\${VAR}=$\" \"\$ENV_FILE\" 2>/dev/null; then
       MISSING+=(\"\$VAR\")
     fi

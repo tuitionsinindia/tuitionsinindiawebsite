@@ -597,7 +597,7 @@ function DashboardContent() {
                                         { label: "Add your email", done: !!tutorData.email, action: () => setActiveTab("SETTINGS") },
                                         { label: "Write a bio (50+ chars)", done: !!(listing?.bio && listing.bio.length >= 50), action: () => setActiveTab("SETTINGS") },
                                         { label: "Add subjects you teach", done: !!(listing?.subjects && listing.subjects.length > 0), action: () => setActiveTab("SETTINGS") },
-                                        { label: "Set your hourly rate", done: !!(listing?.rate && listing.rate > 0), action: () => setActiveTab("SETTINGS") },
+                                        { label: "Set your hourly rate", done: !!(listing?.hourlyRate && listing.hourlyRate > 0), action: () => setActiveTab("SETTINGS") },
                                         { label: "Add your experience", done: !!(listing?.experience && listing.experience > 0), action: () => setActiveTab("SETTINGS") },
                                         { label: "Get verified", done: !!tutorData.isVerified, action: null },
                                     ];
