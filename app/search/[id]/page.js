@@ -13,15 +13,37 @@ export async function generateMetadata({ params }) {
     const { id } = await params;
     const listing = await prisma.listing.findFirst({
         where: { OR: [{ id }, { tutorId: id }] },
-        include: { tutor: { select: { name: true } } },
+        include: { tutor: { select: { name: true, image: true } } },
     });
-    if (!listing) return { title: "Tutor Not Found" };
-    const title = `${listing.tutor.name} — ${listing.subjects?.[0] || "Tutor"} | TuitionsInIndia`;
-    const description = listing.bio?.slice(0, 160) || `${listing.tutor.name} teaches ${listing.subjects?.join(", ")} on TuitionsInIndia.`;
+    if (!listing) return { title: "Tutor Not Found | TuitionsInIndia" };
+
+    const name = listing.tutor.name;
+    const subjects = listing.subjects?.join(", ") || "Academics";
+    const location = listing.locations?.[0] || "India";
+    const rate = listing.hourlyRate ? `₹${listing.hourlyRate}/hr` : "";
+    const bio = listing.bio?.slice(0, 155) || `${name} is an experienced tutor teaching ${subjects} in ${location}.`;
+
+    const title = `${name} — ${subjects} Tutor in ${location}${rate ? ` | ${rate}` : ""} | TuitionsInIndia`;
+    const description = bio;
+    const url = `https://tuitionsinindia.com/search/${id}`;
+    const keywords = [
+        ...(listing.subjects || []),
+        ...(listing.locations || []),
+        "tutor", "home tuition", "online tutor", "private tutor", "TuitionsInIndia",
+    ].join(", ");
+
     return {
         title,
         description,
-        openGraph: { title, description, type: "profile" },
+        keywords,
+        alternates: { canonical: url },
+        openGraph: {
+            title,
+            description,
+            url,
+            type: "profile",
+            images: listing.tutor.image ? [{ url: listing.tutor.image }] : [],
+        },
         twitter: { card: "summary", title, description },
     };
 }

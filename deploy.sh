@@ -28,5 +28,17 @@ ssh -o StrictHostKeyChecking=no ${VPS_USER}@${VPS_HOST} "cd ${APP_DIR} && docker
 echo "🧹 Pruning old images..."
 ssh -o StrictHostKeyChecking=no ${VPS_USER}@${VPS_HOST} "docker image prune -f"
 
+echo "⏰ Step 4: Setting up cron jobs..."
+ssh -o StrictHostKeyChecking=no ${VPS_USER}@${VPS_HOST} "
+  # Daily email drip — 9:00 AM server time
+  DRIP_JOB='0 9 * * * curl -s \"http://localhost:3000/api/cron/email-drip?secret=\${CRON_SECRET}\" >> /var/log/drip.log 2>&1'
+  # Monthly credit reset — 1st of each month at 6:00 AM
+  CREDITS_JOB='0 6 1 * * curl -s -X POST -H \"x-cron-key: \${AUDIT_SEED_KEY}\" \"http://localhost:3000/api/cron/reset-credits\" >> /var/log/credits.log 2>&1'
+
+  (crontab -l 2>/dev/null | grep -v 'email-drip\|reset-credits'; echo \"\$DRIP_JOB\"; echo \"\$CREDITS_JOB\") | crontab -
+  echo 'Cron jobs configured.'
+  crontab -l | grep -E 'drip|credits'
+"
+
 echo "✅ Deployment complete! Monitoring logs..."
 ssh -o StrictHostKeyChecking=no ${VPS_USER}@${VPS_HOST} "docker logs --tail 50 tuitionsinindia-web"

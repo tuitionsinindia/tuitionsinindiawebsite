@@ -9,8 +9,8 @@ export async function POST(request) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
         }
 
-        // 1. Verify Trust Link (Lead Unlock or Chat Session)
-        const [unlock, session] = await Promise.all([
+        // 1. Verify Trust Link (Lead Unlock, Chat Session, or Completed Trial)
+        const [unlock, session, trial] = await Promise.all([
             prisma.leadUnlock.findFirst({
                 where: {
                     tutorId: targetId,
@@ -24,12 +24,19 @@ export async function POST(request) {
                         { studentId: targetId, tutorId: authorId }
                     ]
                 }
-            })
+            }),
+            prisma.trialBooking.findFirst({
+                where: {
+                    studentId: authorId,
+                    tutorId: targetId,
+                    status: "COMPLETED",
+                }
+            }),
         ]);
 
-        if (!unlock && !session) {
-            return NextResponse.json({ 
-                error: "Review restricted. You must engage with the faculty member before providing feedback." 
+        if (!unlock && !session && !trial) {
+            return NextResponse.json({
+                error: "You can only leave a review after connecting with this tutor."
             }, { status: 403 });
         }
 

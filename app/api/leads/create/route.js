@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { sendLeadAlertEmail } from "@/lib/email";
+import { sendLeadAlertSMS } from "@/lib/sms";
 
 export async function POST(request) {
     try {
@@ -47,6 +49,19 @@ export async function POST(request) {
                 status: "OPEN"
             }
         });
+
+        // Non-blocking: notify matching tutors
+        prisma.user.findMany({
+            where: { role: "TUTOR" },
+            select: { email: true, phone: true },
+            take: 50,
+        }).then(tutors => {
+            const emails = tutors.map(t => t.email).filter(Boolean);
+            if (emails.length > 0) sendLeadAlertEmail(emails, lead).catch(() => {});
+            tutors.slice(0, 5).forEach(t => {
+                if (t.phone) sendLeadAlertSMS(t.phone, { subject: subjects?.[0], location: locations?.[0], description }).catch(() => {});
+            });
+        }).catch(() => {});
 
         return NextResponse.json({ success: true, lead });
 
