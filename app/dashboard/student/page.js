@@ -359,6 +359,32 @@ function StudentDashboardContent() {
                                     ))}
                                 </div>
 
+                                {/* Onboarding guide for new users */}
+                                {activeLeads.length === 0 && unlockedTutors.length === 0 && (
+                                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-6">
+                                        <h3 className="text-base font-bold text-gray-900 mb-1">Get started in 3 steps</h3>
+                                        <p className="text-sm text-gray-500 mb-5">Here's how to find a tutor on TuitionsInIndia.</p>
+                                        <div className="space-y-3">
+                                            {[
+                                                { step: "1", title: "Search for tutors", desc: "Browse by subject, location, or let us match you.", href: "/search?role=TUTOR", label: "Search now", color: "bg-blue-600" },
+                                                { step: "2", title: "Post your requirement", desc: "Tell tutors what you need — they'll come to you.", href: "/post-requirement", label: "Post requirement", color: "bg-indigo-600" },
+                                                { step: "3", title: "Book a free trial", desc: "Many tutors offer a free 30-min trial class.", href: "/search?role=TUTOR", label: "Find trials", color: "bg-emerald-600" },
+                                            ].map(item => (
+                                                <div key={item.step} className="bg-white rounded-xl p-4 flex items-center gap-4 shadow-sm">
+                                                    <div className={`size-8 rounded-full ${item.color} text-white text-sm font-bold flex items-center justify-center shrink-0`}>{item.step}</div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="text-sm font-semibold text-gray-900">{item.title}</p>
+                                                        <p className="text-xs text-gray-400">{item.desc}</p>
+                                                    </div>
+                                                    <Link href={item.href} className={`px-3 py-1.5 ${item.color} text-white text-xs font-semibold rounded-lg hover:opacity-90 transition-opacity shrink-0`}>
+                                                        {item.label}
+                                                    </Link>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
                                 {/* Quick Actions */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <Link href="/search?role=TUTOR" className="p-5 bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition-all flex items-center gap-4 group">
@@ -740,6 +766,21 @@ function StudentDashboardContent() {
                                                             className="text-xs text-gray-400 hover:text-red-600 transition-colors font-medium"
                                                         >
                                                             Cancel request
+                                                        </button>
+                                                    </div>
+                                                )}
+                                                {trial.status === "COMPLETED" && (
+                                                    <div className="flex items-center gap-3 pt-2 border-t border-gray-100">
+                                                        <Star size={14} className="text-amber-400 shrink-0" />
+                                                        <p className="text-xs text-gray-600 flex-1">How was the trial? Your review helps other students.</p>
+                                                        <button
+                                                            onClick={() => {
+                                                                setSelectedTutorForReview({ id: trial.tutor?.id || trial.tutorId, name: trial.tutor?.name });
+                                                                setIsReviewOpen(true);
+                                                            }}
+                                                            className="px-3 py-1.5 bg-amber-50 border border-amber-200 text-amber-700 text-xs font-semibold rounded-lg hover:bg-amber-100 transition-colors shrink-0"
+                                                        >
+                                                            Leave a Review
                                                         </button>
                                                     </div>
                                                 )}

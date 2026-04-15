@@ -3,10 +3,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
     MapPin, Clock, Star, BadgeCheck, GraduationCap, BookOpen,
-    Phone, Mail, ArrowLeft, Briefcase, Languages, Users
+    ArrowLeft, Briefcase, Languages, Users
 } from "lucide-react";
 import { WhatsAppShareButton, ShareButton } from "@/app/components/ShareButtons";
 import TrackProfileView from "@/app/components/TrackProfileView";
+import TutorProfileActions from "@/app/components/TutorProfileActions";
 
 export async function generateMetadata({ params }) {
     const { id } = await params;
@@ -46,6 +47,8 @@ export default async function TutorProfilePage({ params }) {
             },
         },
     });
+
+    // Fetch similar tutors includes offersTrialClass implicitly via listing
 
     if (!listing) notFound();
 
@@ -99,16 +102,21 @@ export default async function TutorProfilePage({ params }) {
                                             {tutor.subscriptionTier}
                                         </span>
                                     )}
+                                    {listing.offersTrialClass && (
+                                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-emerald-50 text-emerald-700 text-xs font-semibold rounded-full border border-emerald-100">
+                                            <Clock size={10} /> Free {listing.trialDuration}-min Trial
+                                        </span>
+                                    )}
                                 </div>
                                 <p className="text-gray-500 text-sm mt-1">{listing.title}</p>
                             </div>
                             <div className="flex flex-wrap gap-2 shrink-0">
-                                <Link
-                                    href={`/register/student?intent=unlock&tutorId=${tutor.id}&subject=${listing.subjects?.[0] || ""}`}
-                                    className="px-5 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors"
-                                >
-                                    Contact Tutor
-                                </Link>
+                                <TutorProfileActions
+                                    tutor={{ id: tutor.id, name: tutor.name }}
+                                    subject={listing.subjects?.[0] || ""}
+                                    offersTrialClass={listing.offersTrialClass}
+                                    trialDuration={listing.trialDuration}
+                                />
                                 <WhatsAppShareButton
                                     text={`Check out ${tutor.name} on TuitionsInIndia — ${listing.subjects?.join(", ")} tutor`}
                                     url={`https://tuitionsinindia.com/search/${tutor.id}`}
@@ -278,15 +286,23 @@ export default async function TutorProfilePage({ params }) {
                         )}
 
                         {/* CTA */}
-                        <div className="bg-blue-50 border border-blue-100 rounded-2xl p-6 text-center">
-                            <p className="text-sm font-semibold text-blue-900 mb-2">Interested in this tutor?</p>
-                            <p className="text-xs text-blue-600 mb-4">Post your requirement and this tutor will be notified.</p>
+                        <div className="bg-blue-50 border border-blue-100 rounded-2xl p-6 space-y-3">
+                            <p className="text-sm font-semibold text-blue-900">Interested in this tutor?</p>
                             <Link
                                 href={`/register/student?intent=unlock&tutorId=${tutor.id}&subject=${listing.subjects?.[0] || ""}`}
-                                className="block w-full py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors"
+                                className="block w-full py-2.5 text-center bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors"
                             >
-                                Post Requirement
+                                Contact Tutor
                             </Link>
+                            {listing.offersTrialClass && (
+                                <Link
+                                    href={`/register/student?intent=trial&tutorId=${tutor.id}&subject=${listing.subjects?.[0] || ""}`}
+                                    className="block w-full py-2.5 text-center bg-white border border-emerald-200 text-emerald-700 rounded-xl text-sm font-semibold hover:bg-emerald-50 transition-colors"
+                                >
+                                    Book Free {listing.trialDuration}-min Trial
+                                </Link>
+                            )}
+                            <p className="text-xs text-blue-600 text-center">No commission. Pay the tutor directly.</p>
                         </div>
                     </div>
                 </div>
