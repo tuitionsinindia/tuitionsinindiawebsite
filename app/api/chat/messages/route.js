@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { createNotification } from '@/lib/notifications';
+import { sendNewMessageEmail } from '@/lib/email';
 
 // Fetch all messages for a session (used for polling)
 export async function GET(req) {
@@ -56,11 +57,24 @@ export async function POST(req) {
 
         // Notify the recipient (non-blocking)
         const recipientId = senderId === session.studentId ? session.tutorId : session.studentId;
+        const senderName = message.sender?.name || "Someone";
+        const preview = content.length > 80 ? content.slice(0, 80) + "..." : content;
         createNotification(recipientId, {
             type: "NEW_MESSAGE",
-            title: `New message from ${message.sender?.name || "someone"}`,
-            body: content.length > 80 ? content.slice(0, 80) + "..." : content,
+            title: `New message from ${senderName}`,
+            body: preview,
         });
+
+        // Email notification to recipient
+        prisma.user.findUnique({ where: { id: recipientId }, select: { email: true, name: true, role: true } })
+            .then(recipient => {
+                if (recipient?.email) {
+                    const dashLink = recipient.role === "TUTOR"
+                        ? "https://tuitionsinindia.com/dashboard/tutor"
+                        : "https://tuitionsinindia.com/dashboard/student";
+                    sendNewMessageEmail(recipient.email, recipient.name || "there", senderName, preview, dashLink);
+                }
+            }).catch(() => {});
 
         return NextResponse.json({ message });
     } catch (error) {

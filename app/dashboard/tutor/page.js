@@ -347,6 +347,69 @@ function DashboardContent() {
         }
     };
 
+    const handleSubscriptionPurchase = async (tier) => {
+        const plans = { PRO: { price: 499, credits: 30 }, ELITE: { price: 1999, credits: 100 } };
+        const plan = plans[tier];
+        if (!plan) return;
+        setProcessingPayment(`sub_${tier}`);
+        try {
+            const orderRes = await fetch("/api/payment/order", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    amount: plan.price,
+                    receipt: `sub_${tier.toLowerCase()}_${Date.now()}`,
+                    userId: tutorId,
+                    description: `${tier} Plan — 1 month`
+                })
+            });
+            const order = await orderRes.json();
+
+            const options = {
+                key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+                amount: order.amount,
+                currency: order.currency,
+                name: "TuitionsInIndia",
+                description: `${tier} Plan`,
+                order_id: order.id,
+                handler: async (response) => {
+                    const verifyRes = await fetch("/api/payment/verify", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_signature: response.razorpay_signature,
+                            userId: tutorId,
+                            creditsToAdd: plan.credits,
+                            subscriptionTier: tier,
+                        })
+                    });
+                    const result = await verifyRes.json();
+                    if (result.success) {
+                        fetchTutorData();
+                        fetchTransactions();
+                        alert(`You are now on the ${tier} plan! ${plan.credits} credits added.`);
+                    }
+                },
+                prefill: {
+                    name: tutorData?.name || "",
+                    email: tutorData?.email || "",
+                    contact: tutorData?.phone || ""
+                },
+                theme: { color: "#2563EB" }
+            };
+
+            const rzp = new window.Razorpay(options);
+            rzp.open();
+        } catch (err) {
+            console.error(err);
+            alert("Something went wrong. Please try again.");
+        } finally {
+            setProcessingPayment(null);
+        }
+    };
+
     const handleLogout = () => {
         localStorage.removeItem("ti_active_tutor_id");
         router.push("/");
@@ -693,14 +756,48 @@ function DashboardContent() {
 
                                 {/* Upgrade CTA */}
                                 {tutorData?.subscriptionTier === 'FREE' && (
-                                    <div className="bg-gray-900 rounded-2xl p-6 text-white flex flex-col md:flex-row items-center justify-between gap-6">
-                                        <div>
-                                            <h3 className="text-xl font-bold mb-1">Upgrade to Pro</h3>
-                                            <p className="text-gray-400 text-sm">Get 30 credits/month, verified badge, and priority ranking for ₹499/month.</p>
+                                    <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
+                                        <div className="mb-4">
+                                            <h3 className="text-lg font-bold text-gray-900">Upgrade your plan</h3>
+                                            <p className="text-sm text-gray-400 mt-0.5">Get more credits, a verified badge, and better search ranking.</p>
                                         </div>
-                                        <Link href="/pricing/tutor" className="px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 transition-all whitespace-nowrap flex items-center gap-2">
-                                            View Plans <ArrowRight size={16} />
-                                        </Link>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <div className="border-2 border-blue-600 rounded-xl p-4 relative">
+                                                <div className="absolute -top-2.5 left-4 bg-blue-600 text-white text-xs font-semibold px-2 py-0.5 rounded-full">Recommended</div>
+                                                <p className="font-bold text-gray-900 mt-1">Pro</p>
+                                                <p className="text-2xl font-bold text-gray-900 mt-1">₹499<span className="text-sm font-normal text-gray-400">/month</span></p>
+                                                <ul className="text-xs text-gray-500 mt-2 space-y-1 mb-4">
+                                                    <li>30 credits per month</li>
+                                                    <li>Verified badge on profile</li>
+                                                    <li>Priority search ranking</li>
+                                                </ul>
+                                                <button
+                                                    onClick={() => handleSubscriptionPurchase("PRO")}
+                                                    disabled={!!processingPayment}
+                                                    className="w-full py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                                                >
+                                                    {processingPayment === "sub_PRO" ? <Loader2 size={14} className="animate-spin" /> : null}
+                                                    Get Pro
+                                                </button>
+                                            </div>
+                                            <div className="border border-gray-200 rounded-xl p-4">
+                                                <p className="font-bold text-gray-900">Elite</p>
+                                                <p className="text-2xl font-bold text-gray-900 mt-1">₹1,999<span className="text-sm font-normal text-gray-400">/month</span></p>
+                                                <ul className="text-xs text-gray-500 mt-2 space-y-1 mb-4">
+                                                    <li>100 credits per month</li>
+                                                    <li>Featured listing in search</li>
+                                                    <li>Top search ranking</li>
+                                                </ul>
+                                                <button
+                                                    onClick={() => handleSubscriptionPurchase("ELITE")}
+                                                    disabled={!!processingPayment}
+                                                    className="w-full py-2.5 border border-gray-200 text-gray-700 text-sm font-semibold rounded-lg hover:border-blue-500 hover:text-blue-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                                                >
+                                                    {processingPayment === "sub_ELITE" ? <Loader2 size={14} className="animate-spin" /> : null}
+                                                    Get Elite
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
                                 )}
                             </div>

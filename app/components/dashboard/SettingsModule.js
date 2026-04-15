@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { User, ShieldCheck, Mail, Phone, Lock, Save, Loader2, Info, Clock } from "lucide-react";
+import { useState, useRef } from "react";
+import { User, ShieldCheck, Mail, Phone, Lock, Save, Loader2, Info, Clock, Camera, CheckCircle } from "lucide-react";
 
 export default function SettingsModule({ userData, onUpdate }) {
     const [formData, setFormData] = useState({
@@ -14,6 +14,77 @@ export default function SettingsModule({ userData, onUpdate }) {
     });
     const [isSaving, setIsSaving] = useState(false);
     const [message, setMessage] = useState(null);
+
+    // Password reset
+    const [resetLoading, setResetLoading] = useState(false);
+    const [resetMsg, setResetMsg] = useState(null);
+
+    // Avatar upload
+    const [avatarPreview, setAvatarPreview] = useState(userData?.image || null);
+    const [avatarUploading, setAvatarUploading] = useState(false);
+    const [avatarMsg, setAvatarMsg] = useState(null);
+    const fileInputRef = useRef(null);
+
+    const handleAvatarChange = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+            setAvatarMsg({ type: "error", text: "Please select a JPEG, PNG, or WebP image." });
+            return;
+        }
+        if (file.size > 2 * 1024 * 1024) {
+            setAvatarMsg({ type: "error", text: "Image must be smaller than 2 MB." });
+            return;
+        }
+        setAvatarUploading(true);
+        setAvatarMsg(null);
+        try {
+            const reader = new FileReader();
+            reader.onloadend = async () => {
+                const base64 = reader.result;
+                setAvatarPreview(base64);
+                const res = await fetch("/api/upload/avatar", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ image: base64 }),
+                });
+                if (res.ok) {
+                    setAvatarMsg({ type: "success", text: "Photo updated." });
+                    if (onUpdate) onUpdate();
+                } else {
+                    const err = await res.json();
+                    setAvatarMsg({ type: "error", text: err?.error || "Upload failed. Try again." });
+                }
+                setAvatarUploading(false);
+            };
+            reader.readAsDataURL(file);
+        } catch {
+            setAvatarMsg({ type: "error", text: "Upload failed. Try again." });
+            setAvatarUploading(false);
+        }
+    };
+
+    const handlePasswordReset = async () => {
+        if (!formData.email) return;
+        setResetLoading(true);
+        setResetMsg(null);
+        try {
+            const res = await fetch("/api/auth/password-reset", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: formData.email }),
+            });
+            if (res.ok) {
+                setResetMsg({ type: "success", text: "Reset link sent to your email." });
+            } else {
+                setResetMsg({ type: "error", text: "Could not send reset link. Try again." });
+            }
+        } catch {
+            setResetMsg({ type: "error", text: "Could not send reset link. Try again." });
+        } finally {
+            setResetLoading(false);
+        }
+    };
 
     const isTutor = userData?.role === "TUTOR";
     const [offersTrialClass, setOffersTrialClass] = useState(userData?.tutorListing?.offersTrialClass || false);
@@ -73,6 +144,35 @@ export default function SettingsModule({ userData, onUpdate }) {
                 <span className="px-4 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-xs font-semibold border border-blue-100 w-fit">
                     {userData?.role || 'Member'}
                 </span>
+            </div>
+
+            {/* Profile Photo */}
+            <div className="bg-white border border-gray-100 p-6 rounded-2xl shadow-sm">
+                <div className="flex items-center gap-4">
+                    <div className="relative shrink-0">
+                        {avatarPreview ? (
+                            <img src={avatarPreview} alt="Profile" className="size-16 rounded-full object-cover border-2 border-gray-100" />
+                        ) : (
+                            <div className="size-16 rounded-full bg-blue-50 flex items-center justify-center border-2 border-gray-100">
+                                <User size={28} className="text-blue-400" />
+                            </div>
+                        )}
+                        <button
+                            onClick={() => fileInputRef.current?.click()}
+                            className="absolute -bottom-1 -right-1 size-7 bg-blue-600 rounded-full flex items-center justify-center border-2 border-white hover:bg-blue-700 transition-colors"
+                        >
+                            {avatarUploading ? <Loader2 size={12} className="text-white animate-spin" /> : <Camera size={12} className="text-white" />}
+                        </button>
+                        <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleAvatarChange} />
+                    </div>
+                    <div>
+                        <p className="text-sm font-semibold text-gray-800">{userData?.name || "Your Name"}</p>
+                        <p className="text-xs text-gray-400 mt-0.5">Click the camera icon to upload a new photo (JPEG/PNG/WebP, max 2 MB)</p>
+                        {avatarMsg && (
+                            <p className={`text-xs mt-1 font-medium ${avatarMsg.type === "success" ? "text-emerald-600" : "text-red-500"}`}>{avatarMsg.text}</p>
+                        )}
+                    </div>
+                </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -170,10 +270,20 @@ export default function SettingsModule({ userData, onUpdate }) {
                                 <Lock size={14} className="text-gray-400" />
                                 <h4 className="text-sm font-semibold text-gray-700">Change Password</h4>
                             </div>
-                            <p className="text-sm text-gray-400">Request a password reset link sent to your email.</p>
-                            <button className="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:border-blue-500 hover:text-blue-600 transition-all">
-                                Send Reset Link
-                            </button>
+                            <p className="text-sm text-gray-400">A reset link will be sent to your registered email address.</p>
+                            <div className="flex items-center gap-3">
+                                <button
+                                    onClick={handlePasswordReset}
+                                    disabled={resetLoading || resetMsg?.type === "success"}
+                                    className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:border-blue-500 hover:text-blue-600 transition-all disabled:opacity-50"
+                                >
+                                    {resetLoading ? <Loader2 size={13} className="animate-spin" /> : resetMsg?.type === "success" ? <CheckCircle size={13} className="text-emerald-500" /> : null}
+                                    {resetMsg?.type === "success" ? "Link sent!" : "Send Reset Link"}
+                                </button>
+                                {resetMsg?.type === "error" && (
+                                    <p className="text-xs text-red-500">{resetMsg.text}</p>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
