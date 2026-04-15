@@ -30,6 +30,26 @@ export async function GET(request) {
                 email: isSelf,
                 phone: isSelf,
                 credits: isSelf,
+                tutorListing: isSelf ? {
+                    select: {
+                        id: true,
+                        bio: true,
+                        subjects: true,
+                        grades: true,
+                        locations: true,
+                        hourlyRate: true,
+                        experience: true,
+                        gender: true,
+                        teachingModes: true,
+                        timings: true,
+                        languages: true,
+                        offersTrialClass: true,
+                        trialDuration: true,
+                        rating: true,
+                        reviewCount: true,
+                        isActive: true,
+                    }
+                } : false,
             },
         });
 

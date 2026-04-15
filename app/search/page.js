@@ -577,8 +577,14 @@ function SearchResultsContent() {
 
                                                 {/* Fee */}
                                                 <div className="text-right shrink-0">
-                                                    <p className="text-lg font-bold text-gray-900">₹{item.rate || "500"}</p>
-                                                    <p className="text-xs text-gray-400">per hour</p>
+                                                    {item.rate > 0 ? (
+                                                        <>
+                                                            <p className="text-lg font-bold text-gray-900">₹{item.rate}</p>
+                                                            <p className="text-xs text-gray-400">per hour</p>
+                                                        </>
+                                                    ) : (
+                                                        <p className="text-sm font-medium text-gray-400">Ask for rate</p>
+                                                    )}
                                                 </div>
                                             </div>
 

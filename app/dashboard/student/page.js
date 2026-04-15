@@ -136,6 +136,20 @@ function StudentDashboardContent() {
         } catch (err) { console.error(err); } finally { setTrialLoading(false); }
     };
 
+    const handleCloseLead = async (leadId) => {
+        if (!confirm("Mark this requirement as filled? It will be removed from tutor searches.")) return;
+        try {
+            const res = await fetch("/api/lead/close", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ leadId, studentId }),
+            });
+            if (res.ok) {
+                setActiveLeads(prev => prev.filter(l => l.id !== leadId));
+            }
+        } catch (err) { console.error(err); }
+    };
+
     const fetchSavedTutors = async () => {
         if (!studentId) return;
         setSavedLoading(true);
@@ -473,7 +487,7 @@ function StudentDashboardContent() {
 
                                             {/* Boost Button */}
                                             {lead.isPremium ? (
-                                                <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-100 rounded-xl">
+                                                <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-100 rounded-xl mb-3">
                                                     <Zap size={14} className="text-amber-600" />
                                                     <span className="text-xs font-semibold text-amber-700">Boosted — getting priority responses</span>
                                                 </div>
@@ -481,7 +495,7 @@ function StudentDashboardContent() {
                                                 <button
                                                     onClick={() => handleBoostLead(lead)}
                                                     disabled={boostingLead === lead.id}
-                                                    className="w-full py-2.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-xl font-semibold text-sm hover:bg-amber-100 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                                                    className="w-full py-2.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-xl font-semibold text-sm hover:bg-amber-100 transition-all flex items-center justify-center gap-2 disabled:opacity-50 mb-3"
                                                 >
                                                     {boostingLead === lead.id ? (
                                                         <Loader2 size={14} className="animate-spin" />
@@ -493,6 +507,12 @@ function StudentDashboardContent() {
                                                     )}
                                                 </button>
                                             )}
+                                            <button
+                                                onClick={() => handleCloseLead(lead.id)}
+                                                className="w-full py-2 text-xs font-medium text-gray-400 hover:text-red-500 transition-colors"
+                                            >
+                                                Found a tutor? Mark as filled
+                                            </button>
                                         </div>
                                     )) : (
                                         <div className="col-span-full py-16 text-center bg-white rounded-2xl border border-dashed border-gray-200">
