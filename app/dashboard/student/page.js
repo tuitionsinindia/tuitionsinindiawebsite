@@ -22,7 +22,9 @@ import {
     Star,
     Zap,
     CreditCard,
-    Clock
+    Clock,
+    Bookmark,
+    MapPin
 } from "lucide-react";
 import ReviewModal from "@/app/components/ReviewModal";
 
@@ -44,6 +46,8 @@ function StudentDashboardContent() {
     const [boostingLead, setBoostingLead] = useState(null);
     const [trials, setTrials] = useState([]);
     const [trialLoading, setTrialLoading] = useState(false);
+    const [savedTutors, setSavedTutors] = useState([]);
+    const [savedLoading, setSavedLoading] = useState(false);
 
     useEffect(() => {
         const idFromUrl = searchParams.get("studentId");
@@ -63,6 +67,7 @@ function StudentDashboardContent() {
             fetchActiveLeads();
             fetchChatSessions();
             fetchTrials();
+            fetchSavedTutors();
         }
     }, [studentId]);
 
@@ -129,6 +134,25 @@ function StudentDashboardContent() {
                 setTrials(data.trials || []);
             }
         } catch (err) { console.error(err); } finally { setTrialLoading(false); }
+    };
+
+    const fetchSavedTutors = async () => {
+        if (!studentId) return;
+        setSavedLoading(true);
+        try {
+            const res = await fetch(`/api/saved-tutors?studentId=${studentId}`);
+            if (res.ok) {
+                const data = await res.json();
+                setSavedTutors(data.saved || []);
+            }
+        } catch (err) { console.error(err); } finally { setSavedLoading(false); }
+    };
+
+    const handleUnsave = async (tutorId) => {
+        try {
+            await fetch(`/api/saved-tutors?studentId=${studentId}&tutorId=${tutorId}`, { method: "DELETE" });
+            setSavedTutors(prev => prev.filter(t => t.id !== tutorId));
+        } catch (err) { console.error(err); }
     };
 
     const handleCancelTrial = async (trialId) => {
@@ -245,6 +269,7 @@ function StudentDashboardContent() {
         { id: "HOME", label: "Dashboard", icon: LayoutDashboard },
         { id: "REQUIREMENTS", label: "My Requirements", icon: Briefcase },
         { id: "MATCHES", label: "Tutor Matches", icon: Users },
+        { id: "SAVED", label: "Saved Tutors", icon: Bookmark },
         { id: "TRIALS", label: "Trial Classes", icon: Clock },
         { id: "CHAT", label: "Messages", icon: MessageCircle },
         { id: "CONTACTS", label: "Contacts", icon: ShieldCheck },
@@ -338,9 +363,14 @@ function StudentDashboardContent() {
                                         </h1>
                                         <p className="text-gray-500 text-sm">Track your requirements and connect with tutors.</p>
                                     </div>
-                                    <Link href="/post-requirement" className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold text-sm shadow-sm hover:bg-blue-700 transition-all h-fit">
-                                        <Briefcase size={16} /> Post a Requirement
-                                    </Link>
+                                    <div className="flex flex-wrap items-center gap-3 h-fit">
+                                        <Link href="/search" className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold text-sm shadow-sm hover:bg-blue-700 transition-all">
+                                            <Search size={16} /> Find a Tutor
+                                        </Link>
+                                        <Link href="/post-requirement" className="flex items-center gap-2 px-6 py-3 bg-white border border-gray-200 text-gray-700 rounded-xl font-semibold text-sm hover:bg-gray-50 transition-all">
+                                            <Briefcase size={16} /> Post a Requirement
+                                        </Link>
+                                    </div>
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -699,6 +729,86 @@ function StudentDashboardContent() {
                                         </tbody>
                                     </table>
                                 </div>
+                            </div>
+                        )}
+
+                        {activeTab === "SAVED" && (
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Saved Tutors</h2>
+                                        <p className="text-sm text-gray-500 mt-1">Tutors you have bookmarked for later</p>
+                                    </div>
+                                    <Link href="/search" className="text-sm font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1">
+                                        <Search size={14} /> Find More
+                                    </Link>
+                                </div>
+
+                                {savedLoading ? (
+                                    <div className="flex items-center justify-center py-16">
+                                        <Loader2 size={24} className="animate-spin text-blue-400" />
+                                    </div>
+                                ) : savedTutors.length === 0 ? (
+                                    <div className="bg-white border border-gray-200 rounded-xl p-12 text-center">
+                                        <div className="w-14 h-14 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <Bookmark size={24} className="text-blue-400" />
+                                        </div>
+                                        <h3 className="text-base font-semibold text-gray-700 mb-1">No saved tutors yet</h3>
+                                        <p className="text-sm text-gray-400 mb-5">When you find a tutor you like, tap the bookmark icon on their profile to save them here.</p>
+                                        <Link href="/search"
+                                            className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors">
+                                            Browse Tutors
+                                        </Link>
+                                    </div>
+                                ) : (
+                                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        {savedTutors.map(tutor => (
+                                            <div key={tutor.id} className="bg-white border border-gray-200 rounded-xl p-5 space-y-3">
+                                                <div className="flex items-start gap-3">
+                                                    {tutor.image ? (
+                                                        <img src={tutor.image} alt={tutor.name} className="size-12 rounded-full object-cover shrink-0" />
+                                                    ) : (
+                                                        <div className="size-12 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+                                                            <GraduationCap size={20} className="text-blue-600" />
+                                                        </div>
+                                                    )}
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex items-center gap-1.5 flex-wrap">
+                                                            <p className="font-semibold text-gray-900 text-sm">{tutor.name}</p>
+                                                            {tutor.isVerified && <CheckCircle2 size={13} className="text-blue-600 shrink-0" />}
+                                                        </div>
+                                                        {tutor.tutorListing?.subjects?.length > 0 && (
+                                                            <p className="text-xs text-gray-500 mt-0.5">{tutor.tutorListing.subjects.slice(0, 2).join(", ")}</p>
+                                                        )}
+                                                        {tutor.tutorListing?.locations?.length > 0 && (
+                                                            <p className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
+                                                                <MapPin size={11} /> {tutor.tutorListing.locations[0]}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                {tutor.tutorListing?.hourlyRate && (
+                                                    <p className="text-sm font-semibold text-gray-900">₹{tutor.tutorListing.hourlyRate}<span className="font-normal text-gray-400 text-xs">/hr</span></p>
+                                                )}
+                                                <div className="flex gap-2 pt-1">
+                                                    <Link
+                                                        href={`/search/${tutor.id}`}
+                                                        className="flex-1 text-center py-2 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+                                                    >
+                                                        View Profile
+                                                    </Link>
+                                                    <button
+                                                        onClick={() => handleUnsave(tutor.id)}
+                                                        className="px-3 py-2 border border-gray-200 text-gray-400 text-xs rounded-lg hover:border-red-200 hover:text-red-500 transition-colors"
+                                                        title="Remove from saved"
+                                                    >
+                                                        <Bookmark size={13} className="fill-current" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         )}
 

@@ -70,6 +70,7 @@ function DashboardContent() {
     const [trials, setTrials] = useState([]);
     const [trialLoading, setTrialLoading] = useState(false);
     const [trialActionLoading, setTrialActionLoading] = useState(null);
+    const [paymentStatus, setPaymentStatus] = useState(null); // { type: "success"|"failed"|"dismissed", label, retryFn }
 
     useEffect(() => {
         const savedId = localStorage.getItem("ti_active_tutor_id");
@@ -256,7 +257,9 @@ function DashboardContent() {
                         trackPurchase(pack.price / 100, "INR", `${pack.credits} Credits`);
                         fetchTutorData();
                         fetchTransactions();
-                        alert(`${pack.credits} credits added successfully!`);
+                        setPaymentStatus({ type: "success", label: `${pack.credits} credits added to your account.` });
+                    } else {
+                        setPaymentStatus({ type: "failed", label: "Payment could not be verified. Contact support if credits were deducted.", retryFn: () => handleCreditPurchase(pack) });
                     }
                 },
                 prefill: {
@@ -264,14 +267,20 @@ function DashboardContent() {
                     email: tutorData?.email || "",
                     contact: tutorData?.phone || ""
                 },
-                theme: { color: "#2563EB" }
+                theme: { color: "#2563EB" },
+                modal: {
+                    ondismiss: () => {
+                        setPaymentStatus({ type: "dismissed", label: `Payment for ${pack.credits} credits was not completed.`, retryFn: () => handleCreditPurchase(pack) });
+                        setProcessingPayment(null);
+                    }
+                }
             };
 
             const rzp = new window.Razorpay(options);
             rzp.open();
         } catch (err) {
             console.error(err);
-            alert("Something went wrong. Please try again.");
+            setPaymentStatus({ type: "failed", label: "Could not open payment window. Please try again." });
         } finally {
             setProcessingPayment(null);
         }
@@ -326,7 +335,9 @@ function DashboardContent() {
                         });
                         fetchActiveAds();
                         fetchTransactions();
-                        alert("Your profile is now featured! You will appear at the top of search results.");
+                        setPaymentStatus({ type: "success", label: "Your profile is now featured! You will appear at the top of search results." });
+                    } else {
+                        setPaymentStatus({ type: "failed", label: "Payment could not be verified. Contact support if amount was deducted.", retryFn: () => handleFeaturedPurchase(option) });
                     }
                 },
                 prefill: {
@@ -334,14 +345,20 @@ function DashboardContent() {
                     email: tutorData?.email || "",
                     contact: tutorData?.phone || ""
                 },
-                theme: { color: "#2563EB" }
+                theme: { color: "#2563EB" },
+                modal: {
+                    ondismiss: () => {
+                        setPaymentStatus({ type: "dismissed", label: `Payment for featured listing (${option.label}) was not completed.`, retryFn: () => handleFeaturedPurchase(option) });
+                        setProcessingPayment(null);
+                    }
+                }
             };
 
             const rzp = new window.Razorpay(options);
             rzp.open();
         } catch (err) {
             console.error(err);
-            alert("Something went wrong. Please try again.");
+            setPaymentStatus({ type: "failed", label: "Could not open payment window. Please try again." });
         } finally {
             setProcessingPayment(null);
         }
@@ -389,7 +406,9 @@ function DashboardContent() {
                     if (result.success) {
                         fetchTutorData();
                         fetchTransactions();
-                        alert(`You are now on the ${tier} plan! ${plan.credits} credits added.`);
+                        setPaymentStatus({ type: "success", label: `You are now on the ${tier} plan! ${plan.credits} credits added.` });
+                    } else {
+                        setPaymentStatus({ type: "failed", label: "Payment could not be verified. Contact support if amount was deducted.", retryFn: () => handleSubscriptionPurchase(tier) });
                     }
                 },
                 prefill: {
@@ -397,14 +416,20 @@ function DashboardContent() {
                     email: tutorData?.email || "",
                     contact: tutorData?.phone || ""
                 },
-                theme: { color: "#2563EB" }
+                theme: { color: "#2563EB" },
+                modal: {
+                    ondismiss: () => {
+                        setPaymentStatus({ type: "dismissed", label: `Payment for ${tier} plan was not completed.`, retryFn: () => handleSubscriptionPurchase(tier) });
+                        setProcessingPayment(null);
+                    }
+                }
             };
 
             const rzp = new window.Razorpay(options);
             rzp.open();
         } catch (err) {
             console.error(err);
-            alert("Something went wrong. Please try again.");
+            setPaymentStatus({ type: "failed", label: "Could not open payment window. Please try again." });
         } finally {
             setProcessingPayment(null);
         }
@@ -513,6 +538,24 @@ function DashboardContent() {
                 <main className="flex-1 ml-20 md:ml-64 p-6 md:p-10">
                     <div className="max-w-6xl mx-auto">
 
+                        {/* Payment status banner */}
+                        {paymentStatus && (
+                            <div className={`mb-6 flex items-start gap-4 p-4 rounded-2xl border ${paymentStatus.type === "success" ? "bg-green-50 border-green-200" : "bg-amber-50 border-amber-200"}`}>
+                                <div className="flex-1 min-w-0">
+                                    <p className={`text-sm font-semibold ${paymentStatus.type === "success" ? "text-green-800" : "text-amber-800"}`}>
+                                        {paymentStatus.type === "success" ? "Payment successful" : paymentStatus.type === "failed" ? "Payment failed" : "Payment not completed"}
+                                    </p>
+                                    <p className={`text-sm mt-0.5 ${paymentStatus.type === "success" ? "text-green-700" : "text-amber-700"}`}>{paymentStatus.label}</p>
+                                    {paymentStatus.retryFn && (
+                                        <button onClick={() => { setPaymentStatus(null); paymentStatus.retryFn(); }} className="mt-2 text-xs font-semibold text-blue-600 hover:underline">
+                                            Try again
+                                        </button>
+                                    )}
+                                </div>
+                                <button onClick={() => setPaymentStatus(null)} className="text-gray-400 hover:text-gray-600 shrink-0 text-lg leading-none">&times;</button>
+                            </div>
+                        )}
+
                         {activeTab === "HOME" && (
                             <div className="space-y-8">
                                 <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
@@ -544,6 +587,53 @@ function DashboardContent() {
                                         </div>
                                     ))}
                                 </div>
+
+                                {/* Profile Completeness Score */}
+                                {tutorData && (() => {
+                                    const listing = tutorData.tutorListing;
+                                    const checks = [
+                                        { label: "Add your name", done: !!tutorData.name, action: () => setActiveTab("SETTINGS") },
+                                        { label: "Upload a profile photo", done: !!tutorData.image, action: () => setActiveTab("SETTINGS") },
+                                        { label: "Add your email", done: !!tutorData.email, action: () => setActiveTab("SETTINGS") },
+                                        { label: "Write a bio (50+ chars)", done: !!(listing?.bio && listing.bio.length >= 50), action: () => setActiveTab("SETTINGS") },
+                                        { label: "Add subjects you teach", done: !!(listing?.subjects && listing.subjects.length > 0), action: () => setActiveTab("SETTINGS") },
+                                        { label: "Set your hourly rate", done: !!(listing?.rate && listing.rate > 0), action: () => setActiveTab("SETTINGS") },
+                                        { label: "Add your experience", done: !!(listing?.experience && listing.experience > 0), action: () => setActiveTab("SETTINGS") },
+                                        { label: "Get verified", done: !!tutorData.isVerified, action: null },
+                                    ];
+                                    const done = checks.filter(c => c.done).length;
+                                    const pct = Math.round((done / checks.length) * 100);
+                                    const missing = checks.filter(c => !c.done);
+                                    if (pct === 100) return null;
+                                    return (
+                                        <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
+                                            <div className="flex items-center justify-between mb-3">
+                                                <div>
+                                                    <h3 className="text-base font-bold text-gray-900">Profile completeness</h3>
+                                                    <p className="text-xs text-gray-400 mt-0.5">Complete your profile to appear higher in search results</p>
+                                                </div>
+                                                <span className="text-2xl font-bold text-blue-600">{pct}%</span>
+                                            </div>
+                                            <div className="w-full bg-gray-100 rounded-full h-2 mb-4">
+                                                <div className="bg-blue-600 h-2 rounded-full transition-all" style={{ width: `${pct}%` }} />
+                                            </div>
+                                            <div className="space-y-2">
+                                                {missing.slice(0, 4).map((item, i) => (
+                                                    <div key={i} className="flex items-center gap-3">
+                                                        <div className="size-4 rounded-full border-2 border-gray-300 shrink-0" />
+                                                        <span className="text-sm text-gray-600 flex-1">{item.label}</span>
+                                                        {item.action && (
+                                                            <button onClick={item.action} className="text-xs font-semibold text-blue-600 hover:underline">Fix</button>
+                                                        )}
+                                                        {!item.action && (
+                                                            <a href="mailto:support@tuitionsinindia.com?subject=Verification Documents" className="text-xs font-semibold text-blue-600 hover:underline">Request</a>
+                                                        )}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
 
                                 {/* Verification Guide — shown only when not verified */}
                                 {!tutorData?.isVerified && (
