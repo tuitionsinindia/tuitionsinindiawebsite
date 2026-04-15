@@ -509,6 +509,32 @@ function DashboardContent() {
                                     </div>
                                 )}
 
+                                {/* Onboarding guide for new tutors */}
+                                {leads.length === 0 && (tutorData?.credits || 0) === 0 && (
+                                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-6">
+                                        <h3 className="text-base font-bold text-gray-900 mb-1">How to get your first student</h3>
+                                        <p className="text-sm text-gray-500 mb-5">Follow these steps to start receiving enquiries.</p>
+                                        <div className="space-y-3">
+                                            {[
+                                                { step: "1", title: "Buy credits", desc: "Credits let you unlock student contact details.", action: () => setActiveTab("BILLING"), label: "Buy credits", color: "bg-blue-600" },
+                                                { step: "2", title: "Browse student leads", desc: "Find students looking for tutors in your subject.", action: () => setActiveTab("LEADS"), label: "View leads", color: "bg-indigo-600" },
+                                                { step: "3", title: "Enable free trial", desc: "Offer a free 30-min class to attract more students.", action: () => setActiveTab("SETTINGS"), label: "Enable trial", color: "bg-emerald-600" },
+                                            ].map(item => (
+                                                <div key={item.step} className="bg-white rounded-xl p-4 flex items-center gap-4 shadow-sm">
+                                                    <div className={`size-8 rounded-full ${item.color} text-white text-sm font-bold flex items-center justify-center shrink-0`}>{item.step}</div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="text-sm font-semibold text-gray-900">{item.title}</p>
+                                                        <p className="text-xs text-gray-400">{item.desc}</p>
+                                                    </div>
+                                                    <button onClick={item.action} className={`px-3 py-1.5 ${item.color} text-white text-xs font-semibold rounded-lg hover:opacity-90 transition-opacity shrink-0`}>
+                                                        {item.label}
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
                                 {/* Buy Credits Section */}
                                 <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
                                     <div className="flex items-center gap-3 mb-5">
@@ -703,13 +729,28 @@ function DashboardContent() {
                                             <p className="text-gray-900 font-medium mb-4 leading-relaxed line-clamp-3">{lead.description}</p>
 
                                             {lead.isUnlocked ? (
-                                                <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 flex items-center gap-4">
-                                                    <div className="size-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold">{lead.student?.name?.[0]?.toUpperCase()}</div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <h4 className="font-bold text-gray-900 text-sm">{lead.student?.name?.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(" ")}</h4>
-                                                        <p className="text-xs text-gray-400">Contact unlocked</p>
+                                                <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100 space-y-3">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="size-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold shrink-0">{lead.student?.name?.[0]?.toUpperCase()}</div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <h4 className="font-bold text-gray-900 text-sm">{lead.student?.name?.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(" ")}</h4>
+                                                            <p className="text-xs text-emerald-600 font-medium">Contact unlocked</p>
+                                                        </div>
                                                     </div>
-                                                    <button
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {lead.student?.phone && lead.student.phone !== "Hidden" && (
+                                                            <a href={`tel:${lead.student.phone}`}
+                                                                className="flex items-center gap-1.5 px-3 py-2 bg-white border border-emerald-200 text-emerald-700 text-xs font-semibold rounded-lg hover:bg-emerald-100 transition-colors">
+                                                                <Phone size={12} /> {lead.student.phone}
+                                                            </a>
+                                                        )}
+                                                        {lead.student?.phone && lead.student.phone !== "Hidden" && (
+                                                            <a href={`https://wa.me/91${lead.student.phone.replace(/\D/g, "")}`} target="_blank" rel="noreferrer"
+                                                                className="flex items-center gap-1.5 px-3 py-2 bg-white border border-green-200 text-green-700 text-xs font-semibold rounded-lg hover:bg-green-50 transition-colors">
+                                                                WhatsApp
+                                                            </a>
+                                                        )}
+                                                        <button
                                                         onClick={async () => {
                                                             setLoadingChat(true);
                                                             try {
@@ -728,10 +769,11 @@ function DashboardContent() {
                                                                 }
                                                             } catch (err) { console.error(err); } finally { setLoadingChat(false); }
                                                         }}
-                                                        className="size-10 bg-blue-600 text-white rounded-xl flex items-center justify-center hover:bg-blue-700 transition-all"
+                                                        className="flex items-center gap-1.5 px-3 py-2 bg-white border border-blue-200 text-blue-700 text-xs font-semibold rounded-lg hover:bg-blue-50 transition-colors"
                                                     >
-                                                        {loadingChat ? <Loader2 className="animate-spin" size={16} /> : <MessageCircle size={16} />}
+                                                        {loadingChat ? <Loader2 className="animate-spin" size={12} /> : <><MessageCircle size={12} /> Message</>}
                                                     </button>
+                                                    </div>
                                                 </div>
                                             ) : (
                                                 <div className="flex items-center justify-between gap-4 pt-4 border-t border-gray-50">

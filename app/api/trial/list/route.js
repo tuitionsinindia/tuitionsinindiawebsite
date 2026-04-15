@@ -15,7 +15,7 @@ export async function GET(request) {
             trials = await prisma.trialBooking.findMany({
                 where: { studentId: session.id },
                 include: {
-                    tutor: { select: { id: true, name: true, image: true } },
+                    tutor: { select: { id: true, name: true, image: true, phone: true } },
                 },
                 orderBy: { createdAt: "desc" },
             });
