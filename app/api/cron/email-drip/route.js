@@ -35,6 +35,12 @@ export async function GET(req) {
     let sent = { day3Student: 0, day3Tutor: 0, day7Student: 0, day7Tutor: 0, reEngagement: 0 };
 
     try {
+        // Helper to check if user has unsubscribed from marketing emails
+        const isUnsubscribed = (prefs) => {
+            try { return (typeof prefs === "string" ? JSON.parse(prefs) : prefs)?.unsubscribed === true; }
+            catch { return false; }
+        };
+
         // ── Day 3 Students ───────────────────────────────────────────────
         const day3Students = await prisma.user.findMany({
             where: {
@@ -42,11 +48,14 @@ export async function GET(req) {
                 email: { not: null },
                 createdAt: { gte: day3Window, lte: day3Ago },
             },
-            select: { email: true, name: true },
+            select: { id: true, email: true, name: true, notificationPrefs: true },
             take: 100,
         });
         for (const u of day3Students) {
-            if (u.email) { await sendStudentDay3Email(u.email, u.name || "Student"); sent.day3Student++; }
+            if (u.email && !isUnsubscribed(u.notificationPrefs)) {
+                await sendStudentDay3Email(u.email, u.name || "Student", u.id);
+                sent.day3Student++;
+            }
         }
 
         // ── Day 3 Tutors ─────────────────────────────────────────────────
@@ -56,11 +65,14 @@ export async function GET(req) {
                 email: { not: null },
                 createdAt: { gte: day3Window, lte: day3Ago },
             },
-            select: { email: true, name: true },
+            select: { id: true, email: true, name: true, notificationPrefs: true },
             take: 100,
         });
         for (const u of day3Tutors) {
-            if (u.email) { await sendTutorDay3Email(u.email, u.name || "Tutor"); sent.day3Tutor++; }
+            if (u.email && !isUnsubscribed(u.notificationPrefs)) {
+                await sendTutorDay3Email(u.email, u.name || "Tutor", u.id);
+                sent.day3Tutor++;
+            }
         }
 
         // ── Day 7 Students ───────────────────────────────────────────────
@@ -71,11 +83,14 @@ export async function GET(req) {
                 email: { not: null },
                 createdAt: { gte: day7Window, lte: day7Ago },
             },
-            select: { email: true, name: true },
+            select: { id: true, email: true, name: true, notificationPrefs: true },
             take: 100,
         });
         for (const u of day7Students) {
-            if (u.email) { await sendStudentDay7Email(u.email, u.name || "Student", tutorCount); sent.day7Student++; }
+            if (u.email && !isUnsubscribed(u.notificationPrefs)) {
+                await sendStudentDay7Email(u.email, u.name || "Student", tutorCount, u.id);
+                sent.day7Student++;
+            }
         }
 
         // ── Day 7 Tutors ─────────────────────────────────────────────────
@@ -85,11 +100,14 @@ export async function GET(req) {
                 email: { not: null },
                 createdAt: { gte: day7Window, lte: day7Ago },
             },
-            select: { email: true, name: true },
+            select: { id: true, email: true, name: true, notificationPrefs: true },
             take: 100,
         });
         for (const u of day7Tutors) {
-            if (u.email) { await sendTutorDay7Email(u.email, u.name || "Tutor"); sent.day7Tutor++; }
+            if (u.email && !isUnsubscribed(u.notificationPrefs)) {
+                await sendTutorDay7Email(u.email, u.name || "Tutor", u.id);
+                sent.day7Tutor++;
+            }
         }
 
         // ── 14-day Re-engagement (students who haven't had activity) ─────
@@ -100,15 +118,16 @@ export async function GET(req) {
                 updatedAt: { lte: day14Ago },
                 createdAt: { lte: day14Ago },
             },
-            select: { email: true, name: true },
+            select: { id: true, email: true, name: true, notificationPrefs: true },
             take: 50,
         });
         for (const u of inactiveStudents) {
+            if (!u.email || isUnsubscribed(u.notificationPrefs)) continue;
             const newTutors = await prisma.listing.count({
                 where: { isActive: true, createdAt: { gte: day14Ago } },
             });
-            if (u.email && newTutors > 0) {
-                await sendReEngagementEmail(u.email, u.name || "Student", newTutors);
+            if (newTutors > 0) {
+                await sendReEngagementEmail(u.email, u.name || "Student", newTutors, u.id);
                 sent.reEngagement++;
             }
         }

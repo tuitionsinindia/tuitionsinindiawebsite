@@ -4,12 +4,29 @@ import { useState } from "react";
 import { Mail, Phone, MapPin, Send, CheckCircle2, MessageSquare } from "lucide-react";
 
 export default function ContactPage() {
-    const [formState, setFormState] = useState("idle"); // idle, submitting, success
+    const [formState, setFormState] = useState("idle"); // idle, submitting, success, error
+    const [errorMsg, setErrorMsg] = useState("");
+    const [fields, setFields] = useState({ name: "", email: "", topic: "Finding a tutor", message: "" });
+
+    const set = (key) => (e) => setFields((f) => ({ ...f, [key]: e.target.value }));
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setFormState("submitting");
-        setTimeout(() => setFormState("success"), 1500);
+        setErrorMsg("");
+        try {
+            const res = await fetch("/api/contact", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name: fields.name, email: fields.email, subject: fields.topic, message: fields.message }),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Something went wrong.");
+            setFormState("success");
+        } catch (err) {
+            setErrorMsg(err.message || "Something went wrong. Please try again.");
+            setFormState("error");
+        }
     };
 
     return (
@@ -36,7 +53,7 @@ export default function ContactPage() {
                                 <h2 className="text-xl font-bold text-gray-900 mb-2">Message sent</h2>
                                 <p className="text-gray-500 mb-6">We'll reply to you within 24 hours.</p>
                                 <button
-                                    onClick={() => setFormState("idle")}
+                                    onClick={() => { setFormState("idle"); setFields({ name: "", email: "", topic: "Finding a tutor", message: "" }); }}
                                     className="text-blue-600 font-semibold text-sm hover:underline"
                                 >
                                     Send another message
@@ -44,11 +61,18 @@ export default function ContactPage() {
                             </div>
                         ) : (
                             <form onSubmit={handleSubmit} className="space-y-5">
+                                {formState === "error" && (
+                                    <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-red-700 text-sm">
+                                        {errorMsg}
+                                    </div>
+                                )}
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 mb-1.5">Your name</label>
                                     <input
                                         required
                                         type="text"
+                                        value={fields.name}
+                                        onChange={set("name")}
                                         placeholder="e.g. Priya Sharma"
                                         className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
                                     />
@@ -59,13 +83,19 @@ export default function ContactPage() {
                                         <input
                                             required
                                             type="email"
+                                            value={fields.email}
+                                            onChange={set("email")}
                                             placeholder="priya@example.com"
                                             className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
                                         />
                                     </div>
                                     <div>
                                         <label className="block text-sm font-semibold text-gray-700 mb-1.5">What do you need help with?</label>
-                                        <select className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors">
+                                        <select
+                                            value={fields.topic}
+                                            onChange={set("topic")}
+                                            className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+                                        >
                                             <option>Finding a tutor</option>
                                             <option>Listing as a tutor</option>
                                             <option>Billing or credits</option>
@@ -79,6 +109,8 @@ export default function ContactPage() {
                                     <textarea
                                         required
                                         rows="5"
+                                        value={fields.message}
+                                        onChange={set("message")}
                                         placeholder="Tell us what you need help with..."
                                         className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors resize-none"
                                     ></textarea>

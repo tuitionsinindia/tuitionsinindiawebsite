@@ -32,24 +32,59 @@ function AdminDashboardContent() {
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState("overview");
 
+    // Admin key gate
+    const [adminKey, setAdminKey] = useState("");
+    const [keyInput, setKeyInput] = useState("");
+    const [keyError, setKeyError] = useState("");
+    const [keyLoading, setKeyLoading] = useState(false);
+
     // Users tab state
     const [users, setUsers] = useState([]);
     const [usersLoading, setUsersLoading] = useState(false);
     const [userSearch, setUserSearch] = useState("");
     const [userActionLoading, setUserActionLoading] = useState(null);
 
+    // On mount, check sessionStorage for saved key
     useEffect(() => {
-        fetchMetrics();
+        const saved = sessionStorage.getItem("adminKey");
+        if (saved) setAdminKey(saved);
+        else setLoading(false);
     }, []);
 
     useEffect(() => {
-        if (activeTab === "users") fetchUsers();
+        if (adminKey) fetchMetrics(adminKey);
+    }, [adminKey]);
+
+    useEffect(() => {
+        if (activeTab === "users" && adminKey) fetchUsers(userSearch, adminKey);
     }, [activeTab]);
 
-    const fetchMetrics = async () => {
+    const handleKeySubmit = async (e) => {
+        e.preventDefault();
+        setKeyError("");
+        setKeyLoading(true);
+        try {
+            const res = await fetch("/api/admin/metrics", { headers: { "x-admin-key": keyInput } });
+            if (res.status === 401) {
+                setKeyError("Incorrect admin key. Please try again.");
+                setKeyLoading(false);
+                return;
+            }
+            sessionStorage.setItem("adminKey", keyInput);
+            setAdminKey(keyInput);
+        } catch {
+            setKeyError("Could not connect. Please try again.");
+        } finally {
+            setKeyLoading(false);
+        }
+    };
+
+    const adminHeaders = (key) => ({ "x-admin-key": key || adminKey, "Content-Type": "application/json" });
+
+    const fetchMetrics = async (key) => {
         setLoading(true);
         try {
-            const res = await fetch("/api/admin/metrics");
+            const res = await fetch("/api/admin/metrics", { headers: { "x-admin-key": key || adminKey } });
             const json = await res.json();
             if (json.success) {
                 setData(json);
@@ -61,11 +96,11 @@ function AdminDashboardContent() {
         }
     };
 
-    const fetchUsers = async (search = userSearch) => {
+    const fetchUsers = async (search = userSearch, key = adminKey) => {
         setUsersLoading(true);
         try {
             const params = new URLSearchParams({ search });
-            const res = await fetch(`/api/admin/users?${params}`);
+            const res = await fetch(`/api/admin/users?${params}`, { headers: { "x-admin-key": key } });
             const json = await res.json();
             if (json.success) setUsers(json.users || []);
         } catch (err) {
@@ -80,7 +115,7 @@ function AdminDashboardContent() {
         try {
             const res = await fetch("/api/admin/user/suspend", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: adminHeaders(),
                 body: JSON.stringify({ userId, suspend }),
             });
             const json = await res.json();
@@ -100,7 +135,7 @@ function AdminDashboardContent() {
         try {
             const res = await fetch("/api/admin/user/credits", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: adminHeaders(),
                 body: JSON.stringify({ userId, amount }),
             });
             const json = await res.json();
@@ -130,7 +165,7 @@ function AdminDashboardContent() {
         try {
             const res = await fetch("/api/admin/tutor/approve", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: adminHeaders(),
                 body: JSON.stringify({ tutorId, isApproved: true })
             });
             const json = await res.json();
@@ -143,6 +178,44 @@ function AdminDashboardContent() {
             fetchMetrics();
         }
     };
+
+    // Show key entry gate if not authenticated
+    if (!adminKey) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center px-6">
+                <div className="bg-white border border-gray-200 rounded-2xl p-8 w-full max-w-sm shadow-sm">
+                    <div className="mb-6 text-center">
+                        <Logo />
+                        <p className="text-gray-500 text-sm mt-3">Admin access only. Enter your admin key to continue.</p>
+                    </div>
+                    <form onSubmit={handleKeySubmit} className="space-y-4">
+                        {keyError && (
+                            <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-red-700 text-sm">{keyError}</div>
+                        )}
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Admin key</label>
+                            <input
+                                type="password"
+                                value={keyInput}
+                                onChange={(e) => setKeyInput(e.target.value)}
+                                required
+                                autoFocus
+                                placeholder="Enter admin key"
+                                className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+                            />
+                        </div>
+                        <button
+                            type="submit"
+                            disabled={keyLoading || !keyInput}
+                            className="w-full py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50"
+                        >
+                            {keyLoading ? "Verifying..." : "Continue"}
+                        </button>
+                    </form>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="flex h-screen bg-gray-50 font-sans text-gray-900 overflow-hidden">
@@ -193,7 +266,7 @@ function AdminDashboardContent() {
 
                 <div className="p-4 border-t border-gray-100">
                     <button
-                        onClick={() => router.push("/")}
+                        onClick={() => { sessionStorage.removeItem("adminKey"); router.push("/"); }}
                         className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white text-red-500 border border-gray-200 hover:bg-red-50 hover:border-red-100 rounded-xl transition-all font-semibold text-sm"
                     >
                         <LogOut size={14} strokeWidth={2} />
@@ -420,7 +493,7 @@ function AdminDashboardContent() {
                                                         onClick={async () => {
                                                             if (!confirm(`Reject ${tutor.name}?`)) return;
                                                             setData(prev => ({ ...prev, pendingTutors: prev.pendingTutors.filter(t => t.id !== tutor.id) }));
-                                                            await fetch("/api/admin/tutor/approve", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ tutorId: tutor.id, isApproved: false }) });
+                                                            await fetch("/api/admin/tutor/approve", { method: "POST", headers: adminHeaders(), body: JSON.stringify({ tutorId: tutor.id, isApproved: false }) });
                                                         }}
                                                         className="px-4 py-2 bg-white text-red-500 border border-red-100 text-sm font-semibold rounded-xl hover:bg-red-50 transition-all flex items-center gap-1.5"
                                                     >

@@ -40,5 +40,23 @@ ssh -o StrictHostKeyChecking=no ${VPS_USER}@${VPS_HOST} "
   crontab -l | grep -E 'drip|credits'
 "
 
+echo "🔍 Step 5: Checking required env vars on VPS..."
+ssh -o StrictHostKeyChecking=no ${VPS_USER}@${VPS_HOST} "
+  ENV_FILE=${APP_DIR}/.env.production
+  MISSING=()
+  for VAR in GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET NEXT_PUBLIC_BASE_URL CRON_SECRET AUDIT_SEED_KEY RESEND_API_KEY JWT_SECRET; do
+    if ! grep -q \"^\${VAR}=\" \"\$ENV_FILE\" 2>/dev/null || grep -q \"^\${VAR}=$\" \"\$ENV_FILE\" 2>/dev/null; then
+      MISSING+=(\"\$VAR\")
+    fi
+  done
+  if [ \${#MISSING[@]} -gt 0 ]; then
+    echo '⚠️  Missing or empty env vars in .env.production:'
+    for V in \"\${MISSING[@]}\"; do echo \"   - \$V\"; done
+    echo '   Add these to ${APP_DIR}/.env.production on the VPS.'
+  else
+    echo '✅ All required env vars are set.'
+  fi
+"
+
 echo "✅ Deployment complete! Monitoring logs..."
 ssh -o StrictHostKeyChecking=no ${VPS_USER}@${VPS_HOST} "docker logs --tail 50 tuitionsinindia-web"
