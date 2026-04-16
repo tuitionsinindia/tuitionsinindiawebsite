@@ -41,3 +41,18 @@ yarn-error.log*
 next-env.d.ts
 
 /app/generated/prisma
+
+# Business documents (keep locally, do not commit)
+*.pdf
+*.docx
+*.pptx
+*.html
+*.log
+*.json.old
+test-e2e.mjs
+TuitionsInIndia_*.html
+
+# Dev scratch files
+scratch/
+stitch-export/
+mobile-app/

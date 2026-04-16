@@ -25,6 +25,7 @@ import { BROAD_CATEGORIES, getSubjectsForCategory } from "@/lib/subjects";
 export default function TutorListingForm({ user, onComplete }) {
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
+    const [error, setError] = useState("");
     const [step, setStep] = useState(1); // 1: Profile, 2: Subjects, 3: Availability
     const [isDetecting, setIsDetecting] = useState(false);
 
@@ -86,6 +87,7 @@ export default function TutorListingForm({ user, onComplete }) {
     const handleSubmit = async (e) => {
         if (e) e.preventDefault();
         setLoading(true);
+        setError("");
         try {
             const res = await fetch("/api/tutor/profile/update", {
                 method: "POST",
@@ -98,9 +100,12 @@ export default function TutorListingForm({ user, onComplete }) {
             if (res.ok) {
                 setSuccess(true);
                 setTimeout(() => onComplete(), 2000);
+            } else {
+                const data = await res.json().catch(() => ({}));
+                setError(data.error || "Something went wrong. Please try again.");
             }
-        } catch (error) {
-            console.error("Failed to update profile:", error);
+        } catch {
+            setError("Could not connect to the server. Please check your internet and try again.");
         } finally {
             setLoading(false);
         }
@@ -487,6 +492,11 @@ export default function TutorListingForm({ user, onComplete }) {
                         )}
                     </div>
 
+                    {error && (
+                        <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-xl px-4 py-3 text-center">
+                            {error}
+                        </p>
+                    )}
                     <button
                         disabled={loading}
                         onClick={handleSubmit}
