@@ -300,7 +300,7 @@ export default function AIMatchingFlow() {
                                                 </div>
 
                                                 <div className="bg-white p-5 rounded-xl border border-blue-100">
-                                                    <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Why we matched you</h4>
+                                                    <h4 className="text-xs font-semibold text-gray-500 mb-3">Why we matched you</h4>
                                                     <ul className="space-y-2">
                                                         {aiResults[0].matchReasons.map((reason, idx) => (
                                                             <li key={idx} className="flex items-start gap-3 text-sm text-gray-700 font-medium leading-snug">

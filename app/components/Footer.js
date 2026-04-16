@@ -24,7 +24,7 @@ export default function Footer() {
                     </div>
 
                     <div className="space-y-5">
-                        <h4 className="text-xs font-bold uppercase tracking-wide text-gray-900">Explore</h4>
+                        <h4 className="text-xs font-bold text-gray-900">Explore</h4>
                         <nav className="flex flex-col gap-3">
                             {[
                                 { name: "Find Tutors", href: "/search?role=TUTOR" },
@@ -45,7 +45,7 @@ export default function Footer() {
                     </div>
 
                     <div className="space-y-5">
-                        <h4 className="text-xs font-bold uppercase tracking-wide text-gray-900">Resources</h4>
+                        <h4 className="text-xs font-bold text-gray-900">Resources</h4>
                         <nav className="flex flex-col gap-3">
                             {[
                                 { name: "Browse Categories", href: "/categories" },
@@ -66,7 +66,7 @@ export default function Footer() {
                     </div>
 
                     <div className="space-y-5">
-                        <h4 className="text-xs font-bold uppercase tracking-wide text-gray-900">Legal</h4>
+                        <h4 className="text-xs font-bold text-gray-900">Legal</h4>
                         <nav className="flex flex-col gap-3">
                             {[
                                 { name: "Privacy Policy", href: "/legal/privacy" },
@@ -86,7 +86,7 @@ export default function Footer() {
                     </div>
 
                     <div className="space-y-5">
-                        <h4 className="text-xs font-bold uppercase tracking-wide text-gray-900">Popular Cities</h4>
+                        <h4 className="text-xs font-bold text-gray-900">Popular Cities</h4>
                         <nav className="flex flex-col gap-3">
                             {[
                                 "Mumbai", "Delhi", "Bangalore", "Kolkata",

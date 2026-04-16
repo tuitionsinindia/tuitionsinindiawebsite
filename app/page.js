@@ -6,7 +6,7 @@ import Link from "next/link";
 import {
     Search, MapPin, ChevronDown, Star, ShieldCheck,
     MessageSquare, ArrowRight, CheckCircle2, Users,
-    GraduationCap, Zap, BookOpen, Phone
+    GraduationCap, Zap, BookOpen, Building2
 } from "lucide-react";
 import { ALL_SUBJECTS, BROAD_CATEGORIES, SUBJECT_CATEGORIES, getSubjectsForCategory, GRADE_OPTIONS, CITY_OPTIONS } from "../lib/subjects";
 
@@ -25,6 +25,28 @@ export default function Home() {
     const [openFaq, setOpenFaq] = useState(null);
 
     const isAcademics = searchCategory === "academics";
+
+    const heroContent = {
+        TUTOR: {
+            badge: "India's #1 Tutor Marketplace",
+            headline: <>Find the Right Tutor <span className="text-yellow-300">Near You</span></>,
+            subtitle: "Free to search. No commission. Connect directly with verified tutors for home tuition, online classes, or coaching centres across India.",
+            btnLabel: "Search Tutors",
+        },
+        STUDENT: {
+            badge: "Post a requirement — tutors come to you",
+            headline: <>Find Students <span className="text-yellow-300">for Your Subjects</span></>,
+            subtitle: "Create your tutor profile and get matched with students who need exactly what you teach. Free to list, zero commission.",
+            btnLabel: "Search Students",
+        },
+        INSTITUTE: {
+            badge: "India's #1 Tutor Marketplace",
+            headline: <>Find Coaching Centres <span className="text-yellow-300">Near You</span></>,
+            subtitle: "Browse verified coaching centres and institutes for any subject, exam, or skill — across 500+ cities in India.",
+            btnLabel: "Search Institutes",
+        },
+    };
+    const hero = heroContent[activeTab] || heroContent.TUTOR;
 
     // For academics: subjects come from the chosen school level; for others: filtered by broad category
     const availableSubjects = isAcademics
@@ -59,13 +81,13 @@ export default function Home() {
                 <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "url('/indian_hero.png')", backgroundSize: "cover", backgroundPosition: "center" }} />
                 <div className="relative max-w-5xl mx-auto px-4 text-center">
                     <span className="inline-block bg-white/20 text-white text-xs font-semibold px-4 py-1.5 rounded-full mb-5 tracking-wide">
-                        India's #1 Tutor Marketplace
+                        {hero.badge}
                     </span>
                     <h1 className="text-3xl md:text-5xl font-bold text-white mb-3 leading-tight">
-                        Find the Right Tutor <span className="text-yellow-300">Near You</span>
+                        {hero.headline}
                     </h1>
                     <p className="text-blue-100 text-sm md:text-base mb-6 max-w-xl mx-auto">
-                        Free to search. No commission. Connect directly with verified tutors for home tuition, online classes, or coaching centres across India.
+                        {hero.subtitle}
                     </p>
 
                     {/* Search Box */}
@@ -149,7 +171,7 @@ export default function Home() {
 
                             <button onClick={handleSearch}
                                 className="w-full h-11 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-blue-700 active:scale-95 transition-all flex items-center justify-center gap-2 shadow-md">
-                                <Search size={15} /> Search Tutors
+                                <Search size={15} /> {hero.btnLabel}
                             </button>
                         </div>
                     </div>
@@ -193,7 +215,7 @@ export default function Home() {
                         {[
                             { step: "1", title: "Search", desc: "Enter your subject, class level, and city to find matching tutors near you.", icon: Search },
                             { step: "2", title: "Compare", desc: "View profiles, ratings, and fees. Shortlist tutors that match your requirements.", icon: ShieldCheck },
-                            { step: "3", title: "Connect", desc: "Contact the tutor directly — no middlemen, no commission charges.", icon: Phone }
+                            { step: "3", title: "Connect", desc: "Contact the tutor directly — no middlemen, no commission charges.", icon: MessageSquare }
                         ].map((item, i) => (
                             <div key={i} className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex gap-4">
                                 <div className="w-10 h-10 rounded-xl bg-blue-600 text-white font-bold text-lg flex items-center justify-center shrink-0">
@@ -286,21 +308,46 @@ export default function Home() {
             </section>
 
             {/* ── CTA BANNER ── */}
-            <section className="py-12 px-4 bg-gray-900 text-white">
-                <div className="max-w-3xl mx-auto text-center">
-                    <h2 className="text-2xl md:text-3xl font-bold mb-3">Are You a Tutor?</h2>
-                    <p className="text-gray-400 text-sm mb-6 max-w-lg mx-auto">
-                        Join thousands of tutors already growing their student base on TuitionsInIndia. Create your free profile today.
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                        <Link href="/register/tutor"
-                            className="px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 transition-all flex items-center justify-center gap-2">
-                            Register as Tutor <ArrowRight size={16} />
-                        </Link>
-                        <Link href="/search"
-                            className="px-6 py-3 bg-white/10 text-white rounded-xl font-semibold text-sm hover:bg-white/20 transition-all flex items-center justify-center gap-2">
-                            Find a Tutor
-                        </Link>
+            <section className="py-14 px-4 bg-gray-900 text-white">
+                <div className="max-w-5xl mx-auto">
+                    <div className="text-center mb-10">
+                        <h2 className="text-2xl md:text-3xl font-bold">Get Started Today</h2>
+                        <p className="text-gray-400 text-sm mt-2">Join India's most trusted tuition marketplace — free for everyone.</p>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {[
+                            {
+                                icon: GraduationCap,
+                                title: "For Students",
+                                desc: "Find the perfect tutor for any subject, exam, or skill.",
+                                link: "/register/student",
+                                btnLabel: "Sign Up as Student"
+                            },
+                            {
+                                icon: Users,
+                                title: "For Tutors",
+                                desc: "Grow your teaching business. Get student enquiries directly.",
+                                link: "/register/tutor",
+                                btnLabel: "Sign Up as Tutor"
+                            },
+                            {
+                                icon: Building2,
+                                title: "For Institutes",
+                                desc: "List your coaching centre and reach students across India.",
+                                link: "/register/institute",
+                                btnLabel: "Sign Up as Institute"
+                            }
+                        ].map((item, i) => (
+                            <div key={i} className="bg-white/5 rounded-xl p-6 text-center">
+                                <item.icon size={28} className="mx-auto mb-3 text-yellow-300" strokeWidth={1.5} />
+                                <h3 className="font-semibold text-white mb-1 text-sm">{item.title}</h3>
+                                <p className="text-gray-400 text-xs leading-relaxed mb-4">{item.desc}</p>
+                                <Link href={item.link}
+                                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-blue-700 transition-colors">
+                                    {item.btnLabel} <ArrowRight size={14} />
+                                </Link>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </section>
@@ -308,26 +355,74 @@ export default function Home() {
             {/* ── FOOTER ── */}
             <footer className="bg-white border-t border-gray-100 py-10">
                 <div className="max-w-5xl mx-auto px-4">
-                    <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
-                        <Link href="/">
-                            <img src="/logo_minimal.png" alt="TuitionsInIndia" className="h-9 w-auto" />
-                        </Link>
-                        <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2">
-                            {[
-                                { label: "Find Tutors", href: "/search" },
-                                { label: "For Tutors", href: "/register/tutor" },
-                                { label: "Pricing", href: "/pricing" },
-                                { label: "Blog", href: "/blog" },
-                                { label: "Privacy Policy", href: "/legal/privacy" },
-                                { label: "Contact", href: "/contact" }
-                            ].map((link, i) => (
-                                <Link key={i} href={link.href} className="text-xs text-gray-500 hover:text-blue-600 transition-colors font-medium">{link.label}</Link>
-                            ))}
-                        </nav>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
+                        {/* Brand */}
+                        <div className="col-span-2 md:col-span-1">
+                            <Link href="/">
+                                <img src="/logo_minimal.png" alt="TuitionsInIndia" className="h-9 w-auto mb-3" />
+                            </Link>
+                            <p className="text-xs text-gray-400 leading-relaxed">India's most trusted tuition marketplace. Free to search, zero commission.</p>
+                        </div>
+
+                        {/* For Students */}
+                        <div>
+                            <h4 className="text-xs font-semibold text-gray-900 mb-3">For Students</h4>
+                            <div className="space-y-2">
+                                {[
+                                    { label: "Find Tutors", href: "/search?role=TUTOR" },
+                                    { label: "How it Works", href: "/how-it-works/student" },
+                                    { label: "Pricing", href: "/pricing/student" },
+                                    { label: "Post Requirement", href: "/post-requirement" },
+                                    { label: "Sign Up", href: "/register/student" },
+                                ].map((link, i) => (
+                                    <Link key={i} href={link.href} className="block text-xs text-gray-500 hover:text-blue-600 transition-colors">{link.label}</Link>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* For Tutors */}
+                        <div>
+                            <h4 className="text-xs font-semibold text-gray-900 mb-3">For Tutors</h4>
+                            <div className="space-y-2">
+                                {[
+                                    { label: "How it Works", href: "/how-it-works/tutor" },
+                                    { label: "Pricing", href: "/pricing/tutor" },
+                                    { label: "Find Students", href: "/search?role=STUDENT" },
+                                    { label: "Sign Up", href: "/register/tutor" },
+                                ].map((link, i) => (
+                                    <Link key={i} href={link.href} className="block text-xs text-gray-500 hover:text-blue-600 transition-colors">{link.label}</Link>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* For Institutes */}
+                        <div>
+                            <h4 className="text-xs font-semibold text-gray-900 mb-3">For Institutes</h4>
+                            <div className="space-y-2">
+                                {[
+                                    { label: "How it Works", href: "/how-it-works/institute" },
+                                    { label: "Pricing", href: "/pricing/institute" },
+                                    { label: "Sign Up", href: "/register/institute" },
+                                ].map((link, i) => (
+                                    <Link key={i} href={link.href} className="block text-xs text-gray-500 hover:text-blue-600 transition-colors">{link.label}</Link>
+                                ))}
+                            </div>
+                        </div>
                     </div>
+
+                    {/* Bottom bar */}
                     <div className="border-t border-gray-100 pt-6 flex flex-col md:flex-row justify-between items-center gap-3">
                         <p className="text-xs text-gray-400">© 2026 TuitionsInIndia.com. All rights reserved.</p>
-                        <p className="text-xs text-gray-400">Made with ❤️ for students across India</p>
+                        <nav className="flex flex-wrap gap-x-4 gap-y-1">
+                            {[
+                                { label: "Blog", href: "/blog" },
+                                { label: "Contact", href: "/contact" },
+                                { label: "Privacy Policy", href: "/legal/privacy" },
+                                { label: "Terms", href: "/legal/terms" },
+                            ].map((link, i) => (
+                                <Link key={i} href={link.href} className="text-xs text-gray-400 hover:text-blue-600 transition-colors">{link.label}</Link>
+                            ))}
+                        </nav>
                     </div>
                 </div>
             </footer>

@@ -110,7 +110,11 @@ function SearchResultsContent() {
     // Filter & Sort State
     const [grade, setGrade] = useState(searchParams.get("grade") || "");
     const [maxRate, setMaxRate] = useState(10000);
-    const [sortBy, setSortBy] = useState("relevance");
+    // Initialise sort from URL: ?sort=rating → sortBy="rating", ?nearby=true → sortBy="distance"
+    const [sortBy, setSortBy] = useState(() => {
+        if (searchParams.get("nearby") === "true") return "distance";
+        return searchParams.get("sort") || "relevance";
+    });
     const [verifiedOnly, setVerifiedOnly] = useState(false);
     const [listingType, setListingType] = useState("ALL");
     const [gender, setGender] = useState("");
@@ -129,6 +133,14 @@ function SearchResultsContent() {
             .then(r => r.ok ? r.json() : null)
             .then(data => { if (data?.id) setLoggedInUser(data); })
             .catch(() => {});
+    }, []);
+
+    // Auto-detect location when ?nearby=true is in URL
+    useEffect(() => {
+        if (searchParams.get("nearby") === "true" && !queryLat && !queryLng) {
+            detectLocation();
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const detectLocation = () => {
@@ -580,10 +592,10 @@ function SearchResultsContent() {
                                                     {item.rate > 0 ? (
                                                         <>
                                                             <p className="text-lg font-bold text-gray-900">₹{item.rate}</p>
-                                                            <p className="text-xs text-gray-400">per hour</p>
+                                                            <p className="text-xs text-gray-400">{item.role === "INSTITUTE" ? "per course" : "per hour"}</p>
                                                         </>
                                                     ) : (
-                                                        <p className="text-sm font-medium text-gray-400">Ask for rate</p>
+                                                        <p className="text-sm font-medium text-gray-400">{item.role === "INSTITUTE" ? "Ask for fees" : "Ask for rate"}</p>
                                                     )}
                                                 </div>
                                             </div>
@@ -596,7 +608,10 @@ function SearchResultsContent() {
                                             <div className="flex items-center gap-2 flex-wrap">
                                                 <button onClick={() => handleContactTutor(item)}
                                                     className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 active:scale-95 transition-all">
-                                                    {loggedInUser ? <><Lock size={12} /> Unlock Contact</> : <><Phone size={12} /> Contact Tutor</>}
+                                                    {loggedInUser
+                                                        ? <><Lock size={12} /> Unlock Contact</>
+                                                        : <><Phone size={12} /> {item.role === "INSTITUTE" ? "Contact Institute" : queryRole === "STUDENT" ? "View Requirement" : "Contact Tutor"}</>
+                                                    }
                                                 </button>
                                                 {item.offersTrialClass && (
                                                     <button

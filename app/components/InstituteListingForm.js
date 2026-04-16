@@ -107,7 +107,7 @@ export default function InstituteListingForm({ user, onComplete }) {
                 {/* Header */}
                 <div className="mb-8 flex justify-between items-start">
                     <div>
-                        <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-2">Step {step} of 3</p>
+                        <p className="text-xs font-semibold text-blue-600 mb-2">Step {step} of 3</p>
                         <h2 className="text-2xl font-bold text-gray-900">
                             {step === 1 && "Institute Details"}
                             {step === 2 && "Subjects & Curriculum"}

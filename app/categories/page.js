@@ -61,7 +61,7 @@ export default function CategoriesPage() {
                             Browse All <span className="text-blue-600">Categories</span>
                         </h1>
                         <p className="text-gray-500 text-base max-w-2xl">
-                            Find tutors across all academic subjects and skill areas.
+                            Browse tutors and institutes across all academic subjects and skill areas.
                         </p>
                     </div>
                 </div>
@@ -184,17 +184,17 @@ export default function CategoriesPage() {
                 {/* Popular Insights */}
                 <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6">
                     {[
-                        { title: "Top Rated", desc: "Browse tutors with 4.5+ star ratings from verified parents.", color: "amber", icon: Star },
-                        { title: "Near You", desc: "Find home tutors within 10km of your location.", color: "blue", icon: Users },
-                        { title: "Quick Match", desc: "Get connected with a tutor in less than 24 hours.", color: "green", icon: ShieldCheck }
+                        { title: "Top Rated", desc: "Browse tutors with 4.5+ star ratings from verified parents.", color: "amber", icon: Star, href: "/search?sort=rating&role=TUTOR" },
+                        { title: "Near You", desc: "Find home tutors within 10km of your location.", color: "blue", icon: Users, href: "/search?nearby=true&role=TUTOR" },
+                        { title: "Quick Match", desc: "Get connected with a tutor in less than 24 hours.", color: "green", icon: ShieldCheck, href: "/ai-match" }
                     ].map((item, i) => (
-                        <div key={i} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all group">
+                        <Link key={i} href={item.href} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all group">
                             <div className={`size-10 rounded-xl bg-${item.color}-50 text-${item.color}-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
                                 <item.icon size={20} />
                             </div>
-                            <h4 className="text-lg font-bold text-gray-900 mb-1">{item.title}</h4>
+                            <h4 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">{item.title}</h4>
                             <p className="text-gray-500 text-sm leading-relaxed">{item.desc}</p>
-                        </div>
+                        </Link>
                     ))}
                 </div>
             </div>

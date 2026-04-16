@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Search, Menu, X, ArrowRight } from "lucide-react";
+import { Search, Menu, X, ArrowRight, ChevronDown, GraduationCap, Users, Building2 } from "lucide-react";
 import Logo from "./Logo";
 
 function SearchBar() {
@@ -46,11 +46,92 @@ function SearchBar() {
     );
 }
 
+const NAV_SECTIONS = [
+    {
+        label: "For Students",
+        icon: GraduationCap,
+        links: [
+            { label: "How it Works", href: "/how-it-works/student" },
+            { label: "Find Tutors", href: "/search?role=TUTOR" },
+            { label: "Pricing", href: "/pricing/student" },
+            { label: "Sign Up", href: "/register/student" },
+        ],
+    },
+    {
+        label: "For Tutors",
+        icon: Users,
+        links: [
+            { label: "How it Works", href: "/how-it-works/tutor" },
+            { label: "Find Students", href: "/search?role=STUDENT" },
+            { label: "Pricing", href: "/pricing/tutor" },
+            { label: "Sign Up", href: "/register/tutor" },
+        ],
+    },
+    {
+        label: "For Institutes",
+        icon: Building2,
+        links: [
+            { label: "How it Works", href: "/how-it-works/institute" },
+            { label: "Find Students", href: "/search?role=STUDENT" },
+            { label: "Pricing", href: "/pricing/institute" },
+            { label: "Sign Up", href: "/register/institute" },
+        ],
+    },
+];
+
+function DesktopDropdown({ section, isOpaque }) {
+    const [open, setOpen] = useState(false);
+    const ref = useRef(null);
+    const timeoutRef = useRef(null);
+
+    const handleEnter = () => {
+        clearTimeout(timeoutRef.current);
+        setOpen(true);
+    };
+    const handleLeave = () => {
+        timeoutRef.current = setTimeout(() => setOpen(false), 150);
+    };
+
+    useEffect(() => {
+        return () => clearTimeout(timeoutRef.current);
+    }, []);
+
+    return (
+        <div ref={ref} className="relative" onMouseEnter={handleEnter} onMouseLeave={handleLeave}>
+            <button
+                className={`flex items-center gap-1 text-sm font-medium transition-colors ${
+                    isOpaque ? "text-gray-600 hover:text-blue-600" : "text-white/80 hover:text-white"
+                }`}
+            >
+                {section.label}
+                <ChevronDown size={14} className={`transition-transform ${open ? "rotate-180" : ""}`} />
+            </button>
+            {open && (
+                <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 z-50">
+                    <div className="bg-white rounded-xl border border-gray-100 shadow-lg py-2 min-w-[200px]">
+                        {section.links.map((link) => (
+                            <Link
+                                key={link.href}
+                                href={link.href}
+                                onClick={() => setOpen(false)}
+                                className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                            >
+                                {link.label}
+                            </Link>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
 export default function Header() {
     const router = useRouter();
     const pathname = usePathname();
     const [scrolled, setScrolled] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [mobileExpanded, setMobileExpanded] = useState(null);
 
     const isSearchPage = pathname?.startsWith("/search");
     const isOpaque = scrolled || isSearchPage;
@@ -60,12 +141,6 @@ export default function Header() {
         window.addEventListener("scroll", handleScroll);
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
-
-    const navItems = [
-        { label: "Find Tutors", href: "/search" },
-        { label: "For Tutors", href: "/how-it-works/tutor" },
-        { label: "Pricing", href: "/pricing/tutor" },
-    ];
 
     return (
         <header className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
@@ -88,19 +163,11 @@ export default function Header() {
                     </div>
                 )}
 
-                {/* Nav — hidden on search page (space used by search bar) */}
+                {/* Desktop Nav — dropdowns */}
                 {!isSearchPage && (
-                    <nav className="hidden md:flex items-center gap-8">
-                        {navItems.map((item) => (
-                            <Link
-                                key={item.href}
-                                href={item.href}
-                                className={`text-sm font-medium transition-colors ${
-                                    isOpaque ? "text-gray-600 hover:text-blue-600" : "text-white/80 hover:text-white"
-                                }`}
-                            >
-                                {item.label}
-                            </Link>
+                    <nav className="hidden md:flex items-center gap-6">
+                        {NAV_SECTIONS.map((section) => (
+                            <DesktopDropdown key={section.label} section={section} isOpaque={isOpaque} />
                         ))}
                     </nav>
                 )}
@@ -140,16 +207,34 @@ export default function Header() {
 
             {/* Mobile Menu */}
             {mobileMenuOpen && (
-                <div className="md:hidden absolute top-full left-0 w-full bg-white border-b border-gray-200 shadow-lg p-6 space-y-2">
-                    {navItems.map((item) => (
-                        <Link
-                            key={item.href}
-                            href={item.href}
-                            onClick={() => setMobileMenuOpen(false)}
-                            className="block px-4 py-3 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-50"
-                        >
-                            {item.label}
-                        </Link>
+                <div className="md:hidden absolute top-full left-0 w-full bg-white border-b border-gray-200 shadow-lg p-4 space-y-1">
+                    {NAV_SECTIONS.map((section) => (
+                        <div key={section.label}>
+                            <button
+                                onClick={() => setMobileExpanded(mobileExpanded === section.label ? null : section.label)}
+                                className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-50"
+                            >
+                                <span className="flex items-center gap-2">
+                                    <section.icon size={16} className="text-blue-600" />
+                                    {section.label}
+                                </span>
+                                <ChevronDown size={14} className={`text-gray-400 transition-transform ${mobileExpanded === section.label ? "rotate-180" : ""}`} />
+                            </button>
+                            {mobileExpanded === section.label && (
+                                <div className="ml-8 space-y-0.5 pb-2">
+                                    {section.links.map((link) => (
+                                        <Link
+                                            key={link.href}
+                                            href={link.href}
+                                            onClick={() => setMobileMenuOpen(false)}
+                                            className="block px-4 py-2 text-sm text-gray-500 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                                        >
+                                            {link.label}
+                                        </Link>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     ))}
                     <div className="pt-3 border-t border-gray-100 space-y-2">
                         <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-3 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-50">

@@ -142,7 +142,7 @@ export default function ChatInterface({ studentId, tutorId, currentUserType }) {
                             <div key={msg.id || i} className={`w-full flex ${isMe ? 'justify-end' : 'justify-start'}`}>
                                 <div className={`max-w-[75%] px-4 py-3 rounded-2xl ${isMe ? 'bg-primary text-white rounded-br-sm' : 'bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-100 rounded-bl-sm'}`}>
                                     <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
-                                    <span className={`text-xs uppercase font-bold tracking-wider mt-1 block ${isMe ? 'text-primary-focus opacity-70' : 'text-slate-400'}`}>
+                                    <span className={`text-xs font-medium mt-1 block ${isMe ? 'opacity-70 text-white' : 'text-slate-400'}`}>
                                         {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                     </span>
                                 </div>

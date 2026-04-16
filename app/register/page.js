@@ -34,7 +34,7 @@ export default function RegisterLanding() {
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 pt-24 pb-12">
             <div className="max-w-4xl w-full text-center space-y-4 mb-16">
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-xl text-xs font-bold uppercase tracking-widest mb-4">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-xl text-xs font-bold mb-4">
                     <UserPlus size={14} /> Join the Marketplace
                 </div>
                 <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight">Create your Account</h1>

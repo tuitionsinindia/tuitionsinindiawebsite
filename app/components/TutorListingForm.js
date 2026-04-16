@@ -135,7 +135,7 @@ export default function TutorListingForm({ user, onComplete }) {
 
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">Step {step} of 3</p>
+                    <p className="text-xs text-gray-400 tracking-tight mb-1">Step {step} of 3</p>
                     <h2 className="text-xl font-bold text-gray-900">{stepTitles[step - 1]}</h2>
                 </div>
                 {step > 1 && (
@@ -152,7 +152,7 @@ export default function TutorListingForm({ user, onComplete }) {
             {step === 1 && (
                 <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-500">
                     <div className="space-y-2">
-                        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Professional headline</label>
+                        <label className="text-xs font-semibold text-gray-500 tracking-tight">Professional headline</label>
                         <input
                             required
                             value={form.title}
@@ -164,7 +164,7 @@ export default function TutorListingForm({ user, onComplete }) {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Years of experience</label>
+                            <label className="text-xs font-semibold text-gray-500 tracking-tight">Years of experience</label>
                             <div className="relative">
                                 <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                                 <input
@@ -176,7 +176,7 @@ export default function TutorListingForm({ user, onComplete }) {
                             </div>
                         </div>
                         <div className="space-y-2">
-                            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Expertise level</label>
+                            <label className="text-xs font-semibold text-gray-500 tracking-tight">Expertise level</label>
                             <select
                                 value={form.expertiseLevel}
                                 onChange={(e) => setForm({ ...form, expertiseLevel: e.target.value })}
@@ -191,7 +191,7 @@ export default function TutorListingForm({ user, onComplete }) {
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">About You</label>
+                        <label className="text-xs font-semibold text-gray-500 tracking-tight">About You</label>
                         <textarea
                             value={form.bio || ""}
                             onChange={(e) => setForm({ ...form, bio: e.target.value })}
@@ -203,7 +203,7 @@ export default function TutorListingForm({ user, onComplete }) {
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Languages you teach in</label>
+                        <label className="text-xs font-semibold text-gray-500 tracking-tight">Languages you teach in</label>
                         <div className="flex flex-wrap gap-2">
                             {["ENGLISH", "HINDI", "MARATHI", "BENGALI", "TAMIL", "FRENCH"].map(lang => (
                                 <button
@@ -281,7 +281,7 @@ export default function TutorListingForm({ user, onComplete }) {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div className="space-y-2">
-                            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Grades you teach</label>
+                            <label className="text-xs font-semibold text-gray-500 tracking-tight">Grades you teach</label>
                             <div className="flex flex-wrap gap-2">
                                 {["Primary", "Middle", "High School", "Senior Secondary", "Graduate"].map(lvl => (
                                     <button
@@ -300,7 +300,7 @@ export default function TutorListingForm({ user, onComplete }) {
                             </div>
                         </div>
                         <div className="space-y-2">
-                            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Boards</label>
+                            <label className="text-xs font-semibold text-gray-500 tracking-tight">Boards</label>
                             <div className="flex flex-wrap gap-2">
                                 {BOARDS.map(b => (
                                     <button
@@ -335,7 +335,7 @@ export default function TutorListingForm({ user, onComplete }) {
                 <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-500">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div className="space-y-3">
-                            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Teaching modes</label>
+                            <label className="text-xs font-semibold text-gray-500 tracking-tight">Teaching modes</label>
                             <div className="grid grid-cols-2 gap-2">
                                 {[
                                     { id: "ONLINE", icon: Monitor, label: "Online", desc: "Remote" },
@@ -364,7 +364,7 @@ export default function TutorListingForm({ user, onComplete }) {
                         </div>
 
                         <div className="space-y-3">
-                            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Class format</label>
+                            <label className="text-xs font-semibold text-gray-500 tracking-tight">Class format</label>
                             <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-4">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-3">
@@ -386,7 +386,7 @@ export default function TutorListingForm({ user, onComplete }) {
                                 </div>
                                 {form.type === 'GROUP' && (
                                     <div className="pt-3 border-t border-gray-100 space-y-2 animate-in slide-in-from-top-2 duration-300">
-                                        <label className="text-xs font-semibold text-blue-600 uppercase tracking-wider">Max students per batch</label>
+                                        <label className="text-xs font-semibold text-blue-600 tracking-tight">Max students per batch</label>
                                         <input
                                             type="number"
                                             value={form.maxSeats}
@@ -401,7 +401,7 @@ export default function TutorListingForm({ user, onComplete }) {
 
                     <div className="space-y-3">
                         <div className="flex items-center justify-between">
-                            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Areas / cities you serve (press Enter to add)</label>
+                            <label className="text-xs font-semibold text-gray-500 tracking-tight">Areas / cities you serve (press Enter to add)</label>
                             <button type="button" onClick={detectLocation} disabled={isDetecting}
                                 className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700 disabled:opacity-50 transition-colors">
                                 <MapPin size={11} /> {isDetecting ? "Detecting..." : "Detect my city"}
@@ -436,7 +436,7 @@ export default function TutorListingForm({ user, onComplete }) {
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Hourly rate (₹)</label>
+                        <label className="text-xs font-semibold text-gray-500 tracking-tight">Hourly rate (₹)</label>
                         <div className="relative">
                             <CircleDollarSign className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                             <input

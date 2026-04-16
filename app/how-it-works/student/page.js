@@ -121,7 +121,7 @@ export default function StudentHowItWorks() {
                             { label: "Trust score", val: "High", sub: "Based on reviews" }
                         ].map((stat, i) => (
                             <div key={i} className="space-y-1">
-                                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">{stat.label}</p>
+                                <p className="text-xs font-semibold text-gray-400">{stat.label}</p>
                                 <p className="text-2xl font-bold text-gray-900">{stat.val}</p>
                                 <p className="text-sm text-blue-600 font-medium">{stat.sub}</p>
                             </div>
