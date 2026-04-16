@@ -522,10 +522,12 @@ function SearchResultsContent() {
                                         className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md hover:border-blue-100 transition-all p-4 flex gap-4">
                                         {/* Avatar */}
                                         <div className="flex flex-col items-center shrink-0 gap-1.5">
-                                            <div className="w-16 h-16 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center relative">
-                                                {item.role === "INSTITUTE"
-                                                    ? <Building2 size={26} className="text-blue-400" />
-                                                    : <User size={26} className="text-blue-400" />
+                                            <div className="w-16 h-16 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center relative overflow-hidden">
+                                                {item.image
+                                                    ? <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                                                    : item.isInstitute
+                                                        ? <Building2 size={26} className="text-blue-400" />
+                                                        : <User size={26} className="text-blue-400" />
                                                 }
                                                 {item.isVerified && (
                                                     <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center border-2 border-white">
