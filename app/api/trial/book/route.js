@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { verifyToken } from "@/lib/session";
+import { sendTrialNotificationEmail } from "@/lib/email";
 
 export async function POST(request) {
     try {
@@ -47,7 +48,12 @@ export async function POST(request) {
             },
         });
 
-        // Notify tutor
+        // Notify tutor — in-app + email
+        const [tutor, student] = await Promise.all([
+            prisma.user.findUnique({ where: { id: tutorId }, select: { name: true, email: true } }),
+            prisma.user.findUnique({ where: { id: session.id }, select: { name: true } }),
+        ]);
+
         await prisma.notification.create({
             data: {
                 userId: tutorId,
@@ -57,6 +63,15 @@ export async function POST(request) {
                 link: `/dashboard/tutor?tutorId=${tutorId}&tab=TRIALS`,
             },
         }).catch(() => {});
+
+        if (tutor?.email) {
+            sendTrialNotificationEmail(tutor.email, tutor.name || "Tutor", {
+                status: "REQUESTED",
+                subject,
+                otherPartyName: student?.name || "A student",
+                dashboardLink: `https://tuitionsinindia.com/dashboard/tutor?tutorId=${tutorId}&tab=TRIALS`,
+            }).catch(() => {});
+        }
 
         return NextResponse.json({ success: true, trial });
     } catch (error) {
