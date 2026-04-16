@@ -8,6 +8,7 @@ import {
 import { WhatsAppShareButton, ShareButton } from "@/app/components/ShareButtons";
 import TrackProfileView from "@/app/components/TrackProfileView";
 import TutorProfileActions from "@/app/components/TutorProfileActions";
+import ReviewForm from "@/app/components/ReviewForm";
 
 export async function generateMetadata({ params }) {
     const { id } = await params;
@@ -177,7 +178,15 @@ export default async function TutorProfilePage({ params }) {
 
                         {/* Reviews */}
                         <div className="bg-white rounded-2xl border border-gray-200 p-6">
-                            <h2 className="text-base font-semibold text-gray-900 mb-4">Reviews</h2>
+                            <div className="flex items-center gap-3 mb-4">
+                                <h2 className="text-base font-semibold text-gray-900">Reviews</h2>
+                                {listing.reviewCount > 0 && (
+                                    <span className="flex items-center gap-1 text-sm text-amber-600 font-medium">
+                                        <Star size={14} className="fill-amber-400 text-amber-400" />
+                                        {listing.rating.toFixed(1)} · {listing.reviewCount} {listing.reviewCount === 1 ? "review" : "reviews"}
+                                    </span>
+                                )}
+                            </div>
                             {tutor.reviewsReceived?.length > 0 ? (
                                 <div className="space-y-4">
                                     {tutor.reviewsReceived.map((r, i) => (
@@ -196,8 +205,11 @@ export default async function TutorProfilePage({ params }) {
                                     ))}
                                 </div>
                             ) : (
-                                <p className="text-sm text-gray-400">No reviews yet.</p>
+                                <p className="text-sm text-gray-400 mb-4">No reviews yet. Be the first to review!</p>
                             )}
+                            <div className={tutor.reviewsReceived?.length > 0 ? "mt-6 pt-5 border-t border-gray-100" : ""}>
+                                <ReviewForm tutorId={tutor.id} />
+                            </div>
                         </div>
                     </div>
 

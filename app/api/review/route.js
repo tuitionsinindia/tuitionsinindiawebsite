@@ -1,5 +1,51 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { verifyToken, COOKIE_NAME } from "@/lib/session";
+
+// GET /api/review?targetId=xxx — fetch reviews for a tutor + check if current user already reviewed
+export async function GET(request) {
+    try {
+        const { searchParams } = new URL(request.url);
+        const targetId = searchParams.get("targetId");
+        if (!targetId) return NextResponse.json({ error: "targetId required" }, { status: 400 });
+
+        const reviews = await prisma.review.findMany({
+            where: { targetId },
+            select: {
+                id: true, rating: true, comment: true, createdAt: true,
+                author: { select: { name: true } }
+            },
+            orderBy: { createdAt: "desc" },
+            take: 20,
+        });
+
+        // Check if the current session user has already reviewed this tutor
+        const cookie = request.cookies.get(COOKIE_NAME);
+        const session = cookie ? verifyToken(cookie.value) : null;
+        let alreadyReviewed = false;
+        let canReview = false;
+
+        if (session) {
+            const existing = await prisma.review.findFirst({ where: { authorId: session.id, targetId } });
+            alreadyReviewed = !!existing;
+
+            if (!alreadyReviewed) {
+                // Check trust link
+                const [unlock, chatSession, trial] = await Promise.all([
+                    prisma.leadUnlock.findFirst({ where: { tutorId: targetId, lead: { studentId: session.id } } }),
+                    prisma.chatSession.findFirst({ where: { OR: [{ studentId: session.id, tutorId: targetId }, { studentId: targetId, tutorId: session.id }] } }),
+                    prisma.trialBooking.findFirst({ where: { studentId: session.id, tutorId: targetId, status: "COMPLETED" } }),
+                ]);
+                canReview = !!(unlock || chatSession || trial);
+            }
+        }
+
+        return NextResponse.json({ reviews, alreadyReviewed, canReview, userId: session?.id || null });
+    } catch (err) {
+        console.error("REVIEW_FETCH_ERROR:", err);
+        return NextResponse.json({ error: "Failed to load reviews" }, { status: 500 });
+    }
+}
 
 export async function POST(request) {
     try {
