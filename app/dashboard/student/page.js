@@ -347,7 +347,7 @@ function StudentDashboardContent() {
                     </button>
                 </aside>
 
-                <main className="flex-1 ml-20 md:ml-64 p-6 md:p-10">
+                <main className="flex-1 ml-16 md:ml-64 p-3 sm:p-5 md:p-10">
                     <div className="max-w-6xl mx-auto">
 
                         {/* Success Banner */}
@@ -526,7 +526,7 @@ function StudentDashboardContent() {
                         )}
 
                         {activeTab === "CHAT" && (
-                            <div className="h-[calc(100vh-180px)] flex bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                            <div className="h-[60vh] sm:h-[calc(100vh-180px)] flex bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                                 <div className="w-full md:w-72 border-r border-gray-100 flex flex-col">
                                     <div className="p-4 border-b border-gray-100 flex items-center justify-between">
                                         <h3 className="text-sm font-bold text-gray-900">Messages</h3>

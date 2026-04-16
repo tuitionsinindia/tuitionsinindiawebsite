@@ -85,7 +85,7 @@ export default function DashboardHeader({
     };
 
     return (
-        <header className="fixed top-0 left-0 right-0 z-[60] w-full border-b border-gray-100 bg-white/80 backdrop-blur-xl px-6 md:px-12 py-4 flex items-center justify-between shadow-sm">
+        <header className="fixed top-0 left-0 right-0 z-[60] w-full border-b border-gray-100 bg-white/80 backdrop-blur-xl px-3 sm:px-6 md:px-12 py-4 flex items-center justify-between shadow-sm">
             <div className="flex items-center gap-6">
                 <Logo className="scale-90 origin-left" />
 
@@ -123,7 +123,7 @@ export default function DashboardHeader({
                     </button>
 
                     {notifOpen && (
-                        <div className="absolute top-full right-0 mt-3 w-80 bg-white border border-gray-100 rounded-2xl shadow-xl z-[70] overflow-hidden">
+                        <div className="absolute top-full right-0 mt-3 w-[min(320px,90vw)] bg-white border border-gray-100 rounded-2xl shadow-xl z-[70] overflow-hidden">
                             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
                                 <p className="text-sm font-bold text-gray-900">Notifications</p>
                                 <button onClick={() => setNotifOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
