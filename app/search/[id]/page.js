@@ -94,8 +94,59 @@ export default async function TutorProfilePage({ params }) {
         similarTutors = similar;
     } catch {}
 
+    // Build Person JSON-LD for rich search results
+    const profileUrl = `https://tuitionsinindia.com/search/${id}`;
+    const jsonLd = {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        name: tutor.name,
+        description: listing.bio || `${tutor.name} is an experienced tutor in ${listing.subjects?.join(", ")} based in ${listing.locations?.[0] || "India"}.`,
+        image: tutor.image || undefined,
+        url: profileUrl,
+        jobTitle: "Private Tutor",
+        knowsAbout: listing.subjects || [],
+        ...(listing.locations?.[0] && {
+            address: {
+                "@type": "PostalAddress",
+                addressLocality: listing.locations[0],
+                addressCountry: "IN",
+            },
+        }),
+        ...(listing.hourlyRate && {
+            offers: {
+                "@type": "Offer",
+                priceCurrency: "INR",
+                price: listing.hourlyRate,
+                priceSpecification: {
+                    "@type": "UnitPriceSpecification",
+                    price: listing.hourlyRate,
+                    priceCurrency: "INR",
+                    unitText: "HOUR",
+                },
+            },
+        }),
+        ...(listing.rating > 0 && {
+            aggregateRating: {
+                "@type": "AggregateRating",
+                ratingValue: listing.rating.toFixed(1),
+                reviewCount: listing.reviewCount || 1,
+                bestRating: 5,
+                worstRating: 1,
+            },
+        }),
+        worksFor: {
+            "@type": "Organization",
+            name: "TuitionsInIndia",
+            url: "https://tuitionsinindia.com",
+        },
+    };
+
     return (
         <div className="min-h-screen bg-gray-50">
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
             <TrackProfileView tutorId={listing.id} subject={trackSubject} />
             {/* Header */}
             <div className="bg-white border-b border-gray-100">

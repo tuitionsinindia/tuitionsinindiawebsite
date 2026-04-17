@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { getSession } from "@/lib/auth";
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request) {
     try {
+        const session = getSession();
+        if (!session) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+
         const body = await request.json();
         const {
             userId,
@@ -37,6 +41,11 @@ export async function POST(request) {
 
         if (!targetId) {
             return NextResponse.json({ success: false, error: "Missing Target ID" }, { status: 400 });
+        }
+
+        // Verify the authenticated user can only update their own profile
+        if (session.id !== targetId) {
+            return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
         }
 
         // 1. Update User basic info

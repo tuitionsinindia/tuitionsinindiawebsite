@@ -52,6 +52,11 @@ model User {
   tutorTrials        TrialBooking[]     @relation("TutorTrials")
   savedTutors        SavedTutor[]       @relation("StudentSavedTutors")
   savedByStudents    SavedTutor[]       @relation("TutorSavedBy")
+
+  @@index([role])
+  @@index([createdAt])
+  @@index([subscriptionTier])
+  @@index([isVerified])
 }
 
 model SavedTutor {
@@ -94,6 +99,11 @@ model Listing {
   offersTrialClass  Boolean     @default(false)
   trialDuration     Int         @default(30)
   tutor             User        @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+
+  @@index([isActive])
+  @@index([rating])
+  @@index([createdAt])
+  @@index([hourlyRate])
 }
 
 model TrialBooking {
@@ -138,6 +148,11 @@ model Lead {
   updatedAt        DateTime     @updatedAt
   student          User         @relation("LeadCreator", fields: [studentId], references: [id], onDelete: Cascade)
   unlockedBy       LeadUnlock[]
+
+  @@index([studentId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([type])
 }
 
 model LeadUnlock {
@@ -149,6 +164,7 @@ model LeadUnlock {
   tutor      User     @relation(fields: [tutorId], references: [id], onDelete: Cascade)
 
   @@unique([leadId, tutorId])
+  @@index([tutorId])
 }
 
 model Review {
@@ -205,6 +221,10 @@ model Transaction {
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
   user              User              @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
 }
 
 model ChatSession {
@@ -229,6 +249,10 @@ model Message {
   createdAt DateTime    @default(now())
   sender    User        @relation("SentMessages", fields: [senderId], references: [id])
   session   ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@index([senderId])
+  @@index([createdAt])
 }
 
 model Notification {
@@ -241,6 +265,10 @@ model Notification {
   link      String?
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
 }
 
 model BlogPost {

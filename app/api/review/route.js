@@ -1,9 +1,20 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { getSession } from "@/lib/auth";
+
+export const dynamic = "force-dynamic";
 
 export async function POST(request) {
     try {
+        const authSession = getSession();
+        if (!authSession) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
         const { authorId, targetId, rating, comment } = await request.json();
+
+        // Verify the authenticated user is the actual author
+        if (authSession.id !== authorId) {
+            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        }
 
         if (!authorId || !targetId || !rating) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });

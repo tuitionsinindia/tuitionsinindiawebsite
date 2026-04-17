@@ -174,22 +174,7 @@ export default function LoginPage() {
 
                             {step === 1 ? (
                                 <div className="space-y-5">
-                                    {/* Google Login */}
-                                    <button
-                                        type="button"
-                                        onClick={handleGoogleLogin}
-                                        className="w-full py-3.5 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all flex items-center justify-center gap-3 shadow-sm"
-                                    >
-                                        <GoogleIcon size={18} />
-                                        Continue with Google
-                                    </button>
-
-                                    <div className="flex items-center gap-3">
-                                        <div className="flex-1 h-px bg-gray-200" />
-                                        <span className="text-xs text-gray-400 font-medium">or log in with phone</span>
-                                        <div className="flex-1 h-px bg-gray-200" />
-                                    </div>
-
+                                    {/* Phone OTP — primary method */}
                                     <form onSubmit={handleSendOtp} className="space-y-5">
                                         <div className="space-y-2">
                                             <label className="text-sm font-semibold text-gray-700">Mobile Number</label>
@@ -215,6 +200,22 @@ export default function LoginPage() {
                                             {isLoading ? <><Loader2 size={16} className="animate-spin" /> Sending OTP...</> : <>Send OTP <ArrowRight size={16} /></>}
                                         </button>
                                     </form>
+
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex-1 h-px bg-gray-200" />
+                                        <span className="text-xs text-gray-400 font-medium">or continue with</span>
+                                        <div className="flex-1 h-px bg-gray-200" />
+                                    </div>
+
+                                    {/* Google Login — secondary */}
+                                    <button
+                                        type="button"
+                                        onClick={handleGoogleLogin}
+                                        className="w-full py-3.5 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all flex items-center justify-center gap-3 shadow-sm"
+                                    >
+                                        <GoogleIcon size={18} />
+                                        Continue with Google
+                                    </button>
                                 </div>
                             ) : (
                                 <form onSubmit={handleVerifyOtp} className="space-y-5">

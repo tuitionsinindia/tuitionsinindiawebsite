@@ -574,7 +574,7 @@ function SearchResultsContent() {
                                                                 <MapPin size={11} /> {item.location}
                                                             </span>
                                                         )}
-                                                        {item.experience && (
+                                                        {item.experience > 0 && (
                                                             <span className="inline-flex items-center gap-1 text-xs text-gray-500">
                                                                 <Briefcase size={11} /> {item.experience} yrs
                                                             </span>

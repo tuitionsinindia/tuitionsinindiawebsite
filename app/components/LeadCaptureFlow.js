@@ -44,6 +44,7 @@ export default function LeadCaptureFlow({ initialRole = "STUDENT", onComplete })
                         userId: verifiedUser.id,
                         name: gUser.name || undefined,
                         email: gUser.email || undefined,
+                        image: gUser.image || undefined,
                     }),
                 }).catch(() => {});
             }
@@ -73,8 +74,10 @@ export default function LeadCaptureFlow({ initialRole = "STUDENT", onComplete })
         const w = 500, h = 600;
         const left = window.screenX + (window.outerWidth - w) / 2;
         const top = window.screenY + (window.outerHeight - h) / 2;
+        // Pass the verified user's ID so the callback links Google to this account
+        const linkUserId = verifiedUser?.id ? `&linkUserId=${verifiedUser.id}` : "";
         const popup = window.open(
-            `/api/auth/google?role=${initialRole}`,
+            `/api/auth/google?role=${initialRole}${linkUserId}`,
             "google-auth",
             `width=${w},height=${h},left=${left},top=${top},toolbar=no,menubar=no`
         );

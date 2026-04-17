@@ -2,15 +2,32 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { createNotification } from "@/lib/notifications";
 import { sendTutorUnlockedEmail } from "@/lib/email";
+import { getSession } from "@/lib/auth";
+import { checkRateLimit } from "@/lib/rateLimit";
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request) {
     try {
+        const session = getSession();
+        if (!session) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
+        const { limited } = checkRateLimit(request, "lead-unlock", 20, 60000);
+        if (limited) {
+            return NextResponse.json({ error: "Too many requests. Please wait a moment." }, { status: 429 });
+        }
+
         const { leadId, tutorId } = await request.json();
 
         if (!leadId || !tutorId) {
             return NextResponse.json({ error: "Missing Lead ID or Tutor ID" }, { status: 400 });
+        }
+
+        // Verify the authenticated user is the tutor making the request
+        if (session.id !== tutorId) {
+            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
         }
 
         // 1. Pre-transaction validation (outside $transaction to safely return responses)

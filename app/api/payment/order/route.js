@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import razorpay from "@/lib/razorpay";
+import { getRazorpay } from "@/lib/razorpay";
 import prisma from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rateLimit";
 
@@ -21,7 +21,7 @@ export async function POST(request) {
             receipt,
         };
 
-        const order = await razorpay.orders.create(options);
+        const order = await getRazorpay().orders.create(options);
 
         // Track the transaction as PENDING
         if (userId) {

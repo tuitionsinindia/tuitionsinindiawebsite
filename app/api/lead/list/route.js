@@ -1,13 +1,22 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { calculateMatchScore } from "@/lib/matchEngine";
+import { getSession } from "@/lib/auth";
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request) {
     try {
+        const session = getSession();
+        if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
         const { searchParams } = new URL(request.url);
         const tutorId = searchParams.get("tutorId");
+
+        // When a tutorId is supplied, verify it matches the session
+        if (tutorId && session.id !== tutorId && session.role !== "ADMIN") {
+            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        }
         const subject = searchParams.get("subject");
         const location = searchParams.get("location");
         const minBudget = searchParams.get("minBudget");
