@@ -1,15 +1,23 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { getSession } from "@/lib/auth";
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request) {
     try {
+        const session = getSession();
+        if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
         const { searchParams } = new URL(request.url);
         const tutorId = searchParams.get("tutorId");
 
         if (!tutorId) {
             return NextResponse.json({ error: "Tutor ID is required" }, { status: 400 });
+        }
+
+        if (session.id !== tutorId && session.role !== "ADMIN") {
+            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
         }
 
         const [listing, unlockCount, reviewStats] = await Promise.all([

@@ -13,7 +13,7 @@ rsync -avz --delete \
   --exclude '.git' \
   --exclude 'mobile-app' \
   --exclude '.DS_Store' \
-  --exclude '.env*' \
+--exclude '.env*' \
   -e "ssh -o StrictHostKeyChecking=no" \
   ./ ${VPS_USER}@${VPS_HOST}:${APP_DIR}/
 

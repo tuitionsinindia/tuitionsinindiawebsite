@@ -74,7 +74,7 @@ export async function POST(request) {
         } else {
             const formattedPhone = "+91" + phone.replace(/\D/g, "").slice(-10);
             await sendOTP(formattedPhone, otp);
-            console.log(`[AUTH] OTP ${otp} dispatched to ${phone}`);
+            console.log(`[AUTH] OTP dispatched to ${formattedPhone}`);
         }
 
         return NextResponse.json({

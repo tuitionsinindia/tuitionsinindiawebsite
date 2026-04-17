@@ -1,12 +1,23 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { getSession } from "@/lib/auth";
 
 export async function POST(request) {
     try {
-        const { userId, name, phone, email, bio, gender, preferredContact, notificationPrefs, lat, lng } = await request.json();
+        const session = getSession();
+        if (!session) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
+        const { userId, name, phone, email, image, bio, gender, preferredContact, notificationPrefs, lat, lng } = await request.json();
 
         if (!userId) {
             return NextResponse.json({ error: "userId is required" }, { status: 400 });
+        }
+
+        // Ensure the authenticated user can only update their own profile
+        if (session.id !== userId) {
+            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
         }
 
         await prisma.$transaction(async (tx) => {
@@ -15,6 +26,8 @@ export async function POST(request) {
             if (name !== undefined) userData.name = name;
             if (phone !== undefined) userData.phone = phone;
             if (email !== undefined) userData.email = email;
+            // Allow Google profile photo URLs (https://lh3.googleusercontent.com/...)
+            if (image !== undefined && typeof image === "string" && image.startsWith("https://")) userData.image = image;
             if (lat !== undefined && !isNaN(lat)) userData.lat = lat;
             if (lng !== undefined && !isNaN(lng)) userData.lng = lng;
 

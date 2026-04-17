@@ -34,6 +34,7 @@ export async function GET(request) {
 
         const role = request.cookies.get("google_oauth_role")?.value || "STUDENT";
         const mode = request.cookies.get("google_oauth_mode")?.value || "register";
+        const linkUserId = request.cookies.get("google_oauth_link_user")?.value || null;
         const clientId = process.env.GOOGLE_CLIENT_ID;
         const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
         const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
@@ -73,25 +74,48 @@ export async function GET(request) {
 
         const { sub: googleId, email, name, picture } = googleUser;
 
-        // Find or create user: googleId → email → create new
-        let user = await prisma.user.findUnique({ where: { googleId } });
+        // Find or create user: linkUserId (step-3 phone-verified) → googleId → email → create new
+        let user = null;
 
-        if (!user && email) {
-            // Check if a phone-registered user has the same email — link accounts
-            user = await prisma.user.findUnique({ where: { email } });
+        // Priority 1: linking Google to an existing phone-verified account
+        if (linkUserId) {
+            user = await prisma.user.findUnique({ where: { id: linkUserId } });
             if (user) {
                 user = await prisma.user.update({
                     where: { id: user.id },
                     data: {
                         googleId,
-                        image: user.image || picture,
+                        email: user.email || email,
                         name: user.name || name,
-                        provider: user.provider === "phone" ? "phone" : "google",
+                        image: user.image || picture,
+                        provider: "phone", // keep phone as primary provider
                     },
                 });
             }
         }
 
+        // Priority 2: returning Google user
+        if (!user) {
+            user = await prisma.user.findUnique({ where: { googleId } });
+        }
+
+        // Priority 3: phone-registered user with matching email — link accounts
+        if (!user && email) {
+            const emailUser = await prisma.user.findUnique({ where: { email } });
+            if (emailUser) {
+                user = await prisma.user.update({
+                    where: { id: emailUser.id },
+                    data: {
+                        googleId,
+                        image: emailUser.image || picture,
+                        name: emailUser.name || name,
+                        provider: emailUser.provider === "phone" ? "phone" : "google",
+                    },
+                });
+            }
+        }
+
+        // Priority 4: brand-new user (register flow only)
         if (!user) {
             if (mode === "login") {
                 return popupResponse({

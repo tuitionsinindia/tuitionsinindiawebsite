@@ -1,15 +1,28 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+import { checkRateLimit } from "@/lib/rateLimit";
 
 export async function POST(request) {
     try {
-        const { name, email, phone, subject, message } = await request.json();
+        // Rate limit: 3 contact form submissions per IP per hour
+        const { limited } = checkRateLimit(request, "contact-form", 3, 3600000);
+        if (limited) {
+            return NextResponse.json({ success: false, error: "Too many messages sent. Please wait an hour before trying again." }, { status: 429 });
+        }
+
+        const resend = new Resend(process.env.RESEND_API_KEY);
+        let { name, email, phone, subject, message } = await request.json();
 
         if (!name?.trim() || !email?.trim() || !message?.trim()) {
             return NextResponse.json({ success: false, error: "Name, email, and message are required." }, { status: 400 });
         }
+
+        // Sanitise + enforce length limits
+        name = name.trim().slice(0, 100);
+        email = email.trim().slice(0, 200);
+        subject = (subject || "General Enquiry").trim().slice(0, 200);
+        message = message.trim().slice(0, 2000);
+        phone = (phone || "").trim().slice(0, 20);
 
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {

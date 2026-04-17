@@ -1,12 +1,21 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { createNotifications } from "@/lib/notifications";
+import { getSession } from "@/lib/auth";
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request) {
     try {
+        const session = getSession();
+        if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
         const { leadId, studentId, reason } = await request.json();
+
+        // Verify the authenticated user is the student closing the lead
+        if (session.id !== studentId && session.role !== "ADMIN") {
+            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        }
 
         if (!leadId || !studentId) {
             return NextResponse.json({ error: "Missing Lead ID or Student ID" }, { status: 400 });

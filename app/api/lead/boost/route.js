@@ -1,12 +1,23 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { getSession } from "@/lib/auth";
 
 export const dynamic = 'force-dynamic';
 
 // POST /api/lead/boost — upgrade a lead's premium tier after payment
 export async function POST(request) {
     try {
+        const session = getSession();
+        if (!session) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
         const { leadId, studentId, premiumTier } = await request.json();
+
+        // Verify the authenticated user is the student
+        if (session.id !== studentId) {
+            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        }
 
         if (!leadId || !studentId || premiumTier === undefined) {
             return NextResponse.json({ error: "leadId, studentId, and premiumTier required" }, { status: 400 });

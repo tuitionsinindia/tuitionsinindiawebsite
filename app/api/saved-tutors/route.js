@@ -1,14 +1,18 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { getSession } from "@/lib/session";
+import { getSession } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 // GET /api/saved-tutors?studentId=xxx — list saved tutors
 export async function GET(request) {
+    const session = getSession();
+    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
     const { searchParams } = new URL(request.url);
     const studentId = searchParams.get("studentId");
     if (!studentId) return NextResponse.json({ error: "studentId required" }, { status: 400 });
+    if (session.id !== studentId) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     try {
         const saved = await prisma.savedTutor.findMany({
@@ -38,8 +42,12 @@ export async function GET(request) {
 // POST /api/saved-tutors — save a tutor
 export async function POST(request) {
     try {
+        const session = getSession();
+        if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
         const { studentId, tutorId } = await request.json();
         if (!studentId || !tutorId) return NextResponse.json({ error: "studentId and tutorId required" }, { status: 400 });
+        if (session.id !== studentId) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
         await prisma.savedTutor.create({ data: { studentId, tutorId } });
         return NextResponse.json({ success: true });
@@ -52,10 +60,14 @@ export async function POST(request) {
 
 // DELETE /api/saved-tutors?studentId=xxx&tutorId=xxx — unsave
 export async function DELETE(request) {
+    const session = getSession();
+    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
     const { searchParams } = new URL(request.url);
     const studentId = searchParams.get("studentId");
     const tutorId = searchParams.get("tutorId");
     if (!studentId || !tutorId) return NextResponse.json({ error: "studentId and tutorId required" }, { status: 400 });
+    if (session.id !== studentId) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     try {
         await prisma.savedTutor.deleteMany({ where: { studentId, tutorId } });

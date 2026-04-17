@@ -5,9 +5,9 @@ import crypto from "crypto";
 import { passwordResetTemplate } from "@/lib/emailTemplates";
 import { checkRateLimit } from "@/lib/rateLimit";
 
-const resend = new Resend(process.env.RESEND_API_KEY || "re_dummy_key");
-
 export async function POST(request) {
+    // Instantiate inside handler — not at module level — so env vars are available
+    const resend = new Resend(process.env.RESEND_API_KEY);
     try {
         const { limited } = checkRateLimit(request, "password-reset", 3, 300000);
         if (limited) {

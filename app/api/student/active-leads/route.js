@@ -1,15 +1,26 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { getSession } from "@/lib/auth";
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request) {
     try {
+        const session = getSession();
+        if (!session) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
         const { searchParams } = new URL(request.url);
         const studentId = searchParams.get("studentId");
 
         if (!studentId) {
             return NextResponse.json({ error: "Missing Student ID" }, { status: 400 });
+        }
+
+        // Verify the authenticated user is requesting their own leads
+        if (session.id !== studentId) {
+            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
         }
 
         const activeLeads = await prisma.lead.findMany({

@@ -5,6 +5,7 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const role = searchParams.get("role") || "STUDENT";
     const mode = searchParams.get("mode") || "register";
+    const linkUserId = searchParams.get("linkUserId") || "";
 
     const clientId = process.env.GOOGLE_CLIENT_ID;
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
@@ -30,11 +31,14 @@ export async function GET(request) {
 
     const response = NextResponse.redirect(googleUrl);
 
-    // Store state, role, and mode in cookies for the callback to use
+    // Store state, role, mode, and optional link target in cookies for the callback
     const cookieOpts = "HttpOnly; SameSite=Lax; Path=/; Max-Age=600";
     response.headers.append("Set-Cookie", `google_oauth_state=${state}; ${cookieOpts}`);
     response.headers.append("Set-Cookie", `google_oauth_role=${role}; ${cookieOpts}`);
     response.headers.append("Set-Cookie", `google_oauth_mode=${mode}; ${cookieOpts}`);
+    if (linkUserId) {
+        response.headers.append("Set-Cookie", `google_oauth_link_user=${linkUserId}; ${cookieOpts}`);
+    }
 
     return response;
 }
