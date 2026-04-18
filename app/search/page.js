@@ -13,23 +13,28 @@ import {
     ChevronDown,
     WifiOff,
     ArrowRight,
-    Lock,
     BadgeCheck,
     User,
     Briefcase,
     Monitor,
-    Users,
     Building2,
     RefreshCw,
     X,
     Phone,
     FileText,
-    Clock
+    Clock,
+    MessageCircle,
+    Copy,
+    Check,
+    Send,
+    ExternalLink,
+    Loader2,
 } from "lucide-react";
 import { SUBJECT_CATEGORIES } from "../../lib/subjects";
 import SkeletonLoader from "../components/SkeletonLoader";
 import MapComponent from "../components/MapComponent";
 import { trackSearch, trackViewProfile } from "@/lib/analytics";
+import { saveIntent, getIntent, clearIntent } from "@/lib/intentStore";
 
 // ─── Sign-up Modal (wraps LeadCaptureFlow) ──────────────────────────────────
 import LeadCaptureFlow from "../components/LeadCaptureFlow";
@@ -78,6 +83,176 @@ function FilterChips({ subject, location, grade, teachingMode, verifiedOnly, max
     );
 }
 
+// ─── Contact Details Modal ────────────────────────────────────────────────────
+function ContactModal({ tutor, onClose }) {
+    const [data, setData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+    const [copied, setCopied] = useState(false);
+
+    useEffect(() => {
+        fetch(`/api/tutor/contact?tutorId=${tutor.id || tutor.userId}`)
+            .then(r => r.json())
+            .then(d => { if (d.phone || d.email) setData(d); else setError(d.error || "Could not load contact details."); })
+            .catch(() => setError("Something went wrong. Please try again."))
+            .finally(() => setLoading(false));
+    }, [tutor.id, tutor.userId]);
+
+    const handleCopy = (text) => {
+        navigator.clipboard.writeText(text).then(() => {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        }).catch(() => {});
+    };
+
+    return (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+            <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
+                <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                    <X size={18} />
+                </button>
+                <div className="mb-4">
+                    <div className="size-10 rounded-xl bg-blue-100 flex items-center justify-center mb-3">
+                        <Phone size={18} className="text-blue-600" />
+                    </div>
+                    <h3 className="font-bold text-gray-900 text-lg">{tutor.name}</h3>
+                    <p className="text-sm text-gray-500">Contact details</p>
+                </div>
+                {loading ? (
+                    <div className="flex items-center justify-center py-8">
+                        <Loader2 size={24} className="animate-spin text-blue-600" />
+                    </div>
+                ) : error ? (
+                    <p className="text-sm text-red-500 py-4">{error}</p>
+                ) : data && (
+                    <div className="space-y-3">
+                        {data.phone && (
+                            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100">
+                                <div>
+                                    <p className="text-xs text-gray-500 mb-0.5">Phone</p>
+                                    <p className="font-semibold text-gray-900 text-sm">{data.phone}</p>
+                                </div>
+                                <div className="flex gap-2">
+                                    <button onClick={() => handleCopy(data.phone)}
+                                        className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                                        {copied ? <Check size={15} className="text-emerald-500" /> : <Copy size={15} />}
+                                    </button>
+                                    {data.whatsappUrl && (
+                                        <a href={data.whatsappUrl} target="_blank" rel="noreferrer"
+                                            className="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors">
+                                            <ExternalLink size={15} />
+                                        </a>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                        {data.email && (
+                            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100">
+                                <div className="min-w-0">
+                                    <p className="text-xs text-gray-500 mb-0.5">Email</p>
+                                    <p className="font-semibold text-gray-900 text-sm truncate">{data.email}</p>
+                                </div>
+                            </div>
+                        )}
+                        {data.whatsappUrl && (
+                            <a href={data.whatsappUrl} target="_blank" rel="noreferrer"
+                                className="flex items-center justify-center gap-2 w-full py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold rounded-xl transition-colors">
+                                <ExternalLink size={14} /> Chat on WhatsApp
+                            </a>
+                        )}
+                    </div>
+                )}
+                <p className="text-xs text-gray-400 text-center mt-4">No commission · Pay the tutor directly</p>
+            </div>
+        </div>
+    );
+}
+
+// ─── Inquiry Modal ────────────────────────────────────────────────────────────
+function InquiryModal({ tutor, subject, onClose }) {
+    const [message, setMessage] = useState(
+        subject ? `Hi, I am looking for a ${subject} tutor. Are you available? Please let me know your schedule and fees.` : ""
+    );
+    const [sending, setSending] = useState(false);
+    const [sent, setSent] = useState(false);
+    const [error, setError] = useState("");
+
+    const handleSend = async () => {
+        if (!message.trim()) return;
+        setSending(true);
+        setError("");
+        try {
+            const res = await fetch("/api/inquiry", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ toTutorId: tutor.id || tutor.userId, message, subject })
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                setSent(true);
+            } else {
+                setError(data.error || "Failed to send inquiry. Please try again.");
+            }
+        } catch {
+            setError("Something went wrong. Please try again.");
+        } finally {
+            setSending(false);
+        }
+    };
+
+    return (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+            <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
+                <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                    <X size={18} />
+                </button>
+                {sent ? (
+                    <div className="text-center py-6">
+                        <div className="size-14 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4">
+                            <Check size={28} className="text-emerald-600" />
+                        </div>
+                        <h3 className="font-bold text-gray-900 text-lg mb-2">Inquiry sent!</h3>
+                        <p className="text-sm text-gray-500 mb-4">
+                            {tutor.name} will receive your message and get back to you soon.
+                        </p>
+                        <button onClick={onClose}
+                            className="px-6 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition-colors">
+                            Done
+                        </button>
+                    </div>
+                ) : (
+                    <>
+                        <div className="mb-4">
+                            <div className="size-10 rounded-xl bg-blue-100 flex items-center justify-center mb-3">
+                                <MessageCircle size={18} className="text-blue-600" />
+                            </div>
+                            <h3 className="font-bold text-gray-900 text-lg">Send Inquiry</h3>
+                            <p className="text-sm text-gray-500">to {tutor.name}</p>
+                        </div>
+                        <textarea
+                            value={message}
+                            onChange={e => setMessage(e.target.value.slice(0, 500))}
+                            placeholder="Hi, I need help with..."
+                            rows={4}
+                            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 resize-none outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:text-gray-400"
+                        />
+                        <p className="text-xs text-gray-400 text-right mt-1 mb-3">{message.length}/500</p>
+                        {error && <p className="text-xs text-red-500 mb-3">{error}</p>}
+                        <button onClick={handleSend} disabled={!message.trim() || sending}
+                            className="flex items-center justify-center gap-2 w-full py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm font-semibold rounded-xl transition-colors">
+                            {sending ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+                            {sending ? "Sending..." : "Send Inquiry"}
+                        </button>
+                        <p className="text-xs text-gray-400 text-center mt-3">The tutor will receive your phone number and message by email.</p>
+                    </>
+                )}
+            </div>
+        </div>
+    );
+}
+
 // ─── Main Search Page ─────────────────────────────────────────────────────────
 function SearchResultsContent() {
     const searchParams = useSearchParams();
@@ -96,8 +271,11 @@ function SearchResultsContent() {
 
     // Auth state
     const [loggedInUser, setLoggedInUser] = useState(null);
-    const [signupModal, setSignupModal] = useState({ open: false, targetTutor: null });
+    const [signupModal, setSignupModal] = useState({ open: false, targetTutor: null, pendingAction: null });
     const [trialModal, setTrialModal] = useState({ open: false, tutor: null });
+    // Inline modals for logged-in students
+    const [contactModal, setContactModal] = useState({ open: false, tutor: null });
+    const [inquiryModal, setInquiryModal] = useState({ open: false, tutor: null });
 
     // User's geolocation (for map + distance sort)
     const [userLat, setUserLat] = useState(queryLat ? parseFloat(queryLat) : null);
@@ -209,31 +387,51 @@ function SearchResultsContent() {
         }
     };
 
-    const handleContactTutor = (tutor) => {
+    // ── Action handlers ───────────────────────────────────────────────────────
+
+    /** Student wants to view contact details. If not logged in → save intent, open signup. */
+    const handleViewContact = (tutor) => {
         if (!loggedInUser) {
-            setSignupModal({ open: true, targetTutor: tutor });
+            saveIntent({
+                action: "contact",
+                tutorId: tutor.id || tutor.userId,
+                tutorName: tutor.name,
+                subject: querySubject || undefined,
+            });
+            setSignupModal({ open: true, targetTutor: tutor, pendingAction: "contact" });
             return;
         }
-        // Logged in — go to registration/unlock flow
-        const registerRoute = queryRole === "STUDENT" ? "/register/tutor" : "/register/student";
-        const params = new URLSearchParams();
-        const queryCategory = searchParams.get("category");
-        if (queryCategory) params.set("category", queryCategory);
-        if (querySubject) params.set("subject", querySubject);
-        if (grade) params.set("grade", grade);
-        if (queryLocation) params.set("location", queryLocation);
-        const tutorId = tutor.id || tutor.userId || "";
-        if (tutorId) params.set("tutorId", tutorId);
-        params.set("intent", "unlock");
-        router.push(`${registerRoute}?${params.toString()}`);
+        setContactModal({ open: true, tutor });
     };
 
+    /** Student wants to send an inquiry. If not logged in → save intent, open signup. */
+    const handleSendInquiry = (tutor) => {
+        if (!loggedInUser) {
+            saveIntent({
+                action: "inquiry",
+                tutorId: tutor.id || tutor.userId,
+                tutorName: tutor.name,
+                subject: querySubject || undefined,
+            });
+            setSignupModal({ open: true, targetTutor: tutor, pendingAction: "inquiry" });
+            return;
+        }
+        setInquiryModal({ open: true, tutor });
+    };
+
+    /** Called after the inline signup modal completes — read stored intent and execute. */
     const handleSignupSuccess = (user) => {
         setLoggedInUser(user);
-        setSignupModal({ open: false, targetTutor: null });
-        // If there's a target tutor, proceed to contact
-        if (signupModal.targetTutor) {
-            setTimeout(() => handleContactTutor(signupModal.targetTutor), 100);
+        const pending = signupModal.pendingAction;
+        const targetTutor = signupModal.targetTutor;
+        setSignupModal({ open: false, targetTutor: null, pendingAction: null });
+        clearIntent();
+
+        if (!targetTutor) return;
+        if (pending === "contact") {
+            setTimeout(() => setContactModal({ open: true, tutor: targetTutor }), 150);
+        } else if (pending === "inquiry") {
+            setTimeout(() => setInquiryModal({ open: true, tutor: targetTutor }), 150);
         }
     };
 
@@ -265,10 +463,27 @@ function SearchResultsContent() {
             {/* Sign-up Modal */}
             {signupModal.open && (
                 <SignupModal
-                    onClose={() => setSignupModal({ open: false, targetTutor: null })}
+                    onClose={() => setSignupModal({ open: false, targetTutor: null, pendingAction: null })}
                     onSuccess={handleSignupSuccess}
                     prefill={{ subject: querySubject, grade }}
                     signupRole={signupRole}
+                />
+            )}
+
+            {/* Contact Details Modal */}
+            {contactModal.open && contactModal.tutor && (
+                <ContactModal
+                    tutor={contactModal.tutor}
+                    onClose={() => setContactModal({ open: false, tutor: null })}
+                />
+            )}
+
+            {/* Inquiry Modal */}
+            {inquiryModal.open && inquiryModal.tutor && (
+                <InquiryModal
+                    tutor={inquiryModal.tutor}
+                    subject={querySubject}
+                    onClose={() => setInquiryModal({ open: false, tutor: null })}
                 />
             )}
 
@@ -606,18 +821,30 @@ function SearchResultsContent() {
 
                                             {/* Actions */}
                                             <div className="flex items-center gap-2 flex-wrap">
-                                                <button onClick={() => handleContactTutor(item)}
-                                                    className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 active:scale-95 transition-all">
-                                                    {loggedInUser
-                                                        ? <><Lock size={12} /> Unlock Contact</>
-                                                        : <><Phone size={12} /> {item.role === "INSTITUTE" ? "Contact Institute" : queryRole === "STUDENT" ? "View Requirement" : "Contact Tutor"}</>
-                                                    }
+                                                {/* Primary: View Contact */}
+                                                <button
+                                                    onClick={() => handleViewContact(item)}
+                                                    className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 active:scale-95 transition-all"
+                                                >
+                                                    <Phone size={12} />
+                                                    {item.role === "INSTITUTE" ? "View Contact" : "View Contact"}
                                                 </button>
+
+                                                {/* Secondary: Send Inquiry */}
+                                                <button
+                                                    onClick={() => handleSendInquiry(item)}
+                                                    className="flex items-center gap-1.5 px-4 py-2 border border-blue-200 bg-blue-50 text-blue-700 text-sm font-semibold rounded-lg hover:bg-blue-100 active:scale-95 transition-all"
+                                                >
+                                                    <MessageCircle size={12} /> Send Inquiry
+                                                </button>
+
+                                                {/* Free Trial */}
                                                 {item.offersTrialClass && (
                                                     <button
                                                         onClick={() => {
                                                             if (!loggedInUser) {
-                                                                setSignupModal({ open: true, targetTutor: item });
+                                                                saveIntent({ action: "inquiry", tutorId: item.id || item.userId, tutorName: item.name });
+                                                                setSignupModal({ open: true, targetTutor: item, pendingAction: "inquiry" });
                                                             } else {
                                                                 setTrialModal({ open: true, tutor: item });
                                                             }
@@ -627,6 +854,8 @@ function SearchResultsContent() {
                                                         <Clock size={12} /> Free Trial
                                                     </button>
                                                 )}
+
+                                                {/* View Profile */}
                                                 <Link href={`/search/${item.id || item.userId || "#"}`}
                                                     onClick={() => trackViewProfile(item.id)}
                                                     className="flex items-center gap-1.5 px-4 py-2 border border-gray-200 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-50 transition-all">

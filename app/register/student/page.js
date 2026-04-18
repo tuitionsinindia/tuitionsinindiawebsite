@@ -7,6 +7,7 @@ import Link from "next/link";
 import { GraduationCap, ArrowLeft, Loader2, Search, MapPin, BookOpen, CheckCircle2, Phone } from "lucide-react";
 import LeadCaptureFlow from "../../components/LeadCaptureFlow";
 import RequirementForm from "../../components/RequirementForm";
+import { getIntent, clearIntent } from "@/lib/intentStore";
 
 function StudentRegisterContent() {
     const router = useRouter();
@@ -117,7 +118,21 @@ function StudentRegisterContent() {
                             prefill={prefill}
                             onStepChange={(formStep) => setStep(formStep + 1)} // formStep 1=req, 2=pref, 3=contact → page step 2,3,4
                             onComplete={() => {
-                                router.push(`/dashboard/student?success=true&studentId=${user.id}${prefill.tutorId ? `&highlightTutor=${prefill.tutorId}` : ""}`);
+                                // Check for a deferred intent (e.g. student clicked "View Contact" before signing up)
+                                const intent = getIntent();
+                                if (intent?.tutorId) {
+                                    clearIntent();
+                                    router.push(`/search/${intent.tutorId}?action=${intent.action}&from=signup`);
+                                    return;
+                                }
+                                // Fallback: if tutorId came via URL, redirect to that tutor profile
+                                if (prefill.tutorId) {
+                                    const action = prefill.intent === "contact" ? "contact" : "inquiry";
+                                    router.push(`/search/${prefill.tutorId}?action=${action}&from=signup`);
+                                    return;
+                                }
+                                // Default: go to student dashboard
+                                router.push(`/dashboard/student?success=true&studentId=${user.id}`);
                             }}
                         />
                     )}
