@@ -49,8 +49,10 @@ export async function generateMetadata({ params }) {
     };
 }
 
-export default async function TutorProfilePage({ params }) {
+export default async function TutorProfilePage({ params, searchParams }) {
     const { id } = await params;
+    const resolvedSearch = await searchParams;
+    const initialAction = resolvedSearch?.action || "";
 
     const listing = await prisma.listing.findFirst({
         where: { OR: [{ id }, { tutorId: id }], isActive: true },
@@ -190,6 +192,7 @@ export default async function TutorProfilePage({ params }) {
                                     subject={listing.subjects?.[0] || ""}
                                     offersTrialClass={listing.offersTrialClass}
                                     trialDuration={listing.trialDuration}
+                                    initialAction={initialAction}
                                 />
                                 <WhatsAppShareButton
                                     text={`Check out ${tutor.name} on TuitionsInIndia — ${listing.subjects?.join(", ")} tutor`}
@@ -370,24 +373,9 @@ export default async function TutorProfilePage({ params }) {
                             </div>
                         )}
 
-                        {/* CTA */}
-                        <div className="bg-blue-50 border border-blue-100 rounded-2xl p-6 space-y-3">
-                            <p className="text-sm font-semibold text-blue-900">Interested in this tutor?</p>
-                            <Link
-                                href={`/register/student?intent=unlock&tutorId=${tutor.id}&subject=${listing.subjects?.[0] || ""}`}
-                                className="block w-full py-2.5 text-center bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors"
-                            >
-                                Contact Tutor
-                            </Link>
-                            {listing.offersTrialClass && (
-                                <Link
-                                    href={`/register/student?intent=trial&tutorId=${tutor.id}&subject=${listing.subjects?.[0] || ""}`}
-                                    className="block w-full py-2.5 text-center bg-white border border-emerald-200 text-emerald-700 rounded-xl text-sm font-semibold hover:bg-emerald-50 transition-colors"
-                                >
-                                    Book Free {listing.trialDuration}-min Trial
-                                </Link>
-                            )}
-                            <p className="text-xs text-blue-600 text-center">No commission. Pay the tutor directly.</p>
+                        {/* CTA — handled by TutorProfileActions above (inline panels), this is just a fallback note */}
+                        <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5">
+                            <p className="text-xs text-blue-600 text-center font-medium">No commission · Pay the tutor directly</p>
                         </div>
                     </div>
                 </div>

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { getIntent, clearIntent } from "@/lib/intentStore";
 import {
     Phone, ArrowRight, User, UserCheck, Building2,
     ShieldCheck, GraduationCap, Award, Check, Loader2
@@ -48,6 +49,14 @@ export default function LoginPage() {
         if (event.data.type === "GOOGLE_AUTH_SUCCESS") {
             const user = event.data.user;
             if (user.phoneVerified && user.phone) {
+                if (user.role === "STUDENT") {
+                    const intent = getIntent();
+                    if (intent?.tutorId) {
+                        clearIntent();
+                        router.push(`/search/${intent.tutorId}?action=${intent.action}&from=login`);
+                        return;
+                    }
+                }
                 router.push(DASHBOARD_MAP[user.role](user.id));
             } else {
                 setError("Your account needs phone verification. Please register first.");
@@ -111,6 +120,16 @@ export default function LoginPage() {
             });
             const data = await res.json();
             if (data.success) {
+                // If a student had a deferred action (e.g. clicked "View Contact" before logging in),
+                // redirect them back to the tutor profile to complete that action.
+                if (data.user.role === "STUDENT") {
+                    const intent = getIntent();
+                    if (intent?.tutorId) {
+                        clearIntent();
+                        router.push(`/search/${intent.tutorId}?action=${intent.action}&from=login`);
+                        return;
+                    }
+                }
                 router.push(DASHBOARD_MAP[data.user.role](data.user.id));
             } else {
                 setError(data.error || "Invalid OTP.");
