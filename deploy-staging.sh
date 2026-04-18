@@ -30,6 +30,7 @@ echo "🐳 Step 2: Rebuilding staging containers..."
 ssh -o StrictHostKeyChecking=no ${VPS_USER}@${VPS_HOST} "
   cd ${STAGING_DIR} && \
   rm -rf .next && \
+  cp .env.staging .env.production && \
   docker compose -f docker-compose.staging.yml build --no-cache --build-arg CACHE_BUST=$(date +%s) && \
   docker compose -f docker-compose.staging.yml up -d
 "
@@ -38,7 +39,11 @@ echo ""
 echo "🗄️  Step 3: Syncing staging DB schema..."
 ssh -o StrictHostKeyChecking=no ${VPS_USER}@${VPS_HOST} "
   cd ${STAGING_DIR} && \
-  docker exec tuitionsinindia-staging-web prisma db push --accept-data-loss
+  DB_PASS=\$(grep '^POSTGRES_PASSWORD=' .env.staging | cut -d= -f2 | tr -d '\"') && \
+  DB_USER=\$(grep '^POSTGRES_USER=' .env.staging | cut -d= -f2 | tr -d '\"') && \
+  DB_NAME=\$(grep '^POSTGRES_DB=' .env.staging | cut -d= -f2 | tr -d '\"') && \
+  docker exec tuitionsinindia-staging-db psql -U \$DB_USER -d \$DB_NAME -c \"ALTER USER \$DB_USER WITH PASSWORD '\$DB_PASS';\" 2>/dev/null || true && \
+  docker exec tuitionsinindia-staging-web prisma db push --accept-data-loss --skip-generate 2>&1 | grep -v 'Can.t write to'
 "
 
 echo ""
@@ -65,6 +70,6 @@ ssh -o StrictHostKeyChecking=no ${VPS_USER}@${VPS_HOST} "
 
 echo ""
 echo "✅ Staging deployment complete!"
-echo "   → http://tuitionsinindia.in (via Nginx) or http://${VPS_HOST}:3007 (direct)"
+echo "   → https://tuitionsinindia.in (via Nginx) or http://${VPS_HOST}:3007 (direct)"
 echo ""
 ssh -o StrictHostKeyChecking=no ${VPS_USER}@${VPS_HOST} "docker logs --tail 30 tuitionsinindia-staging-web"
