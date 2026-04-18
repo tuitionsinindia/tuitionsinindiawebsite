@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import DashboardHeader from "@/app/components/DashboardHeader";
@@ -26,9 +26,168 @@ import {
     Phone,
     Mail,
     Star,
-    ShieldCheck
+    ShieldCheck,
+    BookOpen,
+    Calendar,
+    Zap,
+    ChevronLeft,
+    ChevronRight,
+    PlusCircle,
+    Eye,
+    Edit2,
+    Trash2,
+    Send,
+    Play,
+    CheckCircle,
+    AlertCircle,
+    Info,
+    ArrowUpRight,
+    ArrowDownRight,
+    DollarSign,
+    Clock
 } from "lucide-react";
 
+// Simple inline SVG bar chart — no external library needed
+function BarChart({ data = [], height = 160, labelKey = "label", valueKey = "value" }) {
+    const [hovered, setHovered] = useState(null);
+    if (!data || data.length === 0) {
+        return (
+            <div className="flex items-center justify-center bg-gray-50 rounded-xl border border-gray-100" style={{ height }}>
+                <p className="text-gray-400 text-sm">No data available</p>
+            </div>
+        );
+    }
+
+    const values = data.map(d => d[valueKey] || 0);
+    const maxVal = Math.max(...values, 1);
+    const barWidth = 100 / data.length;
+    const chartPad = 8;
+
+    return (
+        <div className="relative" style={{ height }}>
+            <svg width="100%" height={height} viewBox={`0 0 100 100`} preserveAspectRatio="none" className="absolute inset-0">
+                {data.map((d, i) => {
+                    const barH = ((d[valueKey] || 0) / maxVal) * 80;
+                    const x = i * barWidth + barWidth * 0.15;
+                    const w = barWidth * 0.7;
+                    const y = 85 - barH;
+                    return (
+                        <rect
+                            key={i}
+                            x={`${x}%`}
+                            y={`${y}%`}
+                            width={`${w}%`}
+                            height={`${barH}%`}
+                            rx="1"
+                            className={hovered === i ? "fill-blue-600" : "fill-blue-400"}
+                            style={{ transition: "fill 0.15s" }}
+                            onMouseEnter={() => setHovered(i)}
+                            onMouseLeave={() => setHovered(null)}
+                        />
+                    );
+                })}
+                {/* X-axis line */}
+                <line x1="0" y1="86%" x2="100%" y2="86%" stroke="#e5e7eb" strokeWidth="0.5" />
+            </svg>
+            {/* X-axis labels */}
+            <div className="absolute bottom-0 left-0 right-0 flex" style={{ height: 16 }}>
+                {data.map((d, i) => (
+                    <div
+                        key={i}
+                        className="flex-1 text-center text-gray-400 overflow-hidden"
+                        style={{ fontSize: 9 }}
+                    >
+                        {i % 5 === 0 || i === data.length - 1 ? d[labelKey] : ""}
+                    </div>
+                ))}
+            </div>
+            {/* Hover tooltip */}
+            {hovered !== null && (
+                <div
+                    className="absolute bg-gray-800 text-white text-xs rounded-lg px-2 py-1 pointer-events-none z-10 whitespace-nowrap"
+                    style={{
+                        left: `${(hovered / data.length) * 100 + (100 / data.length) / 2}%`,
+                        top: 4,
+                        transform: "translateX(-50%)"
+                    }}
+                >
+                    {data[hovered][labelKey]}: ₹{(data[hovered][valueKey] || 0).toLocaleString("en-IN")}
+                </div>
+            )}
+        </div>
+    );
+}
+
+// Colored progress bar for revenue breakdown
+function BreakdownBar({ label, value, total, color = "bg-blue-500" }) {
+    const pct = total > 0 ? Math.round((value / total) * 100) : 0;
+    return (
+        <div className="space-y-1">
+            <div className="flex items-center justify-between text-xs">
+                <span className="text-gray-700 font-semibold">{label}</span>
+                <span className="text-gray-500">₹{value.toLocaleString("en-IN")} <span className="text-gray-400">({pct}%)</span></span>
+            </div>
+            <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                <div className={`h-full ${color} rounded-full transition-all`} style={{ width: `${pct}%` }} />
+            </div>
+        </div>
+    );
+}
+
+// Status badge helper
+function StatusBadge({ status }) {
+    const map = {
+        PENDING:   { label: "Pending",   cls: "bg-amber-50 text-amber-600 border-amber-100" },
+        CONFIRMED: { label: "Confirmed", cls: "bg-blue-50 text-blue-600 border-blue-100" },
+        COMPLETED: { label: "Completed", cls: "bg-emerald-50 text-emerald-600 border-emerald-100" },
+        CANCELLED: { label: "Cancelled", cls: "bg-red-50 text-red-500 border-red-100" },
+    };
+    const s = map[status] || { label: status, cls: "bg-gray-50 text-gray-500 border-gray-200" };
+    return <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${s.cls}`}>{s.label}</span>;
+}
+
+function DepositBadge({ status }) {
+    const map = {
+        UNPAID:   { label: "Unpaid",    cls: "bg-gray-50 text-gray-500 border-gray-200" },
+        PAID:     { label: "Paid",      cls: "bg-blue-50 text-blue-600 border-blue-100" },
+        CREDITED: { label: "Credited",  cls: "bg-purple-50 text-purple-600 border-purple-100" },
+        RELEASED: { label: "Released",  cls: "bg-emerald-50 text-emerald-600 border-emerald-100" },
+        REFUNDED: { label: "Refunded",  cls: "bg-red-50 text-red-500 border-red-100" },
+    };
+    const s = map[status] || { label: status || "Unknown", cls: "bg-gray-50 text-gray-500 border-gray-200" };
+    return <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${s.cls}`}>{s.label}</span>;
+}
+
+// ─── Projections math ──────────────────────────────────────────────────────────
+function computeProjection(assumptions, month) {
+    const {
+        tutorSignupsPerMonth,
+        studentSignupsPerMonth,
+        pctCreditBuyers,
+        pctPro,
+        pctElite,
+        pctVerified,
+        avgCreditValue,
+        proPrice,
+        elitePrice,
+        verificationFee,
+    } = assumptions;
+
+    const tutors   = tutorSignupsPerMonth * month;
+    const pro      = Math.round(tutors * (pctPro / 100));
+    const elite    = Math.round(tutors * (pctElite / 100));
+    const creditB  = Math.round(tutorSignupsPerMonth * (pctCreditBuyers / 100));
+    const verifiedNew = Math.round(tutorSignupsPerMonth * (pctVerified / 100));
+
+    const creditRev  = creditB * avgCreditValue;
+    const subRev     = pro * proPrice + elite * elitePrice;
+    const verifyRev  = verifiedNew * verificationFee;
+    const total      = creditRev + subRev + verifyRev;
+
+    return { tutors, pro, elite, creditRev, subRev, verifyRev, total };
+}
+
+// ─── Main component ────────────────────────────────────────────────────────────
 function AdminDashboardContent() {
     const router = useRouter();
     const [data, setData] = useState(null);
@@ -41,7 +200,7 @@ function AdminDashboardContent() {
     const [keyError, setKeyError] = useState("");
     const [keyLoading, setKeyLoading] = useState(false);
 
-    // Users tab state
+    // Users tab
     const [users, setUsers] = useState([]);
     const [usersLoading, setUsersLoading] = useState(false);
     const [userSearch, setUserSearch] = useState("");
@@ -51,7 +210,61 @@ function AdminDashboardContent() {
     const [pendingVerifications, setPendingVerifications] = useState([]);
     const [verificationActionLoading, setVerificationActionLoading] = useState(null);
 
-    // On mount, check sessionStorage for saved key
+    // Analytics tab
+    const [analyticsRevenue, setAnalyticsRevenue] = useState([]);
+    const [analyticsGrowth, setAnalyticsGrowth] = useState(null);
+    const [analyticsLoading, setAnalyticsLoading] = useState(false);
+
+    // Bookings tab
+    const [bookings, setBookings] = useState([]);
+    const [bookingsLoading, setBookingsLoading] = useState(false);
+    const [bookingFilter, setBookingFilter] = useState("All");
+    const [bookingSearch, setBookingSearch] = useState("");
+    const [bookingPage, setBookingPage] = useState(1);
+    const [bookingTotal, setBookingTotal] = useState(0);
+    const BOOKINGS_PER_PAGE = 20;
+
+    // Blog tab
+    const [blogPosts, setBlogPosts] = useState([]);
+    const [blogLoading, setBlogLoading] = useState(false);
+    const [blogView, setBlogView] = useState("list"); // "list" | "edit"
+    const [editingPost, setEditingPost] = useState(null);
+    const [blogForm, setBlogForm] = useState({
+        title: "", slug: "", category: "Study Tips", excerpt: "",
+        content: "", author: "TuitionsInIndia", readTime: "5 min read",
+        coverImageUrl: "", isPublished: false
+    });
+    const [blogSaving, setBlogSaving] = useState(false);
+
+    // Emails tab
+    const [emailSegment, setEmailSegment] = useState("All users");
+    const [emailSubject, setEmailSubject] = useState("");
+    const [emailBody, setEmailBody] = useState("");
+    const [emailPreview, setEmailPreview] = useState(null);
+    const [emailSending, setEmailSending] = useState(false);
+    const [emailStatus, setEmailStatus] = useState(null);
+
+    // Automations tab
+    const [cronStatus, setCronStatus] = useState({});
+
+    // Projections tab
+    const [projAssumptions, setProjAssumptions] = useState({
+        tutorSignupsPerMonth: 50,
+        studentSignupsPerMonth: 150,
+        pctCreditBuyers: 20,
+        pctPro: 10,
+        pctElite: 2,
+        pctVerified: 30,
+        demosPerStudentMonth: 0.5,
+        avgCreditValue: 249,
+        proPrice: 499,
+        elitePrice: 1999,
+        verificationFee: 999,
+        demoPlatformCut: 30,
+        fixedMonthlyCosts: 15000,
+    });
+
+    // On mount: check sessionStorage for saved key
     useEffect(() => {
         const saved = sessionStorage.getItem("adminKey");
         if (saved) setAdminKey(saved);
@@ -63,8 +276,12 @@ function AdminDashboardContent() {
     }, [adminKey]);
 
     useEffect(() => {
-        if (activeTab === "users" && adminKey) fetchUsers(userSearch, adminKey);
-    }, [activeTab]);
+        if (!adminKey) return;
+        if (activeTab === "users") fetchUsers(userSearch, adminKey);
+        if (activeTab === "stats") fetchAnalytics();
+        if (activeTab === "bookings") fetchBookings();
+        if (activeTab === "blog") fetchBlogPosts();
+    }, [activeTab, adminKey]);
 
     const handleKeySubmit = async (e) => {
         e.preventDefault();
@@ -96,9 +313,7 @@ function AdminDashboardContent() {
                 fetch("/api/admin/verification/requests", { headers: { "x-admin-key": key || adminKey } }),
             ]);
             const json = await metricsRes.json();
-            if (json.success) {
-                setData(json);
-            }
+            if (json.success) setData(json);
             if (verificationsRes.ok) {
                 const vJson = await verificationsRes.json();
                 setPendingVerifications(vJson.requests || []);
@@ -107,6 +322,60 @@ function AdminDashboardContent() {
             console.error("Failed to load metrics", err);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchAnalytics = async () => {
+        setAnalyticsLoading(true);
+        try {
+            const [revRes, growthRes] = await Promise.all([
+                fetch("/api/admin/analytics/revenue?days=30", { headers: { "x-admin-key": adminKey } }),
+                fetch("/api/admin/analytics/growth?days=30", { headers: { "x-admin-key": adminKey } }),
+            ]);
+            if (revRes.ok) {
+                const j = await revRes.json();
+                setAnalyticsRevenue(j.data || j.revenue || []);
+            }
+            if (growthRes.ok) {
+                const j = await growthRes.json();
+                setAnalyticsGrowth(j);
+            }
+        } catch (err) {
+            console.error("Failed to load analytics", err);
+        } finally {
+            setAnalyticsLoading(false);
+        }
+    };
+
+    const fetchBookings = async (page = bookingPage, filter = bookingFilter, search = bookingSearch) => {
+        setBookingsLoading(true);
+        try {
+            const params = new URLSearchParams({ page, limit: BOOKINGS_PER_PAGE, status: filter === "All" ? "" : filter, search });
+            const res = await fetch(`/api/admin/bookings?${params}`, { headers: { "x-admin-key": adminKey } });
+            if (res.ok) {
+                const j = await res.json();
+                setBookings(j.bookings || []);
+                setBookingTotal(j.total || 0);
+            }
+        } catch (err) {
+            console.error("Failed to load bookings", err);
+        } finally {
+            setBookingsLoading(false);
+        }
+    };
+
+    const fetchBlogPosts = async () => {
+        setBlogLoading(true);
+        try {
+            const res = await fetch("/api/admin/blog", { headers: { "x-admin-key": adminKey } });
+            if (res.ok) {
+                const j = await res.json();
+                setBlogPosts(j.posts || j || []);
+            }
+        } catch (err) {
+            console.error("Failed to load blog posts", err);
+        } finally {
+            setBlogLoading(false);
         }
     };
 
@@ -193,16 +462,11 @@ function AdminDashboardContent() {
     const handleApproveTutor = async (tutorId) => {
         const tutorToApprove = data?.pendingTutors?.find(t => t.id === tutorId);
         if (!tutorToApprove) return;
-
         setData(prev => ({
             ...prev,
             pendingTutors: prev.pendingTutors.filter(t => t.id !== tutorId),
-            metrics: {
-                ...prev.metrics,
-                totalTutors: prev.metrics.totalTutors + 1
-            }
+            metrics: { ...prev.metrics, totalTutors: prev.metrics.totalTutors + 1 }
         }));
-
         try {
             const res = await fetch("/api/admin/tutor/approve", {
                 method: "POST",
@@ -210,17 +474,139 @@ function AdminDashboardContent() {
                 body: JSON.stringify({ tutorId, isApproved: true })
             });
             const json = await res.json();
-            if (!json.success) {
-                fetchMetrics();
-                alert("Failed to approve tutor. Please try again.");
-            }
+            if (!json.success) { fetchMetrics(); alert("Failed to approve tutor. Please try again."); }
         } catch (err) {
             console.error(err);
             fetchMetrics();
         }
     };
 
-    // Show key entry gate if not authenticated
+    // Blog handlers
+    const slugify = (text) =>
+        text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
+    const startCreatePost = () => {
+        setEditingPost(null);
+        setBlogForm({ title: "", slug: "", category: "Study Tips", excerpt: "", content: "", author: "TuitionsInIndia", readTime: "5 min read", coverImageUrl: "", isPublished: false });
+        setBlogView("edit");
+    };
+
+    const startEditPost = (post) => {
+        setEditingPost(post);
+        setBlogForm({
+            title: post.title || "",
+            slug: post.slug || "",
+            category: post.category || "Study Tips",
+            excerpt: post.excerpt || "",
+            content: post.content || "",
+            author: post.author || "TuitionsInIndia",
+            readTime: post.readTime || "5 min read",
+            coverImageUrl: post.coverImageUrl || "",
+            isPublished: post.isPublished || false,
+        });
+        setBlogView("edit");
+    };
+
+    const handleBlogSave = async (publish = false) => {
+        setBlogSaving(true);
+        const body = { ...blogForm, isPublished: publish ? true : blogForm.isPublished };
+        try {
+            const method = editingPost ? "PUT" : "POST";
+            const url = editingPost ? `/api/admin/blog/${editingPost.id}` : "/api/admin/blog";
+            const res = await fetch(url, { method, headers: adminHeaders(), body: JSON.stringify(body) });
+            if (res.ok) {
+                setBlogView("list");
+                fetchBlogPosts();
+            } else {
+                alert("Failed to save post. Please try again.");
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Failed to save post. Please try again.");
+        } finally {
+            setBlogSaving(false);
+        }
+    };
+
+    const handleBlogTogglePublish = async (post) => {
+        try {
+            await fetch(`/api/admin/blog/${post.id}`, {
+                method: "PUT",
+                headers: adminHeaders(),
+                body: JSON.stringify({ ...post, isPublished: !post.isPublished }),
+            });
+            fetchBlogPosts();
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const handleBlogDelete = async (post) => {
+        if (!confirm(`Delete "${post.title}"? This cannot be undone.`)) return;
+        try {
+            await fetch(`/api/admin/blog/${post.id}`, { method: "DELETE", headers: adminHeaders() });
+            fetchBlogPosts();
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    // Email handlers
+    const handleEmailPreview = async () => {
+        try {
+            const res = await fetch("/api/admin/email/broadcast", {
+                method: "POST",
+                headers: adminHeaders(),
+                body: JSON.stringify({ segment: emailSegment, subject: emailSubject, body: emailBody, preview: true }),
+            });
+            if (res.ok) {
+                const j = await res.json();
+                setEmailPreview(j);
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const handleEmailSend = async () => {
+        if (!confirm(`Send this email to all ${emailSegment}? This cannot be undone.`)) return;
+        setEmailSending(true);
+        setEmailStatus(null);
+        try {
+            const res = await fetch("/api/admin/email/broadcast", {
+                method: "POST",
+                headers: adminHeaders(),
+                body: JSON.stringify({ segment: emailSegment, subject: emailSubject, body: emailBody }),
+            });
+            const j = await res.json();
+            setEmailStatus(j.success ? { ok: true, message: `Email sent to ${j.sent || "all"} recipients.` } : { ok: false, message: j.error || "Failed to send. Please try again." });
+        } catch (err) {
+            setEmailStatus({ ok: false, message: "Could not send email. Please try again." });
+        } finally {
+            setEmailSending(false);
+        }
+    };
+
+    // Cron handlers
+    const handleCronRun = async (job) => {
+        setCronStatus(prev => ({ ...prev, [job]: { loading: true, result: null } }));
+        try {
+            const res = await fetch("/api/admin/cron/trigger", {
+                method: "POST",
+                headers: adminHeaders(),
+                body: JSON.stringify({ job }),
+            });
+            const j = await res.json();
+            setCronStatus(prev => ({
+                ...prev,
+                [job]: { loading: false, result: j.success ? "success" : "error", message: j.message || j.error || "" }
+            }));
+        } catch (err) {
+            setCronStatus(prev => ({ ...prev, [job]: { loading: false, result: "error", message: "Could not connect." } }));
+        }
+    };
+
+    // ─── Auth gate ───────────────────────────────────────────────────────────────
     if (!adminKey) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center px-6">
@@ -258,67 +644,78 @@ function AdminDashboardContent() {
         );
     }
 
+    // ─── Sidebar nav config ──────────────────────────────────────────────────────
+    const navItems = [
+        { id: "overview",   icon: LayoutDashboard, label: "Overview" },
+        { id: "users",      icon: Users,           label: "User Directory" },
+        { id: "listings",   icon: GraduationCap,   label: "Tutor Approvals" },
+        { id: "vip",        icon: Star,            label: "VIP Service" },
+        { id: "financials", icon: CreditCard,      label: "Transactions" },
+        { id: "bookings",   icon: Calendar,        label: "Bookings" },
+        { id: "stats",      icon: BarChart3,       label: "Analytics" },
+        { id: "projections",icon: TrendingUp,      label: "Projections" },
+        { id: "blog",       icon: BookOpen,        label: "Blog" },
+        { id: "emails",     icon: Mail,            label: "Emails" },
+        { id: "automations",icon: Zap,             label: "Automations" },
+    ];
+
+    // ─── Projections computed values ─────────────────────────────────────────────
+    const projMonths = [1, 3, 6, 12];
+    const projData = projMonths.map(m => ({ month: m, ...computeProjection(projAssumptions, m) }));
+    // Break-even: month where total >= fixed costs
+    const breakEvenMonth = projData.find(p => p.total >= projAssumptions.fixedMonthlyCosts);
+
+    // ─── Render ──────────────────────────────────────────────────────────────────
     return (
         <div className="flex h-screen bg-gray-50 font-sans text-gray-900 overflow-hidden">
             {/* Sidebar */}
-            <aside className="w-64 border-r border-gray-200 bg-white flex flex-col hidden lg:flex shadow-sm z-50">
-                <div className="p-6 border-b border-gray-100">
+            <aside className="w-56 border-r border-gray-200 bg-white flex-col hidden lg:flex shadow-sm z-50 shrink-0">
+                <div className="p-5 border-b border-gray-100">
                     <Logo />
                 </div>
 
-                <div className="p-4 flex-1 overflow-y-auto space-y-6">
-                    <div>
-                        <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 px-3">Management</h4>
-                        <nav className="space-y-1">
-                            {[
-                                { id: "overview", icon: LayoutDashboard, label: "Overview" },
-                                { id: "users", icon: Users, label: "User Directory" },
-                                { id: "listings", icon: GraduationCap, label: "Tutor Approvals" },
-                                { id: "vip", icon: Star, label: "VIP Service" },
-                                { id: "financials", icon: CreditCard, label: "Transactions" },
-                                { id: "stats", icon: BarChart3, label: "Analytics" }
-                            ].map((item) => (
-                                <button
-                                    key={item.id}
-                                    onClick={() => setActiveTab(item.id)}
-                                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-all ${activeTab === item.id ? 'bg-blue-50 text-blue-600' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}
-                                >
-                                    <item.icon size={16} strokeWidth={activeTab === item.id ? 2.5 : 2} className={activeTab === item.id ? 'text-blue-600' : 'text-gray-400'} />
-                                    {item.label}
-                                </button>
-                            ))}
-                        </nav>
-                    </div>
+                <div className="p-3 flex-1 overflow-y-auto">
+                    <h4 className="text-xs font-semibold text-gray-400 mb-2 px-2 mt-2">Management</h4>
+                    <nav className="space-y-0.5">
+                        {navItems.map((item) => (
+                            <button
+                                key={item.id}
+                                onClick={() => setActiveTab(item.id)}
+                                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl font-semibold text-sm transition-all ${activeTab === item.id ? "bg-blue-50 text-blue-600" : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"}`}
+                            >
+                                <item.icon size={15} strokeWidth={activeTab === item.id ? 2.5 : 2} className={activeTab === item.id ? "text-blue-600" : "text-gray-400"} />
+                                {item.label}
+                            </button>
+                        ))}
+                    </nav>
 
-                    <div>
-                        <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 px-3">Tools</h4>
-                        <nav className="space-y-1">
-                            {[
-                                { icon: Database, label: "Database Tools" },
-                                { icon: Settings, label: "Global Settings" }
-                            ].map((item, i) => (
-                                <button key={i} className="w-full flex items-center gap-3 px-3 py-2.5 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-semibold text-sm transition-all">
-                                    <item.icon size={16} strokeWidth={2} className="text-gray-400" />
-                                    {item.label}
-                                </button>
-                            ))}
-                        </nav>
-                    </div>
+                    <h4 className="text-xs font-semibold text-gray-400 mb-2 px-2 mt-4">Tools</h4>
+                    <nav className="space-y-0.5">
+                        {[
+                            { icon: Database,  label: "Database Tools" },
+                            { icon: Settings,  label: "Global Settings" }
+                        ].map((item, i) => (
+                            <button key={i} className="w-full flex items-center gap-2.5 px-3 py-2 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-semibold text-sm transition-all">
+                                <item.icon size={15} strokeWidth={2} className="text-gray-400" />
+                                {item.label}
+                            </button>
+                        ))}
+                    </nav>
                 </div>
 
-                <div className="p-4 border-t border-gray-100">
+                <div className="p-3 border-t border-gray-100">
                     <button
                         onClick={() => { sessionStorage.removeItem("adminKey"); router.push("/"); }}
                         className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white text-red-500 border border-gray-200 hover:bg-red-50 hover:border-red-100 rounded-xl transition-all font-semibold text-sm"
                     >
                         <LogOut size={14} strokeWidth={2} />
-                        Log Out
+                        Log out
                     </button>
                 </div>
             </aside>
 
-            {/* Main Content */}
-            <main className="flex-1 overflow-y-auto bg-gray-50">
+            {/* Main content */}
+            <main className="flex-1 overflow-y-auto bg-gray-50 min-w-0">
                 <DashboardHeader
                     user={{ name: "Administrator" }}
                     role="ADMIN"
@@ -335,15 +732,16 @@ function AdminDashboardContent() {
                     ) : (
                         <div className="max-w-7xl mx-auto space-y-6">
 
-                            {/* Overview Tab */}
+                            {/* ─── OVERVIEW ─────────────────────────────────────────────────────── */}
                             {activeTab === "overview" && (
                                 <>
+                                    {/* Metric cards */}
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                                         {[
-                                            { label: 'Total Tutors', value: data?.metrics.totalTutors || 0, icon: GraduationCap, color: 'text-blue-600', bg: 'bg-blue-50' },
-                                            { label: 'Students', value: data?.metrics.totalStudents || 0, icon: UserCheck, color: 'text-amber-600', bg: 'bg-amber-50' },
-                                            { label: 'Total Revenue', value: `₹${data?.metrics.totalRevenue || 0}`, icon: Wallet, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-                                            { label: 'Active Leads', value: data?.metrics.activeLeads || 0, icon: Target, color: 'text-purple-600', bg: 'bg-purple-50' }
+                                            { label: "Total tutors",  value: data?.metrics?.totalTutors || 0,                  icon: GraduationCap, color: "text-blue-600",    bg: "bg-blue-50" },
+                                            { label: "Students",      value: data?.metrics?.totalStudents || 0,                icon: UserCheck,     color: "text-amber-600",   bg: "bg-amber-50" },
+                                            { label: "Total revenue", value: `₹${(data?.metrics?.totalRevenue || 0).toLocaleString("en-IN")}`, icon: Wallet, color: "text-emerald-600", bg: "bg-emerald-50" },
+                                            { label: "Active leads",  value: data?.metrics?.activeLeads || 0,                  icon: Target,        color: "text-purple-600",  bg: "bg-purple-50" }
                                         ].map((stat, i) => (
                                             <div key={i} className="p-5 bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-all">
                                                 <div className="flex items-center gap-3 mb-4">
@@ -357,10 +755,33 @@ function AdminDashboardContent() {
                                         ))}
                                     </div>
 
+                                    {/* Quick actions + alert badges */}
+                                    <div className="flex flex-wrap gap-3 items-center">
+                                        <button onClick={() => setActiveTab("listings")} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 transition-all">
+                                            <GraduationCap size={14} />
+                                            View pending approvals
+                                            {data?.pendingTutors?.length > 0 && (
+                                                <span className="ml-1 bg-white text-blue-600 rounded-full text-xs px-1.5 font-bold">{data.pendingTutors.length}</span>
+                                            )}
+                                        </button>
+                                        <button onClick={() => setActiveTab("users")} className="flex items-center gap-2 px-4 py-2 bg-white text-gray-700 border border-gray-200 rounded-xl font-semibold text-sm hover:bg-gray-50 transition-all">
+                                            <Users size={14} />
+                                            View all leads
+                                        </button>
+                                        {pendingVerifications.length > 0 && (
+                                            <div className="flex items-center gap-2 px-4 py-2 bg-amber-50 text-amber-700 border border-amber-100 rounded-xl text-sm font-semibold">
+                                                <ShieldCheck size={14} />
+                                                {pendingVerifications.length} verification{pendingVerifications.length !== 1 ? "s" : ""} pending review
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* 3-panel row */}
                                     <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
+                                        {/* Pending Approvals */}
                                         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
                                             <div className="flex items-center justify-between mb-5">
-                                                <h3 className="font-bold text-base text-gray-900">Pending Approvals</h3>
+                                                <h3 className="font-bold text-base text-gray-900">Pending approvals</h3>
                                                 <button onClick={() => setActiveTab("listings")} className="text-xs font-semibold text-blue-600 hover:underline">View all</button>
                                             </div>
                                             <div className="space-y-3">
@@ -384,9 +805,10 @@ function AdminDashboardContent() {
                                             </div>
                                         </div>
 
+                                        {/* Recent Transactions */}
                                         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
                                             <div className="flex items-center justify-between mb-5">
-                                                <h3 className="font-bold text-base text-gray-900">Recent Transactions</h3>
+                                                <h3 className="font-bold text-base text-gray-900">Recent transactions</h3>
                                                 <button onClick={() => setActiveTab("financials")} className="text-xs font-semibold text-blue-600 hover:underline">View all</button>
                                             </div>
                                             <div className="space-y-3">
@@ -404,16 +826,19 @@ function AdminDashboardContent() {
                                                         <p className="text-xs text-gray-400">{new Date(txn.createdAt).toLocaleDateString()}</p>
                                                     </div>
                                                 ))}
+                                                {(!data?.recentTransactions || data.recentTransactions.length === 0) && (
+                                                    <p className="text-center py-6 text-gray-400 text-sm">No recent transactions.</p>
+                                                )}
                                             </div>
                                         </div>
 
-                                        {/* Pending Verification Requests */}
+                                        {/* Verification Requests */}
                                         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
                                             <div className="flex items-center gap-3 mb-5">
                                                 <div className="p-2 rounded-xl bg-blue-50 text-blue-600">
                                                     <ShieldCheck size={16} strokeWidth={2} />
                                                 </div>
-                                                <h3 className="font-bold text-base text-gray-900">Verification Requests</h3>
+                                                <h3 className="font-bold text-base text-gray-900">Verification requests</h3>
                                                 {pendingVerifications.length > 0 && (
                                                     <span className="ml-auto px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">{pendingVerifications.length}</span>
                                                 )}
@@ -457,11 +882,11 @@ function AdminDashboardContent() {
                                 </>
                             )}
 
-                            {/* Users Tab */}
+                            {/* ─── USERS ────────────────────────────────────────────────────────── */}
                             {activeTab === "users" && (
                                 <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
                                     <div className="flex items-center justify-between mb-6">
-                                        <h3 className="font-bold text-lg text-gray-900">User Directory</h3>
+                                        <h3 className="font-bold text-lg text-gray-900">User directory</h3>
                                         <div className="relative">
                                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" size={14} />
                                             <input
@@ -477,85 +902,85 @@ function AdminDashboardContent() {
                                             <div className="size-8 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
                                         </div>
                                     ) : (
-                                    <div className="overflow-x-auto">
-                                        <table className="w-full text-left">
-                                            <thead>
-                                                <tr className="border-b border-gray-200 bg-gray-50">
-                                                    <th className="pb-3 pt-2 px-4 text-xs font-semibold text-gray-500 rounded-tl-xl">Name</th>
-                                                    <th className="pb-3 pt-2 px-4 text-xs font-semibold text-gray-500">Role</th>
-                                                    <th className="pb-3 pt-2 px-4 text-xs font-semibold text-gray-500">Credits</th>
-                                                    <th className="pb-3 pt-2 px-4 text-xs font-semibold text-gray-500">Status</th>
-                                                    <th className="pb-3 pt-2 px-4 text-xs font-semibold text-gray-500 rounded-tr-xl">Actions</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="divide-y divide-gray-100">
-                                                {users.map(u => (
-                                                    <tr key={u.id} className="hover:bg-gray-50 transition-colors">
-                                                        <td className="py-4 px-4">
-                                                            <div className="flex items-center gap-3">
-                                                                <div className="size-8 bg-blue-50 rounded-lg flex items-center justify-center font-bold text-blue-400 text-xs">
-                                                                    {u.name?.[0] || "?"}
-                                                                </div>
-                                                                <div>
-                                                                    <p className="font-semibold text-sm text-gray-900">{u.name || "—"}</p>
-                                                                    <p className="text-xs text-gray-400">{u.phone || u.email || "—"}</p>
-                                                                </div>
-                                                            </div>
-                                                        </td>
-                                                        <td className="py-4 px-4">
-                                                            <span className={`px-2 py-0.5 rounded text-xs font-semibold ${u.role === "TUTOR" ? "bg-blue-50 text-blue-600" : u.role === "STUDENT" ? "bg-amber-50 text-amber-600" : "bg-gray-100 text-gray-500"}`}>
-                                                                {u.role}
-                                                            </span>
-                                                        </td>
-                                                        <td className="py-4 px-4">
-                                                            <div className="flex items-center gap-2">
-                                                                <span className="text-sm font-semibold text-gray-700">{u.credits}</span>
-                                                                <button
-                                                                    onClick={() => {
-                                                                        const amt = prompt(`Add credits to ${u.name}? (use negative to remove)`, "5");
-                                                                        if (amt !== null && !isNaN(parseInt(amt))) handleAddCredits(u.id, parseInt(amt));
-                                                                    }}
-                                                                    disabled={userActionLoading === u.id + "-credits"}
-                                                                    className="text-xs px-2 py-0.5 border border-gray-200 rounded-lg text-blue-600 hover:border-blue-300 transition-colors"
-                                                                >
-                                                                    {userActionLoading === u.id + "-credits" ? "..." : "+/-"}
-                                                                </button>
-                                                            </div>
-                                                        </td>
-                                                        <td className="py-4 px-4">
-                                                            {u.isSuspended ? (
-                                                                <span className="px-2.5 py-1 bg-red-50 text-red-500 rounded-full text-xs font-semibold border border-red-100">Suspended</span>
-                                                            ) : u.isVerified ? (
-                                                                <span className="px-2.5 py-1 bg-emerald-50 text-emerald-600 rounded-full text-xs font-semibold border border-emerald-100">Active</span>
-                                                            ) : (
-                                                                <span className="px-2.5 py-1 bg-gray-50 text-gray-400 rounded-full text-xs font-semibold border border-gray-200">Pending</span>
-                                                            )}
-                                                        </td>
-                                                        <td className="py-4 px-4">
-                                                            <button
-                                                                onClick={() => handleSuspend(u.id, !u.isSuspended)}
-                                                                disabled={userActionLoading === u.id + "-suspend"}
-                                                                className={`text-xs px-3 py-1.5 rounded-lg font-semibold border transition-all ${u.isSuspended ? "bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100" : "bg-red-50 text-red-500 border-red-100 hover:bg-red-100"}`}
-                                                            >
-                                                                {userActionLoading === u.id + "-suspend" ? "..." : u.isSuspended ? "Reinstate" : "Suspend"}
-                                                            </button>
-                                                        </td>
+                                        <div className="overflow-x-auto">
+                                            <table className="w-full text-left">
+                                                <thead>
+                                                    <tr className="border-b border-gray-200 bg-gray-50">
+                                                        <th className="pb-3 pt-2 px-4 text-xs font-semibold text-gray-500 rounded-tl-xl">Name</th>
+                                                        <th className="pb-3 pt-2 px-4 text-xs font-semibold text-gray-500">Role</th>
+                                                        <th className="pb-3 pt-2 px-4 text-xs font-semibold text-gray-500">Credits</th>
+                                                        <th className="pb-3 pt-2 px-4 text-xs font-semibold text-gray-500">Status</th>
+                                                        <th className="pb-3 pt-2 px-4 text-xs font-semibold text-gray-500 rounded-tr-xl">Actions</th>
                                                     </tr>
-                                                ))}
-                                                {users.length === 0 && (
-                                                    <tr><td colSpan={5} className="py-12 text-center text-gray-400 text-sm">No users found.</td></tr>
-                                                )}
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                                </thead>
+                                                <tbody className="divide-y divide-gray-100">
+                                                    {users.map(u => (
+                                                        <tr key={u.id} className="hover:bg-gray-50 transition-colors">
+                                                            <td className="py-4 px-4">
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className="size-8 bg-blue-50 rounded-lg flex items-center justify-center font-bold text-blue-400 text-xs">
+                                                                        {u.name?.[0] || "?"}
+                                                                    </div>
+                                                                    <div>
+                                                                        <p className="font-semibold text-sm text-gray-900">{u.name || "—"}</p>
+                                                                        <p className="text-xs text-gray-400">{u.phone || u.email || "—"}</p>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td className="py-4 px-4">
+                                                                <span className={`px-2 py-0.5 rounded text-xs font-semibold ${u.role === "TUTOR" ? "bg-blue-50 text-blue-600" : u.role === "STUDENT" ? "bg-amber-50 text-amber-600" : "bg-gray-100 text-gray-500"}`}>
+                                                                    {u.role}
+                                                                </span>
+                                                            </td>
+                                                            <td className="py-4 px-4">
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className="text-sm font-semibold text-gray-700">{u.credits}</span>
+                                                                    <button
+                                                                        onClick={() => {
+                                                                            const amt = prompt(`Add credits to ${u.name}? (use negative to remove)`, "5");
+                                                                            if (amt !== null && !isNaN(parseInt(amt))) handleAddCredits(u.id, parseInt(amt));
+                                                                        }}
+                                                                        disabled={userActionLoading === u.id + "-credits"}
+                                                                        className="text-xs px-2 py-0.5 border border-gray-200 rounded-lg text-blue-600 hover:border-blue-300 transition-colors"
+                                                                    >
+                                                                        {userActionLoading === u.id + "-credits" ? "..." : "+/−"}
+                                                                    </button>
+                                                                </div>
+                                                            </td>
+                                                            <td className="py-4 px-4">
+                                                                {u.isSuspended ? (
+                                                                    <span className="px-2.5 py-1 bg-red-50 text-red-500 rounded-full text-xs font-semibold border border-red-100">Suspended</span>
+                                                                ) : u.isVerified ? (
+                                                                    <span className="px-2.5 py-1 bg-emerald-50 text-emerald-600 rounded-full text-xs font-semibold border border-emerald-100">Active</span>
+                                                                ) : (
+                                                                    <span className="px-2.5 py-1 bg-gray-50 text-gray-400 rounded-full text-xs font-semibold border border-gray-200">Pending</span>
+                                                                )}
+                                                            </td>
+                                                            <td className="py-4 px-4">
+                                                                <button
+                                                                    onClick={() => handleSuspend(u.id, !u.isSuspended)}
+                                                                    disabled={userActionLoading === u.id + "-suspend"}
+                                                                    className={`text-xs px-3 py-1.5 rounded-lg font-semibold border transition-all ${u.isSuspended ? "bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100" : "bg-red-50 text-red-500 border-red-100 hover:bg-red-100"}`}
+                                                                >
+                                                                    {userActionLoading === u.id + "-suspend" ? "..." : u.isSuspended ? "Reinstate" : "Suspend"}
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                    {users.length === 0 && (
+                                                        <tr><td colSpan={5} className="py-12 text-center text-gray-400 text-sm">No users found.</td></tr>
+                                                    )}
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     )}
                                 </div>
                             )}
 
-                            {/* Listings / Approvals Tab */}
+                            {/* ─── TUTOR APPROVALS ──────────────────────────────────────────────── */}
                             {activeTab === "listings" && (
                                 <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-                                    <h3 className="font-bold text-lg text-gray-900 mb-6">Tutor Approvals</h3>
+                                    <h3 className="font-bold text-lg text-gray-900 mb-6">Tutor approvals</h3>
                                     <div className="space-y-3">
                                         {data?.pendingTutors?.map(tutor => (
                                             <div key={tutor.id} className="p-5 bg-gray-50 border border-gray-200 rounded-2xl flex items-center justify-between hover:border-blue-200 transition-all">
@@ -598,7 +1023,7 @@ function AdminDashboardContent() {
                                 </div>
                             )}
 
-                            {/* Financials Tab */}
+                            {/* ─── TRANSACTIONS ─────────────────────────────────────────────────── */}
                             {activeTab === "financials" && (
                                 <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
                                     <h3 className="font-bold text-lg text-gray-900 mb-6">Transactions</h3>
@@ -606,16 +1031,16 @@ function AdminDashboardContent() {
                                         <table className="w-full text-left">
                                             <thead>
                                                 <tr className="border-b border-gray-200 bg-gray-50">
-                                                    <th className="pb-3 pt-2 text-xs font-semibold text-gray-500 uppercase tracking-wider pr-4 rounded-tl-xl">Transaction</th>
-                                                    <th className="pb-3 pt-2 text-xs font-semibold text-gray-500 uppercase tracking-wider px-4">User</th>
-                                                    <th className="pb-3 pt-2 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right pl-4 rounded-tr-xl">Amount</th>
+                                                    <th className="pb-3 pt-2 px-4 text-xs font-semibold text-gray-500 rounded-tl-xl">Transaction</th>
+                                                    <th className="pb-3 pt-2 px-4 text-xs font-semibold text-gray-500">User</th>
+                                                    <th className="pb-3 pt-2 px-4 text-xs font-semibold text-gray-500 text-right rounded-tr-xl">Amount</th>
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-gray-100">
                                                 {data?.recentTransactions?.map(txn => (
                                                     <tr key={txn.id} className="hover:bg-gray-50 transition-colors">
-                                                        <td className="py-5 pr-4">
-                                                            <p className="font-semibold text-sm text-gray-900">Credit Purchase</p>
+                                                        <td className="py-5 px-4">
+                                                            <p className="font-semibold text-sm text-gray-900">Credit purchase</p>
                                                             <p className="text-xs text-gray-400 mt-0.5">{new Date(txn.createdAt).toLocaleString()}</p>
                                                         </td>
                                                         <td className="py-5 px-4">
@@ -627,14 +1052,820 @@ function AdminDashboardContent() {
                                                                 </div>
                                                             </div>
                                                         </td>
-                                                        <td className="py-5 pl-4 text-right">
+                                                        <td className="py-5 px-4 text-right">
                                                             <p className="text-lg font-bold text-emerald-600">₹{txn.amount}</p>
                                                             <span className="text-xs font-semibold text-emerald-500">Paid</span>
                                                         </td>
                                                     </tr>
                                                 ))}
+                                                {(!data?.recentTransactions || data.recentTransactions.length === 0) && (
+                                                    <tr><td colSpan={3} className="py-12 text-center text-gray-400 text-sm">No transactions yet.</td></tr>
+                                                )}
                                             </tbody>
                                         </table>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* ─── BOOKINGS ─────────────────────────────────────────────────────── */}
+                            {activeTab === "bookings" && (
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <h3 className="font-bold text-lg text-gray-900">Bookings</h3>
+                                        <span className="text-sm text-gray-400">{bookingTotal} total</span>
+                                    </div>
+
+                                    {/* Filters */}
+                                    <div className="flex flex-wrap gap-3 items-center">
+                                        <div className="relative">
+                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" size={14} />
+                                            <input
+                                                placeholder="Search student or tutor..."
+                                                value={bookingSearch}
+                                                onChange={e => { setBookingSearch(e.target.value); setBookingPage(1); fetchBookings(1, bookingFilter, e.target.value); }}
+                                                className="pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-blue-100 outline-none w-56"
+                                            />
+                                        </div>
+                                        <div className="flex gap-1.5">
+                                            {["All", "PENDING", "CONFIRMED", "COMPLETED", "CANCELLED"].map(f => (
+                                                <button
+                                                    key={f}
+                                                    onClick={() => { setBookingFilter(f); setBookingPage(1); fetchBookings(1, f, bookingSearch); }}
+                                                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${bookingFilter === f ? "bg-blue-600 text-white" : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"}`}
+                                                >
+                                                    {f === "All" ? "All" : f.charAt(0) + f.slice(1).toLowerCase()}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm">
+                                        {bookingsLoading ? (
+                                            <div className="flex items-center justify-center py-16">
+                                                <div className="size-8 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
+                                            </div>
+                                        ) : (
+                                            <div className="overflow-x-auto">
+                                                <table className="w-full text-left">
+                                                    <thead>
+                                                        <tr className="border-b border-gray-200 bg-gray-50">
+                                                            {["Student", "Tutor", "Subject", "Date", "Status", "Deposit"].map((h, i) => (
+                                                                <th key={i} className={`pb-3 pt-2 px-4 text-xs font-semibold text-gray-500 ${i === 0 ? "rounded-tl-2xl" : i === 5 ? "rounded-tr-2xl" : ""}`}>{h}</th>
+                                                            ))}
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody className="divide-y divide-gray-100">
+                                                        {bookings.map(b => (
+                                                            <tr key={b.id} className="hover:bg-gray-50 transition-colors">
+                                                                <td className="py-4 px-4">
+                                                                    <p className="font-semibold text-sm text-gray-900">{b.student?.name || "—"}</p>
+                                                                    <p className="text-xs text-gray-400">{b.student?.phone || ""}</p>
+                                                                </td>
+                                                                <td className="py-4 px-4">
+                                                                    <p className="font-semibold text-sm text-gray-900">{b.tutor?.name || "—"}</p>
+                                                                    <p className="text-xs text-gray-400">{b.tutor?.phone || ""}</p>
+                                                                </td>
+                                                                <td className="py-4 px-4 text-sm text-gray-700">{b.subject || "—"}</td>
+                                                                <td className="py-4 px-4 text-xs text-gray-500 whitespace-nowrap">
+                                                                    {b.scheduledAt ? new Date(b.scheduledAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—"}
+                                                                </td>
+                                                                <td className="py-4 px-4"><StatusBadge status={b.status} /></td>
+                                                                <td className="py-4 px-4"><DepositBadge status={b.depositStatus} /></td>
+                                                            </tr>
+                                                        ))}
+                                                        {bookings.length === 0 && (
+                                                            <tr><td colSpan={6} className="py-12 text-center text-gray-400 text-sm">No bookings found.</td></tr>
+                                                        )}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        )}
+
+                                        {/* Pagination */}
+                                        {bookingTotal > BOOKINGS_PER_PAGE && (
+                                            <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100">
+                                                <p className="text-xs text-gray-400">
+                                                    Showing {Math.min((bookingPage - 1) * BOOKINGS_PER_PAGE + 1, bookingTotal)}–{Math.min(bookingPage * BOOKINGS_PER_PAGE, bookingTotal)} of {bookingTotal}
+                                                </p>
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        disabled={bookingPage === 1}
+                                                        onClick={() => { const p = bookingPage - 1; setBookingPage(p); fetchBookings(p); }}
+                                                        className="p-1.5 border border-gray-200 rounded-lg disabled:opacity-40 hover:bg-gray-50 transition-all"
+                                                    >
+                                                        <ChevronLeft size={14} />
+                                                    </button>
+                                                    <button
+                                                        disabled={bookingPage * BOOKINGS_PER_PAGE >= bookingTotal}
+                                                        onClick={() => { const p = bookingPage + 1; setBookingPage(p); fetchBookings(p); }}
+                                                        className="p-1.5 border border-gray-200 rounded-lg disabled:opacity-40 hover:bg-gray-50 transition-all"
+                                                    >
+                                                        <ChevronRight size={14} />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* ─── ANALYTICS ────────────────────────────────────────────────────── */}
+                            {activeTab === "stats" && (
+                                <div className="space-y-6">
+                                    {analyticsLoading ? (
+                                        <div className="flex items-center justify-center py-24">
+                                            <div className="size-10 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            {/* Stat cards row */}
+                                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                                                {[
+                                                    {
+                                                        label: "Total revenue",
+                                                        value: `₹${analyticsRevenue.reduce((s, d) => s + (d.value || d.amount || 0), 0).toLocaleString("en-IN")}`,
+                                                        icon: Wallet,
+                                                        color: "text-emerald-600", bg: "bg-emerald-50"
+                                                    },
+                                                    {
+                                                        label: "MRR (est.)",
+                                                        value: `₹${Math.round(analyticsRevenue.reduce((s, d) => s + (d.value || d.amount || 0), 0) / 30 * 30).toLocaleString("en-IN")}`,
+                                                        icon: TrendingUp,
+                                                        color: "text-blue-600", bg: "bg-blue-50"
+                                                    },
+                                                    {
+                                                        label: "This month",
+                                                        value: `₹${analyticsRevenue.slice(-30).reduce((s, d) => s + (d.value || d.amount || 0), 0).toLocaleString("en-IN")}`,
+                                                        icon: DollarSign,
+                                                        color: "text-purple-600", bg: "bg-purple-50"
+                                                    },
+                                                    {
+                                                        label: "Total tutors",
+                                                        value: analyticsGrowth?.totalTutors || data?.metrics?.totalTutors || 0,
+                                                        icon: GraduationCap,
+                                                        color: "text-amber-600", bg: "bg-amber-50"
+                                                    }
+                                                ].map((s, i) => (
+                                                    <div key={i} className="p-5 bg-white rounded-2xl border border-gray-200 shadow-sm">
+                                                        <div className="flex items-center gap-3 mb-3">
+                                                            <div className={`p-2 rounded-xl ${s.bg} ${s.color}`}><s.icon size={16} /></div>
+                                                            <p className="text-xs font-semibold text-gray-500">{s.label}</p>
+                                                        </div>
+                                                        <p className="text-2xl font-bold text-gray-900">{s.value}</p>
+                                                    </div>
+                                                ))}
+                                            </div>
+
+                                            {/* 30-day revenue bar chart */}
+                                            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+                                                <h3 className="font-bold text-base text-gray-900 mb-4">Revenue — last 30 days</h3>
+                                                {analyticsRevenue.length > 0 ? (
+                                                    <BarChart data={analyticsRevenue} height={180} labelKey="label" valueKey="value" />
+                                                ) : (
+                                                    <div className="flex items-center justify-center h-40 text-gray-400 text-sm bg-gray-50 rounded-xl">No revenue data available</div>
+                                                )}
+                                            </div>
+
+                                            {/* Revenue breakdown + user growth side by side */}
+                                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                                                {/* Revenue breakdown */}
+                                                <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+                                                    <h3 className="font-bold text-base text-gray-900 mb-4">Revenue by source</h3>
+                                                    <div className="space-y-4">
+                                                        {(() => {
+                                                            const total = analyticsGrowth?.revenueBySource
+                                                                ? Object.values(analyticsGrowth.revenueBySource).reduce((a, b) => a + b, 0)
+                                                                : 100;
+                                                            const sources = analyticsGrowth?.revenueBySource || {
+                                                                "Credit packs": 0,
+                                                                "Subscriptions": 0,
+                                                                "Verification": 0,
+                                                                "Demo deposits": 0,
+                                                                "VIP service": 0,
+                                                                "Other": 0
+                                                            };
+                                                            const colors = ["bg-blue-500", "bg-purple-500", "bg-emerald-500", "bg-amber-500", "bg-rose-500", "bg-gray-400"];
+                                                            return Object.entries(sources).map(([label, value], i) => (
+                                                                <BreakdownBar key={label} label={label} value={value} total={total || 1} color={colors[i % colors.length]} />
+                                                            ));
+                                                        })()}
+                                                    </div>
+                                                </div>
+
+                                                {/* User growth */}
+                                                <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+                                                    <h3 className="font-bold text-base text-gray-900 mb-4">User growth</h3>
+                                                    <div className="space-y-3">
+                                                        {[
+                                                            { label: "Total tutors",   value: analyticsGrowth?.totalTutors   || data?.metrics?.totalTutors   || 0 },
+                                                            { label: "Total students", value: analyticsGrowth?.totalStudents || data?.metrics?.totalStudents || 0 },
+                                                            { label: "Institutes",     value: analyticsGrowth?.totalInstitutes || 0 },
+                                                            { label: "Verified tutors",value: analyticsGrowth?.verifiedTutors  || 0 },
+                                                            { label: "Pro subscribers",value: analyticsGrowth?.proTutors       || 0 },
+                                                            { label: "Elite subscribers", value: analyticsGrowth?.eliteTutors  || 0 },
+                                                        ].map((row, i) => (
+                                                            <div key={i} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+                                                                <span className="text-sm text-gray-600 font-semibold">{row.label}</span>
+                                                                <span className="text-sm font-bold text-gray-900">{row.value.toLocaleString("en-IN")}</span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+
+                                                    {/* Conversion funnel */}
+                                                    <h4 className="font-bold text-sm text-gray-900 mt-5 mb-3">Conversion funnel</h4>
+                                                    {(() => {
+                                                        const total = analyticsGrowth?.totalTutors || data?.metrics?.totalTutors || 1;
+                                                        const steps = [
+                                                            { label: "Tutor signups", n: total, pct: 100 },
+                                                            { label: "Credit buyers", n: analyticsGrowth?.creditBuyers || 0, pct: Math.round(((analyticsGrowth?.creditBuyers || 0) / total) * 100) },
+                                                            { label: "Pro subscribers", n: analyticsGrowth?.proTutors || 0, pct: Math.round(((analyticsGrowth?.proTutors || 0) / total) * 100) },
+                                                            { label: "Elite subscribers", n: analyticsGrowth?.eliteTutors || 0, pct: Math.round(((analyticsGrowth?.eliteTutors || 0) / total) * 100) },
+                                                        ];
+                                                        return (
+                                                            <div className="space-y-2">
+                                                                {steps.map((s, i) => (
+                                                                    <div key={i} className="space-y-1">
+                                                                        <div className="flex justify-between text-xs">
+                                                                            <span className="text-gray-600 font-semibold">{s.label}</span>
+                                                                            <span className="text-gray-500">{s.n} ({s.pct}%)</span>
+                                                                        </div>
+                                                                        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                                                                            <div className="h-full bg-blue-500 rounded-full" style={{ width: `${s.pct}%` }} />
+                                                                        </div>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        );
+                                                    })()}
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* ─── PROJECTIONS ──────────────────────────────────────────────────── */}
+                            {activeTab === "projections" && (
+                                <div className="space-y-6">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <h3 className="font-bold text-lg text-gray-900">Revenue projections</h3>
+                                            <p className="text-sm text-gray-500 mt-0.5">Edit the assumptions below to update projections in real time.</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                                        {/* Assumptions editor */}
+                                        <div className="lg:col-span-1 space-y-4">
+                                            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
+                                                <h4 className="font-bold text-sm text-gray-900 mb-4">Growth assumptions</h4>
+                                                <div className="space-y-3">
+                                                    {[
+                                                        { key: "tutorSignupsPerMonth",    label: "New tutor signups/month" },
+                                                        { key: "studentSignupsPerMonth",  label: "New student signups/month" },
+                                                        { key: "pctCreditBuyers",         label: "% tutors who buy credits" },
+                                                        { key: "pctPro",                  label: "% tutors who go Pro" },
+                                                        { key: "pctElite",                label: "% tutors who go Elite" },
+                                                        { key: "pctVerified",             label: "% tutors who get verified" },
+                                                    ].map(({ key, label }) => (
+                                                        <div key={key} className="flex items-center justify-between gap-3">
+                                                            <label className="text-xs text-gray-600 font-semibold flex-1">{label}</label>
+                                                            <input
+                                                                type="number"
+                                                                value={projAssumptions[key]}
+                                                                onChange={e => setProjAssumptions(p => ({ ...p, [key]: parseFloat(e.target.value) || 0 }))}
+                                                                className="w-20 text-right border border-gray-200 rounded-lg px-2 py-1.5 text-sm font-semibold bg-gray-50 focus:outline-none focus:border-blue-400"
+                                                            />
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
+                                                <h4 className="font-bold text-sm text-gray-900 mb-4">Revenue per unit (₹)</h4>
+                                                <div className="space-y-3">
+                                                    {[
+                                                        { key: "avgCreditValue",   label: "Avg credit pack" },
+                                                        { key: "proPrice",         label: "Pro subscription" },
+                                                        { key: "elitePrice",       label: "Elite subscription" },
+                                                        { key: "verificationFee",  label: "Verification fee" },
+                                                        { key: "fixedMonthlyCosts",label: "Fixed monthly costs" },
+                                                    ].map(({ key, label }) => (
+                                                        <div key={key} className="flex items-center justify-between gap-3">
+                                                            <label className="text-xs text-gray-600 font-semibold flex-1">{label}</label>
+                                                            <div className="flex items-center gap-1">
+                                                                <span className="text-xs text-gray-400">₹</span>
+                                                                <input
+                                                                    type="number"
+                                                                    value={projAssumptions[key]}
+                                                                    onChange={e => setProjAssumptions(p => ({ ...p, [key]: parseFloat(e.target.value) || 0 }))}
+                                                                    className="w-24 text-right border border-gray-200 rounded-lg px-2 py-1.5 text-sm font-semibold bg-gray-50 focus:outline-none focus:border-blue-400"
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            {/* Break-even */}
+                                            <div className={`rounded-2xl border p-5 ${breakEvenMonth ? "bg-emerald-50 border-emerald-100" : "bg-amber-50 border-amber-100"}`}>
+                                                <h4 className="font-bold text-sm mb-1" style={{ color: breakEvenMonth ? "#059669" : "#92400e" }}>Break-even analysis</h4>
+                                                {breakEvenMonth ? (
+                                                    <p className="text-sm" style={{ color: "#065f46" }}>
+                                                        At current assumptions, you break even at <strong>Month {breakEvenMonth.month}</strong> with <strong>{breakEvenMonth.tutors.toLocaleString("en-IN")} tutors</strong> on the platform.
+                                                    </p>
+                                                ) : (
+                                                    <p className="text-sm text-amber-700">
+                                                        Based on current assumptions, you don&apos;t break even within 12 months. Try increasing growth numbers or reducing fixed costs.
+                                                    </p>
+                                                )}
+                                                <p className="text-xs text-gray-500 mt-2">Fixed monthly costs: ₹{projAssumptions.fixedMonthlyCosts.toLocaleString("en-IN")}</p>
+                                            </div>
+                                        </div>
+
+                                        {/* Projections table */}
+                                        <div className="lg:col-span-2 space-y-5">
+                                            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                                                <div className="p-5 border-b border-gray-100">
+                                                    <h4 className="font-bold text-sm text-gray-900">Projected revenue by month</h4>
+                                                </div>
+                                                <div className="overflow-x-auto">
+                                                    <table className="w-full text-left">
+                                                        <thead>
+                                                            <tr className="bg-gray-50 border-b border-gray-100">
+                                                                <th className="px-5 py-3 text-xs font-semibold text-gray-500">Metric</th>
+                                                                {projMonths.map(m => (
+                                                                    <th key={m} className="px-5 py-3 text-xs font-semibold text-gray-500 text-right">Month {m}</th>
+                                                                ))}
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody className="divide-y divide-gray-100">
+                                                            {[
+                                                                { label: "Tutors on platform", key: "tutors", fmt: n => n.toLocaleString("en-IN") },
+                                                                { label: "Pro subscribers",    key: "pro",    fmt: n => n.toLocaleString("en-IN") },
+                                                                { label: "Elite subscribers",  key: "elite",  fmt: n => n.toLocaleString("en-IN") },
+                                                                { label: "Credit revenue",     key: "creditRev", fmt: n => `₹${n.toLocaleString("en-IN")}` },
+                                                                { label: "Subscription revenue",key: "subRev", fmt: n => `₹${n.toLocaleString("en-IN")}` },
+                                                                { label: "Verification revenue",key: "verifyRev", fmt: n => `₹${n.toLocaleString("en-IN")}` },
+                                                                { label: "Total projected MRR", key: "total", fmt: n => `₹${n.toLocaleString("en-IN")}`, bold: true },
+                                                            ].map(row => (
+                                                                <tr key={row.key} className={row.bold ? "bg-blue-50" : "hover:bg-gray-50"}>
+                                                                    <td className={`px-5 py-3 text-sm ${row.bold ? "font-bold text-blue-700" : "text-gray-700 font-semibold"}`}>{row.label}</td>
+                                                                    {projData.map(p => (
+                                                                        <td key={p.month} className={`px-5 py-3 text-sm text-right ${row.bold ? "font-bold text-blue-700" : "text-gray-900 font-semibold"}`}>
+                                                                            {row.fmt(p[row.key])}
+                                                                        </td>
+                                                                    ))}
+                                                                </tr>
+                                                            ))}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+
+                                            {/* Ad spend guide */}
+                                            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
+                                                <h4 className="font-bold text-sm text-gray-900 mb-1">Ad spend guide</h4>
+                                                <p className="text-xs text-gray-500 mb-4">Estimated cost per lead (CPL) and recommended monthly spend by channel.</p>
+                                                <div className="overflow-x-auto">
+                                                    <table className="w-full text-left text-sm">
+                                                        <thead>
+                                                            <tr className="bg-gray-50 border-b border-gray-100">
+                                                                {["Channel", "Target", "Est. CPL", "Budget/month"].map(h => (
+                                                                    <th key={h} className="px-4 py-2.5 text-xs font-semibold text-gray-500">{h}</th>
+                                                                ))}
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody className="divide-y divide-gray-100">
+                                                            {[
+                                                                { channel: "Facebook / Instagram", target: "Tutors (teachers, 25–45)", cpl: "₹100–200", budget: "₹10,000–30,000/mo" },
+                                                                { channel: "Google Search", target: "Students (\"home tutor near me\")", cpl: "₹150–300", budget: "₹15,000–40,000/mo" },
+                                                                { channel: "WhatsApp groups", target: "Tutor communities (manual)", cpl: "₹0", budget: "Free" },
+                                                                { channel: "LinkedIn", target: "Premium tutors, IIT/IIM coaches", cpl: "₹300–500", budget: "₹5,000–10,000/mo" },
+                                                            ].map((row, i) => (
+                                                                <tr key={i} className="hover:bg-gray-50">
+                                                                    <td className="px-4 py-3 font-semibold text-gray-900 text-sm">{row.channel}</td>
+                                                                    <td className="px-4 py-3 text-gray-600 text-sm">{row.target}</td>
+                                                                    <td className="px-4 py-3 text-gray-700 font-semibold text-sm">{row.cpl}</td>
+                                                                    <td className="px-4 py-3 text-gray-700 font-semibold text-sm">{row.budget}</td>
+                                                                </tr>
+                                                            ))}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+
+                                                <h5 className="font-bold text-sm text-gray-900 mt-5 mb-3">Recommended budget by stage</h5>
+                                                <div className="space-y-2">
+                                                    {[
+                                                        { phase: "Phase 1 (0–100 tutors)", budget: "₹0 — manual outreach only", color: "bg-gray-100 text-gray-700" },
+                                                        { phase: "Phase 2 (100–500 tutors)", budget: "₹15,000–30,000/month", color: "bg-blue-50 text-blue-700" },
+                                                        { phase: "Phase 3 (500–2,000 tutors)", budget: "₹50,000–1,50,000/month", color: "bg-purple-50 text-purple-700" },
+                                                        { phase: "Phase 4 (2,000+ tutors)", budget: "₹2,00,000+/month", color: "bg-emerald-50 text-emerald-700" },
+                                                    ].map((row, i) => (
+                                                        <div key={i} className={`flex items-center justify-between px-4 py-3 rounded-xl ${row.color}`}>
+                                                            <span className="text-sm font-semibold">{row.phase}</span>
+                                                            <span className="text-sm font-bold">{row.budget}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* ─── BLOG ─────────────────────────────────────────────────────────── */}
+                            {activeTab === "blog" && (
+                                <div className="space-y-4">
+                                    {blogView === "list" ? (
+                                        <>
+                                            <div className="flex items-center justify-between">
+                                                <h3 className="font-bold text-lg text-gray-900">Blog posts</h3>
+                                                <button
+                                                    onClick={startCreatePost}
+                                                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 transition-all"
+                                                >
+                                                    <PlusCircle size={14} />
+                                                    Create new post
+                                                </button>
+                                            </div>
+
+                                            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm">
+                                                {blogLoading ? (
+                                                    <div className="flex items-center justify-center py-16">
+                                                        <div className="size-8 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
+                                                    </div>
+                                                ) : (
+                                                    <div className="overflow-x-auto">
+                                                        <table className="w-full text-left">
+                                                            <thead>
+                                                                <tr className="border-b border-gray-200 bg-gray-50">
+                                                                    {["Title", "Category", "Status", "Author", "Published", "Actions"].map((h, i) => (
+                                                                        <th key={i} className={`pb-3 pt-2 px-4 text-xs font-semibold text-gray-500 ${i === 0 ? "rounded-tl-2xl" : i === 5 ? "rounded-tr-2xl" : ""}`}>{h}</th>
+                                                                    ))}
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody className="divide-y divide-gray-100">
+                                                                {blogPosts.map(post => (
+                                                                    <tr key={post.id} className="hover:bg-gray-50 transition-colors">
+                                                                        <td className="py-4 px-4">
+                                                                            <p className="font-semibold text-sm text-gray-900 max-w-xs truncate">{post.title}</p>
+                                                                            <p className="text-xs text-gray-400 truncate max-w-xs">{post.slug}</p>
+                                                                        </td>
+                                                                        <td className="py-4 px-4">
+                                                                            <span className="px-2 py-0.5 bg-blue-50 text-blue-600 rounded text-xs font-semibold">{post.category || "General"}</span>
+                                                                        </td>
+                                                                        <td className="py-4 px-4">
+                                                                            {post.isPublished ? (
+                                                                                <span className="px-2.5 py-0.5 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-full text-xs font-semibold">Published</span>
+                                                                            ) : (
+                                                                                <span className="px-2.5 py-0.5 bg-gray-100 text-gray-500 border border-gray-200 rounded-full text-xs font-semibold">Draft</span>
+                                                                            )}
+                                                                        </td>
+                                                                        <td className="py-4 px-4 text-sm text-gray-600">{post.author || "—"}</td>
+                                                                        <td className="py-4 px-4 text-xs text-gray-500">
+                                                                            {post.publishedAt ? new Date(post.publishedAt).toLocaleDateString("en-IN") : "—"}
+                                                                        </td>
+                                                                        <td className="py-4 px-4">
+                                                                            <div className="flex gap-1.5">
+                                                                                <button onClick={() => startEditPost(post)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all" title="Edit">
+                                                                                    <Edit2 size={14} />
+                                                                                </button>
+                                                                                <button onClick={() => handleBlogTogglePublish(post)} className="p-1.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all" title={post.isPublished ? "Unpublish" : "Publish"}>
+                                                                                    <Eye size={14} />
+                                                                                </button>
+                                                                                <button onClick={() => handleBlogDelete(post)} className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all" title="Delete">
+                                                                                    <Trash2 size={14} />
+                                                                                </button>
+                                                                            </div>
+                                                                        </td>
+                                                                    </tr>
+                                                                ))}
+                                                                {blogPosts.length === 0 && (
+                                                                    <tr><td colSpan={6} className="py-12 text-center text-gray-400 text-sm">No blog posts yet. Create your first one.</td></tr>
+                                                                )}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </>
+                                    ) : (
+                                        /* Blog edit form */
+                                        <div className="space-y-4">
+                                            <div className="flex items-center gap-3">
+                                                <button
+                                                    onClick={() => setBlogView("list")}
+                                                    className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 font-semibold"
+                                                >
+                                                    <ChevronLeft size={16} />
+                                                    Back to posts
+                                                </button>
+                                                <h3 className="font-bold text-lg text-gray-900">{editingPost ? "Edit post" : "Create new post"}</h3>
+                                            </div>
+
+                                            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-4">
+                                                <div>
+                                                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Title</label>
+                                                    <input
+                                                        value={blogForm.title}
+                                                        onChange={e => setBlogForm(f => ({ ...f, title: e.target.value }))}
+                                                        onBlur={e => {
+                                                            if (!blogForm.slug || blogForm.slug === slugify(blogForm.title)) {
+                                                                setBlogForm(f => ({ ...f, slug: slugify(e.target.value) }));
+                                                            }
+                                                        }}
+                                                        placeholder="Post title"
+                                                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-200 transition-colors text-base font-semibold"
+                                                    />
+                                                </div>
+
+                                                <div>
+                                                    <label className="block text-xs font-semibold text-gray-500 mb-1">Slug</label>
+                                                    <input
+                                                        value={blogForm.slug}
+                                                        onChange={e => setBlogForm(f => ({ ...f, slug: e.target.value }))}
+                                                        placeholder="post-url-slug"
+                                                        className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-600 placeholder-gray-400 focus:outline-none focus:border-blue-400 text-sm font-medium transition-colors"
+                                                    />
+                                                </div>
+
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div>
+                                                        <label className="block text-sm font-semibold text-gray-700 mb-1.5">Category</label>
+                                                        <select
+                                                            value={blogForm.category}
+                                                            onChange={e => setBlogForm(f => ({ ...f, category: e.target.value }))}
+                                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-blue-400 text-sm font-medium"
+                                                        >
+                                                            {["JEE/NEET", "CBSE/ICSE", "Study Tips", "Tutor Advice", "News"].map(c => (
+                                                                <option key={c} value={c}>{c}</option>
+                                                            ))}
+                                                        </select>
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-sm font-semibold text-gray-700 mb-1.5">Read time</label>
+                                                        <input
+                                                            value={blogForm.readTime}
+                                                            onChange={e => setBlogForm(f => ({ ...f, readTime: e.target.value }))}
+                                                            placeholder="5 min read"
+                                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-400 text-sm font-medium"
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div>
+                                                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Excerpt <span className="text-gray-400 font-normal">(max 200 chars)</span></label>
+                                                    <textarea
+                                                        value={blogForm.excerpt}
+                                                        onChange={e => setBlogForm(f => ({ ...f, excerpt: e.target.value.slice(0, 200) }))}
+                                                        rows={2}
+                                                        placeholder="Short description shown in previews..."
+                                                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-400 text-sm resize-none"
+                                                    />
+                                                    <p className="text-xs text-gray-400 mt-1 text-right">{blogForm.excerpt.length}/200</p>
+                                                </div>
+
+                                                <div>
+                                                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Content <span className="text-gray-400 font-normal">(Markdown supported)</span></label>
+                                                    <textarea
+                                                        value={blogForm.content}
+                                                        onChange={e => setBlogForm(f => ({ ...f, content: e.target.value }))}
+                                                        rows={12}
+                                                        placeholder="Write your post content here..."
+                                                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-400 text-sm font-mono resize-y"
+                                                    />
+                                                </div>
+
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div>
+                                                        <label className="block text-sm font-semibold text-gray-700 mb-1.5">Author</label>
+                                                        <input
+                                                            value={blogForm.author}
+                                                            onChange={e => setBlogForm(f => ({ ...f, author: e.target.value }))}
+                                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-blue-400 text-sm font-medium"
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-sm font-semibold text-gray-700 mb-1.5">Cover image URL</label>
+                                                        <input
+                                                            value={blogForm.coverImageUrl}
+                                                            onChange={e => setBlogForm(f => ({ ...f, coverImageUrl: e.target.value }))}
+                                                            placeholder="https://..."
+                                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-400 text-sm font-medium"
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex items-center gap-3 pt-1">
+                                                    <label className="flex items-center gap-2 cursor-pointer select-none">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={blogForm.isPublished}
+                                                            onChange={e => setBlogForm(f => ({ ...f, isPublished: e.target.checked }))}
+                                                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                        />
+                                                        <span className="text-sm font-semibold text-gray-700">Publish immediately</span>
+                                                    </label>
+                                                </div>
+
+                                                <div className="flex gap-3 pt-2">
+                                                    <button
+                                                        onClick={() => handleBlogSave(false)}
+                                                        disabled={blogSaving}
+                                                        className="px-5 py-2.5 bg-white text-gray-700 border border-gray-200 rounded-xl font-semibold text-sm hover:bg-gray-50 transition-all disabled:opacity-50"
+                                                    >
+                                                        {blogSaving ? "Saving..." : "Save as draft"}
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleBlogSave(true)}
+                                                        disabled={blogSaving}
+                                                        className="px-5 py-2.5 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 transition-all disabled:opacity-50"
+                                                    >
+                                                        {blogSaving ? "Publishing..." : "Publish"}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* ─── EMAILS ───────────────────────────────────────────────────────── */}
+                            {activeTab === "emails" && (
+                                <div className="space-y-5 max-w-3xl">
+                                    <h3 className="font-bold text-lg text-gray-900">Broadcast email</h3>
+
+                                    <div className="bg-amber-50 border border-amber-100 rounded-xl px-5 py-4 flex gap-3">
+                                        <Info size={16} className="text-amber-600 mt-0.5 shrink-0" />
+                                        <p className="text-sm text-amber-700 font-semibold">
+                                            Emails are sent via Resend. Max 500 recipients per broadcast. Always preview before sending.
+                                        </p>
+                                    </div>
+
+                                    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Send to</label>
+                                            <select
+                                                value={emailSegment}
+                                                onChange={e => { setEmailSegment(e.target.value); setEmailPreview(null); }}
+                                                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-blue-400 text-sm font-medium"
+                                            >
+                                                {["All users", "All Tutors", "All Students", "Pro Tutors", "Elite Tutors", "Unverified Tutors"].map(s => (
+                                                    <option key={s} value={s}>{s}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Subject line</label>
+                                            <input
+                                                value={emailSubject}
+                                                onChange={e => setEmailSubject(e.target.value)}
+                                                placeholder="e.g. New feature alert on TuitionsinIndia"
+                                                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-400 text-sm font-medium"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Email body <span className="text-gray-400 font-normal">(HTML tags allowed)</span></label>
+                                            <textarea
+                                                value={emailBody}
+                                                onChange={e => setEmailBody(e.target.value)}
+                                                rows={10}
+                                                placeholder="Write your email here..."
+                                                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-400 text-sm resize-y"
+                                            />
+                                        </div>
+
+                                        {emailPreview && (
+                                            <div className="bg-blue-50 border border-blue-100 rounded-xl px-5 py-4">
+                                                <p className="text-sm font-bold text-blue-800 mb-1">Preview: {emailPreview.count || 0} recipients</p>
+                                                {emailPreview.sample?.length > 0 && (
+                                                    <p className="text-xs text-blue-600">Sample: {emailPreview.sample.join(", ")}</p>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {emailStatus && (
+                                            <div className={`rounded-xl px-5 py-4 flex gap-3 ${emailStatus.ok ? "bg-emerald-50 border border-emerald-100" : "bg-red-50 border border-red-100"}`}>
+                                                {emailStatus.ok ? <CheckCircle size={16} className="text-emerald-600 mt-0.5 shrink-0" /> : <AlertCircle size={16} className="text-red-500 mt-0.5 shrink-0" />}
+                                                <p className={`text-sm font-semibold ${emailStatus.ok ? "text-emerald-700" : "text-red-700"}`}>{emailStatus.message}</p>
+                                            </div>
+                                        )}
+
+                                        <div className="flex gap-3 pt-1">
+                                            <button
+                                                onClick={handleEmailPreview}
+                                                disabled={!emailSubject || !emailBody}
+                                                className="px-5 py-2.5 bg-white text-gray-700 border border-gray-200 rounded-xl font-semibold text-sm hover:bg-gray-50 transition-all disabled:opacity-50 flex items-center gap-2"
+                                            >
+                                                <Eye size={14} />
+                                                Preview recipients
+                                            </button>
+                                            <button
+                                                onClick={handleEmailSend}
+                                                disabled={emailSending || !emailSubject || !emailBody}
+                                                className="px-5 py-2.5 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 transition-all disabled:opacity-50 flex items-center gap-2"
+                                            >
+                                                <Send size={14} />
+                                                {emailSending ? "Sending..." : "Send email"}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* ─── AUTOMATIONS ──────────────────────────────────────────────────── */}
+                            {activeTab === "automations" && (
+                                <div className="space-y-5 max-w-3xl">
+                                    <h3 className="font-bold text-lg text-gray-900">Automations</h3>
+
+                                    {/* Cron jobs */}
+                                    <div className="space-y-3">
+                                        {[
+                                            {
+                                                id: "monthly-credit-reset",
+                                                label: "Monthly credit reset",
+                                                schedule: "Runs on the 1st of each month at 6:00 AM",
+                                                description: "Resets monthly credit allocations for Pro and Elite subscribers."
+                                            },
+                                            {
+                                                id: "vip-billing",
+                                                label: "VIP billing",
+                                                schedule: "Runs on the 1st of each month at 7:00 AM",
+                                                description: "Processes recurring billing for VIP service customers."
+                                            },
+                                            {
+                                                id: "email-drip",
+                                                label: "Email drip",
+                                                schedule: "Runs daily at 9:00 AM",
+                                                description: "Sends onboarding and re-engagement emails to new and inactive users."
+                                            }
+                                        ].map(job => {
+                                            const s = cronStatus[job.id] || {};
+                                            return (
+                                                <div key={job.id} className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
+                                                    <div className="flex items-start justify-between gap-4">
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="flex items-center gap-2 mb-0.5">
+                                                                <Zap size={14} className="text-blue-500 shrink-0" />
+                                                                <h4 className="font-bold text-sm text-gray-900">{job.label}</h4>
+                                                            </div>
+                                                            <p className="text-xs text-gray-400 mb-1">{job.schedule}</p>
+                                                            <p className="text-sm text-gray-600">{job.description}</p>
+                                                            {s.result && (
+                                                                <div className={`mt-2 flex items-center gap-2 text-xs font-semibold ${s.result === "success" ? "text-emerald-600" : "text-red-500"}`}>
+                                                                    {s.result === "success" ? <CheckCircle size={12} /> : <AlertCircle size={12} />}
+                                                                    {s.result === "success" ? "Job completed successfully" : `Failed: ${s.message}`}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        <button
+                                                            onClick={() => handleCronRun(job.id)}
+                                                            disabled={s.loading}
+                                                            className="px-4 py-2 bg-white text-blue-600 border border-blue-100 rounded-xl font-semibold text-sm hover:bg-blue-50 transition-all disabled:opacity-50 flex items-center gap-2 shrink-0"
+                                                        >
+                                                            {s.loading ? (
+                                                                <>
+                                                                    <div className="size-3.5 border-2 border-blue-300 border-t-blue-600 rounded-full animate-spin" />
+                                                                    Running...
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <Play size={12} />
+                                                                    Run now
+                                                                </>
+                                                            )}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+
+                                    {/* System status */}
+                                    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
+                                        <h4 className="font-bold text-sm text-gray-900 mb-4">System status</h4>
+                                        <div className="space-y-3">
+                                            <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                                                <span className="text-sm font-semibold text-gray-600">App version</span>
+                                                <span className="text-sm font-bold text-gray-900">1.0.0</span>
+                                            </div>
+                                            <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                                                <span className="text-sm font-semibold text-gray-600">Database</span>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="size-2 rounded-full bg-emerald-500 inline-block"></span>
+                                                    <span className="text-sm font-bold text-emerald-700">Connected</span>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center justify-between py-2">
+                                                <span className="text-sm font-semibold text-gray-600">Last deploy</span>
+                                                <span className="text-sm font-bold text-gray-900">
+                                                    {new Date().toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                                                </span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             )}
