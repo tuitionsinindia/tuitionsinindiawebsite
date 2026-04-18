@@ -791,7 +791,7 @@ function AdminDashboardContent() {
 
     // ─── Render ──────────────────────────────────────────────────────────────────
     return (
-        <div className="flex h-screen bg-gray-50 font-sans text-gray-900 overflow-hidden">
+        <div className="fixed inset-0 flex bg-gray-50 font-sans text-gray-900 overflow-hidden">
             {/* Sidebar */}
             <aside className="w-56 border-r border-gray-200 bg-white flex-col hidden lg:flex shadow-sm z-50 shrink-0">
                 <div className="p-5 border-b border-gray-100">
@@ -853,6 +853,16 @@ function AdminDashboardContent() {
                         </span>
                     </div>
                     <div className="flex items-center gap-3">
+                        {/* Pending action badge */}
+                        {(() => {
+                            const pending = (data?.pendingTutors?.length || 0) + pendingVerifications.length + (unreadInsights || 0);
+                            return pending > 0 ? (
+                                <button onClick={() => setActiveTab("overview")} className="relative flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 border border-amber-200 text-amber-700 rounded-lg text-xs font-semibold hover:bg-amber-100 transition-colors">
+                                    <AlertCircle size={13} />
+                                    {pending} item{pending !== 1 ? "s" : ""} need attention
+                                </button>
+                            ) : null;
+                        })()}
                         <button onClick={fetchMetrics} className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-blue-600 transition-colors">
                             <RefreshCcw size={13} /> Refresh
                         </button>
@@ -877,75 +887,196 @@ function AdminDashboardContent() {
                             {/* ─── OVERVIEW ─────────────────────────────────────────────────────── */}
                             {activeTab === "overview" && (
                                 <>
-                                    {/* Metric cards */}
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                    {/* ── Needs attention banner ── */}
+                                    {(data?.pendingTutors?.length > 0 || pendingVerifications.length > 0 || unreadInsights > 0) && (
+                                        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex flex-wrap gap-3 items-center">
+                                            <div className="flex items-center gap-2">
+                                                <AlertCircle size={16} className="text-amber-600 shrink-0" />
+                                                <span className="text-sm font-bold text-amber-800">Needs your attention</span>
+                                            </div>
+                                            <div className="flex flex-wrap gap-2 ml-1">
+                                                {data?.pendingTutors?.length > 0 && (
+                                                    <button onClick={() => setActiveTab("listings")} className="flex items-center gap-1.5 px-3 py-1 bg-white border border-amber-200 rounded-lg text-xs font-semibold text-amber-700 hover:bg-amber-100 transition-colors">
+                                                        <GraduationCap size={12} /> {data.pendingTutors.length} tutor approval{data.pendingTutors.length !== 1 ? "s" : ""}
+                                                    </button>
+                                                )}
+                                                {pendingVerifications.length > 0 && (
+                                                    <button onClick={() => setActiveTab("overview")} className="flex items-center gap-1.5 px-3 py-1 bg-white border border-amber-200 rounded-lg text-xs font-semibold text-amber-700 hover:bg-amber-100 transition-colors">
+                                                        <ShieldCheck size={12} /> {pendingVerifications.length} verification{pendingVerifications.length !== 1 ? "s" : ""}
+                                                    </button>
+                                                )}
+                                                {unreadInsights > 0 && (
+                                                    <span className="flex items-center gap-1.5 px-3 py-1 bg-white border border-amber-200 rounded-lg text-xs font-semibold text-amber-700">
+                                                        <Info size={12} /> {unreadInsights} new insight{unreadInsights !== 1 ? "s" : ""}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* ── Platform metrics ── */}
+                                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                                         {[
-                                            { label: "Total tutors",  value: data?.metrics?.totalTutors || 0,                  icon: GraduationCap, color: "text-blue-600",    bg: "bg-blue-50" },
-                                            { label: "Students",      value: data?.metrics?.totalStudents || 0,                icon: UserCheck,     color: "text-amber-600",   bg: "bg-amber-50" },
-                                            { label: "Total revenue", value: `₹${(data?.metrics?.totalRevenue || 0).toLocaleString("en-IN")}`, icon: Wallet, color: "text-emerald-600", bg: "bg-emerald-50" },
-                                            { label: "Active leads",  value: data?.metrics?.activeLeads || 0,                  icon: Target,        color: "text-purple-600",  bg: "bg-purple-50" }
+                                            { label: "Total tutors",     value: data?.metrics?.totalTutors || 0,    sub: `+${data?.metrics?.newUsersThisWeek || 0} this week`, icon: GraduationCap, color: "text-blue-600",    bg: "bg-blue-50",    tab: "users" },
+                                            { label: "Students",          value: data?.metrics?.totalStudents || 0,  sub: `${data?.metrics?.totalInstitutes || 0} institutes`,  icon: UserCheck,     color: "text-amber-600",   bg: "bg-amber-50",   tab: "users" },
+                                            { label: "Total revenue",     value: `₹${(data?.metrics?.totalRevenue || 0).toLocaleString("en-IN")}`, sub: `₹${(data?.metrics?.weeklyRevenue || 0).toLocaleString("en-IN")} this week`, icon: Wallet, color: "text-emerald-600", bg: "bg-emerald-50", tab: "financials" },
+                                            { label: "Active leads",      value: data?.metrics?.activeLeads || 0,    sub: `${data?.metrics?.pendingBookings || 0} demo bookings pending`, icon: Target, color: "text-purple-600", bg: "bg-purple-50", tab: "bookings" },
                                         ].map((stat, i) => (
-                                            <div key={i} className="p-5 bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-all">
-                                                <div className="flex items-center gap-3 mb-4">
+                                            <button key={i} onClick={() => setActiveTab(stat.tab)} className="p-5 bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md hover:border-blue-200 transition-all text-left group">
+                                                <div className="flex items-center gap-3 mb-3">
                                                     <div className={`p-2.5 rounded-xl ${stat.bg} ${stat.color}`}>
-                                                        <stat.icon size={18} strokeWidth={2} />
+                                                        <stat.icon size={17} strokeWidth={2} />
                                                     </div>
                                                     <p className="text-xs font-semibold text-gray-500">{stat.label}</p>
                                                 </div>
                                                 <p className="text-3xl font-bold text-gray-900 tracking-tight">{stat.value}</p>
-                                            </div>
+                                                <p className="text-xs text-gray-400 mt-1.5">{stat.sub}</p>
+                                            </button>
                                         ))}
                                     </div>
 
-                                    {/* Quick actions + alert badges */}
-                                    <div className="flex flex-wrap gap-3 items-center">
-                                        <button onClick={() => setActiveTab("listings")} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 transition-all">
-                                            <GraduationCap size={14} />
-                                            View pending approvals
-                                            {data?.pendingTutors?.length > 0 && (
-                                                <span className="ml-1 bg-white text-blue-600 rounded-full text-xs px-1.5 font-bold">{data.pendingTutors.length}</span>
-                                            )}
-                                        </button>
-                                        <button onClick={() => setActiveTab("users")} className="flex items-center gap-2 px-4 py-2 bg-white text-gray-700 border border-gray-200 rounded-xl font-semibold text-sm hover:bg-gray-50 transition-all">
-                                            <Users size={14} />
-                                            View all leads
-                                        </button>
-                                        {pendingVerifications.length > 0 && (
-                                            <div className="flex items-center gap-2 px-4 py-2 bg-amber-50 text-amber-700 border border-amber-100 rounded-xl text-sm font-semibold">
-                                                <ShieldCheck size={14} />
-                                                {pendingVerifications.length} verification{pendingVerifications.length !== 1 ? "s" : ""} pending review
-                                            </div>
-                                        )}
+                                    {/* ── Section health at a glance ── */}
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                        {[
+                                            { label: "Tutor approvals", count: data?.pendingTutors?.length || 0, status: data?.pendingTutors?.length > 0 ? "warn" : "ok", tab: "listings" },
+                                            { label: "ID verifications", count: pendingVerifications.length, status: pendingVerifications.length > 0 ? "warn" : "ok", tab: "overview" },
+                                            { label: "Pending bookings", count: data?.metrics?.pendingBookings || 0, status: (data?.metrics?.pendingBookings || 0) > 5 ? "warn" : "ok", tab: "bookings" },
+                                            { label: "Unread insights",  count: unreadInsights || 0, status: unreadInsights > 0 ? "info" : "ok", tab: "overview" },
+                                        ].map((item, i) => (
+                                            <button key={i} onClick={() => setActiveTab(item.tab)} className={`p-4 rounded-xl border text-left transition-all hover:shadow-sm ${item.status === "warn" ? "bg-amber-50 border-amber-200" : item.status === "info" ? "bg-blue-50 border-blue-200" : "bg-emerald-50 border-emerald-200"}`}>
+                                                <p className={`text-2xl font-bold ${item.status === "warn" ? "text-amber-700" : item.status === "info" ? "text-blue-700" : "text-emerald-700"}`}>{item.count}</p>
+                                                <p className={`text-xs font-semibold mt-0.5 ${item.status === "warn" ? "text-amber-600" : item.status === "info" ? "text-blue-600" : "text-emerald-600"}`}>{item.label}</p>
+                                                <p className={`text-xs mt-1 ${item.status === "ok" ? "text-emerald-500" : "text-gray-500"}`}>{item.status === "ok" ? "All clear" : "Needs review"}</p>
+                                            </button>
+                                        ))}
                                     </div>
 
-                                    {/* Weekly insights */}
-                                    {insights.length > 0 && (
-                                        <div className="mb-6">
-                                            <div className="flex items-center justify-between mb-3">
-                                                <h2 className="text-base font-semibold text-gray-900">
-                                                    This week's recommendations
-                                                    {unreadInsights > 0 && (
-                                                        <span className="ml-2 text-xs bg-red-100 text-red-600 font-semibold px-2 py-0.5 rounded-full">{unreadInsights} new</span>
+                                    {/* ── Main 3-column row ── */}
+                                    <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
+                                        {/* Pending Approvals */}
+                                        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
+                                            <div className="flex items-center justify-between mb-4">
+                                                <h3 className="font-bold text-sm text-gray-900">Pending tutor approvals</h3>
+                                                <button onClick={() => setActiveTab("listings")} className="text-xs font-semibold text-blue-600 hover:underline">View all →</button>
+                                            </div>
+                                            <div className="space-y-2">
+                                                {data?.pendingTutors?.slice(0, 4).map(tutor => (
+                                                    <div key={tutor.id} className="p-3 bg-gray-50 rounded-xl flex items-center justify-between border border-gray-100">
+                                                        <div className="flex items-center gap-2.5">
+                                                            <div className="size-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center font-bold text-xs">{tutor.name?.[0]}</div>
+                                                            <div>
+                                                                <p className="font-semibold text-xs text-gray-900">{tutor.name}</p>
+                                                                <p className="text-xs text-gray-400">{tutor.phone || tutor.email || "—"}</p>
+                                                            </div>
+                                                        </div>
+                                                        <button onClick={() => handleApproveTutor(tutor.id)} className="px-2.5 py-1 bg-blue-600 text-white rounded-lg text-xs font-semibold hover:bg-blue-700 transition-all">Approve</button>
+                                                    </div>
+                                                ))}
+                                                {(!data?.pendingTutors || data.pendingTutors.length === 0) && (
+                                                    <div className="py-6 text-center">
+                                                        <CheckCircle2 size={20} className="text-emerald-400 mx-auto mb-1" />
+                                                        <p className="text-xs text-gray-400">All caught up</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Recent signups + transactions */}
+                                        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
+                                            <div className="flex items-center justify-between mb-4">
+                                                <h3 className="font-bold text-sm text-gray-900">Recent signups</h3>
+                                                <button onClick={() => setActiveTab("users")} className="text-xs font-semibold text-blue-600 hover:underline">User directory →</button>
+                                            </div>
+                                            <div className="space-y-2">
+                                                {data?.recentSignups?.slice(0, 5).map(u => (
+                                                    <div key={u.id} className="flex items-center justify-between py-1.5">
+                                                        <div className="flex items-center gap-2.5">
+                                                            <div className={`size-7 rounded-lg flex items-center justify-center font-bold text-xs ${u.role === "TUTOR" ? "bg-blue-100 text-blue-600" : u.role === "INSTITUTE" ? "bg-purple-100 text-purple-600" : "bg-amber-100 text-amber-600"}`}>{u.name?.[0]?.toUpperCase() || "?"}</div>
+                                                            <div>
+                                                                <p className="font-semibold text-xs text-gray-900">{u.name || "—"}</p>
+                                                                <p className="text-xs text-gray-400">{u.role.charAt(0) + u.role.slice(1).toLowerCase()}</p>
+                                                            </div>
+                                                        </div>
+                                                        <p className="text-xs text-gray-400">{new Date(u.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}</p>
+                                                    </div>
+                                                ))}
+                                                {(!data?.recentSignups || data.recentSignups.length === 0) && <p className="py-4 text-center text-xs text-gray-400">No signups yet.</p>}
+                                            </div>
+                                        </div>
+
+                                        {/* Verification requests + recent transactions */}
+                                        <div className="space-y-4">
+                                            {/* Verifications */}
+                                            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
+                                                <div className="flex items-center justify-between mb-3">
+                                                    <h3 className="font-bold text-sm text-gray-900">ID verifications</h3>
+                                                    {pendingVerifications.length > 0 && <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-xs font-semibold rounded-full">{pendingVerifications.length} pending</span>}
+                                                </div>
+                                                <div className="space-y-2">
+                                                    {pendingVerifications.slice(0, 3).map(v => (
+                                                        <div key={v.id} className="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                                                            <div className="flex items-center gap-2 mb-2">
+                                                                <div className="size-7 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center font-bold text-xs shrink-0">{v.tutor?.name?.[0] || "?"}</div>
+                                                                <p className="font-semibold text-xs text-gray-900 truncate">{v.tutor?.name || "—"}</p>
+                                                            </div>
+                                                            <div className="flex gap-1.5">
+                                                                <button onClick={() => handleVerificationReview(v.id, "APPROVE")} disabled={verificationActionLoading === v.id + "APPROVE"} className="flex-1 py-1 bg-emerald-600 text-white rounded-lg text-xs font-semibold hover:bg-emerald-700 disabled:opacity-50 transition-colors">{verificationActionLoading === v.id + "APPROVE" ? "..." : "Approve"}</button>
+                                                                <button onClick={() => handleVerificationReview(v.id, "REJECT")} disabled={verificationActionLoading === v.id + "REJECT"} className="flex-1 py-1 bg-white text-red-500 border border-red-200 rounded-lg text-xs font-semibold hover:bg-red-50 disabled:opacity-50 transition-colors">{verificationActionLoading === v.id + "REJECT" ? "..." : "Reject"}</button>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                    {pendingVerifications.length === 0 && (
+                                                        <div className="py-3 text-center"><CheckCircle2 size={16} className="text-emerald-400 mx-auto mb-1" /><p className="text-xs text-gray-400">No pending verifications</p></div>
                                                     )}
+                                                </div>
+                                            </div>
+
+                                            {/* Revenue snapshot */}
+                                            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
+                                                <div className="flex items-center justify-between mb-3">
+                                                    <h3 className="font-bold text-sm text-gray-900">Recent transactions</h3>
+                                                    <button onClick={() => setActiveTab("financials")} className="text-xs font-semibold text-blue-600 hover:underline">View all →</button>
+                                                </div>
+                                                <div className="space-y-2">
+                                                    {data?.recentTransactions?.slice(0, 3).map(txn => (
+                                                        <div key={txn.id} className="flex items-center justify-between py-1">
+                                                            <div className="flex items-center gap-2">
+                                                                <div className="size-7 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center"><Wallet size={12} /></div>
+                                                                <p className="text-xs text-gray-600 font-medium">{txn.user?.name || "User"}</p>
+                                                            </div>
+                                                            <span className="text-xs font-bold text-emerald-600">₹{txn.amount}</span>
+                                                        </div>
+                                                    ))}
+                                                    {(!data?.recentTransactions || data.recentTransactions.length === 0) && <p className="py-3 text-center text-xs text-gray-400">No transactions yet.</p>}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* ── Weekly insights ── */}
+                                    {insights.length > 0 && (
+                                        <div>
+                                            <div className="flex items-center justify-between mb-3">
+                                                <h2 className="text-sm font-bold text-gray-900">
+                                                    Weekly insights
+                                                    {unreadInsights > 0 && <span className="ml-2 text-xs bg-red-100 text-red-600 font-semibold px-2 py-0.5 rounded-full">{unreadInsights} new</span>}
                                                 </h2>
                                                 <button onClick={async () => {
-                                                    await fetch("/api/admin/insights", { method: "PATCH", headers: { ...adminHeaders(), "Content-Type": "application/json" }, body: JSON.stringify({ markAllRead: true }) });
+                                                    await fetch("/api/admin/insights", { method: "PATCH", headers: adminHeaders(), body: JSON.stringify({ markAllRead: true }) });
                                                     setUnreadInsights(0);
                                                     setInsights(prev => prev.map(i => ({ ...i, isRead: true })));
                                                 }} className="text-xs text-blue-600 hover:underline">Mark all read</button>
                                             </div>
                                             <div className="space-y-2">
-                                                {insights.slice(0, 5).map(insight => (
+                                                {insights.slice(0, 4).map(insight => (
                                                     <div key={insight.id} className={`rounded-xl border p-4 flex gap-3 items-start ${!insight.isRead ? "border-blue-200 bg-blue-50" : "border-gray-100 bg-white"}`}>
-                                                        <div className={`size-8 rounded-lg flex items-center justify-center shrink-0 text-sm font-bold ${insight.priority === "HIGH" ? "bg-red-100 text-red-600" : insight.priority === "MEDIUM" ? "bg-amber-100 text-amber-600" : "bg-emerald-100 text-emerald-600"}`}>
+                                                        <div className={`size-7 rounded-lg flex items-center justify-center shrink-0 text-xs font-bold ${insight.priority === "HIGH" ? "bg-red-100 text-red-600" : insight.priority === "MEDIUM" ? "bg-amber-100 text-amber-600" : "bg-emerald-100 text-emerald-600"}`}>
                                                             {insight.priority === "HIGH" ? "!" : insight.priority === "MEDIUM" ? "~" : "✓"}
                                                         </div>
                                                         <div className="flex-1 min-w-0">
                                                             <p className="text-sm font-semibold text-gray-900">{insight.title}</p>
                                                             <p className="text-xs text-gray-500 mt-0.5">{insight.body}</p>
-                                                            {insight.action && (
-                                                                <p className="text-xs text-blue-600 mt-1 font-medium">→ {insight.action}</p>
-                                                            )}
+                                                            {insight.action && <p className="text-xs text-blue-600 mt-1 font-medium">→ {insight.action}</p>}
                                                         </div>
                                                         <span className={`text-xs px-2 py-0.5 rounded-full font-medium shrink-0 ${insight.category === "REVENUE" ? "bg-green-100 text-green-700" : insight.category === "GROWTH" ? "bg-blue-100 text-blue-700" : insight.category === "ALERT" ? "bg-red-100 text-red-700" : "bg-gray-100 text-gray-600"}`}>{insight.category}</span>
                                                     </div>
@@ -953,110 +1084,6 @@ function AdminDashboardContent() {
                                             </div>
                                         </div>
                                     )}
-
-                                    {/* 3-panel row */}
-                                    <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
-                                        {/* Pending Approvals */}
-                                        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-                                            <div className="flex items-center justify-between mb-5">
-                                                <h3 className="font-bold text-base text-gray-900">Pending approvals</h3>
-                                                <button onClick={() => setActiveTab("listings")} className="text-xs font-semibold text-blue-600 hover:underline">View all</button>
-                                            </div>
-                                            <div className="space-y-3">
-                                                {data?.pendingTutors?.slice(0, 3).map(tutor => (
-                                                    <div key={tutor.id} className="p-3 bg-gray-50 rounded-xl flex items-center justify-between border border-gray-100">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="size-9 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center font-bold text-sm">
-                                                                {tutor.name?.[0]}
-                                                            </div>
-                                                            <div>
-                                                                <p className="font-semibold text-sm text-gray-900">{tutor.name}</p>
-                                                                <p className="text-xs text-gray-400">{tutor.phone}</p>
-                                                            </div>
-                                                        </div>
-                                                        <button onClick={() => handleApproveTutor(tutor.id)} className="px-3 py-1.5 bg-white text-blue-600 border border-blue-100 rounded-lg text-xs font-semibold hover:bg-blue-600 hover:text-white transition-all">Approve</button>
-                                                    </div>
-                                                ))}
-                                                {(!data?.pendingTutors || data.pendingTutors.length === 0) && (
-                                                    <p className="text-center py-6 text-gray-400 text-sm">No pending approvals.</p>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        {/* Recent Transactions */}
-                                        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-                                            <div className="flex items-center justify-between mb-5">
-                                                <h3 className="font-bold text-base text-gray-900">Recent transactions</h3>
-                                                <button onClick={() => setActiveTab("financials")} className="text-xs font-semibold text-blue-600 hover:underline">View all</button>
-                                            </div>
-                                            <div className="space-y-3">
-                                                {data?.recentTransactions?.slice(0, 3).map(txn => (
-                                                    <div key={txn.id} className="p-3 bg-gray-50 rounded-xl flex items-center justify-between border border-gray-100">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="size-9 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center">
-                                                                <Wallet size={16} strokeWidth={2} />
-                                                            </div>
-                                                            <div>
-                                                                <p className="font-semibold text-sm text-gray-900">₹{txn.amount}</p>
-                                                                <p className="text-xs text-gray-400">{txn.user?.name || "User"}</p>
-                                                            </div>
-                                                        </div>
-                                                        <p className="text-xs text-gray-400">{new Date(txn.createdAt).toLocaleDateString()}</p>
-                                                    </div>
-                                                ))}
-                                                {(!data?.recentTransactions || data.recentTransactions.length === 0) && (
-                                                    <p className="text-center py-6 text-gray-400 text-sm">No recent transactions.</p>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        {/* Verification Requests */}
-                                        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-                                            <div className="flex items-center gap-3 mb-5">
-                                                <div className="p-2 rounded-xl bg-blue-50 text-blue-600">
-                                                    <ShieldCheck size={16} strokeWidth={2} />
-                                                </div>
-                                                <h3 className="font-bold text-base text-gray-900">Verification requests</h3>
-                                                {pendingVerifications.length > 0 && (
-                                                    <span className="ml-auto px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">{pendingVerifications.length}</span>
-                                                )}
-                                            </div>
-                                            <div className="space-y-3">
-                                                {pendingVerifications.slice(0, 5).map(v => (
-                                                    <div key={v.id} className="p-3 bg-gray-50 rounded-xl border border-gray-100">
-                                                        <div className="flex items-center gap-3 mb-2">
-                                                            <div className="size-9 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center font-bold text-sm shrink-0">
-                                                                {v.tutor?.name?.[0] || "?"}
-                                                            </div>
-                                                            <div className="min-w-0 flex-1">
-                                                                <p className="font-semibold text-sm text-gray-900 truncate">{v.tutor?.name || "—"}</p>
-                                                                <p className="text-xs text-gray-400 truncate">{v.tutor?.phone || v.tutor?.email || "—"}</p>
-                                                            </div>
-                                                        </div>
-                                                        <div className="flex gap-2">
-                                                            <button
-                                                                onClick={() => handleVerificationReview(v.id, "APPROVE")}
-                                                                disabled={verificationActionLoading === v.id + "APPROVE"}
-                                                                className="flex-1 px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-semibold hover:bg-emerald-700 transition-colors disabled:opacity-50"
-                                                            >
-                                                                {verificationActionLoading === v.id + "APPROVE" ? "..." : "Approve"}
-                                                            </button>
-                                                            <button
-                                                                onClick={() => handleVerificationReview(v.id, "REJECT")}
-                                                                disabled={verificationActionLoading === v.id + "REJECT"}
-                                                                className="flex-1 px-3 py-1.5 bg-white text-red-500 border border-red-200 rounded-lg text-xs font-semibold hover:bg-red-50 transition-colors disabled:opacity-50"
-                                                            >
-                                                                {verificationActionLoading === v.id + "REJECT" ? "..." : "Reject"}
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                                {pendingVerifications.length === 0 && (
-                                                    <p className="text-center py-6 text-gray-400 text-sm">No pending verification requests.</p>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
                                 </>
                             )}
 
