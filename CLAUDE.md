@@ -71,8 +71,8 @@
 ## Business Model
 - FREE users: Can post profiles/requirements, receive enquiries. 0 credits. Cannot initiate contact.
 - Credits: Buy packs (₹99/₹249/₹449) to unlock student contacts.
-- PRO: ₹499/month — 30 credits, verified badge, priority search.
-- ELITE: ₹1,999/month — 100 credits, unlimited, featured listing.
+- PRO: ₹699/month — 30 credits, verified badge, priority search.
+- ELITE: ₹2,499/month — 100 credits, unlimited, featured listing.
 - Featured listing: ₹199/week or ₹499/month.
 - Lead boost: ₹49 per requirement.
 - Zero commission on tutor fees.
