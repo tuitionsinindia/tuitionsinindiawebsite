@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { isAdminAuthorized } from "@/lib/adminAuth";
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { sendVerificationResultEmail } from "@/lib/email";
 
 export async function PATCH(request, { params }) {
     try {
@@ -42,6 +43,13 @@ export async function PATCH(request, { params }) {
                     },
                 }),
             ]);
+
+            // Non-blocking email to tutor
+            prisma.user.findUnique({ where: { id: verRequest.tutorId }, select: { email: true, name: true } })
+                .then(tutor => {
+                    if (tutor?.email) sendVerificationResultEmail(tutor.email, tutor.name || "there", { approved: true });
+                }).catch(() => {});
+
         } else {
             if (!rejectionReason) {
                 return NextResponse.json({ error: "Please provide a reason for rejection." }, { status: 400 });
@@ -61,6 +69,12 @@ export async function PATCH(request, { params }) {
                     },
                 }),
             ]);
+
+            // Non-blocking email to tutor
+            prisma.user.findUnique({ where: { id: verRequest.tutorId }, select: { email: true, name: true } })
+                .then(tutor => {
+                    if (tutor?.email) sendVerificationResultEmail(tutor.email, tutor.name || "there", { approved: false, rejectionReason });
+                }).catch(() => {});
         }
 
         return NextResponse.json({ success: true });
