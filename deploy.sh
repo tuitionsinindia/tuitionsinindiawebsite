@@ -35,10 +35,12 @@ ssh -o StrictHostKeyChecking=no ${VPS_USER}@${VPS_HOST} "
   DRIP_JOB='0 9 * * * curl -s \"http://localhost:3000/api/cron/email-drip?secret=\${CRON_SECRET}\" >> /var/log/drip.log 2>&1'
   # Monthly credit reset — 1st of each month at 6:00 AM
   CREDITS_JOB='0 6 1 * * curl -s -X POST -H \"x-cron-key: \${AUDIT_SEED_KEY}\" \"http://localhost:3000/api/cron/reset-credits\" >> /var/log/credits.log 2>&1'
+  # Monthly VIP billing — 1st of each month at 7:00 AM (after credit reset)
+  VIP_JOB='0 7 1 * * curl -s -X POST -H \"x-cron-key: \${AUDIT_SEED_KEY}\" \"http://localhost:3000/api/cron/vip-billing\" >> /var/log/vip-billing.log 2>&1'
 
-  (crontab -l 2>/dev/null | grep -v 'email-drip\|reset-credits'; echo \"\$DRIP_JOB\"; echo \"\$CREDITS_JOB\") | crontab -
+  (crontab -l 2>/dev/null | grep -v 'email-drip\|reset-credits\|vip-billing'; echo \"\$DRIP_JOB\"; echo \"\$CREDITS_JOB\"; echo \"\$VIP_JOB\") | crontab -
   echo 'Cron jobs configured.'
-  crontab -l | grep -E 'drip|credits'
+  crontab -l | grep -E 'drip|credits|vip'
 "
 
 echo "🔍 Step 5: Checking required env vars on VPS..."
