@@ -10,23 +10,22 @@ export async function GET(request) {
     if (!isAdminAuthorized(request)) {
         return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
-
     try {
         const { searchParams } = new URL(request.url);
         const search = searchParams.get("search") || "";
-        const role   = searchParams.get("role")   || "ALL";
-        const status = searchParams.get("status") || "ALL";
-        const sort   = searchParams.get("sort")   || "createdAt_desc";
-        const page   = Math.max(1, parseInt(searchParams.get("page") || "1"));
+        const role = searchParams.get("role") || "";
+        const status = searchParams.get("status") || "";
+        const sort = searchParams.get("sort") || "createdAt_desc";
+        const page = Math.max(1, parseInt(searchParams.get("page") || "1"));
 
         const where = {
-            ...(role !== "ALL" && { role: role.toUpperCase() }),
+            ...(role && role !== "ALL" && { role: role.toUpperCase() }),
             ...(status === "SUSPENDED" && { isSuspended: true }),
-            ...(status === "ACTIVE"    && { isSuspended: false, isVerified: true }),
-            ...(status === "PENDING"   && { isSuspended: false, isVerified: false }),
+            ...(status === "ACTIVE" && { isSuspended: false, isVerified: true }),
+            ...(status === "PENDING" && { isSuspended: false, isVerified: false }),
             ...(search && {
                 OR: [
-                    { name:  { contains: search, mode: "insensitive" } },
+                    { name: { contains: search, mode: "insensitive" } },
                     { phone: { contains: search } },
                     { email: { contains: search, mode: "insensitive" } }
                 ]
@@ -58,12 +57,8 @@ export async function GET(request) {
             prisma.user.count({ where })
         ]);
 
-        return NextResponse.json({
-            success: true, users, total, page,
-            pages: Math.ceil(total / PAGE_SIZE)
-        });
+        return NextResponse.json({ success: true, users, total, page, pages: Math.ceil(total / PAGE_SIZE) });
     } catch (error) {
-        console.error("Admin users error:", error);
         return NextResponse.json({ success: false, error: error.message }, { status: 500 });
     }
 }

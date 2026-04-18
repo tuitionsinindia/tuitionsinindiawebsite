@@ -4,7 +4,7 @@ import { isAdminAuthorized } from "@/lib/adminAuth";
 
 export const dynamic = 'force-dynamic';
 
-// GET — full user details for admin drawer
+// GET — full user details
 export async function GET(request, { params }) {
     if (!isAdminAuthorized(request)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const { id } = await params;
@@ -21,19 +21,17 @@ export async function GET(request, { params }) {
                     select: {
                         subjects: true, location: true, hourlyRate: true,
                         bio: true, isApproved: true, rating: true, reviewCount: true,
+                        lat: true, lng: true
                     }
                 },
                 _count: {
                     select: {
-                        transactions: true,
-                        leadsPosted: true,
-                        studentTrials: true,
-                        reviewsReceived: true,
+                        transactions: true, leadsPosted: true,
+                        studentTrials: true, reviewsReceived: true,
                     }
                 },
                 transactions: {
-                    take: 5,
-                    orderBy: { createdAt: "desc" },
+                    take: 5, orderBy: { createdAt: "desc" },
                     select: { id: true, amount: true, type: true, createdAt: true, status: true }
                 },
                 verificationRequest: {
@@ -65,8 +63,7 @@ export async function PATCH(request, { params }) {
         if (isSuspended !== undefined) data.isSuspended = Boolean(isSuspended);
 
         const user = await prisma.user.update({
-            where: { id },
-            data,
+            where: { id }, data,
             select: {
                 id: true, name: true, email: true, phone: true, role: true,
                 isVerified: true, isSuspended: true, credits: true,
@@ -80,12 +77,12 @@ export async function PATCH(request, { params }) {
     }
 }
 
-// DELETE — remove user and their data in FK-safe order
+// DELETE — remove user and their data
 export async function DELETE(request, { params }) {
     if (!isAdminAuthorized(request)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const { id } = await params;
     try {
-        // Delete messages in chat sessions involving this user
+        // Delete in FK-safe order
         await prisma.message.deleteMany({
             where: { chatSession: { OR: [{ studentId: id }, { tutorId: id }] } }
         });
@@ -100,6 +97,6 @@ export async function DELETE(request, { params }) {
         await prisma.user.delete({ where: { id } });
         return NextResponse.json({ success: true });
     } catch (error) {
-        return NextResponse.json({ success: false, error: "Cannot delete: " + error.message }, { status: 500 });
+        return NextResponse.json({ success: false, error: "Cannot delete user: " + error.message }, { status: 500 });
     }
 }
