@@ -89,7 +89,7 @@ export async function POST(req) {
 
             if (!initiator) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
-            const isPremium = ['PRO', 'ELITE', 'INSTITUTE'].includes(initiator.subscriptionTier);
+            const isPremium = ['PRO', 'ELITE'].includes(initiator.subscriptionTier);
             const isAuthorized = unlock || isPremium || initiator.role === 'ADMIN';
 
             if (!isAuthorized) {

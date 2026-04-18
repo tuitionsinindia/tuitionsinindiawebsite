@@ -297,15 +297,15 @@ export default function SettingsModule({ userData, onUpdate }) {
                             <Clock size={20} />
                         </div>
                         <div>
-                            <h3 className="text-sm font-bold text-gray-900">Free Trial Classes</h3>
-                            <p className="text-xs text-gray-400 mt-0.5">Let students book a free trial before committing</p>
+                            <h3 className="text-sm font-bold text-gray-900">Demo Classes</h3>
+                            <p className="text-xs text-gray-400 mt-0.5">Let students book a demo class before committing to regular sessions</p>
                         </div>
                     </div>
 
                     <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100">
                         <div>
-                            <p className="text-sm font-semibold text-gray-800">Offer trial classes</p>
-                            <p className="text-xs text-gray-500 mt-0.5">A "Free Trial" button will appear on your profile</p>
+                            <p className="text-sm font-semibold text-gray-800">Accept demo class bookings</p>
+                            <p className="text-xs text-gray-500 mt-0.5">A "Book Demo Class" button will appear on your profile</p>
                         </div>
                         <label className={`w-12 h-7 rounded-full p-0.5 flex items-center transition-all cursor-pointer shrink-0 ${offersTrialClass ? "bg-emerald-500" : "bg-gray-200"}`}>
                             <div className={`size-6 bg-white rounded-full shadow transition-transform ${offersTrialClass ? "translate-x-5" : "translate-x-0"}`} />
@@ -315,7 +315,7 @@ export default function SettingsModule({ userData, onUpdate }) {
 
                     {offersTrialClass && (
                         <div className="space-y-2">
-                            <p className="text-xs font-semibold text-gray-600">Trial duration</p>
+                            <p className="text-xs font-semibold text-gray-600">Demo class duration</p>
                             <div className="flex gap-2">
                                 {[30, 45, 60].map(d => (
                                     <button

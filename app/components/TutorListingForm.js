@@ -459,8 +459,8 @@ export default function TutorListingForm({ user, onComplete }) {
                             <div className="flex items-center gap-3">
                                 <Clock size={16} className="text-emerald-600" />
                                 <div>
-                                    <p className="text-sm font-semibold text-gray-900 leading-none">Offer a free trial class</p>
-                                    <p className="text-xs text-gray-500 leading-none mt-0.5">Students can book a free 30-min session to get started</p>
+                                    <p className="text-sm font-semibold text-gray-900 leading-none">Accept demo class bookings</p>
+                                    <p className="text-xs text-gray-500 leading-none mt-0.5">Students pay ₹149 to book a demo class. You choose free or paid.</p>
                                 </div>
                             </div>
                             <label className={`w-12 h-7 rounded-full p-0.5 flex items-center transition-all cursor-pointer shrink-0 ${form.offersTrialClass ? 'bg-emerald-500' : 'bg-gray-200'}`}>

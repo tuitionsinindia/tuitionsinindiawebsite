@@ -316,7 +316,7 @@ export default function AIMatchingFlow() {
                                                         View profile
                                                     </Link>
                                                     <Link href="/post-requirement" className="flex-[2] bg-blue-600 text-white font-semibold py-3 rounded-xl hover:bg-blue-700 active:scale-95 shadow-sm transition-all text-center text-sm">
-                                                        Book a trial class
+                                                        Book a demo class
                                                     </Link>
                                                 </div>
                                             </div>

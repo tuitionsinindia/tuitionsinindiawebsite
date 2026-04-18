@@ -9,7 +9,7 @@ export async function POST(request) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const { userId, name, phone, email, image, bio, gender, preferredContact, notificationPrefs, lat, lng } = await request.json();
+        const { userId, name, phone, email, image, bio, gender, preferredContact, showPhonePublicly, notificationPrefs, lat, lng } = await request.json();
 
         if (!userId) {
             return NextResponse.json({ error: "userId is required" }, { status: 400 });
@@ -31,10 +31,14 @@ export async function POST(request) {
             if (lat !== undefined && !isNaN(lat)) userData.lat = lat;
             if (lng !== undefined && !isNaN(lng)) userData.lng = lng;
 
-            if (preferredContact) {
+            if (preferredContact !== undefined || showPhonePublicly !== undefined) {
+                // Fetch existing settings to avoid overwriting unrelated fields
+                const existing = await tx.user.findUnique({ where: { id: userId }, select: { privacySettings: true } });
+                const current = (existing?.privacySettings || {});
                 userData.privacySettings = {
-                    preferredContact,
-                    showPhonePublicly: true,
+                    ...current,
+                    ...(preferredContact !== undefined ? { preferredContact } : {}),
+                    ...(showPhonePublicly !== undefined ? { showPhonePublicly } : {}),
                 };
             }
 

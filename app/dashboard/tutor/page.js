@@ -1209,7 +1209,7 @@ function DashboardContent() {
                                     </div>
                                     {!tutorData?.tutorListing?.offersTrialClass && (
                                         <div className="text-right">
-                                            <p className="text-xs text-gray-400">Trial classes are off</p>
+                                            <p className="text-xs text-gray-400">Demo classes are off</p>
                                             <button
                                                 onClick={async () => {
                                                     await fetch("/api/trial/settings", {
@@ -1221,7 +1221,7 @@ function DashboardContent() {
                                                 }}
                                                 className="text-xs font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
                                             >
-                                                Turn on trials
+                                                Turn on demo classes
                                             </button>
                                         </div>
                                     )}

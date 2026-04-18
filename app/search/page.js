@@ -860,7 +860,7 @@ function SearchResultsContent() {
                                                     <MessageCircle size={12} /> Send Inquiry
                                                 </button>
 
-                                                {/* Free Trial */}
+                                                {/* Book Demo */}
                                                 {item.offersTrialClass && (
                                                     <button
                                                         onClick={() => {
@@ -873,7 +873,7 @@ function SearchResultsContent() {
                                                         }}
                                                         className="flex items-center gap-1.5 px-4 py-2 bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm font-semibold rounded-lg hover:bg-emerald-100 active:scale-95 transition-all"
                                                     >
-                                                        <Clock size={12} /> Free Trial
+                                                        <Clock size={12} /> Book Demo
                                                     </button>
                                                 )}
 

@@ -269,7 +269,7 @@ export default function TutorProfileActions({ tutor, subject, offersTrialClass, 
             saveIntent({ action: "inquiry", tutorId: tutor.id, tutorName: tutor.name, subject });
             router.push(`/register/student?intent=trial&tutorId=${tutor.id}&subject=${subject || ""}`);
         } else if (loggedInUser.role !== "STUDENT") {
-            alert("Only students can book trial classes.");
+            alert("Only students can book a demo class.");
         } else {
             setTrialModal(true);
         }
@@ -314,13 +314,13 @@ export default function TutorProfileActions({ tutor, subject, offersTrialClass, 
                     Send Inquiry
                 </button>
 
-                {/* Free Trial */}
+                {/* Book Demo */}
                 {offersTrialClass && (
                     <button
                         onClick={handleTrialClick}
                         className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold transition-colors"
                     >
-                        <Clock size={14} /> Book Free Trial
+                        <Clock size={14} /> Book Demo Class
                     </button>
                 )}
 

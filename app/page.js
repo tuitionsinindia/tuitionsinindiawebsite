@@ -350,40 +350,40 @@ export default function Home() {
             </section>
 
             {/* ── CTA BANNER ── */}
-            <section className="py-14 px-4 bg-gray-900 text-white">
+            <section className="py-14 px-4 bg-gray-50 border-t border-gray-100">
                 <div className="max-w-5xl mx-auto">
                     <div className="text-center mb-10">
-                        <h2 className="text-2xl md:text-3xl font-bold">Get Started Today</h2>
-                        <p className="text-gray-400 text-sm mt-2">Join India's most trusted tuition marketplace — free for everyone.</p>
+                        <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Get started today</h2>
+                        <p className="text-gray-500 text-sm mt-2">Join India's most trusted tuition marketplace — free for everyone.</p>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {[
                             {
                                 icon: GraduationCap,
-                                title: "For Students",
+                                title: "For students",
                                 desc: "Find the perfect tutor for any subject, exam, or skill.",
                                 link: "/register/student",
-                                btnLabel: "Sign Up as Student"
+                                btnLabel: "Sign up as student"
                             },
                             {
                                 icon: Users,
-                                title: "For Tutors",
+                                title: "For tutors",
                                 desc: "Grow your teaching business. Get student enquiries directly.",
                                 link: "/register/tutor",
-                                btnLabel: "Sign Up as Tutor"
+                                btnLabel: "Sign up as tutor"
                             },
                             {
                                 icon: Building2,
-                                title: "For Institutes",
+                                title: "For institutes",
                                 desc: "List your coaching centre and reach students across India.",
                                 link: "/register/institute",
-                                btnLabel: "Sign Up as Institute"
+                                btnLabel: "Sign up as institute"
                             }
                         ].map((item, i) => (
-                            <div key={i} className="bg-white/5 rounded-xl p-6 text-center">
-                                <item.icon size={28} className="mx-auto mb-3 text-yellow-300" strokeWidth={1.5} />
-                                <h3 className="font-semibold text-white mb-1 text-sm">{item.title}</h3>
-                                <p className="text-gray-400 text-xs leading-relaxed mb-4">{item.desc}</p>
+                            <div key={i} className="bg-white rounded-xl p-6 text-center border border-gray-200 shadow-sm">
+                                <item.icon size={28} className="mx-auto mb-3 text-blue-600" strokeWidth={1.5} />
+                                <h3 className="font-semibold text-gray-900 mb-1 text-sm">{item.title}</h3>
+                                <p className="text-gray-500 text-xs leading-relaxed mb-4">{item.desc}</p>
                                 <Link href={item.link}
                                     className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-blue-700 transition-colors">
                                     {item.btnLabel} <ArrowRight size={14} />
