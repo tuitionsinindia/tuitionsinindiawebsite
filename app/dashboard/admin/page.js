@@ -306,7 +306,12 @@ function AdminDashboardContent() {
         try {
             const res = await fetch("/api/admin/deploy", { headers: { "x-admin-key": adminKey } });
             const json = await res.json();
-            if (json.success) setDeployRuns(json.runs || {});
+            if (json.success) {
+                setDeployRuns({
+                    webhookOnline: json.webhookOnline,
+                    currentlyDeploying: json.currentlyDeploying || [],
+                });
+            }
         } catch {}
     };
 
@@ -891,19 +896,7 @@ function AdminDashboardContent() {
                     {/* ─── DEPLOYMENTS TAB ─── */}
                     {activeTab === "deployments" && (() => {
                         const fmtDate = (d) => d ? new Date(d).toLocaleString("en-IN", { day:"numeric", month:"short", hour:"2-digit", minute:"2-digit" }) : "—";
-                        const runBadge = (run) => {
-                            if (!run) return null;
-                            const map = {
-                                queued:      { label: "Queued",      cls: "bg-gray-100 text-gray-600" },
-                                in_progress: { label: "Building…",   cls: "bg-amber-50 text-amber-700 animate-pulse" },
-                                completed:   {
-                                    label: run.conclusion === "success" ? "Success" : run.conclusion === "failure" ? "Failed" : run.conclusion,
-                                    cls: run.conclusion === "success" ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-600"
-                                }
-                            };
-                            const s = map[run.status] || map.queued;
-                            return <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${s.cls}`}>{s.label}</span>;
-                        };
+                        const isDeploying = (env) => (deployRuns.currentlyDeploying || []).includes(env);
 
                         return (
                         <div className="max-w-5xl mx-auto space-y-6">
@@ -914,10 +907,10 @@ function AdminDashboardContent() {
                                     <p className="text-sm text-gray-400 mt-0.5">Trigger deploys, track what's live, and manage backups.</p>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <a href="https://github.com/tuitionsinindia/tuitionsinindiawebsite/actions" target="_blank" rel="noopener noreferrer"
-                                        className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-gray-600 bg-white border border-gray-200 rounded-lg hover:border-blue-300 hover:text-blue-600 transition-colors">
-                                        <ExternalLink size={13} /> GitHub Actions
-                                    </a>
+                                    <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold ${deployRuns.webhookOnline ? "bg-emerald-50 border-emerald-100 text-emerald-700" : "bg-gray-50 border-gray-200 text-gray-400"}`}>
+                                        <span className={`size-1.5 rounded-full ${deployRuns.webhookOnline ? "bg-emerald-500 animate-pulse" : "bg-gray-300"}`} />
+                                        {deployRuns.webhookOnline ? "Deploy server online" : "Checking…"}
+                                    </div>
                                     <button onClick={() => { fetchVersionData(); fetchDeployRuns(); }}
                                         className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 transition-colors">
                                         <RefreshCcw size={13} /> Refresh
@@ -979,28 +972,25 @@ function AdminDashboardContent() {
                                         <div className="mb-4 p-3 bg-gray-50 rounded-xl text-xs text-gray-400">Not deployed yet</div>
                                     )}
 
-                                    {/* Latest run status */}
-                                    {deployRuns.staging && (
-                                        <div className="flex items-center gap-2 mb-3">
-                                            <span className="text-xs text-gray-500">Latest run:</span>
-                                            {runBadge(deployRuns.staging)}
-                                            <a href={deployRuns.staging.runUrl} target="_blank" rel="noopener noreferrer"
-                                                className="text-xs text-blue-500 hover:underline flex items-center gap-0.5">
-                                                View <ExternalLink size={10} />
-                                            </a>
+                                    {isDeploying("staging") && (
+                                        <div className="flex items-center gap-2 mb-3 px-3 py-2 bg-amber-50 border border-amber-100 rounded-lg">
+                                            <div className="size-3 border-2 border-amber-300 border-t-amber-600 rounded-full animate-spin shrink-0" />
+                                            <span className="text-xs text-amber-700 font-semibold">Build in progress… ~3 min</span>
                                         </div>
                                     )}
 
                                     <button
                                         onClick={() => triggerDeploy("staging")}
-                                        disabled={deployTriggering === "staging"}
+                                        disabled={deployTriggering === "staging" || isDeploying("staging")}
                                         className="w-full py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 disabled:opacity-60 transition-colors flex items-center justify-center gap-2"
                                     >
                                         {deployTriggering === "staging"
                                             ? <><div className="size-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Triggering…</>
+                                            : isDeploying("staging")
+                                            ? <><div className="size-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Building…</>
                                             : <><ArrowUpCircle size={15} /> Deploy to Staging</>}
                                     </button>
-                                    <p className="text-xs text-gray-400 mt-2 text-center">Deploys the <code className="font-mono">staging</code> branch. Takes ~3 min.</p>
+                                    <p className="text-xs text-gray-400 mt-2 text-center">Pulls <code className="font-mono">staging</code> branch and rebuilds. ~3 min.</p>
                                 </div>
 
                                 {/* Production */}
@@ -1033,27 +1023,25 @@ function AdminDashboardContent() {
                                         <div className="mb-4 p-3 bg-gray-50 rounded-xl text-xs text-gray-400">No version info yet</div>
                                     )}
 
-                                    {deployRuns.production && (
-                                        <div className="flex items-center gap-2 mb-3">
-                                            <span className="text-xs text-gray-500">Latest run:</span>
-                                            {runBadge(deployRuns.production)}
-                                            <a href={deployRuns.production.runUrl} target="_blank" rel="noopener noreferrer"
-                                                className="text-xs text-blue-500 hover:underline flex items-center gap-0.5">
-                                                View <ExternalLink size={10} />
-                                            </a>
+                                    {isDeploying("production") && (
+                                        <div className="flex items-center gap-2 mb-3 px-3 py-2 bg-amber-50 border border-amber-100 rounded-lg">
+                                            <div className="size-3 border-2 border-amber-300 border-t-amber-600 rounded-full animate-spin shrink-0" />
+                                            <span className="text-xs text-amber-700 font-semibold">Production build in progress… ~3 min</span>
                                         </div>
                                     )}
 
                                     <button
                                         onClick={() => triggerDeploy("production")}
-                                        disabled={deployTriggering === "production"}
+                                        disabled={deployTriggering === "production" || isDeploying("production")}
                                         className="w-full py-2.5 bg-emerald-600 text-white text-sm font-semibold rounded-xl hover:bg-emerald-700 disabled:opacity-60 transition-colors flex items-center justify-center gap-2"
                                     >
                                         {deployTriggering === "production"
                                             ? <><div className="size-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Triggering…</>
+                                            : isDeploying("production")
+                                            ? <><div className="size-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Building…</>
                                             : <><ArrowUpCircle size={15} /> Promote to Production</>}
                                     </button>
-                                    <p className="text-xs text-gray-400 mt-2 text-center">Deploys <code className="font-mono">main</code> branch to the live site.</p>
+                                    <p className="text-xs text-gray-400 mt-2 text-center">Pulls <code className="font-mono">main</code> branch and deploys to the live site.</p>
                                 </div>
                             </div>
 

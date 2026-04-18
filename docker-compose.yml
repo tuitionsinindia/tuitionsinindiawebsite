@@ -11,6 +11,8 @@ services:
       - "3006:3000" # Exposing on port 3006, map this in Nginx
     env_file:
       - .env.production
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       - db
     networks:

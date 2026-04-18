@@ -15,6 +15,8 @@ services:
       - "3007:3000"   # Staging on 3007; map this in Nginx for tuitionsinindia.in
     env_file:
       - .env.staging
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       - db
     networks:
