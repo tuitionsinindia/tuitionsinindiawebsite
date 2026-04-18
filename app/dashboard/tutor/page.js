@@ -983,17 +983,42 @@ function DashboardContent() {
 
                         {activeTab === "LEADS" && (
                             <div className="space-y-6">
-                                <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Student Leads</h2>
+                                <div className="flex items-center justify-between">
+                                    <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Student Leads</h2>
+                                    <div className="flex items-center gap-2 text-xs text-gray-400">
+                                        <span className="inline-flex items-center gap-1 px-2 py-1 bg-red-50 text-red-600 border border-red-100 rounded-full font-semibold">Urgent</span>
+                                        <span className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-full font-semibold">Verified</span>
+                                        <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-500 border border-gray-200 rounded-full font-semibold">Basic</span>
+                                    </div>
+                                </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     {loading ? (
                                         <div className="col-span-2 py-20 flex flex-col items-center justify-center bg-white rounded-2xl border border-gray-100">
                                             <Loader2 className="animate-spin text-blue-600 mb-4" size={32} />
                                             <p className="text-sm text-gray-400">Loading leads...</p>
                                         </div>
-                                    ) : leads.length > 0 ? leads.map((lead) => (
-                                        <div key={lead.id} className="bg-white border border-gray-100 rounded-2xl p-6 hover:shadow-md transition-all shadow-sm">
+                                    ) : leads.length > 0 ? [...leads].sort((a, b) => {
+                                        const order = { URGENT: 0, VERIFIED: 1, BASIC: 2 };
+                                        return (order[a.quality] ?? 2) - (order[b.quality] ?? 2);
+                                    }).map((lead) => (
+                                        <div key={lead.id} className={`bg-white rounded-2xl p-6 hover:shadow-md transition-all shadow-sm border ${
+                                            lead.quality === "URGENT" ? "border-red-200" :
+                                            lead.quality === "VERIFIED" ? "border-emerald-200" :
+                                            "border-gray-100"
+                                        }`}>
                                             <div className="flex justify-between items-center mb-4">
-                                                <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-lg text-xs font-semibold border border-blue-100">{lead.subjects?.[0] || 'General'}</span>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-lg text-xs font-semibold border border-blue-100">{lead.subjects?.[0] || 'General'}</span>
+                                                    {lead.quality === "URGENT" && (
+                                                        <span className="px-2 py-0.5 bg-red-50 text-red-600 border border-red-100 rounded-full text-xs font-semibold">Urgent</span>
+                                                    )}
+                                                    {lead.quality === "VERIFIED" && (
+                                                        <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-full text-xs font-semibold">Verified</span>
+                                                    )}
+                                                    {lead.quality === "BASIC" && (
+                                                        <span className="px-2 py-0.5 bg-gray-100 text-gray-500 border border-gray-200 rounded-full text-xs font-semibold">Basic</span>
+                                                    )}
+                                                </div>
                                                 {lead.matchScore > 0 && (
                                                     <div className="flex items-center gap-1.5 text-emerald-600 text-xs font-semibold">
                                                         <Star size={12} fill="currentColor" />

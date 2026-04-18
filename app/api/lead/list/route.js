@@ -79,6 +79,7 @@ export async function GET(request) {
                         name: true,
                         phone: true,
                         email: true,
+                        phoneVerified: true,
                     }
                 }
             },
@@ -104,10 +105,24 @@ export async function GET(request) {
             lng: requester.lng
         } : null;
 
-        // Sanitize leads and inject match scores
+        // Compute lead quality tier
+        function getLeadQuality(lead) {
+            const ageHours = (Date.now() - new Date(lead.createdAt).getTime()) / 3600000;
+            const descLen = (lead.description || "").length;
+            const phoneVerified = !!lead.student?.phoneVerified;
+            const hasLocation = (lead.locations?.length ?? 0) > 0;
+            const hasBudget = !!lead.budget;
+
+            if (ageHours <= 48 && phoneVerified && hasBudget && descLen >= 80) return "URGENT";
+            if (phoneVerified && hasLocation && descLen >= 40) return "VERIFIED";
+            return "BASIC";
+        }
+
+        // Sanitize leads and inject match scores + quality
         const sanitizedLeads = leads.map(lead => {
             const isUnlockedByCredit = lead.unlockedBy.length > 0;
             const isUnlocked = isUnlockedByCredit || isPremiumTutor;
+            const quality = getLeadQuality(lead);
 
             let match = { score: 0, label: "Analyzing...", factors: [] };
             if (requesterCriterion) {
@@ -123,8 +138,12 @@ export async function GET(request) {
 
             return {
                 ...lead,
-                student: isUnlocked ? lead.student : { name: "Hidden", phone: "Hidden", email: "Hidden" },
+                // Never expose phoneVerified to the tutor — strip from student object
+                student: isUnlocked
+                    ? { name: lead.student?.name, phone: lead.student?.phone, email: lead.student?.email }
+                    : { name: "Hidden", phone: "Hidden", email: "Hidden" },
                 isUnlocked,
+                quality,
                 matchScore: match.score,
                 matchLabel: match.label,
                 matchFactors: match.factors
