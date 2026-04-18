@@ -181,16 +181,18 @@ function DashboardContent() {
         } catch (err) { console.error(err); } finally { setTrialLoading(false); }
     };
 
-    const handleTrialAction = async (trialId, status, note) => {
-        setTrialActionLoading(trialId);
+    const handleTrialAction = async (trialId, status, { note, demoType, noShow } = {}) => {
+        setTrialActionLoading(trialId + status);
         try {
             const res = await fetch(`/api/trial/${trialId}/status`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ status, tutorNote: note }),
+                body: JSON.stringify({ status, tutorNote: note, demoType, noShow }),
             });
             if (res.ok) {
-                setTrials(prev => prev.map(t => t.id === trialId ? { ...t, status } : t));
+                setTrials(prev => prev.map(t =>
+                    t.id === trialId ? { ...t, status, demoType: demoType || t.demoType } : t
+                ));
             }
         } catch (err) { console.error(err); } finally { setTrialActionLoading(null); }
     };
@@ -1093,8 +1095,8 @@ function DashboardContent() {
                             <div className="p-6 space-y-4">
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <h2 className="text-lg font-bold text-gray-900">Trial Class Requests</h2>
-                                        <p className="text-sm text-gray-500 mt-0.5">Students who want a free trial with you</p>
+                                        <h2 className="text-lg font-bold text-gray-900">Demo Class Requests</h2>
+                                        <p className="text-sm text-gray-500 mt-0.5">Students who want a demo session with you · ₹149 deposit held by platform</p>
                                     </div>
                                     {!tutorData?.tutorListing?.offersTrialClass && (
                                         <div className="text-right">
@@ -1125,11 +1127,11 @@ function DashboardContent() {
                                         <div className="w-14 h-14 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4">
                                             <Zap size={24} className="text-emerald-400" />
                                         </div>
-                                        <h3 className="text-base font-semibold text-gray-700 mb-1">No trial requests yet</h3>
+                                        <h3 className="text-base font-semibold text-gray-700 mb-1">No demo requests yet</h3>
                                         <p className="text-sm text-gray-400">
                                             {tutorData?.tutorListing?.offersTrialClass
-                                                ? "Students will see a \"Free Trial\" button on your profile. Requests will appear here."
-                                                : "Enable trial classes so students can book a free session with you."
+                                                ? "Students will see a \"Book Demo\" button on your profile. Requests will appear here."
+                                                : "Enable demo classes so students can book a session with you."
                                             }
                                         </p>
                                     </div>
@@ -1148,10 +1150,26 @@ function DashboardContent() {
                                                                 "bg-gray-100 text-gray-500"
                                                             }`}>
                                                                 {trial.status === "PENDING" ? "Waiting for your response" :
-                                                                 trial.status === "CONFIRMED" ? "Confirmed" :
+                                                                 trial.status === "CONFIRMED" ? `Confirmed${trial.demoType === "FREE" ? " · Free demo" : trial.demoType === "PAID" ? " · Paid (₹149)" : ""}` :
                                                                  trial.status === "COMPLETED" ? "Completed" :
                                                                  trial.status === "DECLINED" ? "Declined" : "Cancelled"}
                                                             </span>
+                                                            {/* Deposit status badge */}
+                                                            {trial.depositStatus && trial.depositStatus !== "UNPAID" && (
+                                                                <span className={`text-xs px-2 py-0.5 rounded-full border ${
+                                                                    trial.depositStatus === "PAID" ? "bg-blue-50 text-blue-700 border-blue-100" :
+                                                                    trial.depositStatus === "CREDITED" ? "bg-purple-50 text-purple-700 border-purple-100" :
+                                                                    trial.depositStatus === "RELEASED" ? "bg-emerald-50 text-emerald-700 border-emerald-100" :
+                                                                    trial.depositStatus === "REFUNDED" ? "bg-gray-100 text-gray-500 border-gray-200" :
+                                                                    "bg-gray-100 text-gray-500 border-gray-200"
+                                                                }`}>
+                                                                    {trial.depositStatus === "PAID" ? "Deposit held" :
+                                                                     trial.depositStatus === "CREDITED" ? "Deposit returned to student" :
+                                                                     trial.depositStatus === "RELEASED" ? "Deposit released to you" :
+                                                                     trial.depositStatus === "REFUNDED" ? "Deposit refunded" :
+                                                                     trial.depositStatus}
+                                                                </span>
+                                                            )}
                                                         </div>
                                                         <p className="text-sm text-gray-600">Subject: <span className="font-medium">{trial.subject}</span></p>
                                                         <p className="text-sm text-gray-500">Preferred time: {trial.preferredTime}</p>
@@ -1159,39 +1177,68 @@ function DashboardContent() {
                                                     </div>
                                                     <div className="text-right shrink-0">
                                                         <p className="text-xs text-gray-400">{new Date(trial.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}</p>
-                                                        <p className="text-xs text-emerald-600 font-medium">{trial.duration} min · Free</p>
+                                                        <p className="text-xs text-gray-500 font-medium">{trial.duration} min</p>
                                                     </div>
                                                 </div>
 
                                                 {trial.status === "PENDING" && (
-                                                    <div className="flex items-center gap-2 pt-1 border-t border-gray-100">
-                                                        <button
-                                                            disabled={trialActionLoading === trial.id}
-                                                            onClick={() => handleTrialAction(trial.id, "CONFIRMED")}
-                                                            className="flex-1 py-2 bg-emerald-600 text-white text-sm font-semibold rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
-                                                        >
-                                                            {trialActionLoading === trial.id ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
-                                                            Accept
-                                                        </button>
-                                                        <button
-                                                            disabled={trialActionLoading === trial.id}
-                                                            onClick={() => handleTrialAction(trial.id, "DECLINED")}
-                                                            className="flex-1 py-2 border border-gray-200 text-gray-600 text-sm font-semibold rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
-                                                        >
-                                                            Decline
-                                                        </button>
+                                                    <div className="space-y-2 pt-2 border-t border-gray-100">
+                                                        <p className="text-xs text-gray-500">Choose demo type — this decides what happens to the student&apos;s ₹149 deposit:</p>
+                                                        <div className="flex items-center gap-2">
+                                                            <button
+                                                                disabled={!!trialActionLoading}
+                                                                onClick={() => handleTrialAction(trial.id, "CONFIRMED", { demoType: "FREE" })}
+                                                                className="flex-1 py-2 bg-emerald-600 text-white text-sm font-semibold rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
+                                                            >
+                                                                {trialActionLoading === trial.id + "CONFIRMED" ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
+                                                                Free demo
+                                                            </button>
+                                                            <button
+                                                                disabled={!!trialActionLoading}
+                                                                onClick={() => handleTrialAction(trial.id, "CONFIRMED", { demoType: "PAID" })}
+                                                                className="flex-1 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
+                                                            >
+                                                                {trialActionLoading === trial.id + "CONFIRMED" ? <Loader2 size={14} className="animate-spin" /> : <CreditCard size={14} />}
+                                                                Paid (₹119 to you)
+                                                            </button>
+                                                            <button
+                                                                disabled={!!trialActionLoading}
+                                                                onClick={() => handleTrialAction(trial.id, "DECLINED")}
+                                                                className="px-3 py-2 border border-gray-200 text-gray-600 text-sm font-semibold rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+                                                            >
+                                                                Decline
+                                                            </button>
+                                                        </div>
+                                                        <p className="text-xs text-gray-400">Free demo → deposit returned to student as platform credit. Paid → ₹119 added to your earnings.</p>
                                                     </div>
                                                 )}
                                                 {trial.status === "CONFIRMED" && (
-                                                    <div className="flex items-center gap-2 pt-1 border-t border-gray-100">
-                                                        <button
-                                                            disabled={trialActionLoading === trial.id}
-                                                            onClick={() => handleTrialAction(trial.id, "COMPLETED")}
-                                                            className="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
-                                                        >
-                                                            Mark as Done
-                                                        </button>
-                                                        <p className="text-xs text-gray-400">Coordinate the exact time with the student via chat.</p>
+                                                    <div className="space-y-2 pt-2 border-t border-gray-100">
+                                                        <p className="text-xs text-gray-400">Coordinate the exact time with the student. Once the class is done, mark it below.</p>
+                                                        <div className="flex items-center gap-2">
+                                                            <button
+                                                                disabled={!!trialActionLoading}
+                                                                onClick={() => handleTrialAction(trial.id, "COMPLETED")}
+                                                                className="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
+                                                            >
+                                                                {trialActionLoading === trial.id + "COMPLETED" ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
+                                                                Mark as Done
+                                                            </button>
+                                                            <button
+                                                                disabled={!!trialActionLoading}
+                                                                onClick={() => handleTrialAction(trial.id, "COMPLETED", { noShow: true })}
+                                                                className="px-4 py-2 border border-red-100 text-red-600 text-sm font-semibold rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50"
+                                                            >
+                                                                Student no-show
+                                                            </button>
+                                                        </div>
+                                                        {trial.depositStatus === "PAID" && (
+                                                            <p className="text-xs text-gray-400">
+                                                                {trial.demoType === "FREE"
+                                                                    ? "Free demo: deposit will be returned to student as credit."
+                                                                    : "Paid demo: ₹119 will be added to your earnings. No-show forfeits ₹100 to you."}
+                                                            </p>
+                                                        )}
                                                     </div>
                                                 )}
                                             </div>

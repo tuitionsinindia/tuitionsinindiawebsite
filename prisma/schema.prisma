@@ -27,6 +27,8 @@ model User {
   isVerified          Boolean            @default(false)
   isIdVerified        Boolean            @default(false)
   credits             Int                @default(0)
+  platformCredit      Int                @default(0) // demo deposit credits in paise
+  contactViewsThisMonth Int             @default(0) // resets 1st of each month
   subscriptionTier    SubscriptionTier   @default(FREE)
   subscriptionStatus  SubscriptionStatus @default(INACTIVE)
   subscriptionId      String?            @unique
@@ -113,20 +115,31 @@ model Listing {
 }
 
 model TrialBooking {
-  id            String      @id @default(cuid())
-  studentId     String
-  tutorId       String
-  subject       String
-  preferredTime String
-  message       String?
-  duration      Int         @default(30)
-  status        TrialStatus @default(PENDING)
-  tutorNote     String?
-  cancelReason  String?
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  student       User        @relation("StudentTrials", fields: [studentId], references: [id], onDelete: Cascade)
-  tutor         User        @relation("TutorTrials", fields: [tutorId], references: [id], onDelete: Cascade)
+  id               String        @id @default(cuid())
+  studentId        String
+  tutorId          String
+  subject          String
+  preferredTime    String
+  message          String?
+  duration         Int           @default(30)
+  status           TrialStatus   @default(PENDING)
+  tutorNote        String?
+  cancelReason     String?
+  // Demo deposit
+  depositAmount    Int           @default(14900)   // ₹149 in paise
+  depositStatus    DepositStatus @default(UNPAID)
+  depositOrderId   String?       @unique
+  depositPaymentId String?       @unique
+  demoType         DemoType?     // set by tutor on accept: FREE | PAID
+  creditUsedFrom   String?       // trialBookingId whose credit funded this booking
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  student          User          @relation("StudentTrials", fields: [studentId], references: [id], onDelete: Cascade)
+  tutor            User          @relation("TutorTrials", fields: [tutorId], references: [id], onDelete: Cascade)
+
+  @@index([studentId])
+  @@index([tutorId])
+  @@index([depositStatus])
 }
 
 model Lead {
@@ -495,4 +508,18 @@ enum TrialStatus {
   COMPLETED
   DECLINED
   CANCELLED
+}
+
+enum DepositStatus {
+  UNPAID      // Booking created, deposit not yet paid
+  PAID        // ₹149 held by platform
+  CREDITED    // Returned as platformCredit to student (free demo completed)
+  RELEASED    // Paid out to tutor (paid demo or no-show)
+  REFUNDED    // Booking cancelled before demo, full refund
+  TRANSFERRED // Student's credit was applied to a new booking
+}
+
+enum DemoType {
+  FREE  // Tutor offers free demo; deposit returned as student platform credit
+  PAID  // Tutor charges ₹149; ₹119 credited to tutor ledger, ₹30 kept by platform
 }
