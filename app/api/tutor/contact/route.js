@@ -61,6 +61,7 @@ export async function GET(request) {
                 email: true,
                 role: true,
                 isVerified: true,
+                privacySettings: true,
                 tutorListing: {
                     select: { subjects: true, locations: true }
                 }
@@ -81,13 +82,18 @@ export async function GET(request) {
             data: { viewCount: { increment: 1 } }
         }).catch(() => {});
 
+        // Respect privacy settings — hide phone if tutor opted out
+        const privacySettings = tutor.privacySettings || {};
+        const showPhone = tutor.phoneVerified && (privacySettings.showPhonePublicly !== false);
+        const resolvedPhone = showPhone ? tutor.phone : null;
+
         // Build WhatsApp link (Indian numbers)
-        const rawPhone = (tutor.phone || "").replace(/\D/g, "").slice(-10);
+        const rawPhone = (resolvedPhone || "").replace(/\D/g, "").slice(-10);
         const whatsappUrl = rawPhone ? `https://wa.me/91${rawPhone}` : null;
 
         return NextResponse.json({
             name: tutor.name,
-            phone: tutor.phoneVerified ? tutor.phone : null,
+            phone: resolvedPhone,
             email: tutor.email || null,
             whatsappUrl,
             isVerified: tutor.isVerified,

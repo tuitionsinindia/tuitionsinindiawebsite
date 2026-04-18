@@ -541,7 +541,7 @@ function DashboardContent() {
     const navItems = [
         { id: "HOME", label: "Dashboard", icon: LayoutDashboard },
         { id: "LEADS", label: "Student Leads", icon: Search },
-        { id: "TRIALS", label: "Trial Requests", icon: Zap },
+        { id: "TRIALS", label: "Demo Classes", icon: Zap },
         { id: "BATCHES", label: "Batch Classes", icon: Box },
         { id: "VIP", label: "VIP Service", icon: Star },
         { id: "CHAT", label: "Messages", icon: MessageCircle },
@@ -759,7 +759,7 @@ function DashboardContent() {
                                             {[
                                                 { step: "1", title: "Buy credits", desc: "Credits let you unlock student contact details.", action: () => setActiveTab("BILLING"), label: "Buy credits", color: "bg-blue-600" },
                                                 { step: "2", title: "Browse student leads", desc: "Find students looking for tutors in your subject.", action: () => setActiveTab("LEADS"), label: "View leads", color: "bg-indigo-600" },
-                                                { step: "3", title: "Enable free trial", desc: "Offer a free 30-min class to attract more students.", action: () => setActiveTab("SETTINGS"), label: "Enable trial", color: "bg-emerald-600" },
+                                                { step: "3", title: "Offer a demo class", desc: "Students pay a ₹149 refundable deposit to book a demo class with you.", action: () => setActiveTab("TRIALS"), label: "View demo classes", color: "bg-emerald-600" },
                                             ].map(item => (
                                                 <div key={item.step} className="bg-white rounded-xl p-4 flex items-center gap-4 shadow-sm">
                                                     <div className={`size-8 rounded-full ${item.color} text-white text-sm font-bold flex items-center justify-center shrink-0`}>{item.step}</div>

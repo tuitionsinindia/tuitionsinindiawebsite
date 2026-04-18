@@ -24,7 +24,7 @@ export default function StudentPricing() {
                         <span className="text-blue-700 text-sm font-semibold">For Students & Parents</span>
                     </div>
                     <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 tracking-tight">
-                        Find the Right Tutor
+                        Find the right tutor
                     </h1>
                     <p className="text-lg text-gray-500">
                         Browse verified tutors for free. Pay only for the tuition you receive — we charge zero commission.
@@ -40,17 +40,17 @@ export default function StudentPricing() {
                         {[
                             {
                                 icon: Search,
-                                title: "Search for Free",
+                                title: "Search for free",
                                 desc: "Browse tutor profiles, read reviews, and compare rates. No account needed to search."
                             },
                             {
                                 icon: Zap,
-                                title: "Post a Requirement",
+                                title: "Post a requirement",
                                 desc: "Tell us what you need — subject, location, and budget. Matching tutors will contact you directly."
                             },
                             {
                                 icon: ShieldCheck,
-                                title: "Start Learning",
+                                title: "Start learning",
                                 desc: "Agree on fees directly with the tutor. We take zero commission — 100% goes to the tutor."
                             }
                         ].map((item, i) => (
@@ -69,7 +69,7 @@ export default function StudentPricing() {
             {/* Pricing Options */}
             <section className="py-16 px-6 bg-gray-50">
                 <div className="max-w-5xl mx-auto">
-                    <h2 className="text-2xl font-bold text-gray-900 text-center mb-3 tracking-tight">Simple Pricing</h2>
+                    <h2 className="text-2xl font-bold text-gray-900 text-center mb-3 tracking-tight">Simple pricing</h2>
                     <p className="text-gray-500 text-center mb-12 max-w-xl mx-auto">Students can use the platform for free. You only pay the tutor directly for classes — no hidden fees.</p>
 
                     <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">

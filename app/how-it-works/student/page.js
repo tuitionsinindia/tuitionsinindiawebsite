@@ -7,7 +7,8 @@ import {
     MessageSquare,
     CheckCircle2,
     ArrowRight,
-    Lock
+    Lock,
+    PlayCircle
 } from "lucide-react";
 
 export default function StudentHowItWorks() {
@@ -30,16 +31,16 @@ export default function StudentHowItWorks() {
         },
         {
             step: "03",
-            title: "Connect and chat",
-            desc: "Once you find a match, unlock their contact details to chat directly. Discuss your goals, schedule, and fees with no middleman involved.",
-            icon: MessageSquare,
+            title: "Book a demo class",
+            desc: "Pay a small ₹149 refundable deposit to book a demo class with any tutor. If you are happy, continue — or get your deposit back as platform credit.",
+            icon: PlayCircle,
             color: "text-indigo-600",
             bg: "bg-indigo-50"
         },
         {
             step: "04",
-            title: "Start learning",
-            desc: "Meet online or in person. Start improving your grades with structured, personalised attention from qualified tutors across India.",
+            title: "Connect and start learning",
+            desc: "Once you are comfortable with the tutor, unlock their contact details and start regular classes. Meet online or in person — you decide.",
             icon: CheckCircle2,
             color: "text-blue-600",
             bg: "bg-blue-50"
@@ -48,6 +49,7 @@ export default function StudentHowItWorks() {
 
     const faqs = [
         { q: "Is it free to search for tutors?", a: "Yes, browsing and searching through our directory of verified tutors and institutes is completely free. You only pay when you are ready to unlock a tutor's contact details." },
+        { q: "What is a demo class?", a: "A demo class is a short introductory session with a tutor before you commit to regular classes. You pay a ₹149 refundable deposit to book it. If the class does not happen, your deposit is returned as platform credit. If the tutor marks it as free, you get the full deposit back." },
         { q: "How do I know the tutors are qualified?", a: "We verify every tutor manually. Our team checks educational certificates and ID proofs before granting a Verified badge on the profile." },
         { q: "Do you take a percentage of the tuition fees?", a: "No. Unlike other platforms, we do not take any commission from the fees you pay your tutor. You negotiate and pay them directly." }
     ];

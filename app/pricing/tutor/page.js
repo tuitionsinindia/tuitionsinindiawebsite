@@ -11,7 +11,7 @@ export default function TutorPricing() {
             <section className="py-16 px-6 text-center border-b border-gray-100">
                 <div className="max-w-2xl mx-auto">
                     <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 tracking-tight">
-                        Simple, Transparent Pricing
+                        Simple, transparent pricing
                     </h1>
                     <p className="text-lg text-gray-500">
                         No commission. Keep 100% of what you earn from students.

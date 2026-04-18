@@ -295,7 +295,7 @@ function StudentDashboardContent() {
         { id: "MATCHES", label: "Tutor Matches", icon: Users },
         { id: "VIP", label: "VIP Service", icon: Star },
         { id: "SAVED", label: "Saved Tutors", icon: Bookmark },
-        { id: "TRIALS", label: "Trial Classes", icon: Clock },
+        { id: "TRIALS", label: "Demo Classes", icon: Clock },
         { id: "CHAT", label: "Messages", icon: MessageCircle },
         { id: "CONTACTS", label: "Contacts", icon: ShieldCheck },
     ];
@@ -423,7 +423,7 @@ function StudentDashboardContent() {
                                             {[
                                                 { step: "1", title: "Search for tutors", desc: "Browse by subject, location, or let us match you.", href: "/search?role=TUTOR", label: "Search now", color: "bg-blue-600" },
                                                 { step: "2", title: "Post your requirement", desc: "Tell tutors what you need — they'll come to you.", href: "/post-requirement", label: "Post requirement", color: "bg-indigo-600" },
-                                                { step: "3", title: "Book a free trial", desc: "Many tutors offer a free 30-min trial class.", href: "/search?role=TUTOR", label: "Find trials", color: "bg-emerald-600" },
+                                                { step: "3", title: "Book a demo class", desc: "Pay a ₹149 refundable deposit to book a demo class with any tutor.", href: "/search?role=TUTOR", label: "Find Tutors", color: "bg-emerald-600" },
                                             ].map(item => (
                                                 <div key={item.step} className="bg-white rounded-xl p-4 flex items-center gap-4 shadow-sm">
                                                     <div className={`size-8 rounded-full ${item.color} text-white text-sm font-bold flex items-center justify-center shrink-0`}>{item.step}</div>
