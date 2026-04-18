@@ -264,6 +264,27 @@ function AdminDashboardContent() {
         fixedMonthlyCosts: 15000,
     });
 
+    // Goals tab
+    const [goals, setGoals] = useState([]);
+    const [goalsLoading, setGoalsLoading] = useState(false);
+
+    // Budget tab
+    const [budget, setBudget] = useState(null);
+    const [budgetHistory, setBudgetHistory] = useState([]);
+    const [budgetLoading, setBudgetLoading] = useState(false);
+
+    // Insights
+    const [insights, setInsights] = useState([]);
+    const [insightsLoading, setInsightsLoading] = useState(false);
+    const [unreadInsights, setUnreadInsights] = useState(0);
+
+    // Goal form
+    const [showGoalForm, setShowGoalForm] = useState(false);
+    const [goalForm, setGoalForm] = useState({ title: "", category: "REVENUE", targetValue: 200000, deadline: "", notes: "" });
+
+    // Budget form
+    const [budgetForm, setBudgetForm] = useState({ totalBudget: 30000, adSpend: 0, breakdown: { facebook: 0, google: 0, whatsapp: 0, other: 0 }, notes: "" });
+
     // On mount: check sessionStorage for saved key
     useEffect(() => {
         const saved = sessionStorage.getItem("adminKey");
@@ -281,6 +302,8 @@ function AdminDashboardContent() {
         if (activeTab === "stats") fetchAnalytics();
         if (activeTab === "bookings") fetchBookings();
         if (activeTab === "blog") fetchBlogPosts();
+        if (activeTab === "goals") fetchGoals();
+        if (activeTab === "budget") fetchBudget();
     }, [activeTab, adminKey]);
 
     const handleKeySubmit = async (e) => {
@@ -318,6 +341,7 @@ function AdminDashboardContent() {
                 const vJson = await verificationsRes.json();
                 setPendingVerifications(vJson.requests || []);
             }
+            fetchInsights();
         } catch (err) {
             console.error("Failed to load metrics", err);
         } finally {
@@ -377,6 +401,35 @@ function AdminDashboardContent() {
         } finally {
             setBlogLoading(false);
         }
+    };
+
+    const fetchGoals = async () => {
+        setGoalsLoading(true);
+        try {
+            const res = await fetch("/api/admin/goals", { headers: { "x-admin-key": adminKey } });
+            const data = await res.json();
+            if (data.goals) setGoals(data.goals);
+        } catch {} finally { setGoalsLoading(false); }
+    };
+
+    const fetchBudget = async () => {
+        setBudgetLoading(true);
+        try {
+            const res = await fetch("/api/admin/budget", { headers: { "x-admin-key": adminKey } });
+            const data = await res.json();
+            if (data.currentMonth) setBudget(data.currentMonth);
+            if (data.budgets) setBudgetHistory(data.budgets);
+        } catch {} finally { setBudgetLoading(false); }
+    };
+
+    const fetchInsights = async () => {
+        setInsightsLoading(true);
+        try {
+            const res = await fetch("/api/admin/insights?limit=20", { headers: { "x-admin-key": adminKey } });
+            const data = await res.json();
+            if (data.insights) setInsights(data.insights);
+            if (typeof data.unreadCount === "number") setUnreadInsights(data.unreadCount);
+        } catch {} finally { setInsightsLoading(false); }
     };
 
     const handleVerificationReview = async (id, action) => {
@@ -654,6 +707,8 @@ function AdminDashboardContent() {
         { id: "bookings",   icon: Calendar,        label: "Bookings" },
         { id: "stats",      icon: BarChart3,       label: "Analytics" },
         { id: "projections",icon: TrendingUp,      label: "Projections" },
+        { id: "goals",      icon: Target,          label: "Goals & Roadmap" },
+        { id: "budget",     icon: Wallet,          label: "Budget & ROI" },
         { id: "blog",       icon: BookOpen,        label: "Blog" },
         { id: "emails",     icon: Mail,            label: "Emails" },
         { id: "automations",icon: Zap,             label: "Automations" },
@@ -685,6 +740,9 @@ function AdminDashboardContent() {
                             >
                                 <item.icon size={15} strokeWidth={activeTab === item.id ? 2.5 : 2} className={activeTab === item.id ? "text-blue-600" : "text-gray-400"} />
                                 {item.label}
+                                {item.id === "overview" && unreadInsights > 0 && (
+                                    <span className="ml-auto text-xs bg-red-100 text-red-600 font-semibold px-1.5 py-0.5 rounded-full">{unreadInsights}</span>
+                                )}
                             </button>
                         ))}
                     </nav>
@@ -775,6 +833,42 @@ function AdminDashboardContent() {
                                             </div>
                                         )}
                                     </div>
+
+                                    {/* Weekly insights */}
+                                    {insights.length > 0 && (
+                                        <div className="mb-6">
+                                            <div className="flex items-center justify-between mb-3">
+                                                <h2 className="text-base font-semibold text-gray-900">
+                                                    This week's recommendations
+                                                    {unreadInsights > 0 && (
+                                                        <span className="ml-2 text-xs bg-red-100 text-red-600 font-semibold px-2 py-0.5 rounded-full">{unreadInsights} new</span>
+                                                    )}
+                                                </h2>
+                                                <button onClick={async () => {
+                                                    await fetch("/api/admin/insights", { method: "PATCH", headers: { ...adminHeaders(), "Content-Type": "application/json" }, body: JSON.stringify({ markAllRead: true }) });
+                                                    setUnreadInsights(0);
+                                                    setInsights(prev => prev.map(i => ({ ...i, isRead: true })));
+                                                }} className="text-xs text-blue-600 hover:underline">Mark all read</button>
+                                            </div>
+                                            <div className="space-y-2">
+                                                {insights.slice(0, 5).map(insight => (
+                                                    <div key={insight.id} className={`rounded-xl border p-4 flex gap-3 items-start ${!insight.isRead ? "border-blue-200 bg-blue-50" : "border-gray-100 bg-white"}`}>
+                                                        <div className={`size-8 rounded-lg flex items-center justify-center shrink-0 text-sm font-bold ${insight.priority === "HIGH" ? "bg-red-100 text-red-600" : insight.priority === "MEDIUM" ? "bg-amber-100 text-amber-600" : "bg-emerald-100 text-emerald-600"}`}>
+                                                            {insight.priority === "HIGH" ? "!" : insight.priority === "MEDIUM" ? "~" : "✓"}
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="text-sm font-semibold text-gray-900">{insight.title}</p>
+                                                            <p className="text-xs text-gray-500 mt-0.5">{insight.body}</p>
+                                                            {insight.action && (
+                                                                <p className="text-xs text-blue-600 mt-1 font-medium">→ {insight.action}</p>
+                                                            )}
+                                                        </div>
+                                                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium shrink-0 ${insight.category === "REVENUE" ? "bg-green-100 text-green-700" : insight.category === "GROWTH" ? "bg-blue-100 text-blue-700" : insight.category === "ALERT" ? "bg-red-100 text-red-700" : "bg-gray-100 text-gray-600"}`}>{insight.category}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
 
                                     {/* 3-panel row */}
                                     <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
@@ -1869,6 +1963,266 @@ function AdminDashboardContent() {
                                     </div>
                                 </div>
                             )}
+                            {/* ─── GOALS & ROADMAP ──────────────────────────────────────────────── */}
+                            {activeTab === "goals" && (
+                                <div className="space-y-6">
+                                    {/* Header */}
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <h2 className="text-xl font-bold text-gray-900">Goals & Roadmap</h2>
+                                            <p className="text-sm text-gray-500 mt-0.5">Track your revenue targets and platform milestones.</p>
+                                        </div>
+                                        <button onClick={() => setShowGoalForm(true)} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition-colors">
+                                            + Add goal
+                                        </button>
+                                    </div>
+
+                                    {/* Primary goal card */}
+                                    {(() => {
+                                        const primaryGoal = goals.find(g => g.category === "REVENUE" && g.isActive) || { title: "₹2 lakh monthly revenue", targetValue: 200000, currentValue: 0, progressPercent: 0, deadline: null };
+                                        const pct = Math.min(100, primaryGoal.progressPercent || 0);
+                                        const currentMRR = primaryGoal.currentValue || 0;
+                                        const target = primaryGoal.targetValue || 200000;
+                                        const monthsLeft = primaryGoal.deadline ? Math.max(0, Math.ceil((new Date(primaryGoal.deadline) - new Date()) / (1000 * 60 * 60 * 24 * 30))) : null;
+                                        const requiredGrowthPct = currentMRR > 0 && monthsLeft > 0 ? (((target / currentMRR) ** (1 / monthsLeft) - 1) * 100).toFixed(1) : null;
+                                        return (
+                                            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-6">
+                                                <div className="flex items-start justify-between mb-4">
+                                                    <div>
+                                                        <p className="text-xs text-blue-600 font-semibold mb-1">Primary goal</p>
+                                                        <h3 className="text-lg font-bold text-gray-900">{primaryGoal.title}</h3>
+                                                        {primaryGoal.deadline && <p className="text-sm text-gray-500 mt-0.5">Target: {new Date(primaryGoal.deadline).toLocaleDateString("en-IN", { month: "long", year: "numeric" })}</p>}
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <p className="text-3xl font-bold text-blue-600">₹{currentMRR.toLocaleString("en-IN")}</p>
+                                                        <p className="text-sm text-gray-500">of ₹{target.toLocaleString("en-IN")}/mo</p>
+                                                    </div>
+                                                </div>
+                                                <div className="h-3 bg-white/60 rounded-full overflow-hidden mb-3">
+                                                    <div className="h-full bg-blue-500 rounded-full transition-all" style={{ width: `${pct}%` }} />
+                                                </div>
+                                                <div className="flex items-center justify-between text-xs text-gray-500">
+                                                    <span>{pct.toFixed(1)}% of target</span>
+                                                    {requiredGrowthPct && <span>Need {requiredGrowthPct}% MoM growth to hit target</span>}
+                                                    {monthsLeft !== null && <span>{monthsLeft} months remaining</span>}
+                                                </div>
+                                            </div>
+                                        );
+                                    })()}
+
+                                    {/* Milestone Roadmap */}
+                                    <div>
+                                        <h3 className="text-base font-semibold text-gray-900 mb-3">Milestone roadmap</h3>
+                                        {(() => {
+                                            const tutorGoal = goals.find(g => g.category === "TUTORS");
+                                            const tutorCount = tutorGoal?.currentValue || 0;
+                                            const revenueGoal = goals.find(g => g.category === "REVENUE");
+                                            const mrr = revenueGoal?.currentValue || 0;
+
+                                            const milestones = [
+                                                { label: "50 tutors signed up", done: tutorCount >= 50, value: `${tutorCount} tutors` },
+                                                { label: "100 tutors — free verification slots filled", done: tutorCount >= 100, value: tutorCount >= 100 ? "Done" : `${tutorCount}/100` },
+                                                { label: "First Pro subscriber", done: (data?.metrics?.totalTutors || 0) > 0, value: "" },
+                                                { label: "₹25,000 monthly revenue", done: mrr >= 25000, value: `₹${mrr.toLocaleString("en-IN")}/mo` },
+                                                { label: "₹50,000 monthly revenue", done: mrr >= 50000, value: `₹${mrr.toLocaleString("en-IN")}/mo` },
+                                                { label: "₹1 lakh monthly revenue", done: mrr >= 100000, value: `₹${mrr.toLocaleString("en-IN")}/mo` },
+                                                { label: "₹2 lakh monthly revenue — target", done: mrr >= 200000, value: `₹${mrr.toLocaleString("en-IN")}/mo`, isMain: true },
+                                            ];
+                                            return (
+                                                <div className="space-y-2">
+                                                    {milestones.map((m, i) => (
+                                                        <div key={i} className={`flex items-center gap-3 p-4 rounded-xl border ${m.done ? "bg-emerald-50 border-emerald-200" : m.isMain ? "bg-blue-50 border-blue-200" : "bg-white border-gray-100"}`}>
+                                                            <div className={`size-6 rounded-full flex items-center justify-center shrink-0 text-sm ${m.done ? "bg-emerald-500 text-white" : "bg-gray-100 text-gray-400"}`}>
+                                                                {m.done ? "✓" : (i + 1)}
+                                                            </div>
+                                                            <span className={`flex-1 text-sm font-medium ${m.done ? "text-emerald-700 line-through" : m.isMain ? "text-blue-700 font-semibold" : "text-gray-700"}`}>{m.label}</span>
+                                                            {m.value && <span className="text-xs text-gray-400">{m.value}</span>}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            );
+                                        })()}
+                                    </div>
+
+                                    {/* Custom Goals list */}
+                                    {goals.length > 0 && (
+                                        <div>
+                                            <h3 className="text-base font-semibold text-gray-900 mb-3">Your goals</h3>
+                                            <div className="space-y-3">
+                                                {goals.map(goal => (
+                                                    <div key={goal.id} className="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-4">
+                                                        <div className="flex-1">
+                                                            <p className="text-sm font-semibold text-gray-900">{goal.title}</p>
+                                                            <p className="text-xs text-gray-400">{goal.category} · Target: {goal.category === "REVENUE" ? `₹${goal.targetValue.toLocaleString("en-IN")}` : goal.targetValue} · Deadline: {goal.deadline ? new Date(goal.deadline).toLocaleDateString("en-IN") : "None"}</p>
+                                                        </div>
+                                                        <div className="text-right shrink-0">
+                                                            <p className="text-sm font-bold text-gray-900">{Math.min(100, goal.progressPercent || 0).toFixed(0)}%</p>
+                                                            <div className="w-20 h-1.5 bg-gray-100 rounded-full mt-1">
+                                                                <div className="h-full bg-blue-500 rounded-full" style={{ width: `${Math.min(100, goal.progressPercent || 0)}%` }} />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Add goal form */}
+                                    {showGoalForm && (
+                                        <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6">
+                                            <h3 className="text-base font-semibold text-gray-900 mb-4">Add new goal</h3>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div className="col-span-2">
+                                                    <label className="block text-xs font-medium text-gray-600 mb-1">Goal title</label>
+                                                    <input value={goalForm.title} onChange={e => setGoalForm(p => ({ ...p, title: e.target.value }))} placeholder="e.g. Reach 500 tutors" className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500 bg-white" />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-600 mb-1">Category</label>
+                                                    <select value={goalForm.category} onChange={e => setGoalForm(p => ({ ...p, category: e.target.value }))} className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm bg-white focus:outline-none focus:border-blue-500">
+                                                        <option value="REVENUE">Revenue (₹/month)</option>
+                                                        <option value="TUTORS">Total tutors</option>
+                                                        <option value="STUDENTS">Total students</option>
+                                                        <option value="CONVERSIONS">Paid conversion %</option>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-600 mb-1">Target value</label>
+                                                    <input type="number" value={goalForm.targetValue} onChange={e => setGoalForm(p => ({ ...p, targetValue: e.target.value }))} className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500 bg-white" />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-600 mb-1">Target date</label>
+                                                    <input type="date" value={goalForm.deadline} onChange={e => setGoalForm(p => ({ ...p, deadline: e.target.value }))} className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500 bg-white" />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-600 mb-1">Notes</label>
+                                                    <input value={goalForm.notes} onChange={e => setGoalForm(p => ({ ...p, notes: e.target.value }))} placeholder="Optional" className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500 bg-white" />
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-2 mt-4">
+                                                <button onClick={async () => {
+                                                    const res = await fetch("/api/admin/goals", { method: "POST", headers: adminHeaders(), body: JSON.stringify(goalForm) });
+                                                    const d = await res.json();
+                                                    if (d.goal) { setGoals(prev => [d.goal, ...prev]); setShowGoalForm(false); setGoalForm({ title: "", category: "REVENUE", targetValue: 200000, deadline: "", notes: "" }); }
+                                                }} className="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700">Save goal</button>
+                                                <button onClick={() => setShowGoalForm(false)} className="px-4 py-2 border border-gray-200 text-gray-600 text-sm rounded-xl hover:bg-gray-50">Cancel</button>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Projections recommendation box */}
+                                    <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5">
+                                        <p className="text-sm font-semibold text-amber-800 mb-1">To reach ₹2 lakh/month</p>
+                                        <ul className="text-xs text-amber-700 space-y-1">
+                                            <li>• You need approx. 300–400 active tutors with 10% on Pro (₹699) and 2% on Elite (₹2,499)</li>
+                                            <li>• Verification revenue (₹999/tutor) is your fastest earner — push for 100+ verifications</li>
+                                            <li>• Spend ₹20,000–35,000/month on ads by Month 3 for tutor acquisition</li>
+                                            <li>• Each ₹150 CPL on Facebook brings one tutor who can generate ₹999–2,499 in revenue</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* ─── BUDGET & ROI ─────────────────────────────────────────────────── */}
+                            {activeTab === "budget" && (
+                                <div className="space-y-6">
+                                    <div>
+                                        <h2 className="text-xl font-bold text-gray-900">Budget & ROI</h2>
+                                        <p className="text-sm text-gray-500 mt-0.5">Track your monthly ad spend and return on investment.</p>
+                                    </div>
+
+                                    {/* Current month budget cards */}
+                                    <div className="grid grid-cols-3 gap-4">
+                                        {[
+                                            { label: "Monthly budget", value: budget ? `₹${budget.totalBudget?.toLocaleString("en-IN") || 0}` : "—" },
+                                            { label: "Actual spend", value: budget ? `₹${budget.adSpend?.toLocaleString("en-IN") || 0}` : "—" },
+                                            { label: "ROI", value: budget?.roi ? `${budget.roi.toFixed(1)}x` : "—", sub: budget?.revenueThisMonth ? `Revenue: ₹${budget.revenueThisMonth.toLocaleString("en-IN")}` : null, highlight: budget?.roi >= 3 }
+                                        ].map((card, i) => (
+                                            <div key={i} className={`rounded-2xl border p-5 ${card.highlight ? "bg-emerald-50 border-emerald-200" : "bg-white border-gray-200"}`}>
+                                                <p className="text-xs text-gray-400 mb-1">{card.label}</p>
+                                                <p className={`text-2xl font-bold ${card.highlight ? "text-emerald-700" : "text-gray-900"}`}>{card.value}</p>
+                                                {card.sub && <p className="text-xs text-gray-400 mt-0.5">{card.sub}</p>}
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Budget entry form */}
+                                    <div className="bg-white border border-gray-200 rounded-2xl p-6">
+                                        <h3 className="text-base font-semibold text-gray-900 mb-4">Update this month's budget</h3>
+                                        <div className="grid grid-cols-2 gap-4 mb-4">
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-600 mb-1">Total budget (₹)</label>
+                                                <input type="number" value={budgetForm.totalBudget} onChange={e => setBudgetForm(p => ({ ...p, totalBudget: parseInt(e.target.value) || 0 }))} className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-600 mb-1">Actual spend so far (₹)</label>
+                                                <input type="number" value={budgetForm.adSpend} onChange={e => setBudgetForm(p => ({ ...p, adSpend: parseInt(e.target.value) || 0 }))} className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500" />
+                                            </div>
+                                        </div>
+                                        <p className="text-xs font-medium text-gray-600 mb-2">Spend breakdown by channel (₹)</p>
+                                        <div className="grid grid-cols-4 gap-3 mb-4">
+                                            {["facebook", "google", "whatsapp", "other"].map(ch => (
+                                                <div key={ch}>
+                                                    <label className="block text-xs text-gray-400 mb-1">{ch === "whatsapp" ? "WhatsApp" : ch.charAt(0).toUpperCase() + ch.slice(1)}</label>
+                                                    <input type="number" value={budgetForm.breakdown?.[ch] || 0} onChange={e => setBudgetForm(p => ({ ...p, breakdown: { ...p.breakdown, [ch]: parseInt(e.target.value) || 0 } }))} className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500" />
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <button onClick={async () => {
+                                            const month = new Date().toISOString().slice(0, 7);
+                                            const res = await fetch("/api/admin/budget", { method: "POST", headers: adminHeaders(), body: JSON.stringify({ month, ...budgetForm }) });
+                                            const d = await res.json();
+                                            if (d.budget) setBudget(prev => ({ ...prev, ...d.budget }));
+                                        }} className="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700">Save budget</button>
+                                    </div>
+
+                                    {/* Recommendations */}
+                                    <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5">
+                                        <p className="text-sm font-semibold text-blue-800 mb-3">Budget recommendations</p>
+                                        <div className="space-y-2 text-xs text-blue-700">
+                                            <p>• <strong>Phase 1 (0–100 tutors):</strong> Spend ₹0–5,000/month. Focus on manual WhatsApp outreach to teacher communities. No ads yet.</p>
+                                            <p>• <strong>Phase 2 (100–500 tutors):</strong> ₹15,000–30,000/month. Facebook/Instagram targeting teachers aged 25–45 in metro cities. Expected CPL: ₹150–200.</p>
+                                            <p>• <strong>Phase 3 (500–2000 tutors):</strong> ₹50,000–1,50,000/month. Add Google Search ("home tutor registration"). Expected CPL: ₹100–200.</p>
+                                            <p>• <strong>Rule of thumb:</strong> If your ROI is above 5x, double the ad budget. If below 2x, pause ads and fix conversion first.</p>
+                                            {budget?.roi > 0 && budget.roi < 2 && (
+                                                <p className="text-red-700 font-medium mt-2">Your current ROI is {budget.roi.toFixed(1)}x — below 2x. Pause ads and focus on improving tutor-to-Pro conversion before spending more.</p>
+                                            )}
+                                            {budget?.roi >= 5 && (
+                                                <p className="text-emerald-700 font-medium mt-2">Your ROI is {budget.roi.toFixed(1)}x — excellent! Consider increasing your budget by 30–50% to accelerate growth.</p>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Budget history table */}
+                                    {budgetHistory.length > 0 && (
+                                        <div>
+                                            <h3 className="text-base font-semibold text-gray-900 mb-3">Budget history</h3>
+                                            <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+                                                <table className="w-full text-sm">
+                                                    <thead className="bg-gray-50 border-b border-gray-100">
+                                                        <tr>
+                                                            {["Month", "Budget", "Spent", "Utilisation", "ROI"].map(h => (
+                                                                <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-gray-500">{h}</th>
+                                                            ))}
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {budgetHistory.map(b => (
+                                                            <tr key={b.id} className="border-b border-gray-50 last:border-0">
+                                                                <td className="px-4 py-3 font-medium text-gray-900">{b.month}</td>
+                                                                <td className="px-4 py-3 text-gray-600">₹{b.totalBudget?.toLocaleString("en-IN")}</td>
+                                                                <td className="px-4 py-3 text-gray-600">₹{b.adSpend?.toLocaleString("en-IN")}</td>
+                                                                <td className="px-4 py-3 text-gray-600">{b.totalBudget > 0 ? `${((b.adSpend / b.totalBudget) * 100).toFixed(0)}%` : "—"}</td>
+                                                                <td className="px-4 py-3 text-gray-600">—</td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
                         </div>
                     )}
 

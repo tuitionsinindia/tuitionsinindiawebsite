@@ -139,6 +139,7 @@ function DashboardContent() {
     const [earlyAdopter, setEarlyAdopter] = useState(null);
     const [verificationLoading, setVerificationLoading] = useState(false);
     const [verificationPaymentLoading, setVerificationPaymentLoading] = useState(false);
+    const [showUpsellModal, setShowUpsellModal] = useState(false);
 
     useEffect(() => {
         const savedId = localStorage.getItem("ti_active_tutor_id");
@@ -296,7 +297,11 @@ function DashboardContent() {
             });
             if (res.ok) {
                 fetchLeads();
-                fetchTutorData();
+                await fetchTutorData();
+                const updatedCredits = tutorData?.credits ? tutorData.credits - 1 : 0;
+                if (updatedCredits < 10) {
+                    setShowUpsellModal(true);
+                }
             } else {
                 const err = await res.json();
                 alert(err.error || "Could not unlock. Please check your credit balance.");
@@ -625,6 +630,35 @@ function DashboardContent() {
 
                 <main className="flex-1 ml-20 md:ml-64 p-6 md:p-10">
                     <div className="max-w-6xl mx-auto">
+
+                        {/* Upsell modal — shown when credits drop below 10 after an unlock */}
+                        {showUpsellModal && (
+                            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+                                <div className="bg-white rounded-2xl p-8 max-w-sm w-full mx-4 shadow-xl">
+                                    <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center mb-4">
+                                        <Crown size={22} className="text-blue-600" />
+                                    </div>
+                                    <h3 className="text-lg font-bold text-gray-900 mb-2">Running low on credits</h3>
+                                    <p className="text-sm text-gray-500 mb-5">
+                                        You have fewer than 10 credits left. Upgrade to Pro and get 30 fresh credits every month for ₹699 — that's less than ₹24 per student contact.
+                                    </p>
+                                    <div className="space-y-2">
+                                        <button
+                                            onClick={() => { setShowUpsellModal(false); setActiveTab("BILLING"); }}
+                                            className="w-full py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors text-sm"
+                                        >
+                                            Upgrade to Pro — ₹699/month
+                                        </button>
+                                        <button
+                                            onClick={() => setShowUpsellModal(false)}
+                                            className="w-full py-2 text-gray-400 text-sm hover:text-gray-600"
+                                        >
+                                            Maybe later
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Payment status banner */}
                         {paymentStatus && (

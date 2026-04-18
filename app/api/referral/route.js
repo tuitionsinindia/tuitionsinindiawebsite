@@ -96,6 +96,22 @@ export async function POST(req) {
             data: { referredById: referrer.id },
         });
 
+        // Give referrer 25 credits as immediate reward
+        await prisma.user.update({
+            where: { id: referrer.id },
+            data: { credits: { increment: 25 } }
+        });
+        // Create notification for referrer
+        await prisma.notification.create({
+            data: {
+                userId: referrer.id,
+                type: "SYSTEM",
+                title: "You earned 25 credits!",
+                body: "Someone signed up using your referral link. Keep sharing to earn more.",
+                link: "/dashboard/tutor",
+            }
+        }).catch(() => {});
+
         // Check if referrer now has 3+ referrals — grant 1 month Pro reward
         const count = await prisma.user.count({ where: { referredById: referrer.id } });
         if (count >= 3 && count % 3 === 0) {

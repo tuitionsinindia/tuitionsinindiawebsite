@@ -67,24 +67,24 @@ export default function InstitutePricing() {
                             <div className="w-10 h-10 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center mb-4">
                                 <Crown size={20} className="text-blue-600" />
                             </div>
-                            <h3 className="text-xl font-semibold text-gray-900 mb-1">Pro</h3>
+                            <h3 className="text-xl font-semibold text-gray-900 mb-1">Institute Pro</h3>
                             <p className="text-sm text-gray-400">For coaching centres and academies</p>
                         </div>
                         <div className="text-4xl font-bold text-gray-900 mb-1">
-                            ₹1,999
+                            ₹4,999
                             <span className="text-base font-normal text-gray-400 ml-1">/month</span>
                         </div>
-                        <p className="text-xs text-blue-600 font-medium mb-8">100 credits included every month</p>
+                        <p className="text-xs text-blue-600 font-medium mb-8">200 credits included every month</p>
                         <ul className="space-y-4 mb-8 flex-1">
                             {[
+                                "Up to 5 staff/teacher listings",
+                                "200 credits per month",
                                 "Verified institute badge",
-                                "100 credits per month",
-                                "Featured listing in search",
-                                "Top search ranking",
-                                "Unlimited courses",
+                                "Featured placement in search",
+                                "Priority student matching",
+                                "Batch and course management",
                                 "Multiple branch locations",
-                                "Manage instructors",
-                                "Dedicated support"
+                                "Dedicated account support"
                             ].map((feature, i) => (
                                 <li key={i} className="flex items-center gap-3 text-sm text-gray-700">
                                     <ShieldCheck size={16} className="text-blue-600 shrink-0" />
@@ -96,7 +96,7 @@ export default function InstitutePricing() {
                             href="/register/institute"
                             className="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors text-center text-sm"
                         >
-                            Start with Pro
+                            Start with Institute Pro
                         </Link>
                     </div>
 

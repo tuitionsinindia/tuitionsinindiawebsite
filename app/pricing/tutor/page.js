@@ -71,7 +71,7 @@ export default function TutorPricing() {
                             <p className="text-sm text-gray-400">For individual tutors</p>
                         </div>
                         <div className="text-4xl font-bold text-gray-900 mb-1">
-                            ₹499
+                            ₹699
                             <span className="text-base font-normal text-gray-400 ml-1">/month</span>
                         </div>
                         <p className="text-xs text-blue-600 font-medium mb-8">30 credits included every month</p>
@@ -108,7 +108,7 @@ export default function TutorPricing() {
                             <p className="text-sm text-gray-400">For institutes and top tutors</p>
                         </div>
                         <div className="text-4xl font-bold text-gray-900 mb-1">
-                            ₹1,999
+                            ₹2,499
                             <span className="text-base font-normal text-gray-400 ml-1">/month</span>
                         </div>
                         <p className="text-xs text-gray-400 mb-8">100 credits included every month</p>

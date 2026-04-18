@@ -6,7 +6,7 @@ export async function GET() {
             id: "plan_pro_monthly",
             name: "Pro",
             tier: "PRO",
-            price: 499,
+            price: 699,
             interval: "month",
             credits: 30,
             features: [
@@ -21,7 +21,7 @@ export async function GET() {
             id: "plan_elite_monthly",
             name: "Elite",
             tier: "ELITE",
-            price: 1999,
+            price: 2499,
             interval: "month",
             credits: 100,
             features: [
@@ -31,6 +31,24 @@ export async function GET() {
                 "Top search ranking",
                 "Dedicated support",
                 "Unlimited subject categories"
+            ]
+        },
+        {
+            id: "plan_institute_monthly",
+            name: "Institute Pro",
+            tier: "ELITE",
+            price: 4999,
+            interval: "month",
+            credits: 200,
+            targetRole: "INSTITUTE",
+            features: [
+                "Up to 5 staff/teacher listings",
+                "200 credits per month",
+                "Verified institute badge",
+                "Featured placement in search",
+                "Priority student matching",
+                "Dedicated account support",
+                "Batch and course management"
             ]
         }
     ];

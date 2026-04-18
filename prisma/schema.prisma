@@ -546,3 +546,48 @@ enum VerificationStatus {
   APPROVED         // Admin approved — isVerified set to true
   REJECTED         // Admin rejected with reason
 }
+
+// ─── Platform Goals & Roadmap ──────────────────────────────────────────────
+
+model PlatformGoal {
+  id          String   @id @default(cuid())
+  title       String
+  category    String   // REVENUE | TUTORS | STUDENTS | CONVERSIONS
+  targetValue Float
+  deadline    DateTime
+  notes       String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ─── Monthly Ad Budget Tracking ────────────────────────────────────────────
+
+model MonthlyBudget {
+  id          String   @id @default(cuid())
+  month       String   // "2026-04" format
+  totalBudget Int      // rupees
+  adSpend     Int      @default(0) // actual spend, manual entry
+  breakdown   Json?    // { facebook: 10000, google: 8000, whatsapp: 0, other: 2000 }
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([month])
+}
+
+// ─── Weekly Admin Insights ─────────────────────────────────────────────────
+
+model AdminInsight {
+  id          String   @id @default(cuid())
+  weekOf      DateTime
+  category    String   // REVENUE | GROWTH | CONVERSION | BUDGET | ALERT
+  priority    String   // HIGH | MEDIUM | LOW
+  title       String
+  body        String
+  action      String?  // suggested next action
+  metric      String?  // key metric name that triggered this
+  metricValue Float?   // value of that metric
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
