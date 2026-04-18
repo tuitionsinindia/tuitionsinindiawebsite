@@ -79,7 +79,7 @@ export async function POST(request) {
                 userId: toTutorId,
                 type: "INQUIRY",
                 title: "New Student Inquiry",
-                message: `${student.name} is interested in your services: "${trimmedMessage.slice(0, 100)}${trimmedMessage.length > 100 ? "…" : ""}"`,
+                body: `${student.name} is interested in your services: "${trimmedMessage.slice(0, 100)}${trimmedMessage.length > 100 ? "…" : ""}"`,
                 metadata: {
                     fromStudentId: student.id,
                     fromStudentName: student.name,

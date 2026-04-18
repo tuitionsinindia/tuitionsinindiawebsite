@@ -6,7 +6,7 @@ import Link from "next/link";
 import {
     Search, MapPin, ChevronDown, Star, ShieldCheck,
     MessageSquare, ArrowRight, CheckCircle2, Users,
-    GraduationCap, Zap, BookOpen, Building2
+    GraduationCap, Zap, BookOpen, Building2, Award
 } from "lucide-react";
 import { ALL_SUBJECTS, BROAD_CATEGORIES, SUBJECT_CATEGORIES, getSubjectsForCategory, GRADE_OPTIONS, CITY_OPTIONS } from "../lib/subjects";
 
@@ -303,6 +303,48 @@ export default function Home() {
                                 )}
                             </div>
                         ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* ── VIP SERVICE HIGHLIGHT ── */}
+            <section className="py-14 px-4 bg-gradient-to-br from-blue-700 to-indigo-800 text-white">
+                <div className="max-w-5xl mx-auto">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+                        <div>
+                            <span className="inline-flex items-center gap-2 bg-white/20 text-white text-xs font-semibold px-4 py-1.5 rounded-full mb-5 border border-white/30">
+                                <Award size={12} /> New — VIP Managed Service
+                            </span>
+                            <h2 className="text-2xl md:text-3xl font-bold text-white mb-4 leading-snug">
+                                Don't have time to search?<br />We'll find the tutor for you.
+                            </h2>
+                            <p className="text-blue-100 text-sm leading-relaxed mb-6">
+                                Tell us what you need. Our team handpicks the best verified tutors, arranges a monitored intro call, and manages everything — with 3 free replacements guaranteed.
+                            </p>
+                            <div className="flex flex-col sm:flex-row items-start gap-3">
+                                <Link href="/vip"
+                                    className="inline-flex items-center gap-2 px-6 py-3 bg-white text-blue-700 font-bold rounded-xl hover:bg-blue-50 transition-colors text-sm shadow-lg">
+                                    Learn About VIP <ArrowRight size={15} />
+                                </Link>
+                                <Link href="/vip/apply"
+                                    className="inline-flex items-center gap-2 px-6 py-3 bg-white/10 text-white border border-white/30 font-semibold rounded-xl hover:bg-white/20 transition-colors text-sm">
+                                    Enroll — ₹2,000
+                                </Link>
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                            {[
+                                { value: "48 hrs", label: "First match sent" },
+                                { value: "3×", label: "Free replacements" },
+                                { value: "4.5+", label: "Tutor rating" },
+                                { value: "₹2,000", label: "One-time fee" },
+                            ].map(stat => (
+                                <div key={stat.label} className="bg-white/10 rounded-xl p-5 border border-white/20">
+                                    <p className="text-2xl font-bold text-white">{stat.value}</p>
+                                    <p className="text-blue-200 text-xs mt-1">{stat.label}</p>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </section>

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import DashboardHeader from "@/app/components/DashboardHeader";
 import Logo from "@/app/components/Logo";
+import VipAdminPanel from "@/app/components/VipAdminPanel";
 import {
     LayoutDashboard,
     Users,
@@ -30,7 +31,8 @@ import {
     EyeOff,
     Loader2,
     Pencil,
-    ArrowLeft
+    ArrowLeft,
+    Star
 } from "lucide-react";
 
 function AdminDashboardContent() {
@@ -290,6 +292,7 @@ function AdminDashboardContent() {
                                 { id: "overview", icon: LayoutDashboard, label: "Overview" },
                                 { id: "users", icon: Users, label: "User Directory" },
                                 { id: "listings", icon: GraduationCap, label: "Tutor Approvals" },
+                                { id: "vip", icon: Star, label: "VIP Service" },
                                 { id: "financials", icon: CreditCard, label: "Transactions" },
                                 { id: "stats", icon: BarChart3, label: "Analytics" },
                                 { id: "blog", icon: FileText, label: "Blog" }
@@ -791,6 +794,8 @@ function AdminDashboardContent() {
                             )}
                         </div>
                     )}
+
+                    {activeTab === "vip" && <VipAdminPanel adminKey={adminKey} />}
                 </div>
             </main>
         </div>
