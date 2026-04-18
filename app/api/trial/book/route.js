@@ -38,13 +38,13 @@ export async function POST(request) {
         // Check monthly demo limits
         const student = await prisma.user.findUnique({
             where: { id: session.id },
-            select: { contactViewsThisMonth: true, platformCredit: true },
+            select: { demoBookingsThisMonth: true, platformCredit: true },
         });
 
         if (!student) return NextResponse.json({ error: "Student account not found" }, { status: 404 });
 
         // Check if student can book — either has credit or is within free limit
-        if (student.contactViewsThisMonth >= 2 && student.platformCredit < 14900) {
+        if (student.demoBookingsThisMonth >= 2 && student.platformCredit < 14900) {
             return NextResponse.json({
                 error: "You've used your 2 free demo bookings this month. Buy credits or wait until next month.",
                 limitReached: true,

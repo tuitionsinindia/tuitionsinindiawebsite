@@ -14,6 +14,7 @@ export async function GET() {
             select: {
                 platformCredit: true,
                 contactViewsThisMonth: true,
+                demoBookingsThisMonth: true,
             },
         });
 
@@ -22,7 +23,9 @@ export async function GET() {
         return NextResponse.json({
             platformCredit: user.platformCredit,
             contactViewsThisMonth: user.contactViewsThisMonth,
-            freeContactsRemaining: Math.max(0, 2 - user.contactViewsThisMonth),
+            freeContactsRemaining: Math.max(0, 3 - user.contactViewsThisMonth),
+            demoBookingsThisMonth: user.demoBookingsThisMonth,
+            freeDemosRemaining: Math.max(0, 2 - user.demoBookingsThisMonth),
         });
     } catch (error) {
         console.error("Student credits error:", error);

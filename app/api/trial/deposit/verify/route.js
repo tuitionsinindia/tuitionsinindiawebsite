@@ -51,7 +51,7 @@ export async function POST(request) {
             }),
             prisma.user.update({
                 where: { id: session.id },
-                data: { contactViewsThisMonth: { increment: 1 } },
+                data: { demoBookingsThisMonth: { increment: 1 } },
             }),
         ]);
 

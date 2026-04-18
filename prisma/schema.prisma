@@ -25,10 +25,12 @@ model User {
   lat                 Float?
   lng                 Float?
   isVerified          Boolean            @default(false)
+  verificationRequest VerificationRequest?
   isIdVerified        Boolean            @default(false)
   credits             Int                @default(0)
   platformCredit      Int                @default(0) // demo deposit credits in paise
   contactViewsThisMonth Int             @default(0) // resets 1st of each month
+  demoBookingsThisMonth Int              @default(0) // resets 1st of each month
   subscriptionTier    SubscriptionTier   @default(FREE)
   subscriptionStatus  SubscriptionStatus @default(INACTIVE)
   subscriptionId      String?            @unique
@@ -422,6 +424,20 @@ model VipPayment {
   @@index([dueDate])
 }
 
+model VerificationRequest {
+  id                String             @id @default(cuid())
+  tutorId           String             @unique
+  status            VerificationStatus @default(PENDING_PAYMENT)
+  razorpayOrderId   String?            @unique
+  razorpayPaymentId String?            @unique
+  rejectionReason   String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  tutor             User               @relation(fields: [tutorId], references: [id])
+
+  @@index([status])
+}
+
 // ─── VIP Enums ──────────────────────────────────────────────────────────────
 
 enum VipApplicationStatus {
@@ -522,4 +538,11 @@ enum DepositStatus {
 enum DemoType {
   FREE  // Tutor offers free demo; deposit returned as student platform credit
   PAID  // Tutor charges ₹149; ₹119 credited to tutor ledger, ₹30 kept by platform
+}
+
+enum VerificationStatus {
+  PENDING_PAYMENT  // Razorpay order created, not yet paid
+  PENDING_REVIEW   // Payment done, awaiting admin review
+  APPROVED         // Admin approved — isVerified set to true
+  REJECTED         // Admin rejected with reason
 }

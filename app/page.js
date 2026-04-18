@@ -457,7 +457,6 @@ export default function Home() {
                         <p className="text-xs text-gray-400">© 2026 TuitionsInIndia.com. All rights reserved.</p>
                         <nav className="flex flex-wrap gap-x-4 gap-y-1">
                             {[
-                                { label: "Blog", href: "/blog" },
                                 { label: "Contact", href: "/contact" },
                                 { label: "Privacy Policy", href: "/legal/privacy" },
                                 { label: "Terms", href: "/legal/terms" },

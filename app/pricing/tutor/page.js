@@ -160,6 +160,19 @@ export default function TutorPricing() {
                 </div>
             </section>
 
+            {/* Early Adopter Verification Offer */}
+            <section className="py-12 px-6 bg-emerald-50 border-t border-emerald-100">
+                <div className="max-w-3xl mx-auto text-center">
+                    <span className="inline-block bg-emerald-100 text-emerald-700 text-xs font-semibold px-3 py-1 rounded-full mb-4">Limited time — first 100 tutors</span>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-3 tracking-tight">Get verified for free</h2>
+                    <p className="text-gray-500 mb-6 max-w-xl mx-auto">Verified tutors rank higher in search and receive more student enquiries. We are offering free verification to the first 100 tutors on the platform.</p>
+                    <a href="/register/tutor" className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 transition-colors text-sm">
+                        Claim your free verified badge
+                    </a>
+                    <p className="text-xs text-gray-400 mt-4">After the first 100 tutors, verification is ₹999 (one-time).</p>
+                </div>
+            </section>
+
             {/* FAQ / Support CTA */}
             <section className="py-16 px-6 border-t border-gray-100 text-center">
                 <div className="max-w-xl mx-auto">

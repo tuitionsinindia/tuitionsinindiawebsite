@@ -25,7 +25,8 @@ import {
     Wallet,
     Phone,
     Mail,
-    Star
+    Star,
+    ShieldCheck
 } from "lucide-react";
 
 function AdminDashboardContent() {
@@ -45,6 +46,10 @@ function AdminDashboardContent() {
     const [usersLoading, setUsersLoading] = useState(false);
     const [userSearch, setUserSearch] = useState("");
     const [userActionLoading, setUserActionLoading] = useState(null);
+
+    // Verification requests
+    const [pendingVerifications, setPendingVerifications] = useState([]);
+    const [verificationActionLoading, setVerificationActionLoading] = useState(null);
 
     // On mount, check sessionStorage for saved key
     useEffect(() => {
@@ -86,15 +91,49 @@ function AdminDashboardContent() {
     const fetchMetrics = async (key) => {
         setLoading(true);
         try {
-            const res = await fetch("/api/admin/metrics", { headers: { "x-admin-key": key || adminKey } });
-            const json = await res.json();
+            const [metricsRes, verificationsRes] = await Promise.all([
+                fetch("/api/admin/metrics", { headers: { "x-admin-key": key || adminKey } }),
+                fetch("/api/admin/verification/requests", { headers: { "x-admin-key": key || adminKey } }),
+            ]);
+            const json = await metricsRes.json();
             if (json.success) {
                 setData(json);
+            }
+            if (verificationsRes.ok) {
+                const vJson = await verificationsRes.json();
+                setPendingVerifications(vJson.requests || []);
             }
         } catch (err) {
             console.error("Failed to load metrics", err);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleVerificationReview = async (id, action) => {
+        let rejectionReason;
+        if (action === "REJECT") {
+            rejectionReason = window.prompt("Enter a reason for rejection:");
+            if (!rejectionReason) return;
+        }
+        setVerificationActionLoading(id + action);
+        try {
+            const res = await fetch(`/api/admin/verification/${id}/review`, {
+                method: "PATCH",
+                headers: adminHeaders(),
+                body: JSON.stringify({ action, rejectionReason }),
+            });
+            const json = await res.json();
+            if (json.success) {
+                setPendingVerifications(prev => prev.filter(v => v.id !== id));
+            } else {
+                alert(json.error || "Something went wrong. Please try again.");
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Something went wrong. Please try again.");
+        } finally {
+            setVerificationActionLoading(null);
         }
     };
 
@@ -318,7 +357,7 @@ function AdminDashboardContent() {
                                         ))}
                                     </div>
 
-                                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
+                                    <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
                                         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
                                             <div className="flex items-center justify-between mb-5">
                                                 <h3 className="font-bold text-base text-gray-900">Pending Approvals</h3>
@@ -365,6 +404,53 @@ function AdminDashboardContent() {
                                                         <p className="text-xs text-gray-400">{new Date(txn.createdAt).toLocaleDateString()}</p>
                                                     </div>
                                                 ))}
+                                            </div>
+                                        </div>
+
+                                        {/* Pending Verification Requests */}
+                                        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+                                            <div className="flex items-center gap-3 mb-5">
+                                                <div className="p-2 rounded-xl bg-blue-50 text-blue-600">
+                                                    <ShieldCheck size={16} strokeWidth={2} />
+                                                </div>
+                                                <h3 className="font-bold text-base text-gray-900">Verification Requests</h3>
+                                                {pendingVerifications.length > 0 && (
+                                                    <span className="ml-auto px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">{pendingVerifications.length}</span>
+                                                )}
+                                            </div>
+                                            <div className="space-y-3">
+                                                {pendingVerifications.slice(0, 5).map(v => (
+                                                    <div key={v.id} className="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                                                        <div className="flex items-center gap-3 mb-2">
+                                                            <div className="size-9 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center font-bold text-sm shrink-0">
+                                                                {v.tutor?.name?.[0] || "?"}
+                                                            </div>
+                                                            <div className="min-w-0 flex-1">
+                                                                <p className="font-semibold text-sm text-gray-900 truncate">{v.tutor?.name || "—"}</p>
+                                                                <p className="text-xs text-gray-400 truncate">{v.tutor?.phone || v.tutor?.email || "—"}</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex gap-2">
+                                                            <button
+                                                                onClick={() => handleVerificationReview(v.id, "APPROVE")}
+                                                                disabled={verificationActionLoading === v.id + "APPROVE"}
+                                                                className="flex-1 px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-semibold hover:bg-emerald-700 transition-colors disabled:opacity-50"
+                                                            >
+                                                                {verificationActionLoading === v.id + "APPROVE" ? "..." : "Approve"}
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleVerificationReview(v.id, "REJECT")}
+                                                                disabled={verificationActionLoading === v.id + "REJECT"}
+                                                                className="flex-1 px-3 py-1.5 bg-white text-red-500 border border-red-200 rounded-lg text-xs font-semibold hover:bg-red-50 transition-colors disabled:opacity-50"
+                                                            >
+                                                                {verificationActionLoading === v.id + "REJECT" ? "..." : "Reject"}
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                                {pendingVerifications.length === 0 && (
+                                                    <p className="text-center py-6 text-gray-400 text-sm">No pending verification requests.</p>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
