@@ -88,12 +88,21 @@ function ContactModal({ tutor, onClose }) {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [limitReached, setLimitReached] = useState(false);
     const [copied, setCopied] = useState(false);
 
     useEffect(() => {
         fetch(`/api/tutor/contact?tutorId=${tutor.id || tutor.userId}`)
             .then(r => r.json())
-            .then(d => { if (d.phone || d.email) setData(d); else setError(d.error || "Could not load contact details."); })
+            .then(d => {
+                if (d.limitReached) {
+                    setLimitReached(true);
+                } else if (d.phone || d.email) {
+                    setData(d);
+                } else {
+                    setError(d.error || "Could not load contact details.");
+                }
+            })
             .catch(() => setError("Something went wrong. Please try again."))
             .finally(() => setLoading(false));
     }, [tutor.id, tutor.userId]);
@@ -122,6 +131,12 @@ function ContactModal({ tutor, onClose }) {
                 {loading ? (
                     <div className="flex items-center justify-center py-8">
                         <Loader2 size={24} className="animate-spin text-blue-600" />
+                    </div>
+                ) : limitReached ? (
+                    <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 space-y-2">
+                        <p className="text-sm font-semibold text-amber-800">Monthly limit reached</p>
+                        <p className="text-xs text-amber-700 leading-relaxed">You&apos;ve used your 3 free contact views this month. Your limit resets on the 1st of next month.</p>
+                        <p className="text-xs text-amber-600">Tip: Book a demo class directly — the tutor will reach out to you.</p>
                     </div>
                 ) : error ? (
                     <p className="text-sm text-red-500 py-4">{error}</p>

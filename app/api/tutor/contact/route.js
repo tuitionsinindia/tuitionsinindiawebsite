@@ -4,9 +4,12 @@ import { getSession } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
+// Free contact views per month for students (separate from demo booking limit)
+const FREE_CONTACT_VIEWS_PER_MONTH = 3;
+
 // GET /api/tutor/contact?tutorId=xxx
-// Returns a tutor's contact details to any logged-in user (students get it free).
-// Also logs the contact view for analytics.
+// Returns a tutor's contact details.
+// Students: limited to 3 free contact views/month. Tutors/admins: unlimited.
 export async function GET(request) {
     try {
         const session = getSession();
@@ -21,8 +24,33 @@ export async function GET(request) {
             return NextResponse.json({ error: "tutorId is required." }, { status: 400 });
         }
 
-        // Don't let a tutor fetch their own contact details via this route
-        // (they can see it in their dashboard)
+        // Students: enforce monthly contact view limit
+        if (session.role === "STUDENT") {
+            const student = await prisma.user.findUnique({
+                where: { id: session.id },
+                select: { contactViewsThisMonth: true },
+            });
+
+            if (!student) {
+                return NextResponse.json({ error: "Account not found." }, { status: 404 });
+            }
+
+            if (student.contactViewsThisMonth >= FREE_CONTACT_VIEWS_PER_MONTH) {
+                return NextResponse.json({
+                    error: `You've used your ${FREE_CONTACT_VIEWS_PER_MONTH} free contact views this month. Your limit resets on the 1st of next month.`,
+                    limitReached: true,
+                    used: student.contactViewsThisMonth,
+                    limit: FREE_CONTACT_VIEWS_PER_MONTH,
+                }, { status: 429 });
+            }
+
+            // Increment the counter atomically
+            await prisma.user.update({
+                where: { id: session.id },
+                data: { contactViewsThisMonth: { increment: 1 } },
+            });
+        }
+
         const tutor = await prisma.user.findUnique({
             where: { id: tutorId },
             select: {
@@ -47,7 +75,7 @@ export async function GET(request) {
             return NextResponse.json({ error: "Not a tutor profile." }, { status: 400 });
         }
 
-        // Increment profile view counter (fire-and-forget, don't await)
+        // Increment profile view counter (fire-and-forget)
         prisma.listing.updateMany({
             where: { tutorId },
             data: { viewCount: { increment: 1 } }
