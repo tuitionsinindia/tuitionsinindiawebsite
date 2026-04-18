@@ -46,7 +46,7 @@ export default function AdminLoginPage() {
                         <ShieldCheck size={26} className="text-white" />
                     </div>
                     <h1 className="text-2xl font-bold text-gray-900 mb-1">Admin Portal</h1>
-                    <p className="text-xs text-gray-400 uppercase tracking-widest font-semibold">Authorized Personnel Only</p>
+                    <p className="text-xs text-gray-400 font-semibold">Authorized access only</p>
                 </div>
 
                 <form onSubmit={handleLogin} className="space-y-4">
@@ -57,7 +57,7 @@ export default function AdminLoginPage() {
                     )}
 
                     <div>
-                        <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5">Admin Email</label>
+                        <label className="block text-xs font-semibold text-gray-600 mb-1.5">Admin email</label>
                         <input
                             type="email"
                             value={email}
@@ -69,7 +69,7 @@ export default function AdminLoginPage() {
                     </div>
 
                     <div>
-                        <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5">Password</label>
+                        <label className="block text-xs font-semibold text-gray-600 mb-1.5">Password</label>
                         <input
                             type="password"
                             value={password}

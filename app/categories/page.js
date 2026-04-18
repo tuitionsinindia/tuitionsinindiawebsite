@@ -16,7 +16,7 @@ import { SUBJECT_CATEGORIES } from "../../lib/subjects";
 
 export default function CategoriesPage() {
     const router = useRouter();
-    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [selectedCategory, setSelectedCategory] = useState(SUBJECT_CATEGORIES[0] || null);
     const [subjectCounts, setSubjectCounts] = useState({});
     const [loading, setLoading] = useState(true);
 

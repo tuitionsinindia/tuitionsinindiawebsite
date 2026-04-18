@@ -843,13 +843,13 @@ function SearchResultsContent() {
 
                                             {/* Actions */}
                                             <div className="flex items-center gap-2 flex-wrap">
-                                                {/* Primary: View Contact */}
+                                                {/* Primary: Contact Tutor */}
                                                 <button
                                                     onClick={() => handleViewContact(item)}
                                                     className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 active:scale-95 transition-all"
                                                 >
                                                     <Phone size={12} />
-                                                    {item.role === "INSTITUTE" ? "View Contact" : "View Contact"}
+                                                    {item.role === "INSTITUTE" ? "Contact Institute" : "Contact Tutor"}
                                                 </button>
 
                                                 {/* Secondary: Send Inquiry */}

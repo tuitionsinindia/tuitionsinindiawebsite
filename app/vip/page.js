@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 
 export const metadata = {
-    title: "VIP Tuition Service — Guaranteed Tutor Matching | TuitionsInIndia",
+    title: "VIP Tuition Service — Guaranteed Tutor Matching",
     description: "Let us find the perfect tutor for your child. Curated recommendations, monitored intro calls, 3 replacement guarantee. ₹2,000 one-time enrollment fee.",
 };
 

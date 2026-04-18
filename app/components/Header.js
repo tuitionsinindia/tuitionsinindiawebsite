@@ -134,7 +134,9 @@ export default function Header() {
     const [mobileExpanded, setMobileExpanded] = useState(null);
 
     const isSearchPage = pathname?.startsWith("/search");
-    const isOpaque = scrolled || isSearchPage;
+    // Only the homepage gets the transparent/light header — all other pages are always opaque
+    const isHomepage = pathname === "/";
+    const isOpaque = scrolled || isSearchPage || !isHomepage;
 
     useEffect(() => {
         const handleScroll = () => setScrolled(window.scrollY > 50);
