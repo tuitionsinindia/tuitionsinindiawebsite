@@ -9,49 +9,53 @@ datasource db {
 }
 
 model User {
-  id                 String             @id @default(cuid())
-  name               String?
-  email              String?            @unique
-  emailVerified      DateTime?
-  image              String?
-  googleId           String?            @unique
-  provider           String?            @default("phone")
-  role               Role               @default(STUDENT)
-  phone              String?            @unique
-  phoneVerified      Boolean            @default(false)
-  isProfileComplete  Boolean            @default(false)
-  privacySettings    Json?              @default("{\"showPhonePublicly\": true, \"preferredContact\": \"PHONE\"}")
-  notificationPrefs  Json?              @default("{\"emailMatches\": true, \"emailMessages\": true, \"emailPayments\": true, \"smsLeads\": false}")
-  lat                Float?
-  lng                Float?
-  isVerified         Boolean            @default(false)
-  isIdVerified       Boolean            @default(false)
-  credits            Int                @default(0)
-  subscriptionTier   SubscriptionTier   @default(FREE)
-  subscriptionStatus SubscriptionStatus @default(INACTIVE)
-  subscriptionId     String?            @unique
-  referralCode       String?            @unique
-  referredById       String?
-  referredBy         User?              @relation("Referrals", fields: [referredById], references: [id])
-  referrals          User[]             @relation("Referrals")
-  createdAt          DateTime           @default(now())
-  updatedAt          DateTime           @updatedAt
-  ads                AdSlot[]           @relation("UserAds")
-  studentChats       ChatSession[]      @relation("StudentChats")
-  tutorChats         ChatSession[]      @relation("TutorChats")
-  courses            Course[]           @relation("InstituteCourses")
-  leadsPosted        Lead[]             @relation("LeadCreator")
-  leadsUnlocked      LeadUnlock[]
-  tutorListing       Listing?
-  messagesSent       Message[]          @relation("SentMessages")
-  reviewsGiven       Review[]           @relation("ReviewAuthor")
-  reviewsReceived    Review[]           @relation("ReviewTarget")
-  transactions       Transaction[]
-  notifications      Notification[]
-  studentTrials      TrialBooking[]     @relation("StudentTrials")
-  tutorTrials        TrialBooking[]     @relation("TutorTrials")
-  savedTutors        SavedTutor[]       @relation("StudentSavedTutors")
-  savedByStudents    SavedTutor[]       @relation("TutorSavedBy")
+  id                  String             @id @default(cuid())
+  name                String?
+  email               String?            @unique
+  emailVerified       DateTime?
+  image               String?
+  googleId            String?            @unique
+  provider            String?            @default("phone")
+  role                Role               @default(STUDENT)
+  phone               String?            @unique
+  phoneVerified       Boolean            @default(false)
+  isProfileComplete   Boolean            @default(false)
+  privacySettings     Json?              @default("{\"showPhonePublicly\": true, \"preferredContact\": \"PHONE\"}")
+  notificationPrefs   Json?              @default("{\"emailMatches\": true, \"emailMessages\": true, \"emailPayments\": true, \"smsLeads\": false}")
+  lat                 Float?
+  lng                 Float?
+  isVerified          Boolean            @default(false)
+  isIdVerified        Boolean            @default(false)
+  credits             Int                @default(0)
+  subscriptionTier    SubscriptionTier   @default(FREE)
+  subscriptionStatus  SubscriptionStatus @default(INACTIVE)
+  subscriptionId      String?            @unique
+  referralCode        String?            @unique
+  referredById        String?
+  referredBy          User?              @relation("Referrals", fields: [referredById], references: [id])
+  referrals           User[]             @relation("Referrals")
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  ads                 AdSlot[]           @relation("UserAds")
+  studentChats        ChatSession[]      @relation("StudentChats")
+  tutorChats          ChatSession[]      @relation("TutorChats")
+  courses             Course[]           @relation("InstituteCourses")
+  leadsPosted         Lead[]             @relation("LeadCreator")
+  leadsUnlocked       LeadUnlock[]
+  tutorListing        Listing?
+  messagesSent        Message[]          @relation("SentMessages")
+  reviewsGiven        Review[]           @relation("ReviewAuthor")
+  reviewsReceived     Review[]           @relation("ReviewTarget")
+  transactions        Transaction[]
+  notifications       Notification[]
+  studentTrials       TrialBooking[]     @relation("StudentTrials")
+  tutorTrials         TrialBooking[]     @relation("TutorTrials")
+  savedTutors         SavedTutor[]       @relation("StudentSavedTutors")
+  savedByStudents     SavedTutor[]       @relation("TutorSavedBy")
+  vipApplications     VipApplication[]   @relation("VipStudent")
+  vipMatchesAsTutor   VipMatch[]         @relation("VipMatchTutor")
+  vipContracts        VipContract[]      @relation("VipContractStudent")
+  vipContractsAsTutor VipContract[]      @relation("VipContractTutor")
 
   @@index([role])
   @@index([createdAt])
@@ -71,34 +75,36 @@ model SavedTutor {
 }
 
 model Listing {
-  id                String      @id @default(cuid())
-  tutorId           String      @unique
-  title             String
-  bio               String
-  subjects          String[]
-  grades            String[]
-  locations         String[]
-  hourlyRate        Int?
-  rating            Float       @default(0)
-  reviewCount       Int         @default(0)
-  viewCount         Int         @default(0)
-  isActive          Boolean     @default(true)
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
-  boards            String[]
-  experience        Int?
-  gender            String?
-  teachingModes     String[]
-  timings           String[]
-  languages         String[]
-  expertiseLevel    String?
-  type              ListingType @default(PRIVATE)
-  maxSeats          Int?        @default(1)
-  enrolledCount     Int         @default(0)
-  isInstitute       Boolean     @default(false)
-  offersTrialClass  Boolean     @default(false)
-  trialDuration     Int         @default(30)
-  tutor             User        @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+  id               String      @id @default(cuid())
+  tutorId          String      @unique
+  title            String
+  bio              String
+  subjects         String[]
+  grades           String[]
+  locations        String[]
+  hourlyRate       Int?
+  rating           Float       @default(0)
+  reviewCount      Int         @default(0)
+  viewCount        Int         @default(0)
+  isActive         Boolean     @default(true)
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  boards           String[]
+  experience       Int?
+  gender           String?
+  teachingModes    String[]
+  timings          String[]
+  languages        String[]
+  expertiseLevel   String?
+  type             ListingType @default(PRIVATE)
+  maxSeats         Int?        @default(1)
+  enrolledCount    Int         @default(0)
+  isInstitute      Boolean     @default(false)
+  offersTrialClass Boolean     @default(false)
+  trialDuration    Int         @default(30)
+  isVipEligible    Boolean     @default(false)
+  vipAvailability  Json? // weekly schedule slots for VIP matching
+  tutor            User        @relation(fields: [tutorId], references: [id], onDelete: Cascade)
 
   @@index([isActive])
   @@index([rating])
@@ -258,11 +264,12 @@ model Message {
 model Notification {
   id        String   @id @default(cuid())
   userId    String
-  type      String // LEAD_UNLOCK | NEW_LEAD | NEW_MESSAGE | PAYMENT | SYSTEM
+  type      String // LEAD_UNLOCK | NEW_LEAD | NEW_MESSAGE | PAYMENT | INQUIRY | VIP | SYSTEM
   title     String
   body      String
   isRead    Boolean  @default(false)
   link      String?
+  metadata  Json?
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -285,6 +292,152 @@ model BlogPost {
   publishedAt DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+}
+
+// ─── VIP Managed Tuition Service ───────────────────────────────────────────
+
+model VipApplication {
+  id                  String               @id @default(cuid())
+  studentId           String
+  status              VipApplicationStatus @default(PENDING_PAYMENT)
+  // Requirements filled by student
+  subjects            String[]
+  grades              String[]
+  locations           String[]
+  budget              Int? // monthly budget in INR
+  schedule            String[] // e.g. ["Weekdays 4-6pm", "Weekends morning"]
+  genderPreference    String? // MALE | FEMALE | ANY
+  boardPreference     String?
+  modePreference      String? // ONLINE | OFFLINE | BOTH
+  additionalNotes     String?
+  // Enrollment payment (₹2,000 = 200000 paise)
+  enrollmentFee       Int                  @default(200000)
+  enrollmentOrderId   String?              @unique
+  enrollmentPaymentId String?              @unique
+  // Matching state
+  currentMatchNumber  Int                  @default(0) // 0 = no match sent yet
+  replacementsUsed    Int                  @default(0)
+  maxReplacements     Int                  @default(3)
+  maxRecommendations  Int                  @default(5)
+  // Admin notes
+  adminNotes          String?
+  assignedAdminId     String?
+  // Relations
+  student             User                 @relation("VipStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  matches             VipMatch[]
+  contract            VipContract?
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+
+  @@index([studentId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model VipMatch {
+  id                   String         @id @default(cuid())
+  applicationId        String
+  tutorId              String
+  recommendationNumber Int // 1–5
+  status               VipMatchStatus @default(SENT)
+  // Student response
+  studentNote          String? // reason for rejection
+  respondedAt          DateTime?
+  // Intro call
+  introCallUrl         String? // Google Meet link
+  introCallScheduledAt DateTime?
+  introCallNotes       String?
+  // Relations
+  application          VipApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  tutor                User           @relation("VipMatchTutor", fields: [tutorId], references: [id], onDelete: Cascade)
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+
+  @@unique([applicationId, tutorId])
+  @@index([applicationId])
+  @@index([tutorId])
+  @@index([status])
+}
+
+model VipContract {
+  id               String            @id @default(cuid())
+  applicationId    String            @unique
+  studentId        String
+  tutorId          String
+  // Financial terms
+  monthlyFee       Int // what student pays platform per month (paise)
+  tutorPayout      Int // what tutor receives (85% of monthlyFee)
+  platformCut      Int // platform commission (15%)
+  // Contract terms
+  startDate        DateTime          @default(now())
+  endDate          DateTime? // null = ongoing
+  status           VipContractStatus @default(ACTIVE)
+  replacementsUsed Int               @default(0)
+  replacementsLeft Int               @default(3)
+  // Notes
+  contractNotes    String?
+  // Relations
+  application      VipApplication    @relation(fields: [applicationId], references: [id])
+  student          User              @relation("VipContractStudent", fields: [studentId], references: [id])
+  tutor            User              @relation("VipContractTutor", fields: [tutorId], references: [id])
+  payments         VipPayment[]
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  @@index([studentId])
+  @@index([tutorId])
+  @@index([status])
+}
+
+model VipPayment {
+  id                String           @id @default(cuid())
+  contractId        String
+  amount            Int // paise
+  tutorPayout       Int
+  platformCut       Int
+  status            VipPaymentStatus @default(PENDING)
+  razorpayOrderId   String?          @unique
+  razorpayPaymentId String?          @unique
+  dueDate           DateTime
+  paidAt            DateTime?
+  failureReason     String?
+  contract          VipContract      @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  createdAt         DateTime         @default(now())
+
+  @@index([contractId])
+  @@index([status])
+  @@index([dueDate])
+}
+
+// ─── VIP Enums ──────────────────────────────────────────────────────────────
+
+enum VipApplicationStatus {
+  PENDING_PAYMENT // Application started, awaiting ₹2,000 payment
+  ACTIVE // Paid, matching in progress
+  MATCHED // Student has confirmed a tutor, contract active
+  COMPLETED // Contract ended naturally
+  REFUNDED // All 5 recommendations rejected, refunded
+  CANCELLED // Cancelled by student or admin
+}
+
+enum VipMatchStatus {
+  SENT // Recommendation sent to student
+  ACCEPTED // Student wants to proceed with this tutor
+  REJECTED // Student rejected this tutor
+  EXPIRED // Student didn't respond in time
+}
+
+enum VipContractStatus {
+  ACTIVE
+  PAUSED // Temporarily paused (e.g. school break)
+  TERMINATED // Ended early
+  COMPLETED // Natural end
+}
+
+enum VipPaymentStatus {
+  PENDING
+  PAID
+  FAILED
 }
 
 enum Role {
