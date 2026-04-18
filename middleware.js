@@ -8,7 +8,12 @@ import { NextResponse } from "next/server";
 export function middleware(request) {
     const { pathname } = request.nextUrl;
 
-    // Check for session cookie
+    // Admin dashboard uses its own key-based auth (localStorage) — skip cookie check
+    if (pathname.startsWith("/dashboard/admin")) {
+        return NextResponse.next();
+    }
+
+    // All other dashboard routes require a session cookie
     const sessionCookie = request.cookies.get("ti_session");
     if (!sessionCookie?.value) {
         const loginUrl = new URL("/login", request.url);
