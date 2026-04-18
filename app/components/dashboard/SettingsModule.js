@@ -10,7 +10,8 @@ export default function SettingsModule({ userData, onUpdate }) {
         phone: userData?.phone || "",
         bio: userData?.tutorListing?.bio || "",
         gender: userData?.tutorListing?.gender || "OTHER",
-        preferredContact: userData?.privacySettings?.preferredContact || "PHONE"
+        preferredContact: userData?.privacySettings?.preferredContact || "PHONE",
+        showPhonePublicly: userData?.privacySettings?.showPhonePublicly !== false, // default true
     });
     const [isSaving, setIsSaving] = useState(false);
     const [message, setMessage] = useState(null);
@@ -102,7 +103,7 @@ export default function SettingsModule({ userData, onUpdate }) {
                 body: JSON.stringify({ offersTrialClass, trialDuration }),
             });
             if (res.ok) {
-                setTrialMsg({ type: "success", text: "Trial settings saved." });
+                setTrialMsg({ type: "success", text: "Demo class settings saved." });
                 if (onUpdate) onUpdate();
             } else {
                 setTrialMsg({ type: "error", text: "Could not save. Try again." });
@@ -263,6 +264,17 @@ export default function SettingsModule({ userData, onUpdate }) {
                                     </button>
                                 ))}
                             </div>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100">
+                            <div>
+                                <p className="text-sm font-semibold text-gray-800">Show phone number publicly</p>
+                                <p className="text-xs text-gray-500 mt-0.5">Students who unlock your profile can see your phone number</p>
+                            </div>
+                            <label className={`w-12 h-7 rounded-full p-0.5 flex items-center transition-all cursor-pointer shrink-0 ${formData.showPhonePublicly ? "bg-blue-600" : "bg-gray-200"}`}>
+                                <div className={`size-6 bg-white rounded-full shadow transition-transform ${formData.showPhonePublicly ? "translate-x-5" : "translate-x-0"}`} />
+                                <input type="checkbox" className="hidden" checked={formData.showPhonePublicly} onChange={e => setFormData({...formData, showPhonePublicly: e.target.checked})} />
+                            </label>
                         </div>
 
                         <div className="p-4 rounded-xl bg-gray-50 border border-gray-100 space-y-3">

@@ -54,18 +54,20 @@ export async function POST(request) {
                 }
             });
         } else {
-            // Create new user
+            // Create new user with 5 welcome credits
             user = await prisma.user.create({
                 data: {
                     email,
                     name,
                     phone,
                     role: 'TUTOR',
+                    credits: 5,
                 },
             });
         }
 
         // 2. Create the Listing
+        const isNewUser = !existingUser;
         const listing = await prisma.listing.create({
             data: {
                 tutorId: user.id,
@@ -78,6 +80,19 @@ export async function POST(request) {
                 isActive: true,
             },
         });
+
+        // 3. Welcome notification with free credits info (new tutors only)
+        if (isNewUser) {
+            await prisma.notification.create({
+                data: {
+                    userId: user.id,
+                    type: "SYSTEM",
+                    title: "Welcome to TuitionsInIndia! 🎉",
+                    body: "Your profile is live. We've given you 5 free credits to get started — use them to unlock student contact details from your dashboard.",
+                    link: "/dashboard/tutor",
+                },
+            }).catch(() => {});
+        }
 
         return NextResponse.json({ success: true, listingId: listing.id }, { status: 201 });
     } catch (error) {

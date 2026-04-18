@@ -35,13 +35,14 @@ export default function TutorPricing() {
                         <div className="text-4xl font-bold text-gray-900 mb-1">
                             ₹0
                         </div>
-                        <p className="text-xs text-gray-400 mb-8">No credits included</p>
+                        <p className="text-xs text-gray-400 mb-8">5 free credits on signup</p>
                         <ul className="space-y-4 mb-8 flex-1">
                             {[
-                                "Basic tutor profile",
+                                "Full tutor profile listing",
+                                "5 free credits when you sign up",
                                 "Receive student enquiries",
-                                "1 subject category",
-                                "Buy credit packs as needed"
+                                "Accept demo class bookings",
+                                "Buy more credits as needed"
                             ].map((feature, i) => (
                                 <li key={i} className="flex items-center gap-3 text-sm text-gray-600">
                                     <CheckCircle2 size={16} className="text-blue-500 shrink-0" />

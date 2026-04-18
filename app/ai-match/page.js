@@ -315,8 +315,8 @@ export default function AIMatchingFlow() {
                                                     <Link href={`/search?tutor=${aiResults[0].userId}`} className="flex-1 bg-white border border-gray-200 text-gray-700 font-semibold py-3 rounded-xl hover:border-blue-300 transition-all text-center text-sm">
                                                         View profile
                                                     </Link>
-                                                    <Link href="/post-requirement" className="flex-[2] bg-blue-600 text-white font-semibold py-3 rounded-xl hover:bg-blue-700 active:scale-95 shadow-sm transition-all text-center text-sm">
-                                                        Book a demo class
+                                                    <Link href="/search?role=TUTOR" className="flex-[2] bg-blue-600 text-white font-semibold py-3 rounded-xl hover:bg-blue-700 active:scale-95 shadow-sm transition-all text-center text-sm">
+                                                        Find a tutor
                                                     </Link>
                                                 </div>
                                             </div>
