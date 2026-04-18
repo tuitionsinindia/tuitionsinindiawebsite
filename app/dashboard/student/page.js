@@ -47,6 +47,8 @@ function StudentDashboardContent() {
     const [boostingLead, setBoostingLead] = useState(null);
     const [trials, setTrials] = useState([]);
     const [trialLoading, setTrialLoading] = useState(false);
+    const [platformCredit, setPlatformCredit] = useState(null);
+    const [transferLoading, setTransferLoading] = useState(null);
     const [savedTutors, setSavedTutors] = useState([]);
     const [savedLoading, setSavedLoading] = useState(false);
 
@@ -129,10 +131,17 @@ function StudentDashboardContent() {
     const fetchTrials = async () => {
         setTrialLoading(true);
         try {
-            const res = await fetch("/api/trial/list");
-            if (res.ok) {
-                const data = await res.json();
+            const [trialsRes, creditsRes] = await Promise.all([
+                fetch("/api/trial/list"),
+                fetch("/api/student/credits"),
+            ]);
+            if (trialsRes.ok) {
+                const data = await trialsRes.json();
                 setTrials(data.trials || []);
+            }
+            if (creditsRes.ok) {
+                const data = await creditsRes.json();
+                setPlatformCredit(data.platformCredit ?? null);
             }
         } catch (err) { console.error(err); } finally { setTrialLoading(false); }
     };
@@ -838,13 +847,26 @@ function StudentDashboardContent() {
                             <div className="space-y-4">
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Trial Classes</h2>
-                                        <p className="text-sm text-gray-500 mt-1">Free 30-min sessions you have booked with tutors</p>
+                                        <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Demo Classes</h2>
+                                        <p className="text-sm text-gray-500 mt-1">Demo sessions you have booked with tutors</p>
                                     </div>
                                     <Link href="/search" className="text-sm font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1">
                                         <Search size={14} /> Find Tutors
                                     </Link>
                                 </div>
+
+                                {/* Platform credit balance */}
+                                {platformCredit !== null && platformCredit > 0 && (
+                                    <div className="bg-purple-50 border border-purple-100 rounded-xl p-3 flex items-center gap-3">
+                                        <CreditCard size={16} className="text-purple-600 shrink-0" />
+                                        <div className="flex-1">
+                                            <p className="text-sm font-semibold text-purple-800">
+                                                You have ₹{Math.floor(platformCredit / 100)} in platform credit
+                                            </p>
+                                            <p className="text-xs text-purple-600">Use it to book your next demo class — no payment needed.</p>
+                                        </div>
+                                    </div>
+                                )}
 
                                 {trialLoading ? (
                                     <div className="flex items-center justify-center py-16">
@@ -855,11 +877,11 @@ function StudentDashboardContent() {
                                         <div className="w-14 h-14 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4">
                                             <Clock size={24} className="text-emerald-400" />
                                         </div>
-                                        <h3 className="text-base font-semibold text-gray-700 mb-1">No trial classes yet</h3>
-                                        <p className="text-sm text-gray-400 mb-5">Look for tutors with a "Free Trial" button on the search page and book a session before committing.</p>
+                                        <h3 className="text-base font-semibold text-gray-700 mb-1">No demo classes yet</h3>
+                                        <p className="text-sm text-gray-400 mb-5">Look for tutors offering demo classes on the search page. A ₹149 refundable deposit is required to book.</p>
                                         <Link href="/search"
-                                            className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white text-sm font-semibold rounded-lg hover:bg-emerald-700 transition-colors">
-                                            Find Tutors with Free Trial
+                                            className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors">
+                                            Find Tutors
                                         </Link>
                                     </div>
                                 ) : (
@@ -877,21 +899,40 @@ function StudentDashboardContent() {
                                                                 "bg-gray-100 text-gray-500"
                                                             }`}>
                                                                 {trial.status === "PENDING" ? "Waiting for tutor" :
-                                                                 trial.status === "CONFIRMED" ? "Confirmed — contact tutor to schedule" :
-                                                                 trial.status === "COMPLETED" ? "Completed" :
+                                                                 trial.status === "CONFIRMED"
+                                                                    ? (trial.demoType === "FREE" ? "Confirmed · Free demo" :
+                                                                       trial.demoType === "PAID" ? "Confirmed · Paid demo (₹149)" :
+                                                                       "Confirmed — contact tutor to schedule")
+                                                                    : trial.status === "COMPLETED" ? "Completed" :
                                                                  trial.status === "DECLINED" ? "Not accepted" : "Cancelled"}
                                                             </span>
+                                                            {/* Deposit badge */}
+                                                            {trial.depositStatus && trial.depositStatus !== "UNPAID" && (
+                                                                <span className={`text-xs px-2 py-0.5 rounded-full border ${
+                                                                    trial.depositStatus === "PAID" ? "bg-blue-50 text-blue-600 border-blue-100" :
+                                                                    trial.depositStatus === "CREDITED" ? "bg-purple-50 text-purple-700 border-purple-100" :
+                                                                    trial.depositStatus === "REFUNDED" ? "bg-gray-100 text-gray-500 border-gray-200" :
+                                                                    trial.depositStatus === "RELEASED" ? "bg-gray-100 text-gray-500 border-gray-200" :
+                                                                    "bg-gray-100 text-gray-500 border-gray-200"
+                                                                }`}>
+                                                                    {trial.depositStatus === "PAID" ? "₹149 deposit held" :
+                                                                     trial.depositStatus === "CREDITED" ? "₹149 returned as credit" :
+                                                                     trial.depositStatus === "REFUNDED" ? "Deposit refunded" :
+                                                                     trial.depositStatus === "RELEASED" ? "Demo complete" :
+                                                                     trial.depositStatus}
+                                                                </span>
+                                                            )}
                                                         </div>
                                                         <p className="text-sm text-gray-600">Subject: <span className="font-medium">{trial.subject}</span></p>
                                                         <p className="text-sm text-gray-500">Preferred: {trial.preferredTime}</p>
                                                     </div>
                                                     <div className="text-right shrink-0">
                                                         <p className="text-xs text-gray-400">{new Date(trial.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}</p>
-                                                        <p className="text-xs text-emerald-600 font-medium">{trial.duration} min · Free</p>
+                                                        <p className="text-xs text-gray-500 font-medium">{trial.duration} min</p>
                                                     </div>
                                                 </div>
 
-                                                {trial.status === "PENDING" && (
+                                                {(trial.status === "PENDING" || trial.status === "CONFIRMED") && (
                                                     <div className="pt-2 border-t border-gray-100">
                                                         <button
                                                             onClick={() => handleCancelTrial(trial.id)}
@@ -902,24 +943,38 @@ function StudentDashboardContent() {
                                                     </div>
                                                 )}
                                                 {trial.status === "COMPLETED" && (
-                                                    <div className="flex items-center gap-3 pt-2 border-t border-gray-100">
-                                                        <Star size={14} className="text-amber-400 shrink-0" />
-                                                        <p className="text-xs text-gray-600 flex-1">How was the trial? Your review helps other students.</p>
-                                                        <button
-                                                            onClick={() => {
-                                                                setSelectedTutorForReview({ id: trial.tutor?.id || trial.tutorId, name: trial.tutor?.name });
-                                                                setIsReviewOpen(true);
-                                                            }}
-                                                            className="px-3 py-1.5 bg-amber-50 border border-amber-200 text-amber-700 text-xs font-semibold rounded-lg hover:bg-amber-100 transition-colors shrink-0"
-                                                        >
-                                                            Leave a Review
-                                                        </button>
+                                                    <div className="space-y-2 pt-2 border-t border-gray-100">
+                                                        {/* Credit returned — show it prominently */}
+                                                        {trial.depositStatus === "CREDITED" && (
+                                                            <div className="flex items-center gap-2 bg-purple-50 border border-purple-100 rounded-lg p-2.5">
+                                                                <CreditCard size={14} className="text-purple-600 shrink-0" />
+                                                                <p className="text-xs text-purple-700 font-medium flex-1">₹149 returned to your platform credit — use it for your next demo booking.</p>
+                                                            </div>
+                                                        )}
+                                                        <div className="flex items-center gap-3">
+                                                            <Star size={14} className="text-amber-400 shrink-0" />
+                                                            <p className="text-xs text-gray-600 flex-1">How was the demo? Your review helps other students.</p>
+                                                            <button
+                                                                onClick={() => {
+                                                                    setSelectedTutorForReview({ id: trial.tutor?.id || trial.tutorId, name: trial.tutor?.name });
+                                                                    setIsReviewOpen(true);
+                                                                }}
+                                                                className="px-3 py-1.5 bg-amber-50 border border-amber-200 text-amber-700 text-xs font-semibold rounded-lg hover:bg-amber-100 transition-colors shrink-0"
+                                                            >
+                                                                Leave a Review
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 )}
                                                 {trial.status === "CONFIRMED" && (
                                                     <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
                                                         <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
                                                         <p className="text-xs text-emerald-700 font-medium">The tutor will reach out to schedule your session. You can also message them directly.</p>
+                                                    </div>
+                                                )}
+                                                {trial.status === "DECLINED" && (
+                                                    <div className="pt-2 border-t border-gray-100">
+                                                        <p className="text-xs text-gray-400">Your ₹149 deposit will be refunded within 5–7 business days. Try booking with another tutor.</p>
                                                     </div>
                                                 )}
                                             </div>
