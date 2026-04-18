@@ -3,7 +3,6 @@ export const dynamic = "force-dynamic";
 import { isAdminAuthorized } from "@/lib/adminAuth";
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
-import { sendVerificationResultEmail } from "@/lib/email";
 
 export async function PATCH(request, { params }) {
     try {
@@ -18,16 +17,10 @@ export async function PATCH(request, { params }) {
             return NextResponse.json({ error: "Invalid action. Use APPROVE or REJECT." }, { status: 400 });
         }
 
-        const verRequest = await prisma.verificationRequest.findUnique({
-            where: { id },
-            include: { tutor: { select: { name: true, email: true } } },
-        });
+        const verRequest = await prisma.verificationRequest.findUnique({ where: { id } });
         if (!verRequest) {
             return NextResponse.json({ error: "Verification request not found." }, { status: 404 });
         }
-
-        const tutorName = verRequest.tutor?.name || "Tutor";
-        const tutorEmail = verRequest.tutor?.email;
 
         if (action === "APPROVE") {
             await prisma.$transaction([
@@ -49,9 +42,6 @@ export async function PATCH(request, { params }) {
                     },
                 }),
             ]);
-            if (tutorEmail) {
-                await sendVerificationResultEmail(tutorEmail, tutorName, { approved: true });
-            }
         } else {
             if (!rejectionReason) {
                 return NextResponse.json({ error: "Please provide a reason for rejection." }, { status: 400 });
@@ -71,9 +61,6 @@ export async function PATCH(request, { params }) {
                     },
                 }),
             ]);
-            if (tutorEmail) {
-                await sendVerificationResultEmail(tutorEmail, tutorName, { approved: false, rejectionReason });
-            }
         }
 
         return NextResponse.json({ success: true });

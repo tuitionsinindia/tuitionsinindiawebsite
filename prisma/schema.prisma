@@ -30,6 +30,7 @@ model User {
   credits             Int                @default(0)
   platformCredit      Int                @default(0) // demo deposit credits in paise
   contactViewsThisMonth Int             @default(0) // resets 1st of each month
+  demoBookingsThisMonth Int              @default(0) // resets 1st of each month
   subscriptionTier    SubscriptionTier   @default(FREE)
   subscriptionStatus  SubscriptionStatus @default(INACTIVE)
   subscriptionId      String?            @unique

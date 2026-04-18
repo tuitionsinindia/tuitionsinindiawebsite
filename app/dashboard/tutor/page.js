@@ -49,8 +49,10 @@ const FEATURED_OPTIONS = [
     { id: "featured_month", duration: "month", price: 499, label: "1 Month", days: 30 }
 ];
 
-function VerificationBanner({ verificationStatus, loading, paymentLoading, onApply }) {
+function VerificationBanner({ verificationStatus, earlyAdopter, loading, paymentLoading, onApply }) {
     const status = verificationStatus?.status;
+    const isFree = earlyAdopter?.isFree;
+    const slotsRemaining = earlyAdopter?.slotsRemaining ?? 0;
 
     if (status === "PENDING_REVIEW") {
         return (
@@ -60,20 +62,32 @@ function VerificationBanner({ verificationStatus, loading, paymentLoading, onApp
                 </div>
                 <div>
                     <h3 className="font-bold text-gray-900 mb-1">Verification under review</h3>
-                    <p className="text-sm text-gray-600">Your payment was received. Our team will review your profile within 2–3 working days and grant your verified badge.</p>
+                    <p className="text-sm text-gray-600">{isFree ? "You applied as an early adopter — free of charge." : "Your payment was received."} Our team will review your profile within 2–3 working days and grant your verified badge.</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex gap-4 items-start">
-            <div className="size-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
+        <div className={`rounded-2xl p-5 flex gap-4 items-start ${isFree ? "bg-emerald-50 border border-emerald-200" : "bg-amber-50 border border-amber-200"}`}>
+            <div className={`size-10 rounded-xl flex items-center justify-center shrink-0 ${isFree ? "bg-emerald-100 text-emerald-600" : "bg-amber-100 text-amber-600"}`}>
                 <ShieldCheck size={20} />
             </div>
             <div className="flex-1 min-w-0">
-                <h3 className="font-bold text-gray-900 mb-1">Get verified — ₹999 one-time</h3>
-                <p className="text-sm text-gray-600 mb-2">Verified tutors get a badge, appear higher in search, and earn more trust from students and parents.</p>
+                {isFree ? (
+                    <>
+                        <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-bold text-gray-900">Get verified — free for early adopters</h3>
+                            <span className="text-xs bg-emerald-100 text-emerald-700 font-semibold px-2 py-0.5 rounded-full">{slotsRemaining} spots left</span>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-2">You're among the first tutors on TuitionsInIndia. Get a verified badge at no cost — just upload your ID and qualification.</p>
+                    </>
+                ) : (
+                    <>
+                        <h3 className="font-bold text-gray-900 mb-1">Get verified — ₹999 one-time</h3>
+                        <p className="text-sm text-gray-600 mb-2">Verified tutors get a badge, appear higher in search, and earn more trust from students and parents.</p>
+                    </>
+                )}
                 {status === "REJECTED" && verificationStatus?.rejectionReason && (
                     <div className="bg-red-50 border border-red-100 rounded-lg p-2 mb-3">
                         <p className="text-xs text-red-600">Previous request not approved: {verificationStatus.rejectionReason}</p>
@@ -90,9 +104,9 @@ function VerificationBanner({ verificationStatus, loading, paymentLoading, onApp
                     className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50"
                 >
                     {paymentLoading ? <Loader2 size={14} className="animate-spin" /> : <ShieldCheck size={14} />}
-                    Get Verified — ₹999
+                    {isFree ? "Apply for Free Verification" : "Get Verified — ₹999"}
                 </button>
-                <p className="text-xs text-gray-400 mt-2">One-time fee. Non-refundable once documents are reviewed.</p>
+                {!isFree && <p className="text-xs text-gray-400 mt-2">One-time fee. Non-refundable once documents are reviewed.</p>}
             </div>
         </div>
     );
@@ -122,6 +136,7 @@ function DashboardContent() {
     const [trialActionLoading, setTrialActionLoading] = useState(null);
     const [paymentStatus, setPaymentStatus] = useState(null); // { type: "success"|"failed"|"dismissed", label, retryFn }
     const [verificationStatus, setVerificationStatus] = useState(null);
+    const [earlyAdopter, setEarlyAdopter] = useState(null);
     const [verificationLoading, setVerificationLoading] = useState(false);
     const [verificationPaymentLoading, setVerificationPaymentLoading] = useState(false);
 
@@ -189,6 +204,7 @@ function DashboardContent() {
             if (res.ok) {
                 const data = await res.json();
                 setVerificationStatus(data.request || null);
+                setEarlyAdopter(data.earlyAdopter || null);
             }
         } catch { /* silent */ } finally { setVerificationLoading(false); }
     };
@@ -541,7 +557,7 @@ function DashboardContent() {
     const navItems = [
         { id: "HOME", label: "Dashboard", icon: LayoutDashboard },
         { id: "LEADS", label: "Student Leads", icon: Search },
-        { id: "TRIALS", label: "Demo Classes", icon: Zap },
+        { id: "TRIALS", label: "Trial Requests", icon: Zap },
         { id: "BATCHES", label: "Batch Classes", icon: Box },
         { id: "VIP", label: "VIP Service", icon: Star },
         { id: "CHAT", label: "Messages", icon: MessageCircle },
@@ -711,6 +727,7 @@ function DashboardContent() {
                                 {!tutorData?.isVerified && (
                                     <VerificationBanner
                                         verificationStatus={verificationStatus}
+                                        earlyAdopter={earlyAdopter}
                                         loading={verificationLoading}
                                         paymentLoading={verificationPaymentLoading}
                                         onApply={async () => {
@@ -719,6 +736,15 @@ function DashboardContent() {
                                                 const res = await fetch("/api/verification/apply", { method: "POST" });
                                                 const data = await res.json();
                                                 if (!res.ok) { alert(data.error || "Could not start verification."); return; }
+
+                                                // Early adopter — no payment needed, already submitted
+                                                if (data.earlyAdopter) {
+                                                    setVerificationStatus({ status: "PENDING_REVIEW" });
+                                                    setEarlyAdopter(prev => prev ? { ...prev, isFree: true } : null);
+                                                    return;
+                                                }
+
+                                                // Paid path — open Razorpay
                                                 const options = {
                                                     key: data.keyId,
                                                     amount: data.amount,
@@ -759,7 +785,7 @@ function DashboardContent() {
                                             {[
                                                 { step: "1", title: "Buy credits", desc: "Credits let you unlock student contact details.", action: () => setActiveTab("BILLING"), label: "Buy credits", color: "bg-blue-600" },
                                                 { step: "2", title: "Browse student leads", desc: "Find students looking for tutors in your subject.", action: () => setActiveTab("LEADS"), label: "View leads", color: "bg-indigo-600" },
-                                                { step: "3", title: "Offer a demo class", desc: "Students pay a ₹149 refundable deposit to book a demo class with you.", action: () => setActiveTab("TRIALS"), label: "View demo classes", color: "bg-emerald-600" },
+                                                { step: "3", title: "Offer demo classes", desc: "Students pay ₹149 to book a demo class with you.", action: () => setActiveTab("SETTINGS"), label: "Set up demos", color: "bg-emerald-600" },
                                             ].map(item => (
                                                 <div key={item.step} className="bg-white rounded-xl p-4 flex items-center gap-4 shadow-sm">
                                                     <div className={`size-8 rounded-full ${item.color} text-white text-sm font-bold flex items-center justify-center shrink-0`}>{item.step}</div>
@@ -983,42 +1009,17 @@ function DashboardContent() {
 
                         {activeTab === "LEADS" && (
                             <div className="space-y-6">
-                                <div className="flex items-center justify-between">
-                                    <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Student Leads</h2>
-                                    <div className="flex items-center gap-2 text-xs text-gray-400">
-                                        <span className="inline-flex items-center gap-1 px-2 py-1 bg-red-50 text-red-600 border border-red-100 rounded-full font-semibold">Urgent</span>
-                                        <span className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-full font-semibold">Verified</span>
-                                        <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-500 border border-gray-200 rounded-full font-semibold">Basic</span>
-                                    </div>
-                                </div>
+                                <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Student Leads</h2>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     {loading ? (
                                         <div className="col-span-2 py-20 flex flex-col items-center justify-center bg-white rounded-2xl border border-gray-100">
                                             <Loader2 className="animate-spin text-blue-600 mb-4" size={32} />
                                             <p className="text-sm text-gray-400">Loading leads...</p>
                                         </div>
-                                    ) : leads.length > 0 ? [...leads].sort((a, b) => {
-                                        const order = { URGENT: 0, VERIFIED: 1, BASIC: 2 };
-                                        return (order[a.quality] ?? 2) - (order[b.quality] ?? 2);
-                                    }).map((lead) => (
-                                        <div key={lead.id} className={`bg-white rounded-2xl p-6 hover:shadow-md transition-all shadow-sm border ${
-                                            lead.quality === "URGENT" ? "border-red-200" :
-                                            lead.quality === "VERIFIED" ? "border-emerald-200" :
-                                            "border-gray-100"
-                                        }`}>
+                                    ) : leads.length > 0 ? leads.map((lead) => (
+                                        <div key={lead.id} className="bg-white border border-gray-100 rounded-2xl p-6 hover:shadow-md transition-all shadow-sm">
                                             <div className="flex justify-between items-center mb-4">
-                                                <div className="flex items-center gap-2">
-                                                    <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-lg text-xs font-semibold border border-blue-100">{lead.subjects?.[0] || 'General'}</span>
-                                                    {lead.quality === "URGENT" && (
-                                                        <span className="px-2 py-0.5 bg-red-50 text-red-600 border border-red-100 rounded-full text-xs font-semibold">Urgent</span>
-                                                    )}
-                                                    {lead.quality === "VERIFIED" && (
-                                                        <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-full text-xs font-semibold">Verified</span>
-                                                    )}
-                                                    {lead.quality === "BASIC" && (
-                                                        <span className="px-2 py-0.5 bg-gray-100 text-gray-500 border border-gray-200 rounded-full text-xs font-semibold">Basic</span>
-                                                    )}
-                                                </div>
+                                                <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-lg text-xs font-semibold border border-blue-100">{lead.subjects?.[0] || 'General'}</span>
                                                 {lead.matchScore > 0 && (
                                                     <div className="flex items-center gap-1.5 text-emerald-600 text-xs font-semibold">
                                                         <Star size={12} fill="currentColor" />
@@ -1209,7 +1210,7 @@ function DashboardContent() {
                                     </div>
                                     {!tutorData?.tutorListing?.offersTrialClass && (
                                         <div className="text-right">
-                                            <p className="text-xs text-gray-400">Demo classes are off</p>
+                                            <p className="text-xs text-gray-400">Trial classes are off</p>
                                             <button
                                                 onClick={async () => {
                                                     await fetch("/api/trial/settings", {
@@ -1221,7 +1222,7 @@ function DashboardContent() {
                                                 }}
                                                 className="text-xs font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
                                             >
-                                                Turn on demo classes
+                                                Turn on trials
                                             </button>
                                         </div>
                                     )}

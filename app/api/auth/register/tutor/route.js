@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { sendTutorWelcomeEmail } from "@/lib/email";
 import prisma from "@/lib/prisma";
 
 export const dynamic = 'force-dynamic';
@@ -42,6 +43,8 @@ export async function POST(request) {
             }
         });
 
+        const isNewUser = !user;
+
         if (user) {
             // Update existing user to TUTOR role
             user = await prisma.user.update({
@@ -54,20 +57,18 @@ export async function POST(request) {
                 }
             });
         } else {
-            // Create new user with 5 welcome credits
+            // Create new user
             user = await prisma.user.create({
                 data: {
                     email,
                     name,
                     phone,
                     role: 'TUTOR',
-                    credits: 5,
                 },
             });
         }
 
         // 2. Create the Listing
-        const isNewUser = !existingUser;
         const listing = await prisma.listing.create({
             data: {
                 tutorId: user.id,
@@ -86,12 +87,17 @@ export async function POST(request) {
             await prisma.notification.create({
                 data: {
                     userId: user.id,
-                    type: "SYSTEM",
-                    title: "Welcome to TuitionsInIndia! 🎉",
-                    body: "Your profile is live. We've given you 5 free credits to get started — use them to unlock student contact details from your dashboard.",
+                    type: "WELCOME",
+                    title: "Welcome to TuitionsInIndia!",
+                    body: "Your tutor profile is live. Complete your profile and apply for a free Verified badge to get more enquiries.",
                     link: "/dashboard/tutor",
                 },
             }).catch(() => {});
+        }
+
+        // Send welcome email (non-blocking)
+        if (isNewUser && user.email) {
+            sendTutorWelcomeEmail(user.email, user.name || "there").catch(() => {});
         }
 
         return NextResponse.json({ success: true, listingId: listing.id }, { status: 201 });
