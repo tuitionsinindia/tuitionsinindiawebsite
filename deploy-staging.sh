@@ -1,0 +1,70 @@
+#!/bin/bash
+# Deploy to STAGING (tuitionsinindia.in) on the same VPS
+# Usage: ./deploy-staging.sh
+#
+# First-time setup on VPS:
+#   1. Create /root/tuitionsinindia-staging/.env.staging (copy from .env.staging.example)
+#   2. Configure Nginx for tuitionsinindia.in → localhost:3007
+#   3. Run: ./deploy-staging.sh
+
+VPS_HOST="187.77.188.36"
+VPS_USER="root"
+STAGING_DIR="/root/tuitionsinindia-staging"
+
+echo "🚧 Deploying to STAGING (tuitionsinindia.in)..."
+echo ""
+
+echo "📦 Step 1: Syncing code to VPS staging directory..."
+rsync -avz --delete \
+  --exclude 'node_modules' \
+  --exclude '.next' \
+  --exclude '.git' \
+  --exclude 'mobile-app' \
+  --exclude '.DS_Store' \
+  --exclude '.env*' \
+  -e "ssh -o StrictHostKeyChecking=no" \
+  ./ ${VPS_USER}@${VPS_HOST}:${STAGING_DIR}/
+
+echo ""
+echo "🐳 Step 2: Rebuilding staging containers..."
+ssh -o StrictHostKeyChecking=no ${VPS_USER}@${VPS_HOST} "
+  cd ${STAGING_DIR} && \
+  rm -rf .next && \
+  docker compose -f docker-compose.staging.yml build --no-cache --build-arg CACHE_BUST=$(date +%s) && \
+  docker compose -f docker-compose.staging.yml up -d
+"
+
+echo ""
+echo "🗄️  Step 3: Syncing staging DB schema..."
+ssh -o StrictHostKeyChecking=no ${VPS_USER}@${VPS_HOST} "
+  cd ${STAGING_DIR} && \
+  docker exec tuitionsinindia-staging-web prisma db push --accept-data-loss
+"
+
+echo ""
+echo "🧹 Pruning old images..."
+ssh -o StrictHostKeyChecking=no ${VPS_USER}@${VPS_HOST} "docker image prune -f"
+
+echo ""
+echo "🔍 Step 4: Checking staging env vars..."
+ssh -o StrictHostKeyChecking=no ${VPS_USER}@${VPS_HOST} "
+  ENV_FILE=${STAGING_DIR}/.env.staging
+  MISSING=()
+  for VAR in DATABASE_URL NEXT_PUBLIC_BASE_URL SESSION_SECRET; do
+    if ! grep -q \"^\${VAR}=\" \"\$ENV_FILE\" 2>/dev/null; then
+      MISSING+=(\"\$VAR\")
+    fi
+  done
+  if [ \${#MISSING[@]} -gt 0 ]; then
+    echo '⚠️  Missing env vars in .env.staging:'
+    for V in \"\${MISSING[@]}\"; do echo \"   - \$V\"; done
+  else
+    echo '✅ Staging env vars OK.'
+  fi
+"
+
+echo ""
+echo "✅ Staging deployment complete!"
+echo "   → http://tuitionsinindia.in (via Nginx) or http://${VPS_HOST}:3007 (direct)"
+echo ""
+ssh -o StrictHostKeyChecking=no ${VPS_USER}@${VPS_HOST} "docker logs --tail 30 tuitionsinindia-staging-web"
