@@ -25,14 +25,8 @@ import {
     Wallet,
     Phone,
     Mail,
-    FileText,
-    PlusCircle,
-    Eye,
-    EyeOff,
-    Loader2,
-    Pencil,
-    ArrowLeft,
-    Star
+    Star,
+    ShieldCheck
 } from "lucide-react";
 
 function AdminDashboardContent() {
@@ -53,12 +47,9 @@ function AdminDashboardContent() {
     const [userSearch, setUserSearch] = useState("");
     const [userActionLoading, setUserActionLoading] = useState(null);
 
-    // Blog tab state
-    const [blogPosts, setBlogPosts] = useState([]);
-    const [blogLoading, setBlogLoading] = useState(false);
-    const [blogForm, setBlogForm] = useState(null); // null = list view, {} = new post, {id,...} = edit
-    const [blogSaving, setBlogSaving] = useState(false);
-    const [blogMsg, setBlogMsg] = useState(null);
+    // Verification requests
+    const [pendingVerifications, setPendingVerifications] = useState([]);
+    const [verificationActionLoading, setVerificationActionLoading] = useState(null);
 
     // On mount, check sessionStorage for saved key
     useEffect(() => {
@@ -73,7 +64,6 @@ function AdminDashboardContent() {
 
     useEffect(() => {
         if (activeTab === "users" && adminKey) fetchUsers(userSearch, adminKey);
-        if (activeTab === "blog") fetchBlogPosts();
     }, [activeTab]);
 
     const handleKeySubmit = async (e) => {
@@ -101,15 +91,49 @@ function AdminDashboardContent() {
     const fetchMetrics = async (key) => {
         setLoading(true);
         try {
-            const res = await fetch("/api/admin/metrics", { headers: { "x-admin-key": key || adminKey } });
-            const json = await res.json();
+            const [metricsRes, verificationsRes] = await Promise.all([
+                fetch("/api/admin/metrics", { headers: { "x-admin-key": key || adminKey } }),
+                fetch("/api/admin/verification/requests", { headers: { "x-admin-key": key || adminKey } }),
+            ]);
+            const json = await metricsRes.json();
             if (json.success) {
                 setData(json);
+            }
+            if (verificationsRes.ok) {
+                const vJson = await verificationsRes.json();
+                setPendingVerifications(vJson.requests || []);
             }
         } catch (err) {
             console.error("Failed to load metrics", err);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleVerificationReview = async (id, action) => {
+        let rejectionReason;
+        if (action === "REJECT") {
+            rejectionReason = window.prompt("Enter a reason for rejection:");
+            if (!rejectionReason) return;
+        }
+        setVerificationActionLoading(id + action);
+        try {
+            const res = await fetch(`/api/admin/verification/${id}/review`, {
+                method: "PATCH",
+                headers: adminHeaders(),
+                body: JSON.stringify({ action, rejectionReason }),
+            });
+            const json = await res.json();
+            if (json.success) {
+                setPendingVerifications(prev => prev.filter(v => v.id !== id));
+            } else {
+                alert(json.error || "Something went wrong. Please try again.");
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Something went wrong. Please try again.");
+        } finally {
+            setVerificationActionLoading(null);
         }
     };
 
@@ -124,48 +148,6 @@ function AdminDashboardContent() {
             console.error("Failed to load users", err);
         } finally {
             setUsersLoading(false);
-        }
-    };
-
-    const fetchBlogPosts = async () => {
-        setBlogLoading(true);
-        try {
-            const res = await fetch("/api/blog?all=true");
-            const json = await res.json();
-            if (Array.isArray(json)) setBlogPosts(json);
-        } catch (err) {
-            console.error("Failed to load blog posts", err);
-        } finally {
-            setBlogLoading(false);
-        }
-    };
-
-    const saveBlogPost = async () => {
-        if (!blogForm?.title || !blogForm?.slug || !blogForm?.content || !blogForm?.category) {
-            setBlogMsg({ type: "error", text: "Title, slug, content, and category are required." });
-            return;
-        }
-        setBlogSaving(true);
-        setBlogMsg(null);
-        try {
-            const isEdit = !!blogForm.id;
-            const res = await fetch("/api/blog", {
-                method: isEdit ? "PUT" : "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(blogForm),
-            });
-            const json = await res.json();
-            if (res.ok) {
-                setBlogMsg({ type: "success", text: isEdit ? "Post updated." : "Post created." });
-                await fetchBlogPosts();
-                setTimeout(() => setBlogForm(null), 800);
-            } else {
-                setBlogMsg({ type: "error", text: json.error || "Something went wrong." });
-            }
-        } catch {
-            setBlogMsg({ type: "error", text: "Could not save post. Please try again." });
-        } finally {
-            setBlogSaving(false);
         }
     };
 
@@ -294,8 +276,7 @@ function AdminDashboardContent() {
                                 { id: "listings", icon: GraduationCap, label: "Tutor Approvals" },
                                 { id: "vip", icon: Star, label: "VIP Service" },
                                 { id: "financials", icon: CreditCard, label: "Transactions" },
-                                { id: "stats", icon: BarChart3, label: "Analytics" },
-                                { id: "blog", icon: FileText, label: "Blog" }
+                                { id: "stats", icon: BarChart3, label: "Analytics" }
                             ].map((item) => (
                                 <button
                                     key={item.id}
@@ -376,7 +357,7 @@ function AdminDashboardContent() {
                                         ))}
                                     </div>
 
-                                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
+                                    <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
                                         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
                                             <div className="flex items-center justify-between mb-5">
                                                 <h3 className="font-bold text-base text-gray-900">Pending Approvals</h3>
@@ -423,6 +404,53 @@ function AdminDashboardContent() {
                                                         <p className="text-xs text-gray-400">{new Date(txn.createdAt).toLocaleDateString()}</p>
                                                     </div>
                                                 ))}
+                                            </div>
+                                        </div>
+
+                                        {/* Pending Verification Requests */}
+                                        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+                                            <div className="flex items-center gap-3 mb-5">
+                                                <div className="p-2 rounded-xl bg-blue-50 text-blue-600">
+                                                    <ShieldCheck size={16} strokeWidth={2} />
+                                                </div>
+                                                <h3 className="font-bold text-base text-gray-900">Verification Requests</h3>
+                                                {pendingVerifications.length > 0 && (
+                                                    <span className="ml-auto px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">{pendingVerifications.length}</span>
+                                                )}
+                                            </div>
+                                            <div className="space-y-3">
+                                                {pendingVerifications.slice(0, 5).map(v => (
+                                                    <div key={v.id} className="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                                                        <div className="flex items-center gap-3 mb-2">
+                                                            <div className="size-9 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center font-bold text-sm shrink-0">
+                                                                {v.tutor?.name?.[0] || "?"}
+                                                            </div>
+                                                            <div className="min-w-0 flex-1">
+                                                                <p className="font-semibold text-sm text-gray-900 truncate">{v.tutor?.name || "—"}</p>
+                                                                <p className="text-xs text-gray-400 truncate">{v.tutor?.phone || v.tutor?.email || "—"}</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex gap-2">
+                                                            <button
+                                                                onClick={() => handleVerificationReview(v.id, "APPROVE")}
+                                                                disabled={verificationActionLoading === v.id + "APPROVE"}
+                                                                className="flex-1 px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-semibold hover:bg-emerald-700 transition-colors disabled:opacity-50"
+                                                            >
+                                                                {verificationActionLoading === v.id + "APPROVE" ? "..." : "Approve"}
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleVerificationReview(v.id, "REJECT")}
+                                                                disabled={verificationActionLoading === v.id + "REJECT"}
+                                                                className="flex-1 px-3 py-1.5 bg-white text-red-500 border border-red-200 rounded-lg text-xs font-semibold hover:bg-red-50 transition-colors disabled:opacity-50"
+                                                            >
+                                                                {verificationActionLoading === v.id + "REJECT" ? "..." : "Reject"}
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                                {pendingVerifications.length === 0 && (
+                                                    <p className="text-center py-6 text-gray-400 text-sm">No pending verification requests.</p>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
@@ -607,188 +635,6 @@ function AdminDashboardContent() {
                                                 ))}
                                             </tbody>
                                         </table>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    )}
-
-                    {/* ── BLOG TAB ── */}
-                    {activeTab === "blog" && (
-                        <div className="space-y-6">
-                            {blogForm === null ? (
-                                <>
-                                    {/* Header */}
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <h2 className="text-xl font-bold text-gray-900">Blog Posts</h2>
-                                            <p className="text-sm text-gray-500 mt-0.5">{blogPosts.length} posts total</p>
-                                        </div>
-                                        <button
-                                            onClick={() => { setBlogForm({ title: "", slug: "", excerpt: "", content: "", category: "Tips", author: "TuitionsInIndia", readTime: "5 min read", isPublished: false }); setBlogMsg(null); }}
-                                            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors"
-                                        >
-                                            <PlusCircle size={16} /> New Post
-                                        </button>
-                                    </div>
-
-                                    {/* Posts list */}
-                                    {blogLoading ? (
-                                        <div className="flex justify-center py-12"><Loader2 size={24} className="animate-spin text-gray-300" /></div>
-                                    ) : blogPosts.length === 0 ? (
-                                        <div className="text-center py-16 text-gray-400">
-                                            <FileText size={40} className="mx-auto mb-3 opacity-30" />
-                                            <p className="font-medium">No blog posts yet</p>
-                                            <p className="text-sm mt-1">Click "New Post" to write your first article.</p>
-                                        </div>
-                                    ) : (
-                                        <div className="space-y-3">
-                                            {blogPosts.map(post => (
-                                                <div key={post.id} className="bg-white border border-gray-200 rounded-xl p-5 flex items-start justify-between gap-4">
-                                                    <div className="flex-1 min-w-0">
-                                                        <div className="flex items-center gap-2 flex-wrap mb-1">
-                                                            <h3 className="font-semibold text-gray-900 text-sm truncate">{post.title}</h3>
-                                                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${post.isPublished ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}>
-                                                                {post.isPublished ? "Published" : "Draft"}
-                                                            </span>
-                                                            <span className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-[10px] font-medium">{post.category}</span>
-                                                        </div>
-                                                        <p className="text-xs text-gray-400">/blog/{post.slug} · {post.readTime} · by {post.author}</p>
-                                                        {post.excerpt && <p className="text-xs text-gray-500 mt-1 line-clamp-1">{post.excerpt}</p>}
-                                                    </div>
-                                                    <div className="flex items-center gap-2 shrink-0">
-                                                        <Link href={`/blog/${post.slug}`} target="_blank"
-                                                            className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-                                                            <Eye size={15} />
-                                                        </Link>
-                                                        <button
-                                                            onClick={() => { setBlogForm({ ...post }); setBlogMsg(null); }}
-                                                            className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-                                                            <Pencil size={15} />
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </>
-                            ) : (
-                                /* ── Create / Edit form ── */
-                                <div className="space-y-6">
-                                    <div className="flex items-center gap-3">
-                                        <button onClick={() => { setBlogForm(null); setBlogMsg(null); }} className="p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
-                                            <ArrowLeft size={18} />
-                                        </button>
-                                        <h2 className="text-xl font-bold text-gray-900">{blogForm.id ? "Edit Post" : "New Post"}</h2>
-                                    </div>
-
-                                    <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-5">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                            <div className="space-y-1.5">
-                                                <label className="text-xs font-medium text-gray-500">Title *</label>
-                                                <input
-                                                    value={blogForm.title}
-                                                    onChange={e => {
-                                                        const title = e.target.value;
-                                                        const slug = title.toLowerCase().replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-");
-                                                        setBlogForm(f => ({ ...f, title, slug: f.slug || slug }));
-                                                    }}
-                                                    placeholder="How to Find the Best Maths Tutor"
-                                                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
-                                                />
-                                            </div>
-                                            <div className="space-y-1.5">
-                                                <label className="text-xs font-medium text-gray-500">Slug * (URL)</label>
-                                                <input
-                                                    value={blogForm.slug}
-                                                    onChange={e => setBlogForm(f => ({ ...f, slug: e.target.value }))}
-                                                    placeholder="how-to-find-best-maths-tutor"
-                                                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all font-mono"
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                                            <div className="space-y-1.5">
-                                                <label className="text-xs font-medium text-gray-500">Category *</label>
-                                                <select
-                                                    value={blogForm.category}
-                                                    onChange={e => setBlogForm(f => ({ ...f, category: e.target.value }))}
-                                                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-blue-500 transition-all"
-                                                >
-                                                    {["Tips", "Guides", "News", "Success Stories", "Exams", "Parenting"].map(c => (
-                                                        <option key={c} value={c}>{c}</option>
-                                                    ))}
-                                                </select>
-                                            </div>
-                                            <div className="space-y-1.5">
-                                                <label className="text-xs font-medium text-gray-500">Author</label>
-                                                <input
-                                                    value={blogForm.author}
-                                                    onChange={e => setBlogForm(f => ({ ...f, author: e.target.value }))}
-                                                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-blue-500 transition-all"
-                                                />
-                                            </div>
-                                            <div className="space-y-1.5">
-                                                <label className="text-xs font-medium text-gray-500">Read Time</label>
-                                                <input
-                                                    value={blogForm.readTime}
-                                                    onChange={e => setBlogForm(f => ({ ...f, readTime: e.target.value }))}
-                                                    placeholder="5 min read"
-                                                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-blue-500 transition-all"
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-1.5">
-                                            <label className="text-xs font-medium text-gray-500">Excerpt (shown in listings)</label>
-                                            <input
-                                                value={blogForm.excerpt}
-                                                onChange={e => setBlogForm(f => ({ ...f, excerpt: e.target.value }))}
-                                                placeholder="A short description of the post..."
-                                                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
-                                            />
-                                        </div>
-
-                                        <div className="space-y-1.5">
-                                            <label className="text-xs font-medium text-gray-500">Content * (plain text or Markdown)</label>
-                                            <textarea
-                                                value={blogForm.content}
-                                                onChange={e => setBlogForm(f => ({ ...f, content: e.target.value }))}
-                                                rows={16}
-                                                placeholder="Write your article here..."
-                                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all resize-y font-mono leading-relaxed"
-                                            />
-                                        </div>
-
-                                        {blogMsg && (
-                                            <p className={`text-sm px-4 py-3 rounded-xl ${blogMsg.type === "success" ? "bg-emerald-50 text-emerald-700 border border-emerald-100" : "bg-red-50 text-red-600 border border-red-100"}`}>
-                                                {blogMsg.text}
-                                            </p>
-                                        )}
-
-                                        <div className="flex items-center justify-between pt-2">
-                                            <label className="flex items-center gap-3 cursor-pointer">
-                                                <div className="relative">
-                                                    <input type="checkbox" className="sr-only"
-                                                        checked={blogForm.isPublished}
-                                                        onChange={e => setBlogForm(f => ({ ...f, isPublished: e.target.checked }))} />
-                                                    <div className={`w-10 h-6 rounded-full transition-colors ${blogForm.isPublished ? "bg-blue-600" : "bg-gray-200"}`} />
-                                                    <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${blogForm.isPublished ? "translate-x-4" : ""}`} />
-                                                </div>
-                                                <span className="text-sm font-medium text-gray-700">
-                                                    {blogForm.isPublished ? <><Eye size={14} className="inline mr-1" />Published</> : <><EyeOff size={14} className="inline mr-1" />Draft</>}
-                                                </span>
-                                            </label>
-                                            <button
-                                                onClick={saveBlogPost}
-                                                disabled={blogSaving}
-                                                className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50"
-                                            >
-                                                {blogSaving ? <Loader2 size={14} className="animate-spin" /> : null}
-                                                {blogSaving ? "Saving..." : blogForm.id ? "Update Post" : "Create Post"}
-                                            </button>
-                                        </div>
                                     </div>
                                 </div>
                             )}

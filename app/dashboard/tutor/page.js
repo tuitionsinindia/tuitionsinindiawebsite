@@ -49,6 +49,55 @@ const FEATURED_OPTIONS = [
     { id: "featured_month", duration: "month", price: 499, label: "1 Month", days: 30 }
 ];
 
+function VerificationBanner({ verificationStatus, loading, paymentLoading, onApply }) {
+    const status = verificationStatus?.status;
+
+    if (status === "PENDING_REVIEW") {
+        return (
+            <div className="bg-blue-50 border border-blue-200 rounded-2xl p-5 flex gap-4 items-start">
+                <div className="size-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                    <ShieldCheck size={20} />
+                </div>
+                <div>
+                    <h3 className="font-bold text-gray-900 mb-1">Verification under review</h3>
+                    <p className="text-sm text-gray-600">Your payment was received. Our team will review your profile within 2–3 working days and grant your verified badge.</p>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex gap-4 items-start">
+            <div className="size-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
+                <ShieldCheck size={20} />
+            </div>
+            <div className="flex-1 min-w-0">
+                <h3 className="font-bold text-gray-900 mb-1">Get verified — ₹999 one-time</h3>
+                <p className="text-sm text-gray-600 mb-2">Verified tutors get a badge, appear higher in search, and earn more trust from students and parents.</p>
+                {status === "REJECTED" && verificationStatus?.rejectionReason && (
+                    <div className="bg-red-50 border border-red-100 rounded-lg p-2 mb-3">
+                        <p className="text-xs text-red-600">Previous request not approved: {verificationStatus.rejectionReason}</p>
+                    </div>
+                )}
+                <ul className="text-xs text-gray-500 space-y-1 mb-3">
+                    <li>• Government ID (Aadhaar, PAN, Passport, or Driving Licence)</li>
+                    <li>• Highest qualification certificate</li>
+                    <li>• Our team reviews within 2–3 working days</li>
+                </ul>
+                <button
+                    onClick={onApply}
+                    disabled={paymentLoading}
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50"
+                >
+                    {paymentLoading ? <Loader2 size={14} className="animate-spin" /> : <ShieldCheck size={14} />}
+                    Get Verified — ₹999
+                </button>
+                <p className="text-xs text-gray-400 mt-2">One-time fee. Non-refundable once documents are reviewed.</p>
+            </div>
+        </div>
+    );
+}
+
 function DashboardContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -72,6 +121,9 @@ function DashboardContent() {
     const [trialLoading, setTrialLoading] = useState(false);
     const [trialActionLoading, setTrialActionLoading] = useState(null);
     const [paymentStatus, setPaymentStatus] = useState(null); // { type: "success"|"failed"|"dismissed", label, retryFn }
+    const [verificationStatus, setVerificationStatus] = useState(null);
+    const [verificationLoading, setVerificationLoading] = useState(false);
+    const [verificationPaymentLoading, setVerificationPaymentLoading] = useState(false);
 
     useEffect(() => {
         const savedId = localStorage.getItem("ti_active_tutor_id");
@@ -95,6 +147,10 @@ function DashboardContent() {
             if (activeTab === "TRIALS") fetchTrials();
         }
     }, [tutorId, activeTab]);
+
+    useEffect(() => {
+        if (tutorData && !tutorData.isVerified) fetchVerificationStatus();
+    }, [tutorData]);
 
     const fetchLeads = async () => {
         setLoading(true);
@@ -123,6 +179,18 @@ function DashboardContent() {
                 setTutorData(data);
             }
         } catch (err) { console.error(err); }
+    };
+
+    const fetchVerificationStatus = async () => {
+        if (tutorData?.isVerified) return;
+        setVerificationLoading(true);
+        try {
+            const res = await fetch("/api/verification/status");
+            if (res.ok) {
+                const data = await res.json();
+                setVerificationStatus(data.request || null);
+            }
+        } catch { /* silent */ } finally { setVerificationLoading(false); }
     };
 
     const fetchChatSessions = async () => {
@@ -539,7 +607,7 @@ function DashboardContent() {
                     </button>
                 </aside>
 
-                <main className="flex-1 ml-16 md:ml-64 p-3 sm:p-5 md:p-10">
+                <main className="flex-1 ml-20 md:ml-64 p-6 md:p-10">
                     <div className="max-w-6xl mx-auto">
 
                         {/* Payment status banner */}
@@ -639,31 +707,47 @@ function DashboardContent() {
                                     );
                                 })()}
 
-                                {/* Verification Guide — shown only when not verified */}
+                                {/* Verification — shown only when not verified */}
                                 {!tutorData?.isVerified && (
-                                    <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex gap-4 items-start">
-                                        <div className="size-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
-                                            <ShieldCheck size={20} />
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <h3 className="font-bold text-gray-900 mb-1">Complete your verification</h3>
-                                            <p className="text-sm text-gray-600 mb-3">
-                                                Verified tutors get a badge on their profile, appear higher in search results, and receive more student enquiries.
-                                            </p>
-                                            <p className="text-xs font-semibold text-gray-700 mb-2">What to upload:</p>
-                                            <ul className="text-xs text-gray-500 space-y-1 mb-3">
-                                                <li>• A government-issued photo ID (Aadhaar, PAN, Passport, or Driving Licence)</li>
-                                                <li>• Your highest qualification certificate (degree, marksheet, or diploma)</li>
-                                            </ul>
-                                            <p className="text-xs text-gray-400 mb-3">Expected timeline: 2–3 working days after documents are submitted.</p>
-                                            <a
-                                                href="mailto:support@tuitionsinindia.com?subject=Verification Documents&body=Hi, I would like to complete my tutor verification. My tutor ID is: "
-                                                className="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-lg text-xs font-semibold hover:bg-amber-700 transition-colors"
-                                            >
-                                                Send Documents to Support
-                                            </a>
-                                        </div>
-                                    </div>
+                                    <VerificationBanner
+                                        verificationStatus={verificationStatus}
+                                        loading={verificationLoading}
+                                        paymentLoading={verificationPaymentLoading}
+                                        onApply={async () => {
+                                            setVerificationPaymentLoading(true);
+                                            try {
+                                                const res = await fetch("/api/verification/apply", { method: "POST" });
+                                                const data = await res.json();
+                                                if (!res.ok) { alert(data.error || "Could not start verification."); return; }
+                                                const options = {
+                                                    key: data.keyId,
+                                                    amount: data.amount,
+                                                    currency: data.currency,
+                                                    name: "TuitionsinIndia",
+                                                    description: "Tutor Verification Badge",
+                                                    order_id: data.orderId,
+                                                    handler: async (response) => {
+                                                        const verifyRes = await fetch("/api/verification/payment/verify", {
+                                                            method: "POST",
+                                                            headers: { "Content-Type": "application/json" },
+                                                            body: JSON.stringify({
+                                                                razorpayOrderId: response.razorpay_order_id,
+                                                                razorpayPaymentId: response.razorpay_payment_id,
+                                                                razorpaySignature: response.razorpay_signature,
+                                                            }),
+                                                        });
+                                                        if (verifyRes.ok) {
+                                                            setVerificationStatus({ status: "PENDING_REVIEW" });
+                                                        }
+                                                    },
+                                                    theme: { color: "#2563eb" },
+                                                    modal: { ondismiss: () => setVerificationPaymentLoading(false) },
+                                                };
+                                                new window.Razorpay(options).open();
+                                            } catch { alert("Something went wrong. Please try again."); }
+                                            finally { setVerificationPaymentLoading(false); }
+                                        }}
+                                    />
                                 )}
 
                                 {/* Onboarding guide for new tutors */}
@@ -806,7 +890,7 @@ function DashboardContent() {
 
                                         {/* Referral link */}
                                         <div className="flex items-center gap-2 mb-4">
-                                            <div className="flex-1 min-w-0 bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-600 truncate">
+                                            <div className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-600 truncate">
                                                 {referralData.referralLink}
                                             </div>
                                             <button
@@ -996,7 +1080,7 @@ function DashboardContent() {
                         )}
 
                         {activeTab === "CHAT" && (
-                            <div className="h-[60vh] sm:h-[calc(100vh-180px)] flex bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                            <div className="h-[calc(100vh-180px)] flex bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                                 <div className="w-full md:w-72 border-r border-gray-100 flex flex-col">
                                     <div className="p-4 border-b border-gray-100 flex items-center justify-between">
                                         <h3 className="text-sm font-bold text-gray-900">Messages</h3>
