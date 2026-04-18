@@ -36,6 +36,7 @@ import DashboardHeader from "@/app/components/DashboardHeader";
 import Chat from "@/app/components/chat/Chat";
 import SettingsModule from "@/app/components/dashboard/SettingsModule";
 import BillingModule from "@/app/components/dashboard/BillingModule";
+import VipTutorTab from "@/app/components/VipTutorTab";
 
 const CREDIT_PACKS = [
     { id: "pack_10", credits: 10, price: 99, label: "Starter", popular: false },
@@ -472,6 +473,7 @@ function DashboardContent() {
         { id: "LEADS", label: "Student Leads", icon: Search },
         { id: "TRIALS", label: "Trial Requests", icon: Zap },
         { id: "BATCHES", label: "Batch Classes", icon: Box },
+        { id: "VIP", label: "VIP Service", icon: Star },
         { id: "CHAT", label: "Messages", icon: MessageCircle },
         { id: "BILLING", label: "Billing", icon: CreditCard },
         { id: "SETTINGS", label: "Settings", icon: Settings }
@@ -1199,6 +1201,7 @@ function DashboardContent() {
                             </div>
                         )}
 
+                        {activeTab === "VIP" && <VipTutorTab listing={listing} />}
                         {activeTab === "BILLING" && <BillingModule userData={tutorData} transactions={transactions} />}
                         {activeTab === "SETTINGS" && <SettingsModule userData={tutorData} onUpdate={fetchTutorData} />}
                     </div>

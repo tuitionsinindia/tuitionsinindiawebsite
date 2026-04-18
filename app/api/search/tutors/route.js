@@ -225,6 +225,7 @@ export async function GET(request) {
                 lng: t.lng,
                 offersTrialClass: t.tutorListing?.offersTrialClass || false,
                 trialDuration: t.tutorListing?.trialDuration || 30,
+                isVipEligible: t.tutorListing?.isVipEligible || false,
             };
         }));
 

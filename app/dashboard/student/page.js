@@ -6,6 +6,7 @@ import Script from "next/script";
 import Link from "next/link";
 import DashboardHeader from "@/app/components/DashboardHeader";
 import Chat from "@/app/components/chat/Chat";
+import VipStudentTab from "@/app/components/VipStudentTab";
 import {
     GraduationCap,
     Briefcase,
@@ -283,6 +284,7 @@ function StudentDashboardContent() {
         { id: "HOME", label: "Dashboard", icon: LayoutDashboard },
         { id: "REQUIREMENTS", label: "My Requirements", icon: Briefcase },
         { id: "MATCHES", label: "Tutor Matches", icon: Users },
+        { id: "VIP", label: "VIP Service", icon: Star },
         { id: "SAVED", label: "Saved Tutors", icon: Bookmark },
         { id: "TRIALS", label: "Trial Classes", icon: Clock },
         { id: "CHAT", label: "Messages", icon: MessageCircle },
@@ -925,6 +927,9 @@ function StudentDashboardContent() {
                                     </div>
                                 )}
                             </div>
+                        )}
+                        {activeTab === "VIP" && (
+                            <VipStudentTab studentId={studentId} />
                         )}
                     </div>
                 </main>

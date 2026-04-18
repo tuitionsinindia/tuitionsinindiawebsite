@@ -772,6 +772,11 @@ function SearchResultsContent() {
                                                         {item.isFeatured && (
                                                             <span className="text-xs text-amber-700 font-medium bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100">Featured</span>
                                                         )}
+                                                        {item.isVipEligible && (
+                                                            <span className="inline-flex items-center gap-1 text-xs text-indigo-700 font-semibold bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">
+                                                                <Star size={9} fill="currentColor" /> VIP
+                                                            </span>
+                                                        )}
                                                         {item.matchScore > 0 && (
                                                             <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
                                                                 item.matchScore >= 85 ? "bg-emerald-50 text-emerald-700 border border-emerald-200" :
