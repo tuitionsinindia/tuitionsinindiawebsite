@@ -285,9 +285,9 @@ function AdminDashboardContent() {
     // Budget form
     const [budgetForm, setBudgetForm] = useState({ totalBudget: 30000, adSpend: 0, breakdown: { facebook: 0, google: 0, whatsapp: 0, other: 0 }, notes: "" });
 
-    // On mount: check sessionStorage for saved key
+    // On mount: check localStorage (set by /admin/login) or sessionStorage fallback
     useEffect(() => {
-        const saved = sessionStorage.getItem("adminKey");
+        const saved = localStorage.getItem("ti_admin_key") || sessionStorage.getItem("adminKey");
         if (saved) setAdminKey(saved);
         else setLoading(false);
     }, []);
@@ -317,6 +317,7 @@ function AdminDashboardContent() {
                 setKeyLoading(false);
                 return;
             }
+            localStorage.setItem("ti_admin_key", keyInput);
             sessionStorage.setItem("adminKey", keyInput);
             setAdminKey(keyInput);
         } catch {
@@ -763,7 +764,7 @@ function AdminDashboardContent() {
 
                 <div className="p-3 border-t border-gray-100">
                     <button
-                        onClick={() => { sessionStorage.removeItem("adminKey"); router.push("/"); }}
+                        onClick={() => { localStorage.removeItem("ti_admin_key"); sessionStorage.removeItem("adminKey"); router.push("/admin/login"); }}
                         className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white text-red-500 border border-gray-200 hover:bg-red-50 hover:border-red-100 rounded-xl transition-all font-semibold text-sm"
                     >
                         <LogOut size={14} strokeWidth={2} />
