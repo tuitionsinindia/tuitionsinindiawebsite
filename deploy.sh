@@ -17,14 +17,30 @@ rsync -avz --delete \
   -e "ssh -o StrictHostKeyChecking=no" \
   ./ ${VPS_USER}@${VPS_HOST}:${APP_DIR}/
 
+GIT_SHA=$(git rev-parse --short HEAD)
+GIT_MSG=$(git log -1 --pretty=%s)
+GIT_AUTHOR=$(git log -1 --pretty=%an)
+DEPLOY_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+
 echo "📦 Step 2: Rebuilding Containers on VPS..."
 ssh -o StrictHostKeyChecking=no ${VPS_USER}@${VPS_HOST} "cd ${APP_DIR} && \
     rm -rf .next && \
-    docker compose build --no-cache --build-arg CACHE_BUST=$(date +%s) && \
+    docker compose build --no-cache --build-arg CACHE_BUST=$(date +%s) --build-arg GIT_SHA=${GIT_SHA} && \
     docker compose up -d"
 
 echo "🗄️ Step 3: Synchronizing Database Schema..."
-ssh -o StrictHostKeyChecking=no ${VPS_USER}@${VPS_HOST} "cd ${APP_DIR} && docker exec tuitionsinindia-web prisma db push --accept-data-loss"
+ssh -o StrictHostKeyChecking=no ${VPS_USER}@${VPS_HOST} "cd ${APP_DIR} && docker exec tuitionsinindia-web prisma db push --accept-data-loss --skip-generate 2>&1 | grep -v \"Can't write to\""
+
+echo "📋 Writing version info..."
+ssh -o StrictHostKeyChecking=no ${VPS_USER}@${VPS_HOST} "
+  mkdir -p /root/deploy-history
+  cat > ${APP_DIR}/version.json << 'VEOF'
+{\"sha\":\"${GIT_SHA}\",\"shortSha\":\"${GIT_SHA}\",\"branch\":\"main\",\"message\":\"${GIT_MSG}\",\"author\":\"${GIT_AUTHOR}\",\"deployedAt\":\"${DEPLOY_TIME}\",\"env\":\"production\"}
+VEOF
+  ENTRY='{\"sha\":\"${GIT_SHA}\",\"branch\":\"main\",\"message\":\"${GIT_MSG}\",\"author\":\"${GIT_AUTHOR}\",\"deployedAt\":\"${DEPLOY_TIME}\",\"env\":\"production\",\"status\":\"success\"}'
+  echo \"{\\\"sha\\\":\\\"${GIT_SHA}\\\",\\\"branch\\\":\\\"main\\\",\\\"message\\\":\\\"${GIT_MSG}\\\",\\\"author\\\":\\\"${GIT_AUTHOR}\\\",\\\"deployedAt\\\":\\\"${DEPLOY_TIME}\\\",\\\"env\\\":\\\"production\\\",\\\"status\\\":\\\"success\\\"}\" >> /root/deploy-history/production.log
+  echo 'Version info written.'
+"
 
 echo "🧹 Pruning old images..."
 ssh -o StrictHostKeyChecking=no ${VPS_USER}@${VPS_HOST} "docker image prune -f"

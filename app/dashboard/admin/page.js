@@ -31,7 +31,15 @@ import {
     Trash2,
     Eye,
     ChevronLeft,
-    ChevronRight
+    ChevronRight,
+    GitBranch,
+    Server,
+    HardDrive,
+    Clock,
+    ArrowUpCircle,
+    RotateCcw,
+    ExternalLink,
+    AlertTriangle
 } from "lucide-react";
 
 function AdminDashboardContent() {
@@ -68,6 +76,10 @@ function AdminDashboardContent() {
     const [pendingVerifications, setPendingVerifications] = useState([]);
     const [verificationActionLoading, setVerificationActionLoading] = useState(null);
 
+    // Deployments tab
+    const [versionData, setVersionData] = useState(null);
+    const [versionLoading, setVersionLoading] = useState(false);
+
     // On mount, check sessionStorage for saved key
     useEffect(() => {
         const saved = sessionStorage.getItem("adminKey");
@@ -81,6 +93,7 @@ function AdminDashboardContent() {
 
     useEffect(() => {
         if (activeTab === "users" && adminKey) fetchUsers();
+        if (activeTab === "deployments" && adminKey) fetchVersionData();
     }, [activeTab]);
 
     const handleKeySubmit = async (e) => {
@@ -263,6 +276,19 @@ function AdminDashboardContent() {
         }
     };
 
+    const fetchVersionData = async () => {
+        setVersionLoading(true);
+        try {
+            const res = await fetch("/api/admin/version", { headers: { "x-admin-key": adminKey } });
+            const json = await res.json();
+            if (json.success) setVersionData(json);
+        } catch (err) {
+            console.error("Failed to load version data", err);
+        } finally {
+            setVersionLoading(false);
+        }
+    };
+
     const handleApproveTutor = async (tutorId) => {
         const tutorToApprove = data?.pendingTutors?.find(t => t.id === tutorId);
         if (!tutorToApprove) return;
@@ -349,7 +375,8 @@ function AdminDashboardContent() {
                                 { id: "listings", icon: GraduationCap, label: "Tutor Approvals" },
                                 { id: "vip", icon: Star, label: "VIP Service" },
                                 { id: "financials", icon: CreditCard, label: "Transactions" },
-                                { id: "stats", icon: BarChart3, label: "Analytics" }
+                                { id: "stats", icon: BarChart3, label: "Analytics" },
+                                { id: "deployments", icon: GitBranch, label: "Deployments" }
                             ].map((item) => (
                                 <button
                                     key={item.id}
@@ -814,6 +841,221 @@ function AdminDashboardContent() {
                     )}
 
                     {activeTab === "vip" && <VipAdminPanel adminKey={adminKey} />}
+
+                    {/* ─── DEPLOYMENTS TAB ─── */}
+                    {activeTab === "deployments" && (
+                        <div className="max-w-5xl mx-auto space-y-6">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <h2 className="text-xl font-bold text-gray-900">Deployments & Backups</h2>
+                                    <p className="text-sm text-gray-400 mt-0.5">Track what's live, review history, and manage database backups.</p>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <a href="https://github.com/tuitionsinindia/tuitionsinindiawebsite/actions" target="_blank" rel="noopener noreferrer"
+                                        className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-gray-600 bg-white border border-gray-200 rounded-lg hover:border-blue-300 hover:text-blue-600 transition-colors">
+                                        <ExternalLink size={13} /> GitHub Actions
+                                    </a>
+                                    <button onClick={fetchVersionData} className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 transition-colors">
+                                        <RefreshCcw size={13} /> Refresh
+                                    </button>
+                                </div>
+                            </div>
+
+                            {versionLoading ? (
+                                <div className="flex items-center justify-center py-24">
+                                    <div className="size-8 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin" />
+                                </div>
+                            ) : (
+                                <>
+                                    {/* ── Live Environments ── */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {[
+                                            { label: "Production", env: "production", domain: "tuitionsinindia.com", branch: "main", data: versionData?.production?.current, color: "emerald" },
+                                            { label: "Staging", env: "staging", domain: "tuitionsinindia.in", branch: "staging", data: versionData?.staging?.current, color: "blue" },
+                                        ].map(({ label, env, domain, branch, data: v, color }) => (
+                                            <div key={env} className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+                                                <div className="flex items-center justify-between mb-4">
+                                                    <div className="flex items-center gap-2">
+                                                        <Server size={15} className={`text-${color}-600`} />
+                                                        <span className="font-bold text-sm text-gray-900">{label}</span>
+                                                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full bg-${color}-50 text-${color}-700 border border-${color}-100`}>
+                                                            {branch}
+                                                        </span>
+                                                    </div>
+                                                    <a href={`https://${domain}`} target="_blank" rel="noopener noreferrer"
+                                                        className="text-xs text-gray-400 hover:text-blue-600 flex items-center gap-1 transition-colors">
+                                                        {domain} <ExternalLink size={11} />
+                                                    </a>
+                                                </div>
+                                                {v ? (
+                                                    <div className="space-y-2.5">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="font-mono text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-lg">{v.shortSha || v.sha?.slice(0,7)}</span>
+                                                            <span className="text-sm text-gray-700 font-medium truncate">{v.message}</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-3 text-xs text-gray-400">
+                                                            <span className="flex items-center gap-1"><Clock size={11} /> {new Date(v.deployedAt).toLocaleString("en-IN", { day:"numeric", month:"short", hour:"2-digit", minute:"2-digit" })}</span>
+                                                            <span>by {v.author}</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-1.5 mt-1">
+                                                            <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                                            <span className="text-xs text-emerald-600 font-semibold">Live</span>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex items-center gap-2 text-sm text-gray-400 py-3">
+                                                        <AlertTriangle size={14} className="text-amber-400" />
+                                                        No version info yet — deploy once to populate.
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* ── How to deploy ── */}
+                                    <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5">
+                                        <h3 className="font-bold text-sm text-blue-900 mb-3 flex items-center gap-2">
+                                            <ArrowUpCircle size={15} className="text-blue-600" /> Deployment Procedure
+                                        </h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                                            {[
+                                                {
+                                                    step: "1",
+                                                    title: "Push to staging branch",
+                                                    desc: "All changes go to the staging branch first. GitHub Actions auto-deploys to tuitionsinindia.in within ~2 minutes.",
+                                                    code: "git checkout staging\ngit merge main\ngit push origin staging"
+                                                },
+                                                {
+                                                    step: "2",
+                                                    title: "Test on staging",
+                                                    desc: "Verify every change on tuitionsinindia.in — check all flows, payments, auth. Only proceed when everything looks good.",
+                                                    code: "https://tuitionsinindia.in"
+                                                },
+                                                {
+                                                    step: "3",
+                                                    title: "Promote to production",
+                                                    desc: "Merge staging → main. GitHub Actions requires manual approval before deploying to production.",
+                                                    code: "git checkout main\ngit merge staging\ngit push origin main"
+                                                }
+                                            ].map(({ step, title, desc, code }) => (
+                                                <div key={step} className="bg-white rounded-xl p-4 border border-blue-100">
+                                                    <div className="size-6 bg-blue-600 text-white rounded-lg flex items-center justify-center text-xs font-bold mb-2">{step}</div>
+                                                    <p className="font-semibold text-gray-800 mb-1">{title}</p>
+                                                    <p className="text-gray-500 mb-2 leading-relaxed">{desc}</p>
+                                                    <pre className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs font-mono text-gray-600 whitespace-pre-wrap">{code}</pre>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* ── Deployment History ── */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                        {[
+                                            { label: "Production history", history: versionData?.production?.history },
+                                            { label: "Staging history", history: versionData?.staging?.history }
+                                        ].map(({ label, history }) => (
+                                            <div key={label} className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+                                                <div className="px-5 py-4 border-b border-gray-100">
+                                                    <h3 className="font-bold text-sm text-gray-900">{label}</h3>
+                                                </div>
+                                                <div className="divide-y divide-gray-50">
+                                                    {history && history.length > 0 ? history.map((entry, i) => (
+                                                        <div key={i} className="px-5 py-3 flex items-start gap-3 hover:bg-gray-50 transition-colors">
+                                                            <div className={`mt-0.5 size-2 rounded-full shrink-0 ${entry.status === "success" ? "bg-emerald-500" : "bg-red-400"}`} />
+                                                            <div className="flex-1 min-w-0">
+                                                                <div className="flex items-center gap-2 mb-0.5">
+                                                                    <span className="font-mono text-xs bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">{entry.sha}</span>
+                                                                    <span className="text-xs text-gray-500 truncate">{entry.message}</span>
+                                                                </div>
+                                                                <p className="text-xs text-gray-400">{entry.author} · {new Date(entry.deployedAt).toLocaleString("en-IN", { day:"numeric", month:"short", hour:"2-digit", minute:"2-digit" })}</p>
+                                                            </div>
+                                                        </div>
+                                                    )) : (
+                                                        <div className="px-5 py-8 text-center text-xs text-gray-400">
+                                                            No deployment history yet. Run a deploy to start tracking.
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* ── Database Backups ── */}
+                                    <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+                                        <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+                                            <div className="flex items-center gap-2">
+                                                <HardDrive size={15} className="text-gray-500" />
+                                                <h3 className="font-bold text-sm text-gray-900">Database Backups</h3>
+                                            </div>
+                                            {versionData?.backups?.lastRun && (
+                                                <span className="text-xs text-gray-400 flex items-center gap-1">
+                                                    <Clock size={11} /> Last: {new Date(versionData.backups.lastRun).toLocaleString("en-IN", { day:"numeric", month:"short", hour:"2-digit", minute:"2-digit" })}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-5">
+                                            {[
+                                                { label: "Production backups", files: versionData?.backups?.production },
+                                                { label: "Staging backups", files: versionData?.backups?.staging }
+                                            ].map(({ label, files }) => (
+                                                <div key={label}>
+                                                    <p className="text-xs font-semibold text-gray-600 mb-2">{label}</p>
+                                                    <div className="space-y-1.5">
+                                                        {files && files.length > 0 ? files.map((f, i) => (
+                                                            <div key={i} className="flex items-center justify-between text-xs py-1.5 px-3 bg-gray-50 rounded-lg border border-gray-100">
+                                                                <span className="font-mono text-gray-600 truncate">{f.name}</span>
+                                                                <span className="text-gray-400 ml-2 shrink-0">{(f.size / 1024).toFixed(1)}KB</span>
+                                                            </div>
+                                                        )) : (
+                                                            <p className="text-xs text-gray-400 py-2">No backups yet. First backup runs at 2 AM.</p>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <div className="px-5 py-3 bg-gray-50 border-t border-gray-100">
+                                            <p className="text-xs text-gray-400">
+                                                Backups run daily at 2 AM IST. Last 14 days are retained on the VPS at <code className="font-mono">/root/db-backups/</code>
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {/* ── Rollback Instructions ── */}
+                                    <div className="bg-amber-50 border border-amber-100 rounded-2xl p-5">
+                                        <h3 className="font-bold text-sm text-amber-900 mb-3 flex items-center gap-2">
+                                            <RotateCcw size={15} className="text-amber-600" /> Emergency Rollback
+                                        </h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                                            <div>
+                                                <p className="font-semibold text-amber-800 mb-2">Roll back the app (code only):</p>
+                                                <pre className="bg-white border border-amber-200 rounded-lg px-3 py-2 font-mono text-gray-600 whitespace-pre-wrap leading-relaxed">{`# SSH into VPS
+ssh root@187.77.188.36
+cd /root/tuitionsinindia
+
+# Find previous commit
+git log --oneline -10
+
+# Roll back to that commit
+git checkout <commit-sha>
+docker compose build --no-cache
+docker compose up -d`}</pre>
+                                            </div>
+                                            <div>
+                                                <p className="font-semibold text-amber-800 mb-2">Restore database from backup:</p>
+                                                <pre className="bg-white border border-amber-200 rounded-lg px-3 py-2 font-mono text-gray-600 whitespace-pre-wrap leading-relaxed">{`# List backups
+ls /root/db-backups/production/
+
+# Restore a backup
+gunzip < /root/db-backups/production/prod_DATE.sql.gz \\
+  | docker exec -i tuitionsinindia-db \\
+    psql -U tuitions_admin tuitionsinindia`}</pre>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    )}
                 </div>
             </main>
 

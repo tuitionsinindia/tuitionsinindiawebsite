@@ -14,6 +14,11 @@ STAGING_DIR="/root/tuitionsinindia-staging"
 echo "🚧 Deploying to STAGING (tuitionsinindia.in)..."
 echo ""
 
+GIT_SHA=$(git rev-parse --short HEAD)
+GIT_MSG=$(git log -1 --pretty=%s)
+GIT_AUTHOR=$(git log -1 --pretty=%an)
+DEPLOY_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+
 echo "📦 Step 1: Syncing code to VPS staging directory..."
 rsync -avz --delete \
   --exclude 'node_modules' \
@@ -31,7 +36,7 @@ ssh -o StrictHostKeyChecking=no ${VPS_USER}@${VPS_HOST} "
   cd ${STAGING_DIR} && \
   rm -rf .next && \
   cp .env.staging .env.production && \
-  docker compose -f docker-compose.staging.yml build --no-cache --build-arg CACHE_BUST=$(date +%s) && \
+  docker compose -f docker-compose.staging.yml build --no-cache --build-arg CACHE_BUST=$(date +%s) --build-arg GIT_SHA=${GIT_SHA} && \
   docker compose -f docker-compose.staging.yml up -d
 "
 
@@ -44,6 +49,15 @@ ssh -o StrictHostKeyChecking=no ${VPS_USER}@${VPS_HOST} "
   DB_NAME=\$(grep '^POSTGRES_DB=' .env.staging | cut -d= -f2 | tr -d '\"') && \
   docker exec tuitionsinindia-staging-db psql -U \$DB_USER -d \$DB_NAME -c \"ALTER USER \$DB_USER WITH PASSWORD '\$DB_PASS';\" 2>/dev/null || true && \
   docker exec tuitionsinindia-staging-web prisma db push --accept-data-loss --skip-generate 2>&1 | grep -v 'Can.t write to'
+"
+
+echo ""
+echo "📋 Writing version info..."
+ssh -o StrictHostKeyChecking=no ${VPS_USER}@${VPS_HOST} "
+  mkdir -p /root/deploy-history
+  echo \"{\\\"sha\\\":\\\"${GIT_SHA}\\\",\\\"shortSha\\\":\\\"${GIT_SHA}\\\",\\\"branch\\\":\\\"staging\\\",\\\"message\\\":\\\"${GIT_MSG}\\\",\\\"author\\\":\\\"${GIT_AUTHOR}\\\",\\\"deployedAt\\\":\\\"${DEPLOY_TIME}\\\",\\\"env\\\":\\\"staging\\\"}\" > ${STAGING_DIR}/version.json
+  echo \"{\\\"sha\\\":\\\"${GIT_SHA}\\\",\\\"branch\\\":\\\"staging\\\",\\\"message\\\":\\\"${GIT_MSG}\\\",\\\"author\\\":\\\"${GIT_AUTHOR}\\\",\\\"deployedAt\\\":\\\"${DEPLOY_TIME}\\\",\\\"env\\\":\\\"staging\\\",\\\"status\\\":\\\"success\\\"}\" >> /root/deploy-history/staging.log
+  echo 'Version info written.'
 "
 
 echo ""

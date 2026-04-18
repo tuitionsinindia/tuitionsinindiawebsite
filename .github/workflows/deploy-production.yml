@@ -1,0 +1,92 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "deploy" to confirm production deployment'
+        required: true
+        default: ''
+
+jobs:
+  confirm:
+    name: Confirm deployment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check manual confirmation
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          if [ "${{ github.event.inputs.confirm }}" != "deploy" ]; then
+            echo "❌ You must type 'deploy' to confirm."
+            exit 1
+          fi
+
+  deploy:
+    name: Deploy → tuitionsinindia.com
+    runs-on: ubuntu-latest
+    needs: confirm
+    environment: production   # ← requires manual approval in GitHub environments settings
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script_stop: true
+          timeout: 600s
+          script: |
+            set -e
+            cd /root/tuitionsinindia
+
+            echo "📥 Pulling latest code from GitHub..."
+            git fetch origin main
+            git reset --hard origin/main
+
+            echo "📋 Writing version info..."
+            cat > /root/tuitionsinindia/version.json << EOF
+            {
+              "sha": "${{ github.sha }}",
+              "shortSha": "$(echo ${{ github.sha }} | cut -c1-7)",
+              "branch": "main",
+              "message": "${{ github.event.head_commit.message }}",
+              "author": "${{ github.event.head_commit.author.name }}",
+              "deployedAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+              "env": "production"
+            }
+            EOF
+
+            echo "🐳 Building and starting production containers..."
+            rm -rf .next
+            docker compose build \
+              --no-cache \
+              --build-arg CACHE_BUST=$(date +%s) \
+              --build-arg GIT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
+            docker compose up -d
+
+            echo "🗄️ Syncing DB schema..."
+            docker exec tuitionsinindia-web prisma db push \
+              --accept-data-loss --skip-generate 2>&1 | grep -v "Can't write to"
+
+            echo "📝 Logging deployment..."
+            mkdir -p /root/deploy-history
+            ENTRY="{\"sha\":\"$(echo ${{ github.sha }} | cut -c1-7)\",\"branch\":\"main\",\"message\":\"${{ github.event.head_commit.message }}\",\"author\":\"${{ github.event.head_commit.author.name }}\",\"deployedAt\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"env\":\"production\",\"status\":\"success\"}"
+            echo "$ENTRY" >> /root/deploy-history/production.log
+
+            echo "🧹 Pruning old images..."
+            docker image prune -f
+
+            echo "✅ Production deploy complete! → https://tuitionsinindia.com"
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "❌ Production deployment FAILED for commit ${{ github.sha }}"
+          echo "Roll back by re-running the previous successful workflow."
