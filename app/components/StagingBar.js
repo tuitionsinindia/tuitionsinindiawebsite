@@ -4,9 +4,9 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
     GraduationCap, Users, Building2, ShieldCheck,
-    Rocket, GitBranch, ChevronUp, ChevronDown,
-    RefreshCcw, ExternalLink, Clock, CheckCircle2,
-    AlertTriangle, LogOut, X, RotateCcw, History
+    GitBranch, ChevronUp, ChevronDown,
+    ExternalLink, Clock, CheckCircle2,
+    AlertTriangle, LogOut, X, History
 } from "lucide-react";
 
 const ROLES = [
@@ -305,18 +305,6 @@ export default function StagingBar({ adminKey: initialAdminKey }) {
                     {/* Deploy buttons */}
                     <div className="flex items-center gap-1 shrink-0">
                         <div className={`size-1.5 rounded-full shrink-0 ${webhookOnline === true ? "bg-emerald-400" : webhookOnline === false ? "bg-red-400" : "bg-slate-600"}`} title={webhookOnline ? "Deploy server online" : "Deploy server offline"} />
-
-                        <button
-                            onClick={() => triggerDeploy("staging")}
-                            disabled={!!deploying || webhookOnline === false}
-                            title="Deploy staging branch to tuitionsinindia.in"
-                            className="flex items-center gap-1 px-2.5 py-1 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-lg transition-colors disabled:opacity-50 shrink-0"
-                        >
-                            {deploying === "staging"
-                                ? <div className="size-3 border border-white/40 border-t-white rounded-full animate-spin" />
-                                : <Rocket size={11} />}
-                            Deploy
-                        </button>
 
                         <button
                             onClick={() => triggerDeploy("production")}
