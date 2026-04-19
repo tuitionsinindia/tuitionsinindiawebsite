@@ -78,31 +78,36 @@ export async function POST(request) {
             },
         });
 
-        // 3. Dispatch Asynchronous Notifications
+        // 3. Dispatch asynchronous notifications.
+        // Resend has a 2-req/sec rate limit on the free plan, so we stagger
+        // the three fan-out sends by ~500ms rather than firing them in parallel.
+        // Everything runs fire-and-forget so the HTTP response isn't blocked.
         try {
-            // If it's a completely new user, send them a welcome email
-            if (isNewUser) {
-                sendWelcomeEmail(email, name, "Student").catch(console.error);
-            }
+            const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 
-            // Confirm to the student that their requirement was posted.
-            sendLeadPostedEmail(email, name, lead).catch(console.error);
+            (async () => {
+                if (isNewUser) {
+                    await sendWelcomeEmail(email, name, "Student");
+                    await delay(500);
+                }
+                await sendLeadPostedEmail(email, name, lead);
+                await delay(500);
 
-            // Fetch active tutors to notify them about the new lead
-            prisma.user.findMany({
-                where: { role: 'TUTOR' },
-                select: { email: true, phone: true },
-                take: 50 // In production, filter by subject/location algorithm
-            }).then(tutors => {
+                const tutors = await prisma.user.findMany({
+                    where: { role: 'TUTOR' },
+                    select: { email: true, phone: true },
+                    take: 50, // TODO: filter by matching subject/location
+                });
+
                 const tutorEmails = tutors.map(t => t.email).filter(Boolean);
                 if (tutorEmails.length > 0) {
-                    sendLeadAlertEmail(tutorEmails, lead).catch(console.error);
+                    await sendLeadAlertEmail(tutorEmails, lead);
                 }
-                // Send SMS to a small subset (mock)
-                tutors.slice(0, 5).forEach(t => {
+                // SMS burst — Twilio handles its own rate limiting.
+                for (const t of tutors.slice(0, 5)) {
                     if (t.phone) sendLeadAlertSMS(t.phone, lead).catch(console.error);
-                });
-            }).catch(console.error);
+                }
+            })().catch((err) => console.error("Lead notification error:", err));
         } catch (notifyErr) {
             console.error("Non-blocking notification error", notifyErr);
         }
