@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { createSessionToken, makeSessionCookie } from "@/lib/session";
 import { getAttributionFromRequest } from "@/lib/attribution";
+import { maybeGrantEarlyTutorPro } from "@/lib/earlyAdopterPromo";
 
 function popupResponse(data, setCookie = null) {
     const json = JSON.stringify(data);
@@ -125,6 +126,7 @@ export async function GET(request) {
                 });
             }
             const attribution = getAttributionFromRequest(request);
+            const earlyPro = await maybeGrantEarlyTutorPro(role);
             user = await prisma.user.create({
                 data: {
                     googleId,
@@ -141,6 +143,7 @@ export async function GET(request) {
                     utmTerm: attribution.utmTerm,
                     landingPath: attribution.landingPath,
                     referrerHost: attribution.referrerHost,
+                    ...(earlyPro || {}),
                 },
             });
         }

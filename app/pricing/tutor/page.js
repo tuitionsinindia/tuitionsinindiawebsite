@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { CheckCircle2, ShieldCheck, Building2, Crown, Info, ArrowRight, CreditCard } from "lucide-react";
+import EarlyTutorPromoBanner from "@/app/components/EarlyTutorPromoBanner";
 
 export default function TutorPricing() {
     return (
@@ -16,6 +17,13 @@ export default function TutorPricing() {
                     <p className="text-lg text-gray-500">
                         No commission. Keep 100% of what you earn from students.
                     </p>
+                </div>
+            </section>
+
+            {/* Founding-tutor PRO offer — hides automatically when 500 slots are full */}
+            <section className="px-6 pt-10">
+                <div className="max-w-5xl mx-auto">
+                    <EarlyTutorPromoBanner />
                 </div>
             </section>
 

@@ -900,16 +900,44 @@ function SearchResultsContent() {
                                 )}
                             </>
                         ) : (
-                            <div className="bg-white border border-gray-200 rounded-xl p-12 text-center">
-                                <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <Search size={28} className="text-gray-300" />
+                            <div className="space-y-4">
+                                {/* Primary: post requirement — turn a dead-end into a lead */}
+                                <div className="bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-2xl p-6 sm:p-8 shadow-sm">
+                                    <div className="flex items-start gap-4">
+                                        <div className="size-12 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center shrink-0">
+                                            <MessageCircle size={22} className="text-white" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <h2 className="text-lg sm:text-xl font-bold mb-1">
+                                                {querySubject || queryLocation
+                                                    ? <>No {roleLabel}{querySubject ? <> for <span className="text-yellow-200">{querySubject}</span></> : ""}{queryLocation ? <> in <span className="text-yellow-200">{queryLocation}</span></> : ""} yet — let them come to you.</>
+                                                    : <>Tell us what you need. Tutors will contact you.</>
+                                                }
+                                            </h2>
+                                            <p className="text-sm text-blue-100 leading-relaxed mb-4">
+                                                Post a free requirement and matching tutors will reach out — usually within 12 hours.
+                                            </p>
+                                            <Link
+                                                href={`/post-requirement?${querySubject ? `subject=${encodeURIComponent(querySubject)}&` : ""}${queryLocation ? `location=${encodeURIComponent(queryLocation)}` : ""}`}
+                                                className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-blue-700 text-sm font-semibold rounded-lg hover:bg-blue-50 transition-colors"
+                                            >
+                                                Post a free requirement <ArrowRight size={14} />
+                                            </Link>
+                                        </div>
+                                    </div>
                                 </div>
-                                <h2 className="text-base font-semibold text-gray-700 mb-1">No {roleLabel} found</h2>
-                                <p className="text-sm text-gray-400 mb-5">Try adjusting your filters or searching for a different subject or location.</p>
-                                <button onClick={resetFilters}
-                                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors">
-                                    Clear Filters
-                                </button>
+
+                                {/* Secondary: tweak the search */}
+                                <div className="bg-white border border-gray-200 rounded-xl p-6 text-center">
+                                    <p className="text-sm font-semibold text-gray-700 mb-1">Or try a broader search</p>
+                                    <p className="text-xs text-gray-400 mb-4">Some filters might be too narrow.</p>
+                                    <button
+                                        onClick={resetFilters}
+                                        className="inline-flex items-center gap-2 px-4 py-2 bg-gray-50 border border-gray-200 text-sm font-semibold text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
+                                    >
+                                        Clear all filters
+                                    </button>
+                                </div>
                             </div>
                         )}
                     </div>

@@ -6,5 +6,10 @@ Disallow: /admin/
 Disallow: /messages/
 Disallow: /api/
 Disallow: /production-audit/
+Disallow: /unsubscribe
 
-Sitemap: https://www.tuitionsinindia.com/sitemap.xml
+# /land/* are paid-ad landing pages — they carry a `noindex` meta so they
+# stay out of search even though they're crawlable. Don't add them to
+# Disallow here — that would block the crawl and defeat the noindex.
+
+Sitemap: https://tuitionsinindia.com/sitemap.xml

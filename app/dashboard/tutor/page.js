@@ -713,42 +713,58 @@ function DashboardContent() {
                                 {/* Profile Completeness Score */}
                                 {tutorData && (() => {
                                     const listing = tutorData.tutorListing;
+                                    // Impact text answers "why does this matter?" — sorted high impact first.
                                     const checks = [
-                                        { label: "Add your name", done: !!tutorData.name, action: () => setActiveTab("SETTINGS") },
-                                        { label: "Upload a profile photo", done: !!tutorData.image, action: () => setActiveTab("SETTINGS") },
-                                        { label: "Add your email", done: !!tutorData.email, action: () => setActiveTab("SETTINGS") },
-                                        { label: "Write a bio (50+ chars)", done: !!(listing?.bio && listing.bio.length >= 50), action: () => setActiveTab("SETTINGS") },
-                                        { label: "Add subjects you teach", done: !!(listing?.subjects && listing.subjects.length > 0), action: () => setActiveTab("SETTINGS") },
-                                        { label: "Set your hourly rate", done: !!(listing?.hourlyRate && listing.hourlyRate > 0), action: () => setActiveTab("SETTINGS") },
-                                        { label: "Add your experience", done: !!(listing?.experience && listing.experience > 0), action: () => setActiveTab("SETTINGS") },
-                                        { label: "Get verified", done: !!tutorData.isVerified, action: null },
+                                        { label: "Upload a profile photo",     done: !!tutorData.image,                                          impact: "Tutors with photos get 4× more contacts.",            href: "/dashboard/tutor/profile" },
+                                        { label: "Write a bio (50+ chars)",    done: !!(listing?.bio && listing.bio.length >= 50),               impact: "Your bio is the first thing students read.",          href: "/dashboard/tutor/profile" },
+                                        { label: "Add subjects you teach",     done: !!(listing?.subjects && listing.subjects.length > 0),       impact: "Without subjects you won't show up in searches.",     href: "/dashboard/tutor/profile" },
+                                        { label: "Set your hourly rate",       done: !!(listing?.hourlyRate && listing.hourlyRate > 0),          impact: "Parents filter by budget — no rate means no match.",  href: "/dashboard/tutor/profile" },
+                                        { label: "Add your experience",        done: !!(listing?.experience && listing.experience > 0),          impact: "Years of teaching boost your search rank.",           href: "/dashboard/tutor/profile" },
+                                        { label: "Add your email",             done: !!tutorData.email,                                          impact: "We email you new student leads daily.",               href: "/dashboard/tutor/profile" },
+                                        { label: "Add your name",              done: !!tutorData.name,                                           impact: "Name appears on your public profile.",                href: "/dashboard/tutor/profile" },
+                                        { label: "Get verified",               done: !!tutorData.isVerified,                                     impact: "Verified tutors get 3× more enquiries.",              href: null },
                                     ];
                                     const done = checks.filter(c => c.done).length;
                                     const pct = Math.round((done / checks.length) * 100);
                                     const missing = checks.filter(c => !c.done);
                                     if (pct === 100) return null;
+                                    const isUrgent = pct < 60;
                                     return (
-                                        <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
-                                            <div className="flex items-center justify-between mb-3">
+                                        <div className={`rounded-2xl p-5 shadow-sm border ${isUrgent ? "bg-amber-50 border-amber-200" : "bg-white border-gray-100"}`}>
+                                            <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
                                                 <div>
-                                                    <h3 className="text-base font-bold text-gray-900">Profile completeness</h3>
-                                                    <p className="text-xs text-gray-400 mt-0.5">Complete your profile to appear higher in search results</p>
+                                                    <h3 className="text-base font-bold text-gray-900">
+                                                        {isUrgent ? "Finish your profile to start receiving enquiries" : "Profile completeness"}
+                                                    </h3>
+                                                    <p className="text-xs text-gray-500 mt-0.5">
+                                                        {missing.length} item{missing.length === 1 ? "" : "s"} left · usually takes about {Math.max(2, missing.length)} minutes
+                                                    </p>
                                                 </div>
-                                                <span className="text-2xl font-bold text-blue-600">{pct}%</span>
+                                                <div className="flex items-center gap-3">
+                                                    <span className={`text-2xl font-bold ${isUrgent ? "text-amber-700" : "text-blue-600"}`}>{pct}%</span>
+                                                    <Link
+                                                        href="/dashboard/tutor/profile"
+                                                        className={`px-4 py-2 text-sm font-semibold rounded-lg transition-colors ${isUrgent ? "bg-amber-600 text-white hover:bg-amber-700" : "bg-blue-600 text-white hover:bg-blue-700"}`}
+                                                    >
+                                                        Open profile editor
+                                                    </Link>
+                                                </div>
                                             </div>
-                                            <div className="w-full bg-gray-100 rounded-full h-2 mb-4">
-                                                <div className="bg-blue-600 h-2 rounded-full transition-all" style={{ width: `${pct}%` }} />
+                                            <div className="w-full bg-white/60 rounded-full h-2 mb-4 overflow-hidden">
+                                                <div className={`h-2 rounded-full transition-all ${isUrgent ? "bg-amber-500" : "bg-blue-600"}`} style={{ width: `${pct}%` }} />
                                             </div>
                                             <div className="space-y-2">
-                                                {missing.slice(0, 4).map((item, i) => (
-                                                    <div key={i} className="flex items-center gap-3">
-                                                        <div className="size-4 rounded-full border-2 border-gray-300 shrink-0" />
-                                                        <span className="text-sm text-gray-600 flex-1">{item.label}</span>
-                                                        {item.action && (
-                                                            <button onClick={item.action} className="text-xs font-semibold text-blue-600 hover:underline">Fix</button>
-                                                        )}
-                                                        {!item.action && (
-                                                            <a href="mailto:support@tuitionsinindia.com?subject=Verification Documents" className="text-xs font-semibold text-blue-600 hover:underline">Request</a>
+                                                {missing.map((item, i) => (
+                                                    <div key={i} className="flex items-start gap-3 p-2 rounded-lg hover:bg-white/60 transition-colors">
+                                                        <div className="size-4 rounded-full border-2 border-gray-300 shrink-0 mt-0.5" />
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="text-sm font-semibold text-gray-800">{item.label}</p>
+                                                            <p className="text-xs text-gray-500 mt-0.5">{item.impact}</p>
+                                                        </div>
+                                                        {item.href ? (
+                                                            <Link href={item.href} className="text-xs font-semibold text-blue-600 hover:underline shrink-0 mt-0.5">Fix</Link>
+                                                        ) : (
+                                                            <a href="mailto:support@tuitionsinindia.com?subject=Verification Documents" className="text-xs font-semibold text-blue-600 hover:underline shrink-0 mt-0.5">Request</a>
                                                         )}
                                                     </div>
                                                 ))}

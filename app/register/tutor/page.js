@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Award, ArrowLeft, CheckCircle2, MapPin, BookOpen, Search, Loader2 } from "lucide-react";
 import LeadCaptureFlow from "../../components/LeadCaptureFlow";
 import TutorListingForm from "../../components/TutorListingForm";
+import EarlyTutorPromoBanner from "../../components/EarlyTutorPromoBanner";
 
 function TutorRegisterContent() {
     const router = useRouter();
@@ -67,6 +68,13 @@ function TutorRegisterContent() {
                                 )}
                             </div>
                         </div>
+                    </div>
+                )}
+
+                {/* Founding-tutor PRO offer (only on the first step, only while slots remain) */}
+                {step === 1 && (
+                    <div className="mb-5">
+                        <EarlyTutorPromoBanner variant="compact" ctaHref="#top" />
                     </div>
                 )}
 

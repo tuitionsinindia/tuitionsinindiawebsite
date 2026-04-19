@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import {
     sendStudentDay3Email, sendStudentDay7Email,
-    sendTutorDay3Email, sendTutorDay7Email,
+    sendTutorDay1Email, sendTutorDay3Email, sendTutorDay7Email,
     sendReEngagementEmail,
 } from "@/lib/email";
 
@@ -26,13 +26,15 @@ export async function GET(req) {
     }
 
     const now = new Date();
+    const day1Ago = new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000);
+    const day1Window = new Date(day1Ago.getTime() - 24 * 60 * 60 * 1000); // 1–2 days ago
     const day3Ago = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000);
     const day3Window = new Date(day3Ago.getTime() - 24 * 60 * 60 * 1000); // 3–4 days ago
     const day7Ago = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     const day7Window = new Date(day7Ago.getTime() - 24 * 60 * 60 * 1000); // 7–8 days ago
     const day14Ago = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
 
-    let sent = { day3Student: 0, day3Tutor: 0, day7Student: 0, day7Tutor: 0, reEngagement: 0 };
+    let sent = { day1Tutor: 0, day3Student: 0, day3Tutor: 0, day7Student: 0, day7Tutor: 0, reEngagement: 0 };
 
     try {
         // Helper to check if user has unsubscribed from marketing emails
@@ -40,6 +42,24 @@ export async function GET(req) {
             try { return (typeof prefs === "string" ? JSON.parse(prefs) : prefs)?.unsubscribed === true; }
             catch { return false; }
         };
+
+        // ── Day 1 Tutors — only those who haven't completed profile ─────
+        const day1Tutors = await prisma.user.findMany({
+            where: {
+                role: "TUTOR",
+                email: { not: null },
+                createdAt: { gte: day1Window, lte: day1Ago },
+                isProfileComplete: false,
+            },
+            select: { id: true, email: true, name: true, notificationPrefs: true },
+            take: 100,
+        });
+        for (const u of day1Tutors) {
+            if (u.email && !isUnsubscribed(u.notificationPrefs)) {
+                await sendTutorDay1Email(u.email, u.name || "Tutor", u.id);
+                sent.day1Tutor++;
+            }
+        }
 
         // ── Day 3 Students ───────────────────────────────────────────────
         const day3Students = await prisma.user.findMany({
@@ -109,6 +129,23 @@ export async function GET(req) {
                 sent.day7Tutor++;
             }
         }
+
+        // ── Daily housekeeping: downgrade expired complimentary PRO ─────
+        // First-500 tutors got 30-day complimentary PRO at signup. Once that
+        // window passes, return them to FREE so PRO truly is paid-tier.
+        const expiredPro = await prisma.user.updateMany({
+            where: {
+                role: "TUTOR",
+                proGrantedUntil: { not: null, lte: now },
+                subscriptionTier: "PRO",
+            },
+            data: {
+                subscriptionTier: "FREE",
+                subscriptionStatus: "INACTIVE",
+                proGrantedUntil: null,
+            },
+        });
+        sent.expiredProDowngrades = expiredPro.count;
 
         // ── 14-day Re-engagement (students who haven't had activity) ─────
         const inactiveStudents = await prisma.user.findMany({

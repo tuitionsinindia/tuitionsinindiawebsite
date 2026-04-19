@@ -4,6 +4,7 @@ import { sendOTP } from "@/lib/sms";
 import { otpStore } from "@/lib/otpStore";
 import { checkRateLimit } from "@/lib/rateLimit";
 import { getAttributionFromRequest } from "@/lib/attribution";
+import { maybeGrantEarlyTutorPro } from "@/lib/earlyAdopterPromo";
 
 export async function POST(request) {
     try {
@@ -53,6 +54,7 @@ export async function POST(request) {
                 });
             } else {
                 const attribution = getAttributionFromRequest(request);
+                const earlyPro = await maybeGrantEarlyTutorPro(role);
                 user = await prisma.user.create({
                     data: {
                         phone,
@@ -66,6 +68,7 @@ export async function POST(request) {
                         utmTerm: attribution.utmTerm,
                         landingPath: attribution.landingPath,
                         referrerHost: attribution.referrerHost,
+                        ...(earlyPro || {}),
                     },
                 });
             }

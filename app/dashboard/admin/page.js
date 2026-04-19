@@ -101,6 +101,23 @@ function AdminDashboardContent() {
     const [blogForm, setBlogForm] = useState({ title: "", slug: "", excerpt: "", content: "", category: "", author: "TuitionsInIndia", readTime: "5 min read", isPublished: false });
     const [blogDeleteLoading, setBlogDeleteLoading] = useState(null);
 
+    // Attribution tab
+    const [attrData, setAttrData] = useState(null);
+    const [attrLoading, setAttrLoading] = useState(false);
+    const [attrRange, setAttrRange] = useState("30d");
+
+    const fetchAttribution = async (range = attrRange) => {
+        if (!adminKey) return;
+        setAttrLoading(true);
+        try {
+            const res = await fetch(`/api/admin/attribution?range=${range}`, { headers: { "x-admin-key": adminKey } });
+            const json = await res.json();
+            if (json.success) setAttrData(json);
+        } finally {
+            setAttrLoading(false);
+        }
+    };
+
     // Launch readiness tab
     const [launchData, setLaunchData] = useState(null);
     const [launchLoading, setLaunchLoading] = useState(false);
@@ -144,6 +161,7 @@ function AdminDashboardContent() {
         }
         if (activeTab === "blog" && adminKey) fetchBlogPosts();
         if (activeTab === "launch" && adminKey) fetchLaunchReadiness();
+        if (activeTab === "attribution" && adminKey) fetchAttribution();
     }, [activeTab]);
 
     // Poll deploy run status every 8s while deployments tab is active
@@ -571,6 +589,7 @@ function AdminDashboardContent() {
                             {[
                                 { id: "overview", icon: LayoutDashboard, label: "Overview" },
                                 { id: "launch", icon: Rocket, label: "Launch Readiness" },
+                                { id: "attribution", icon: Megaphone, label: "Ad Attribution" },
                                 { id: "users", icon: Users, label: "User Directory" },
                                 { id: "listings", icon: GraduationCap, label: "Tutor Approvals" },
                                 { id: "vip", icon: Star, label: "VIP Service" },
@@ -1336,6 +1355,218 @@ function AdminDashboardContent() {
 
                                                 <div className="text-xs text-gray-400 pt-2">
                                                     Tip: environment variables come from the running container. Update <code className="bg-gray-100 px-1.5 py-0.5 rounded">.env.production</code> on the VPS and redeploy to refresh.
+                                                </div>
+                                            </>
+                                        ) : null}
+                                    </div>
+                                );
+                            })()}
+
+                            {/* ─── AD ATTRIBUTION ───────────────────────────────────────────── */}
+                            {activeTab === "attribution" && (() => {
+                                const fmtDateShort = (d) => d ? new Date(d).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "—";
+                                const rangeOptions = [
+                                    { id: "7d",  label: "Last 7 days" },
+                                    { id: "30d", label: "Last 30 days" },
+                                    { id: "90d", label: "Last 90 days" },
+                                    { id: "all", label: "All time" },
+                                ];
+                                const maxCount = (rows) => rows.reduce((max, r) => Math.max(max, r.count), 0) || 1;
+                                const BarRow = ({ label, count, max }) => (
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-48 shrink-0 text-sm text-gray-700 truncate" title={label}>{label}</div>
+                                        <div className="flex-1 bg-gray-100 rounded-full h-6 overflow-hidden">
+                                            <div
+                                                className="h-full bg-blue-500 rounded-full flex items-center justify-end pr-2 transition-all"
+                                                style={{ width: `${Math.max(6, (count / max) * 100)}%` }}
+                                            >
+                                                <span className="text-[11px] font-semibold text-white">{count}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+
+                                return (
+                                    <div className="max-w-5xl space-y-6">
+                                        {/* Header */}
+                                        <div className="flex items-center justify-between flex-wrap gap-3">
+                                            <div>
+                                                <h2 className="text-xl font-bold text-gray-900">Ad Attribution</h2>
+                                                <p className="text-sm text-gray-400 mt-0.5">
+                                                    First-touch attribution — the ad that <em>acquired</em> each user.
+                                                </p>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <div className="flex items-center gap-1 bg-gray-50 border border-gray-200 rounded-lg p-1">
+                                                    {rangeOptions.map(opt => (
+                                                        <button
+                                                            key={opt.id}
+                                                            onClick={() => { setAttrRange(opt.id); fetchAttribution(opt.id); }}
+                                                            className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${attrRange === opt.id ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-900"}`}
+                                                        >
+                                                            {opt.label}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                                <button
+                                                    onClick={() => fetchAttribution(attrRange)}
+                                                    disabled={attrLoading}
+                                                    className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50"
+                                                >
+                                                    <RefreshCcw size={13} className={attrLoading ? "animate-spin" : ""} />
+                                                    Refresh
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {attrLoading && !attrData ? (
+                                            <div className="flex items-center gap-3 p-4 bg-white border border-gray-100 rounded-xl">
+                                                <div className="size-5 border-2 border-gray-200 border-t-blue-600 rounded-full animate-spin" />
+                                                <p className="text-sm text-gray-500 font-medium">Loading attribution…</p>
+                                            </div>
+                                        ) : attrData ? (
+                                            <>
+                                                {/* Summary tiles */}
+                                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                                    <div className="p-4 bg-white rounded-xl border border-gray-200">
+                                                        <p className="text-xs font-semibold text-gray-400 mb-1">New users in range</p>
+                                                        <p className="text-2xl font-bold text-gray-900">{attrData.totalUsers}</p>
+                                                    </div>
+                                                    <div className="p-4 bg-white rounded-xl border border-gray-200">
+                                                        <p className="text-xs font-semibold text-gray-400 mb-1">From a tracked ad</p>
+                                                        <p className="text-2xl font-bold text-blue-600">{attrData.attributedUsers}</p>
+                                                    </div>
+                                                    <div className="p-4 bg-white rounded-xl border border-gray-200">
+                                                        <p className="text-xs font-semibold text-gray-400 mb-1">Attribution rate</p>
+                                                        <p className="text-2xl font-bold text-emerald-600">{attrData.attributionRate}%</p>
+                                                    </div>
+                                                </div>
+
+                                                {/* By source */}
+                                                <div className="bg-white border border-gray-200 rounded-2xl p-5">
+                                                    <div className="flex items-center justify-between mb-4">
+                                                        <h3 className="font-bold text-gray-900">Signups by source</h3>
+                                                        <span className="text-xs text-gray-400">utm_source (or referrer for direct)</span>
+                                                    </div>
+                                                    {attrData.bySource.length === 0 ? (
+                                                        <p className="text-sm text-gray-400">No attributed signups in this range yet.</p>
+                                                    ) : (
+                                                        <div className="space-y-2">
+                                                            {(() => {
+                                                                const max = maxCount(attrData.bySource);
+                                                                return attrData.bySource.map((row, i) => (
+                                                                    <BarRow key={i} label={row.key} count={row.count} max={max} />
+                                                                ));
+                                                            })()}
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                {/* By campaign */}
+                                                <div className="bg-white border border-gray-200 rounded-2xl p-5">
+                                                    <div className="flex items-center justify-between mb-4">
+                                                        <h3 className="font-bold text-gray-900">Signups by campaign</h3>
+                                                        <span className="text-xs text-gray-400">utm_campaign</span>
+                                                    </div>
+                                                    {attrData.byCampaign.length === 0 ? (
+                                                        <p className="text-sm text-gray-400">No campaign-tagged traffic yet. Use <code className="bg-gray-100 px-1.5 py-0.5 rounded">utm_campaign=</code> on your ad URLs.</p>
+                                                    ) : (
+                                                        <div className="space-y-2">
+                                                            {(() => {
+                                                                const max = maxCount(attrData.byCampaign);
+                                                                return attrData.byCampaign.map((row, i) => (
+                                                                    <BarRow key={i} label={row.key} count={row.count} max={max} />
+                                                                ));
+                                                            })()}
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                {/* By landing path */}
+                                                <div className="bg-white border border-gray-200 rounded-2xl p-5">
+                                                    <div className="flex items-center justify-between mb-4">
+                                                        <h3 className="font-bold text-gray-900">Signups by landing page</h3>
+                                                        <span className="text-xs text-gray-400">page they first hit</span>
+                                                    </div>
+                                                    {attrData.byLandingPath.length === 0 ? (
+                                                        <p className="text-sm text-gray-400">No landing-page data yet.</p>
+                                                    ) : (
+                                                        <div className="space-y-2">
+                                                            {(() => {
+                                                                const max = maxCount(attrData.byLandingPath);
+                                                                return attrData.byLandingPath.map((row, i) => (
+                                                                    <BarRow key={i} label={row.key} count={row.count} max={max} />
+                                                                ));
+                                                            })()}
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                {/* Role × source matrix */}
+                                                {Object.keys(attrData.roleSourceMatrix).length > 0 && (
+                                                    <div className="bg-white border border-gray-200 rounded-2xl p-5 overflow-x-auto">
+                                                        <div className="flex items-center justify-between mb-4">
+                                                            <h3 className="font-bold text-gray-900">Role × source</h3>
+                                                            <span className="text-xs text-gray-400">who each channel brought in</span>
+                                                        </div>
+                                                        <table className="w-full text-sm">
+                                                            <thead>
+                                                                <tr className="text-left text-xs font-semibold text-gray-500 border-b border-gray-100">
+                                                                    <th className="py-2 px-3">Source</th>
+                                                                    <th className="py-2 px-3 text-right">Students</th>
+                                                                    <th className="py-2 px-3 text-right">Tutors</th>
+                                                                    <th className="py-2 px-3 text-right">Institutes</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {Object.entries(attrData.roleSourceMatrix).map(([source, counts]) => (
+                                                                    <tr key={source} className="border-b border-gray-50">
+                                                                        <td className="py-2 px-3 font-semibold text-gray-900">{source}</td>
+                                                                        <td className="py-2 px-3 text-right text-gray-700">{counts.STUDENT || 0}</td>
+                                                                        <td className="py-2 px-3 text-right text-gray-700">{counts.TUTOR || 0}</td>
+                                                                        <td className="py-2 px-3 text-right text-gray-700">{counts.INSTITUTE || 0}</td>
+                                                                    </tr>
+                                                                ))}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                )}
+
+                                                {/* Recent attributed signups */}
+                                                <div className="bg-white border border-gray-200 rounded-2xl p-5 overflow-x-auto">
+                                                    <h3 className="font-bold text-gray-900 mb-4">Recent attributed signups</h3>
+                                                    {attrData.recentUsers.length === 0 ? (
+                                                        <p className="text-sm text-gray-400">No attributed signups yet.</p>
+                                                    ) : (
+                                                        <table className="w-full text-sm">
+                                                            <thead>
+                                                                <tr className="text-left text-xs font-semibold text-gray-500 border-b border-gray-100">
+                                                                    <th className="py-2 px-3">When</th>
+                                                                    <th className="py-2 px-3">Name</th>
+                                                                    <th className="py-2 px-3">Role</th>
+                                                                    <th className="py-2 px-3">Source</th>
+                                                                    <th className="py-2 px-3">Campaign</th>
+                                                                    <th className="py-2 px-3">Landing</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {attrData.recentUsers.map((u) => (
+                                                                    <tr key={u.id} className="border-b border-gray-50">
+                                                                        <td className="py-2 px-3 text-gray-500 whitespace-nowrap">{fmtDateShort(u.createdAt)}</td>
+                                                                        <td className="py-2 px-3 text-gray-900 font-medium">{u.name}</td>
+                                                                        <td className="py-2 px-3 text-gray-600">{u.role?.toLowerCase()}</td>
+                                                                        <td className="py-2 px-3 text-gray-700">{u.utmSource || "—"}</td>
+                                                                        <td className="py-2 px-3 text-gray-700 truncate max-w-[160px]" title={u.utmCampaign || ""}>{u.utmCampaign || "—"}</td>
+                                                                        <td className="py-2 px-3 text-gray-500 truncate max-w-[160px]" title={u.landingPath || ""}>{u.landingPath || "—"}</td>
+                                                                    </tr>
+                                                                ))}
+                                                            </tbody>
+                                                        </table>
+                                                    )}
+                                                </div>
+
+                                                <div className="text-xs text-gray-400 pt-2">
+                                                    Updated: {fmtDateShort(attrData.generatedAt)} · First-touch attribution is permanent — later visits don't overwrite the original source.
                                                 </div>
                                             </>
                                         ) : null}
