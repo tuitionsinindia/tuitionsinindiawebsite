@@ -1,10 +1,23 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request) {
+    // Hard block in production — this route only runs in staging/dev.
+    // It creates clearly-labelled "Prod_Audit" test users that must never
+    // appear on the live site (see testing-issues-log.md #4).
+    const env = process.env.NEXT_PUBLIC_ENV || process.env.NODE_ENV;
+    if (env === "production") {
+        return NextResponse.json(
+            { error: "Audit seeding is disabled in production." },
+            { status: 403 }
+        );
+    }
+
     const { searchParams } = new URL(request.url);
     const phase = searchParams.get('phase') || '1';
-    
+
     const key = searchParams.get('key');
     const expectedKey = process.env.AUDIT_SEED_KEY;
     if (!expectedKey || key !== expectedKey) {

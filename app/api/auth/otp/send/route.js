@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma";
 import { sendOTP } from "@/lib/sms";
 import { otpStore } from "@/lib/otpStore";
 import { checkRateLimit } from "@/lib/rateLimit";
+import { getAttributionFromRequest } from "@/lib/attribution";
 
 export async function POST(request) {
     try {
@@ -51,8 +52,21 @@ export async function POST(request) {
                     data: { name: name || existing.name },
                 });
             } else {
+                const attribution = getAttributionFromRequest(request);
                 user = await prisma.user.create({
-                    data: { phone, name: name || "User", role, phoneVerified: false },
+                    data: {
+                        phone,
+                        name: name || "User",
+                        role,
+                        phoneVerified: false,
+                        utmSource: attribution.utmSource,
+                        utmMedium: attribution.utmMedium,
+                        utmCampaign: attribution.utmCampaign,
+                        utmContent: attribution.utmContent,
+                        utmTerm: attribution.utmTerm,
+                        landingPath: attribution.landingPath,
+                        referrerHost: attribution.referrerHost,
+                    },
                 });
             }
         } else {

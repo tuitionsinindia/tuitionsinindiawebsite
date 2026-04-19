@@ -1,9 +1,11 @@
+import { Suspense } from "react";
 import "./globals.css";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import GoogleAnalytics from "./components/GoogleAnalytics";
 import MetaPixel from "./components/MetaPixel";
 import StagingBar from "./components/StagingBar";
+import UtmCapture from "./components/UtmCapture";
 
 const IS_STAGING = process.env.NEXT_PUBLIC_ENV === "staging";
 
@@ -123,6 +125,9 @@ export default function RootLayout({ children }) {
             })
           }}
         />
+        <Suspense fallback={null}>
+          <UtmCapture />
+        </Suspense>
         <Header />
         {children}
         <Footer />

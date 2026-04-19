@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { sendWelcomeEmail, sendLeadAlertEmail } from "@/lib/email";
 import { sendLeadAlertSMS } from "@/lib/sms";
+import { getAttributionFromRequest } from "@/lib/attribution";
 
 export const dynamic = 'force-dynamic';
 
@@ -9,6 +10,7 @@ export async function POST(request) {
     try {
         const body = await request.json();
         let { name, email, phone, subject, location, budget, description, grade, modes } = body;
+        const attribution = getAttributionFromRequest(request);
 
         // Validation
         if (!email || !name || !phone) {
@@ -43,13 +45,21 @@ export async function POST(request) {
                 data: { name, phone, email }
             });
         } else {
-            // Create new user
+            // Create new user — stamp first-touch attribution so marketing can
+            // see which ad/campaign brought them in.
             user = await prisma.user.create({
                 data: {
                     email,
                     name,
                     phone,
                     role: 'STUDENT',
+                    utmSource: attribution.utmSource,
+                    utmMedium: attribution.utmMedium,
+                    utmCampaign: attribution.utmCampaign,
+                    utmContent: attribution.utmContent,
+                    utmTerm: attribution.utmTerm,
+                    landingPath: attribution.landingPath,
+                    referrerHost: attribution.referrerHost,
                 },
             });
         }

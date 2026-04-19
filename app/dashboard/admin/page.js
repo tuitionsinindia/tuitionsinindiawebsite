@@ -48,6 +48,8 @@ import {
     Tag,
     Globe,
     X,
+    Rocket,
+    HelpCircle,
 } from "lucide-react";
 
 function AdminDashboardContent() {
@@ -99,6 +101,22 @@ function AdminDashboardContent() {
     const [blogForm, setBlogForm] = useState({ title: "", slug: "", excerpt: "", content: "", category: "", author: "TuitionsInIndia", readTime: "5 min read", isPublished: false });
     const [blogDeleteLoading, setBlogDeleteLoading] = useState(null);
 
+    // Launch readiness tab
+    const [launchData, setLaunchData] = useState(null);
+    const [launchLoading, setLaunchLoading] = useState(false);
+
+    const fetchLaunchReadiness = async () => {
+        if (!adminKey) return;
+        setLaunchLoading(true);
+        try {
+            const res = await fetch("/api/admin/launch-readiness", { headers: { "x-admin-key": adminKey } });
+            const json = await res.json();
+            if (json.success) setLaunchData(json);
+        } finally {
+            setLaunchLoading(false);
+        }
+    };
+
     // Marketing tab
     const [mktSegment, setMktSegment] = useState("ALL");
     const [mktSubject, setMktSubject] = useState("");
@@ -125,6 +143,7 @@ function AdminDashboardContent() {
             fetchDeployRuns();
         }
         if (activeTab === "blog" && adminKey) fetchBlogPosts();
+        if (activeTab === "launch" && adminKey) fetchLaunchReadiness();
     }, [activeTab]);
 
     // Poll deploy run status every 8s while deployments tab is active
@@ -551,6 +570,7 @@ function AdminDashboardContent() {
                         <nav className="space-y-1">
                             {[
                                 { id: "overview", icon: LayoutDashboard, label: "Overview" },
+                                { id: "launch", icon: Rocket, label: "Launch Readiness" },
                                 { id: "users", icon: Users, label: "User Directory" },
                                 { id: "listings", icon: GraduationCap, label: "Tutor Approvals" },
                                 { id: "vip", icon: Star, label: "VIP Service" },
@@ -1200,6 +1220,128 @@ function AdminDashboardContent() {
                                     </div>
                                 </div>
                             )}
+
+                            {/* ─── LAUNCH READINESS ─────────────────────────────────────────── */}
+                            {activeTab === "launch" && (() => {
+                                const statusStyles = {
+                                    ok:     { icon: CheckCircle2,  bg: "bg-emerald-50", border: "border-emerald-100", fg: "text-emerald-700", dot: "bg-emerald-500", label: "Ready" },
+                                    warn:   { icon: AlertTriangle, bg: "bg-amber-50",   border: "border-amber-100",   fg: "text-amber-700",   dot: "bg-amber-500",   label: "Attention" },
+                                    fail:   { icon: XCircle,       bg: "bg-red-50",     border: "border-red-100",     fg: "text-red-700",     dot: "bg-red-500",     label: "Blocker" },
+                                    manual: { icon: HelpCircle,    bg: "bg-gray-50",    border: "border-gray-200",    fg: "text-gray-600",    dot: "bg-gray-400",    label: "Manual check" },
+                                };
+                                const groupedChecks = (launchData?.checks || []).reduce((acc, c) => {
+                                    (acc[c.category] = acc[c.category] || []).push(c);
+                                    return acc;
+                                }, {});
+                                const summary = launchData?.summary;
+                                const ready = launchData?.launchReady;
+
+                                return (
+                                    <div className="max-w-5xl space-y-6">
+                                        {/* Header */}
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <h2 className="text-xl font-bold text-gray-900">Launch Readiness</h2>
+                                                <p className="text-sm text-gray-400 mt-0.5">
+                                                    Go/no-go checklist for production. Re-run any time.
+                                                </p>
+                                            </div>
+                                            <button
+                                                onClick={fetchLaunchReadiness}
+                                                disabled={launchLoading}
+                                                className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50"
+                                            >
+                                                <RefreshCcw size={13} className={launchLoading ? "animate-spin" : ""} />
+                                                {launchLoading ? "Checking…" : "Re-run checks"}
+                                            </button>
+                                        </div>
+
+                                        {/* Go/no-go banner + summary */}
+                                        {launchLoading && !launchData ? (
+                                            <div className="flex items-center gap-3 p-4 bg-white border border-gray-100 rounded-xl">
+                                                <div className="size-5 border-2 border-gray-200 border-t-blue-600 rounded-full animate-spin" />
+                                                <p className="text-sm text-gray-500 font-medium">Running readiness checks…</p>
+                                            </div>
+                                        ) : launchData ? (
+                                            <>
+                                                <div className={`p-5 rounded-2xl border ${ready ? "bg-emerald-50 border-emerald-100" : "bg-amber-50 border-amber-100"}`}>
+                                                    <div className="flex items-start gap-4">
+                                                        <div className={`p-2.5 rounded-xl ${ready ? "bg-white text-emerald-600" : "bg-white text-amber-600"}`}>
+                                                            <Rocket size={18} />
+                                                        </div>
+                                                        <div className="flex-1">
+                                                            <h3 className={`font-bold text-base ${ready ? "text-emerald-900" : "text-amber-900"}`}>
+                                                                {ready ? "Ready to launch" : "Not ready yet"}
+                                                            </h3>
+                                                            <p className={`text-sm mt-0.5 ${ready ? "text-emerald-700" : "text-amber-700"}`}>
+                                                                {ready
+                                                                    ? "All blockers clear. You can push to production."
+                                                                    : `${summary.fail} blocker${summary.fail === 1 ? "" : "s"} and ${summary.warn} warning${summary.warn === 1 ? "" : "s"} to resolve first.`}
+                                                            </p>
+                                                            <p className="text-xs text-gray-500 mt-2">
+                                                                Last checked: {new Date(launchData.generatedAt).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Summary tiles */}
+                                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                                    {[
+                                                        { key: "ok",     label: "Ready",         value: summary.ok,     ...statusStyles.ok },
+                                                        { key: "warn",   label: "Warnings",      value: summary.warn,   ...statusStyles.warn },
+                                                        { key: "fail",   label: "Blockers",      value: summary.fail,   ...statusStyles.fail },
+                                                        { key: "manual", label: "Manual checks", value: summary.manual, ...statusStyles.manual },
+                                                    ].map(tile => (
+                                                        <div key={tile.key} className={`p-4 rounded-xl border ${tile.border} ${tile.bg}`}>
+                                                            <div className="flex items-center gap-2 mb-1">
+                                                                <span className={`size-2 rounded-full ${tile.dot}`} />
+                                                                <p className={`text-xs font-semibold ${tile.fg}`}>{tile.label}</p>
+                                                            </div>
+                                                            <p className={`text-2xl font-bold ${tile.fg}`}>{tile.value}</p>
+                                                        </div>
+                                                    ))}
+                                                </div>
+
+                                                {/* Checks by category */}
+                                                {Object.entries(groupedChecks).map(([category, items]) => (
+                                                    <div key={category} className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+                                                        <div className="px-5 py-3 border-b border-gray-100 bg-gray-50">
+                                                            <h3 className="text-sm font-bold text-gray-900">{category}</h3>
+                                                        </div>
+                                                        <div className="divide-y divide-gray-100">
+                                                            {items.map(check => {
+                                                                const s = statusStyles[check.status] || statusStyles.manual;
+                                                                const Icon = s.icon;
+                                                                return (
+                                                                    <div key={check.id} className="px-5 py-4 flex items-start gap-3">
+                                                                        <div className={`p-1.5 rounded-lg ${s.bg} ${s.border} border shrink-0`}>
+                                                                            <Icon size={14} className={s.fg} />
+                                                                        </div>
+                                                                        <div className="flex-1 min-w-0">
+                                                                            <div className="flex items-center gap-2 flex-wrap">
+                                                                                <p className="text-sm font-semibold text-gray-900">{check.label}</p>
+                                                                                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md ${s.bg} ${s.fg} border ${s.border}`}>
+                                                                                    {s.label}
+                                                                                </span>
+                                                                            </div>
+                                                                            <p className="text-xs text-gray-500 mt-1">{check.detail}</p>
+                                                                        </div>
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </div>
+                                                ))}
+
+                                                <div className="text-xs text-gray-400 pt-2">
+                                                    Tip: environment variables come from the running container. Update <code className="bg-gray-100 px-1.5 py-0.5 rounded">.env.production</code> on the VPS and redeploy to refresh.
+                                                </div>
+                                            </>
+                                        ) : null}
+                                    </div>
+                                );
+                            })()}
 
                             {/* ─── MARKETING ─────────────────────────────────────────────────── */}
                             {activeTab === "marketing" && (

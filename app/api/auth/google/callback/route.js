@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { createSessionToken, makeSessionCookie } from "@/lib/session";
+import { getAttributionFromRequest } from "@/lib/attribution";
 
 function popupResponse(data, setCookie = null) {
     const json = JSON.stringify(data);
@@ -123,6 +124,7 @@ export async function GET(request) {
                     error: "No account found with this Google account. Please register first.",
                 });
             }
+            const attribution = getAttributionFromRequest(request);
             user = await prisma.user.create({
                 data: {
                     googleId,
@@ -132,6 +134,13 @@ export async function GET(request) {
                     role,
                     provider: "google",
                     phoneVerified: false,
+                    utmSource: attribution.utmSource,
+                    utmMedium: attribution.utmMedium,
+                    utmCampaign: attribution.utmCampaign,
+                    utmContent: attribution.utmContent,
+                    utmTerm: attribution.utmTerm,
+                    landingPath: attribution.landingPath,
+                    referrerHost: attribution.referrerHost,
                 },
             });
         }

@@ -133,16 +133,20 @@ export default function Header() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [mobileExpanded, setMobileExpanded] = useState(null);
 
-    const isSearchPage = pathname?.startsWith("/search");
-    // Only the homepage gets the transparent/light header — all other pages are always opaque
-    const isHomepage = pathname === "/";
-    const isOpaque = scrolled || isSearchPage || !isHomepage;
-
     useEffect(() => {
         const handleScroll = () => setScrolled(window.scrollY > 50);
         window.addEventListener("scroll", handleScroll);
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
+
+    // Ad landing pages render their own minimal top bar — hide the global header.
+    // (Hooks above must always run in the same order; this early return happens after them.)
+    if (pathname?.startsWith("/land/")) return null;
+
+    const isSearchPage = pathname?.startsWith("/search");
+    // Only the homepage gets the transparent/light header — all other pages are always opaque
+    const isHomepage = pathname === "/";
+    const isOpaque = scrolled || isSearchPage || !isHomepage;
 
     return (
         <header className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${

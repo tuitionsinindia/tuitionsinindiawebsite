@@ -61,10 +61,21 @@ model User {
   vipContracts        VipContract[]      @relation("VipContractStudent")
   vipContractsAsTutor VipContract[]      @relation("VipContractTutor")
 
+  // Ad attribution — captured at first landing, never overwritten.
+  utmSource           String?
+  utmMedium           String?
+  utmCampaign         String?
+  utmContent          String?
+  utmTerm             String?
+  landingPath         String?
+  referrerHost        String?
+
   @@index([role])
   @@index([createdAt])
   @@index([subscriptionTier])
   @@index([isVerified])
+  @@index([utmSource])
+  @@index([utmCampaign])
 }
 
 model SavedTutor {

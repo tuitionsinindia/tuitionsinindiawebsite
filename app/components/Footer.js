@@ -1,10 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { ShieldCheck, Facebook, Twitter, Linkedin, Instagram } from "lucide-react";
 import Logo from "./Logo";
 
 export default function Footer() {
+    const pathname = usePathname();
+    // Ad landing pages render their own minimal footer — hide the global one.
+    if (pathname?.startsWith("/land/")) return null;
+
     return (
         <footer className="bg-white border-t border-gray-100 py-16 overflow-hidden relative">
             <div className="max-w-7xl mx-auto px-6 relative z-10">
