@@ -1,15 +1,19 @@
 "use client";
 
-import { useState } from "react";
-import { BookOpen, MapPin, ArrowRight, ArrowLeft, Loader2, User, Mail, Navigation } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { MapPin, ArrowRight, ArrowLeft, Loader2, User, Mail, Navigation, CheckCircle2 } from "lucide-react";
 import { BROAD_CATEGORIES, getSubjectsForCategory, getCategoryForSubject, GRADE_OPTIONS, CITY_OPTIONS } from "@/lib/subjects";
 import { trackEnquiry } from "@/lib/analytics";
+
+// Level options relevant per category
+const LEVEL_CATEGORIES = ["academics"]; // only academics needs a level step
 
 export default function RequirementForm({ user, prefill = {}, onStepChange, onComplete }) {
     const [loading, setLoading] = useState(false);
     const [isDetecting, setIsDetecting] = useState(false);
-    const [step, setStep] = useState(1);
-    // Auto-detect category from pre-filled subject
+    const [step, setStep] = useState(1);       // outer: 1=requirement, 2=preferences, 3=contact
+    const [subStep, setSubStep] = useState(0); // inner step 1: 0=category, 1=level, 2=subject, 3=location
+
     const initialCategory = prefill.subject ? getCategoryForSubject(prefill.subject) : "";
 
     const [form, setForm] = useState({
@@ -27,18 +31,34 @@ export default function RequirementForm({ user, prefill = {}, onStepChange, onCo
         email: "",
     });
 
+    // City autocomplete
+    const [cityInput, setCityInput] = useState(form.location || "");
+    const [citySuggestions, setCitySuggestions] = useState([]);
+    const cityRef = useRef(null);
+
+    useEffect(() => {
+        if (cityInput.length < 1) { setCitySuggestions([]); return; }
+        const q = cityInput.toLowerCase();
+        setCitySuggestions(
+            CITY_OPTIONS.filter(c => c.toLowerCase().startsWith(q)).slice(0, 6)
+        );
+    }, [cityInput]);
+
+    // Close city dropdown on outside click
+    useEffect(() => {
+        const handler = (e) => { if (cityRef.current && !cityRef.current.contains(e.target)) setCitySuggestions([]); };
+        document.addEventListener("mousedown", handler);
+        return () => document.removeEventListener("mousedown", handler);
+    }, []);
+
     const BOARDS = ["CBSE", "ICSE", "IB", "State Board", "IGCSE"];
     const TIMING_SLOTS = ["Morning (7-12)", "Afternoon (12-4)", "Evening (4-8)", "Weekends"];
 
-    // Subjects filtered by selected category
     const availableSubjects = form.category
         ? getSubjectsForCategory(form.category)
-        : getSubjectsForCategory("academics"); // default to academics if no category
+        : getSubjectsForCategory("academics");
 
-    const goToStep = (s) => {
-        setStep(s);
-        if (onStepChange) onStepChange(s);
-    };
+    const goToStep = (s) => { setStep(s); if (onStepChange) onStepChange(s); };
 
     const detectLocation = () => {
         setIsDetecting(true);
@@ -49,8 +69,7 @@ export default function RequirementForm({ user, prefill = {}, onStepChange, onCo
                     const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
                     const data = await res.json();
                     const city = data.address.city || data.address.town || data.address.state_district || "";
-                    if (city) setForm(f => ({ ...f, location: city }));
-                    // Save lat/lng to user record for map-based distance sorting
+                    if (city) { setForm(f => ({ ...f, location: city })); setCityInput(city); }
                     if (user?.id) {
                         fetch("/api/user/update", {
                             method: "POST",
@@ -66,7 +85,6 @@ export default function RequirementForm({ user, prefill = {}, onStepChange, onCo
     const handleSubmit = async () => {
         setLoading(true);
         try {
-            // Update user name + email
             if (user?.id) {
                 fetch("/api/user/update", {
                     method: "POST",
@@ -74,7 +92,6 @@ export default function RequirementForm({ user, prefill = {}, onStepChange, onCo
                     body: JSON.stringify({ userId: user.id, name: form.name, email: form.email || undefined }),
                 }).catch(() => {});
             }
-
             const res = await fetch("/api/leads/create", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -96,88 +113,220 @@ export default function RequirementForm({ user, prefill = {}, onStepChange, onCo
         finally { setLoading(false); }
     };
 
+    // ── Breadcrumb for step 1 sub-steps ────────────────────────────────────────
+    const BreadcrumbBar = () => {
+        const cat = BROAD_CATEGORIES.find(c => c.id === form.category);
+        if (!cat) return null;
+        return (
+            <div className="flex items-center gap-1.5 flex-wrap mb-1">
+                <button onClick={() => { setSubStep(0); setForm(f => ({ ...f, category: "", subjects: [], grades: [] })); }} className="text-xs text-blue-600 font-medium hover:underline">
+                    {cat.label}
+                </button>
+                {form.grades[0] && (
+                    <>
+                        <span className="text-gray-300 text-xs">›</span>
+                        <button onClick={() => { setSubStep(LEVEL_CATEGORIES.includes(form.category) ? 1 : 2); setForm(f => ({ ...f, subjects: [] })); }} className="text-xs text-blue-600 font-medium hover:underline">
+                            {form.grades[0]}
+                        </button>
+                    </>
+                )}
+                {form.subjects[0] && (
+                    <>
+                        <span className="text-gray-300 text-xs">›</span>
+                        <span className="text-xs text-gray-600 font-medium">{form.subjects[0]}</span>
+                    </>
+                )}
+            </div>
+        );
+    };
+
     return (
         <div className="space-y-5">
-            {/* ─── Step 1: Your Requirement ─── */}
+
+            {/* ─── Step 1: Your Requirement — sub-steps ─── */}
             {step === 1 && (
                 <div className="space-y-5">
-                    <div>
-                        <h2 className="text-lg font-bold text-gray-900">What do you need?</h2>
-                        <p className="text-sm text-gray-500 mt-1">Tell us what subject and level you're looking for.</p>
-                    </div>
 
-                    {/* Category */}
-                    <div className="space-y-1.5">
-                        <label className="text-xs font-medium text-gray-500">Category</label>
-                        <select
-                            value={form.category}
-                            onChange={(e) => setForm(f => ({ ...f, category: e.target.value, subjects: [] }))}
-                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-blue-500 cursor-pointer"
-                        >
-                            <option value="">All Categories</option>
-                            {BROAD_CATEGORIES.map(c => (
-                                <option key={c.id} value={c.id}>{c.label}</option>
-                            ))}
-                        </select>
-                    </div>
-
-                    {/* Subject (dropdown filtered by category) */}
-                    <div className="space-y-1.5">
-                        <label className="text-xs font-medium text-gray-500">Subject</label>
-                        <select
-                            value={form.subjects[0] || ""}
-                            onChange={(e) => setForm(f => ({ ...f, subjects: e.target.value ? [e.target.value] : [] }))}
-                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-blue-500 cursor-pointer"
-                        >
-                            <option value="">Select subject</option>
-                            {availableSubjects.map(s => <option key={s} value={s}>{s}</option>)}
-                        </select>
-                    </div>
-
-                    {/* Level / Grade */}
-                    <div className="space-y-1.5">
-                        <label className="text-xs font-medium text-gray-500">Level / Class</label>
-                        <select
-                            value={form.grades[0] || ""}
-                            onChange={(e) => setForm(f => ({ ...f, grades: e.target.value ? [e.target.value] : [] }))}
-                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-blue-500 cursor-pointer"
-                        >
-                            <option value="">Select level</option>
-                            {GRADE_OPTIONS.map(g => <option key={g} value={g}>{g}</option>)}
-                        </select>
-                    </div>
-
-                    {/* City */}
-                    <div className="space-y-1.5">
-                        <label className="text-xs font-medium text-gray-500">City</label>
-                        <div className="flex gap-2">
-                            <div className="relative flex-1">
-                                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" size={16} />
-                                <input
-                                    list="city-options"
-                                    value={form.location}
-                                    onChange={(e) => setForm(f => ({ ...f, location: e.target.value }))}
-                                    className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:border-blue-500 outline-none transition-all"
-                                    placeholder="Your city"
-                                />
-                                <datalist id="city-options">
-                                    {CITY_OPTIONS.map(c => <option key={c} value={c} />)}
-                                </datalist>
+                    {/* Sub-step 0: Category cards */}
+                    {subStep === 0 && (
+                        <>
+                            <div>
+                                <h2 className="text-lg font-bold text-gray-900">What do you need help with?</h2>
+                                <p className="text-sm text-gray-500 mt-1">Choose a category to get started.</p>
                             </div>
-                            <button onClick={detectLocation} disabled={isDetecting}
-                                className="p-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-500 hover:text-blue-600 hover:border-blue-300 transition-colors disabled:opacity-50" title="Detect my location">
-                                {isDetecting ? <Loader2 size={16} className="animate-spin" /> : <Navigation size={16} />}
-                            </button>
-                        </div>
-                    </div>
+                            <div className="grid grid-cols-2 gap-3">
+                                {BROAD_CATEGORIES.map(cat => {
+                                    const Icon = cat.icon;
+                                    return (
+                                        <button
+                                            key={cat.id}
+                                            type="button"
+                                            onClick={() => {
+                                                setForm(f => ({ ...f, category: cat.id, subjects: [], grades: [] }));
+                                                setSubStep(LEVEL_CATEGORIES.includes(cat.id) ? 1 : 2);
+                                            }}
+                                            className="flex flex-col items-center gap-2.5 p-4 bg-gray-50 border-2 border-gray-200 rounded-2xl hover:border-blue-400 hover:bg-blue-50 transition-all text-center group"
+                                        >
+                                            <div className="size-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center group-hover:border-blue-200 group-hover:bg-blue-50 transition-all shadow-sm">
+                                                <Icon size={20} className="text-blue-600" />
+                                            </div>
+                                            <span className="text-xs font-semibold text-gray-700 group-hover:text-blue-700 leading-tight">{cat.label}</span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </>
+                    )}
 
-                    <button
-                        disabled={form.subjects.length === 0}
-                        onClick={() => goToStep(2)}
-                        className="w-full py-3 bg-blue-600 text-white rounded-xl text-sm font-semibold flex items-center justify-center gap-2 hover:bg-blue-700 transition-colors disabled:opacity-40"
-                    >
-                        Next: Preferences <ArrowRight size={16} />
-                    </button>
+                    {/* Sub-step 1: Level (academics only) */}
+                    {subStep === 1 && (
+                        <>
+                            <div className="flex items-center gap-2">
+                                <button onClick={() => { setSubStep(0); setForm(f => ({ ...f, category: "", subjects: [], grades: [] })); }} className="text-gray-400 hover:text-blue-600 transition-colors">
+                                    <ArrowLeft size={16} />
+                                </button>
+                                <div>
+                                    <BreadcrumbBar />
+                                    <h2 className="text-lg font-bold text-gray-900">Which level?</h2>
+                                </div>
+                            </div>
+                            <p className="text-sm text-gray-500 -mt-3">Select the class or level you need a tutor for.</p>
+                            <div className="grid grid-cols-2 gap-2.5">
+                                {GRADE_OPTIONS.map(g => (
+                                    <button
+                                        key={g}
+                                        type="button"
+                                        onClick={() => { setForm(f => ({ ...f, grades: [g], subjects: [] })); setSubStep(2); }}
+                                        className="py-3 px-4 bg-gray-50 border-2 border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700 transition-all text-left"
+                                    >
+                                        {g}
+                                    </button>
+                                ))}
+                            </div>
+                        </>
+                    )}
+
+                    {/* Sub-step 2: Subject */}
+                    {subStep === 2 && (
+                        <>
+                            <div className="flex items-center gap-2">
+                                <button onClick={() => { setSubStep(LEVEL_CATEGORIES.includes(form.category) ? 1 : 0); setForm(f => ({ ...f, subjects: [], grades: LEVEL_CATEGORIES.includes(form.category) ? [] : f.grades })); }} className="text-gray-400 hover:text-blue-600 transition-colors">
+                                    <ArrowLeft size={16} />
+                                </button>
+                                <div>
+                                    <BreadcrumbBar />
+                                    <h2 className="text-lg font-bold text-gray-900">Which subject?</h2>
+                                </div>
+                            </div>
+                            <p className="text-sm text-gray-500 -mt-3">Pick the subject you need help with.</p>
+                            <div className="flex flex-wrap gap-2">
+                                {availableSubjects.map(s => (
+                                    <button
+                                        key={s}
+                                        type="button"
+                                        onClick={() => { setForm(f => ({ ...f, subjects: [s] })); setSubStep(3); }}
+                                        className={`px-3 py-2 rounded-xl border text-sm font-medium transition-all ${
+                                            form.subjects[0] === s
+                                                ? "bg-blue-600 border-blue-600 text-white"
+                                                : "bg-gray-50 border-gray-200 text-gray-700 hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700"
+                                        }`}
+                                    >
+                                        {s}
+                                    </button>
+                                ))}
+                            </div>
+                        </>
+                    )}
+
+                    {/* Sub-step 3: Location */}
+                    {subStep === 3 && (
+                        <>
+                            <div className="flex items-center gap-2">
+                                <button onClick={() => { setSubStep(2); }} className="text-gray-400 hover:text-blue-600 transition-colors shrink-0">
+                                    <ArrowLeft size={16} />
+                                </button>
+                                <div className="min-w-0">
+                                    <BreadcrumbBar />
+                                    <h2 className="text-lg font-bold text-gray-900">Where are you located?</h2>
+                                </div>
+                            </div>
+                            <p className="text-sm text-gray-500 -mt-3">We'll find tutors near you for the best match.</p>
+
+                            {/* City search with autocomplete */}
+                            <div className="relative" ref={cityRef}>
+                                <div className="flex gap-2">
+                                    <div className="relative flex-1">
+                                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" size={16} />
+                                        <input
+                                            autoFocus
+                                            value={cityInput}
+                                            onChange={(e) => {
+                                                setCityInput(e.target.value);
+                                                setForm(f => ({ ...f, location: e.target.value }));
+                                            }}
+                                            className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+                                            placeholder="Type your city..."
+                                        />
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={detectLocation}
+                                        disabled={isDetecting}
+                                        title="Auto-detect my location"
+                                        className="p-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-500 hover:text-blue-600 hover:border-blue-300 hover:bg-blue-50 transition-colors disabled:opacity-50"
+                                    >
+                                        {isDetecting ? <Loader2 size={16} className="animate-spin" /> : <Navigation size={16} />}
+                                    </button>
+                                </div>
+
+                                {/* Dropdown suggestions */}
+                                {citySuggestions.length > 0 && (
+                                    <div className="absolute left-0 right-10 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-20 overflow-hidden">
+                                        {citySuggestions.map(city => (
+                                            <button
+                                                key={city}
+                                                type="button"
+                                                onMouseDown={() => {
+                                                    setForm(f => ({ ...f, location: city }));
+                                                    setCityInput(city);
+                                                    setCitySuggestions([]);
+                                                }}
+                                                className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-2 transition-colors"
+                                            >
+                                                <MapPin size={13} className="text-gray-400 shrink-0" />
+                                                {city}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* Selected city confirmation */}
+                                {form.location && citySuggestions.length === 0 && (
+                                    <div className="flex items-center gap-1.5 mt-2 px-1">
+                                        <CheckCircle2 size={13} className="text-emerald-500" />
+                                        <span className="text-xs text-emerald-600 font-medium">{form.location}</span>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="flex flex-col gap-2 pt-1">
+                                <button
+                                    onClick={() => goToStep(2)}
+                                    disabled={!form.location.trim()}
+                                    className="w-full py-3 bg-blue-600 text-white rounded-xl text-sm font-semibold flex items-center justify-center gap-2 hover:bg-blue-700 transition-colors disabled:opacity-40"
+                                >
+                                    Continue <ArrowRight size={16} />
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => goToStep(2)}
+                                    className="w-full py-2 text-sm text-gray-400 hover:text-blue-600 transition-colors font-medium"
+                                >
+                                    Skip — find tutors across India
+                                </button>
+                            </div>
+                        </>
+                    )}
                 </div>
             )}
 
@@ -189,7 +338,9 @@ export default function RequirementForm({ user, prefill = {}, onStepChange, onCo
                             <h2 className="text-lg font-bold text-gray-900">Tuition Preferences</h2>
                             <p className="text-sm text-gray-500 mt-1">Help us find the best match for you.</p>
                         </div>
-                        <button onClick={() => goToStep(1)} className="text-sm text-gray-400 hover:text-blue-600 flex items-center gap-1"><ArrowLeft size={14} /> Back</button>
+                        <button onClick={() => { goToStep(1); setSubStep(3); }} className="text-sm text-gray-400 hover:text-blue-600 flex items-center gap-1">
+                            <ArrowLeft size={14} /> Back
+                        </button>
                     </div>
 
                     {/* Teaching Mode */}
@@ -296,7 +447,7 @@ export default function RequirementForm({ user, prefill = {}, onStepChange, onCo
                     </div>
 
                     <div className="space-y-1.5">
-                        <label className="text-xs font-medium text-gray-500">Email (optional, for notifications)</label>
+                        <label className="text-xs font-medium text-gray-500">Email <span className="text-gray-400 font-normal">(optional — for tutor notifications)</span></label>
                         <div className="relative">
                             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" size={16} />
                             <input
@@ -310,7 +461,7 @@ export default function RequirementForm({ user, prefill = {}, onStepChange, onCo
 
                     {/* Summary */}
                     <div className="bg-gray-50 rounded-xl p-4 space-y-2">
-                        <h3 className="text-xs font-semibold text-gray-700 mb-2">Your Requirement Summary</h3>
+                        <h3 className="text-xs font-semibold text-gray-700 mb-2">Your requirement</h3>
                         <div className="grid grid-cols-2 gap-y-1.5 gap-x-4 text-xs">
                             <div><span className="text-gray-400">Subject:</span> <span className="text-gray-700 font-medium">{form.subjects.join(", ") || "—"}</span></div>
                             <div><span className="text-gray-400">Level:</span> <span className="text-gray-700 font-medium">{form.grades.join(", ") || "Any"}</span></div>

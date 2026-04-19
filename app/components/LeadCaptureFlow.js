@@ -28,6 +28,7 @@ export default function LeadCaptureFlow({ initialRole = "STUDENT", onComplete })
     // Profile completion (step 3)
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
+    const [googleImage, setGoogleImage] = useState("");
     const [googleConnected, setGoogleConnected] = useState(false);
 
     // Listen for Google OAuth popup messages (step 3)
@@ -35,7 +36,7 @@ export default function LeadCaptureFlow({ initialRole = "STUDENT", onComplete })
         if (event.origin !== window.location.origin) return;
         if (event.data.type === "GOOGLE_AUTH_SUCCESS") {
             const gUser = event.data.user;
-            // Link Google to existing phone-verified user
+            // Link Google to existing phone-verified user — save name, email, photo
             if (verifiedUser?.id) {
                 fetch("/api/user/update", {
                     method: "POST",
@@ -50,14 +51,14 @@ export default function LeadCaptureFlow({ initialRole = "STUDENT", onComplete })
             }
             setName(gUser.name || "");
             setEmail(gUser.email || "");
+            setGoogleImage(gUser.image || "");
             setGoogleConnected(true);
-            // Auto-complete — Google filled everything
             trackSignUp(initialRole);
             onComplete({
                 ...verifiedUser,
-                name: gUser.name || verifiedUser.name,
-                email: gUser.email || verifiedUser.email,
-                image: gUser.image || verifiedUser.image,
+                name: gUser.name || verifiedUser?.name,
+                email: gUser.email || verifiedUser?.email,
+                image: gUser.image || verifiedUser?.image,
             });
         } else if (event.data.type === "GOOGLE_AUTH_ERROR") {
             setError(event.data.error || "Google sign-in failed.");
@@ -159,76 +160,96 @@ export default function LeadCaptureFlow({ initialRole = "STUDENT", onComplete })
                 <div className="flex items-center gap-2.5 p-3 bg-emerald-50 rounded-xl border border-emerald-100">
                     <CheckCircle2 size={18} className="text-emerald-600 shrink-0" />
                     <div>
-                        <p className="text-sm font-semibold text-emerald-900">Phone verified</p>
+                        <p className="text-sm font-semibold text-emerald-900">Phone verified ✓</p>
                         <p className="text-xs text-emerald-600">+91 {phone}</p>
                     </div>
                 </div>
 
                 <div>
-                    <h2 className="text-lg font-bold text-gray-900">Complete your profile</h2>
-                    <p className="text-sm text-gray-500 mt-1">Connect Google to auto-fill your details, or enter them manually.</p>
+                    <h2 className="text-lg font-bold text-gray-900">One last step</h2>
+                    <p className="text-sm text-gray-500 mt-1">Add your name so tutors know who to contact.</p>
                 </div>
 
-                {/* Google Connect */}
+                {/* Google — primary option */}
                 <button
                     type="button"
                     onClick={handleGoogleConnect}
-                    className="w-full py-3 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all flex items-center justify-center gap-3 shadow-sm"
+                    className="w-full py-3.5 bg-white border-2 border-gray-200 rounded-xl font-semibold text-gray-800 hover:border-blue-400 hover:bg-blue-50 transition-all flex items-center justify-center gap-3 shadow-sm"
                 >
-                    <GoogleIcon size={18} />
-                    Connect with Google
+                    <GoogleIcon size={20} />
+                    <span>
+                        Continue with Google
+                        <span className="block text-xs font-normal text-gray-400 mt-0.5">Auto-fills your name, email & profile photo</span>
+                    </span>
                 </button>
 
                 {/* Divider */}
                 <div className="flex items-center gap-3">
                     <div className="flex-1 h-px bg-gray-200" />
-                    <span className="text-xs text-gray-400 font-medium">or fill manually</span>
+                    <span className="text-xs text-gray-400 font-medium">or enter manually</span>
                     <div className="flex-1 h-px bg-gray-200" />
                 </div>
 
-                {/* Manual name + email */}
+                {/* Manual form */}
                 <form onSubmit={handleManualComplete} className="space-y-4">
+                    {/* Name field — with optional profile photo preview */}
                     <div className="space-y-1.5">
-                        <label className="text-xs font-medium text-gray-500">Your Name</label>
-                        <div className="relative">
-                            <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" size={16} />
+                        <label className="text-xs font-medium text-gray-500">Your name <span className="text-red-400">*</span></label>
+                        <div className="relative flex items-center gap-2">
+                            {googleImage ? (
+                                <img src={googleImage} alt="" className="size-9 rounded-full border border-gray-200 shrink-0 object-cover" />
+                            ) : (
+                                <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                                    <User size={16} className="text-gray-300" />
+                                </div>
+                            )}
                             <input
-                                type="text" value={name}
+                                type="text"
+                                value={name}
                                 onChange={(e) => setName(e.target.value)}
-                                className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+                                className={`w-full py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all ${googleImage ? "pl-3" : "pl-10"}`}
                                 placeholder="Full name"
-                                autoFocus
+                                autoFocus={!googleConnected}
+                                required
                             />
                         </div>
                     </div>
+
+                    {/* Email */}
                     <div className="space-y-1.5">
-                        <label className="text-xs font-medium text-gray-500">Email</label>
+                        <label className="text-xs font-medium text-gray-500">
+                            Email <span className="text-gray-400 font-normal">(optional — for tutor notifications)</span>
+                        </label>
                         <div className="relative">
                             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" size={16} />
                             <input
-                                type="email" value={email}
+                                type="email"
+                                value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
                                 placeholder="your@email.com"
                             />
                         </div>
                     </div>
+
                     {error && <p className="text-sm text-red-600 bg-red-50 p-3 rounded-lg border border-red-100">{error}</p>}
+
                     <button
-                        disabled={loading} type="submit"
+                        disabled={loading || !name.trim()}
+                        type="submit"
                         className="w-full py-3 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
                     >
                         {loading ? <Loader2 className="animate-spin" size={16} /> : <>Continue <ArrowRight size={16} /></>}
                     </button>
                 </form>
 
-                {/* Skip option */}
+                {/* Skip */}
                 <button
                     type="button"
                     onClick={() => { trackSignUp(initialRole); onComplete(verifiedUser); }}
                     className="w-full text-sm text-gray-400 hover:text-blue-600 transition-colors font-medium"
                 >
-                    Skip for now
+                    Skip for now →
                 </button>
             </div>
         );

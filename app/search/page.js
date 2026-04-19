@@ -806,11 +806,15 @@ function SearchResultsContent() {
                                                         <span className="inline-flex items-center gap-1 text-xs font-medium text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md">
                                                             <GraduationCap size={11} /> {item.subject || querySubject || "Academics"}
                                                         </span>
-                                                        {item.location && (
+                                                        {item.distance != null && item.distance < 9999 ? (
+                                                            <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">
+                                                                <MapPin size={11} /> {item.distance < 1 ? "< 1 km" : `${Math.round(item.distance)} km away`}
+                                                            </span>
+                                                        ) : item.location ? (
                                                             <span className="inline-flex items-center gap-1 text-xs text-gray-500">
                                                                 <MapPin size={11} /> {item.location}
                                                             </span>
-                                                        )}
+                                                        ) : null}
                                                         {item.experience > 0 && (
                                                             <span className="inline-flex items-center gap-1 text-xs text-gray-500">
                                                                 <Briefcase size={11} /> {item.experience} yrs
