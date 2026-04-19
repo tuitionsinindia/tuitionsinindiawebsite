@@ -6,6 +6,7 @@ import GoogleAnalytics from "./components/GoogleAnalytics";
 import MetaPixel from "./components/MetaPixel";
 import StagingBar from "./components/StagingBar";
 import UtmCapture from "./components/UtmCapture";
+import Chatbot from "./components/Chatbot";
 
 const IS_STAGING = process.env.NEXT_PUBLIC_ENV === "staging";
 
@@ -131,6 +132,7 @@ export default function RootLayout({ children }) {
         <Header />
         {children}
         <Footer />
+        <Chatbot />
         {IS_STAGING && <StagingBar adminKey={process.env.AUDIT_SEED_KEY} />}
       </body>
     </html>

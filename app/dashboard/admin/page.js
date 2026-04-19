@@ -50,6 +50,8 @@ import {
     X,
     Rocket,
     HelpCircle,
+    MessageSquare,
+    Inbox,
 } from "lucide-react";
 
 function AdminDashboardContent() {
@@ -100,6 +102,48 @@ function AdminDashboardContent() {
     const [blogSaving, setBlogSaving] = useState(false);
     const [blogForm, setBlogForm] = useState({ title: "", slug: "", excerpt: "", content: "", category: "", author: "TuitionsInIndia", readTime: "5 min read", isPublished: false });
     const [blogDeleteLoading, setBlogDeleteLoading] = useState(null);
+
+    // Tickets tab
+    const [tickets, setTickets] = useState(null);
+    const [ticketsLoading, setTicketsLoading] = useState(false);
+    const [ticketStatusFilter, setTicketStatusFilter] = useState("OPEN");
+    const [ticketTypeFilter, setTicketTypeFilter] = useState("ALL");
+    const [ticketStatusCounts, setTicketStatusCounts] = useState({});
+    const [ticketUpdating, setTicketUpdating] = useState(null);
+
+    const fetchTickets = async (statusOverride, typeOverride) => {
+        if (!adminKey) return;
+        const status = statusOverride ?? ticketStatusFilter;
+        const type = typeOverride ?? ticketTypeFilter;
+        setTicketsLoading(true);
+        try {
+            const res = await fetch(`/api/admin/tickets?status=${status}&type=${type}`, {
+                headers: { "x-admin-key": adminKey },
+            });
+            const json = await res.json();
+            if (json.success) {
+                setTickets(json.tickets || []);
+                setTicketStatusCounts(json.statusCounts || {});
+            }
+        } finally {
+            setTicketsLoading(false);
+        }
+    };
+
+    const updateTicketStatus = async (id, status) => {
+        if (!adminKey) return;
+        setTicketUpdating(id);
+        try {
+            await fetch("/api/admin/tickets", {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json", "x-admin-key": adminKey },
+                body: JSON.stringify({ id, status }),
+            });
+            await fetchTickets();
+        } finally {
+            setTicketUpdating(null);
+        }
+    };
 
     // Attribution tab
     const [attrData, setAttrData] = useState(null);
@@ -162,6 +206,7 @@ function AdminDashboardContent() {
         if (activeTab === "blog" && adminKey) fetchBlogPosts();
         if (activeTab === "launch" && adminKey) fetchLaunchReadiness();
         if (activeTab === "attribution" && adminKey) fetchAttribution();
+        if (activeTab === "tickets" && adminKey) fetchTickets();
     }, [activeTab]);
 
     // Poll deploy run status every 8s while deployments tab is active
@@ -590,6 +635,7 @@ function AdminDashboardContent() {
                                 { id: "overview", icon: LayoutDashboard, label: "Overview" },
                                 { id: "launch", icon: Rocket, label: "Launch Readiness" },
                                 { id: "attribution", icon: Megaphone, label: "Ad Attribution" },
+                                { id: "tickets", icon: Inbox, label: "Tickets" },
                                 { id: "users", icon: Users, label: "User Directory" },
                                 { id: "listings", icon: GraduationCap, label: "Tutor Approvals" },
                                 { id: "vip", icon: Star, label: "VIP Service" },
@@ -1570,6 +1616,139 @@ function AdminDashboardContent() {
                                                 </div>
                                             </>
                                         ) : null}
+                                    </div>
+                                );
+                            })()}
+
+                            {/* ─── TICKETS ───────────────────────────────────────────────────── */}
+                            {activeTab === "tickets" && (() => {
+                                const fmtDateShort = (d) => d ? new Date(d).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "—";
+                                const statusStyles = {
+                                    OPEN:        { bg: "bg-amber-50",   fg: "text-amber-700",   dot: "bg-amber-500",   label: "Open" },
+                                    IN_PROGRESS: { bg: "bg-blue-50",    fg: "text-blue-700",    dot: "bg-blue-500",    label: "In progress" },
+                                    RESOLVED:    { bg: "bg-emerald-50", fg: "text-emerald-700", dot: "bg-emerald-500", label: "Resolved" },
+                                    CLOSED:      { bg: "bg-gray-50",    fg: "text-gray-500",    dot: "bg-gray-400",    label: "Closed" },
+                                };
+                                const typeStyles = {
+                                    SALES:   { bg: "bg-indigo-50", fg: "text-indigo-700", label: "Sales" },
+                                    SUPPORT: { bg: "bg-purple-50", fg: "text-purple-700", label: "Support" },
+                                };
+
+                                return (
+                                    <div className="max-w-6xl space-y-5">
+                                        <div className="flex items-center justify-between flex-wrap gap-3">
+                                            <div>
+                                                <h2 className="text-xl font-bold text-gray-900">Tickets</h2>
+                                                <p className="text-sm text-gray-400 mt-0.5">Sales & support tickets raised by users or the chatbot.</p>
+                                            </div>
+                                            <button
+                                                onClick={() => fetchTickets()}
+                                                disabled={ticketsLoading}
+                                                className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50"
+                                            >
+                                                <RefreshCcw size={13} className={ticketsLoading ? "animate-spin" : ""} />
+                                                Refresh
+                                            </button>
+                                        </div>
+
+                                        {/* Status counts */}
+                                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                            {["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED"].map((s) => {
+                                                const style = statusStyles[s];
+                                                return (
+                                                    <div key={s} className={`p-4 rounded-xl border ${style.bg} border-gray-200`}>
+                                                        <div className="flex items-center gap-2 mb-1">
+                                                            <span className={`size-2 rounded-full ${style.dot}`} />
+                                                            <p className={`text-xs font-semibold ${style.fg}`}>{style.label}</p>
+                                                        </div>
+                                                        <p className={`text-2xl font-bold ${style.fg}`}>{ticketStatusCounts[s] || 0}</p>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+
+                                        {/* Filters */}
+                                        <div className="flex items-center gap-3 flex-wrap">
+                                            <div className="flex items-center gap-1 bg-gray-50 border border-gray-200 rounded-lg p-1">
+                                                {["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED", "ALL"].map((s) => (
+                                                    <button
+                                                        key={s}
+                                                        onClick={() => { setTicketStatusFilter(s); fetchTickets(s, ticketTypeFilter); }}
+                                                        className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${ticketStatusFilter === s ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-900"}`}
+                                                    >
+                                                        {s === "ALL" ? "All statuses" : statusStyles[s]?.label}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                            <div className="flex items-center gap-1 bg-gray-50 border border-gray-200 rounded-lg p-1">
+                                                {["ALL", "SALES", "SUPPORT"].map((t) => (
+                                                    <button
+                                                        key={t}
+                                                        onClick={() => { setTicketTypeFilter(t); fetchTickets(ticketStatusFilter, t); }}
+                                                        className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${ticketTypeFilter === t ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-900"}`}
+                                                    >
+                                                        {t === "ALL" ? "All types" : typeStyles[t]?.label}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {/* Tickets list */}
+                                        {ticketsLoading && !tickets ? (
+                                            <div className="flex items-center gap-3 p-4 bg-white border border-gray-100 rounded-xl">
+                                                <div className="size-5 border-2 border-gray-200 border-t-blue-600 rounded-full animate-spin" />
+                                                <p className="text-sm text-gray-500 font-medium">Loading tickets…</p>
+                                            </div>
+                                        ) : !tickets || tickets.length === 0 ? (
+                                            <div className="p-6 bg-white border border-gray-200 rounded-2xl text-center">
+                                                <Inbox size={24} className="text-gray-300 mx-auto mb-2" />
+                                                <p className="text-sm font-semibold text-gray-600">No tickets match these filters.</p>
+                                            </div>
+                                        ) : (
+                                            <div className="space-y-3">
+                                                {tickets.map((t) => {
+                                                    const sStyle = statusStyles[t.status] || statusStyles.OPEN;
+                                                    const tyStyle = typeStyles[t.type] || typeStyles.SUPPORT;
+                                                    return (
+                                                        <div key={t.id} className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+                                                            <div className="flex items-start justify-between gap-3 mb-2 flex-wrap">
+                                                                <div className="flex items-center gap-2 flex-wrap">
+                                                                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md ${tyStyle.bg} ${tyStyle.fg} border border-gray-200`}>
+                                                                        {tyStyle.label}
+                                                                    </span>
+                                                                    <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-md ${sStyle.bg} ${sStyle.fg} border border-gray-200`}>
+                                                                        <span className={`size-1.5 rounded-full ${sStyle.dot}`} />
+                                                                        {sStyle.label}
+                                                                    </span>
+                                                                    <span className="text-[11px] text-gray-400">{fmtDateShort(t.createdAt)}</span>
+                                                                </div>
+                                                                <div className="flex items-center gap-1">
+                                                                    {["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED"].filter((s) => s !== t.status).map((s) => (
+                                                                        <button
+                                                                            key={s}
+                                                                            onClick={() => updateTicketStatus(t.id, s)}
+                                                                            disabled={ticketUpdating === t.id}
+                                                                            className="text-[10px] font-semibold px-2 py-1 rounded-md bg-gray-50 border border-gray-200 text-gray-600 hover:bg-gray-100 disabled:opacity-50 transition-colors"
+                                                                        >
+                                                                            Mark {statusStyles[s]?.label.toLowerCase()}
+                                                                        </button>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                            <h3 className="text-base font-bold text-gray-900 mb-1">{t.subject}</h3>
+                                                            <p className="text-sm text-gray-700 whitespace-pre-wrap mb-3 leading-relaxed">{t.body}</p>
+                                                            <div className="flex items-center gap-4 flex-wrap text-xs text-gray-500 pt-2 border-t border-gray-100">
+                                                                {t.name && <span><span className="text-gray-400">Name:</span> <span className="font-semibold text-gray-700">{t.name}</span></span>}
+                                                                {t.email && <span><span className="text-gray-400">Email:</span> <a href={`mailto:${t.email}`} className="font-semibold text-blue-600 hover:underline">{t.email}</a></span>}
+                                                                {t.phone && <span><span className="text-gray-400">Phone:</span> <span className="font-semibold text-gray-700">{t.phone}</span></span>}
+                                                                {t.sourcePath && <span><span className="text-gray-400">Page:</span> <code className="text-gray-600">{t.sourcePath}</code></span>}
+                                                                {t.userId && <span><span className="text-gray-400">User:</span> <code className="text-gray-600">{t.userId.slice(0, 10)}…</code></span>}
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
                                     </div>
                                 );
                             })()}

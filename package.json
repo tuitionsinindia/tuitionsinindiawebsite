@@ -8,6 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.90.0",
     "@prisma/client": "6.19.2",
     "@tailwindcss/postcss": "^4.2.1",
     "leaflet": "^1.9.4",
