@@ -30,6 +30,7 @@ import {
     Edit2,
     Trash2,
     Eye,
+    EyeOff,
     ChevronLeft,
     ChevronRight,
     GitBranch,
@@ -39,7 +40,14 @@ import {
     ArrowUpCircle,
     RotateCcw,
     ExternalLink,
-    AlertTriangle
+    AlertTriangle,
+    FileText,
+    Megaphone,
+    Send,
+    Plus,
+    Tag,
+    Globe,
+    X,
 } from "lucide-react";
 
 function AdminDashboardContent() {
@@ -83,6 +91,22 @@ function AdminDashboardContent() {
     const [deployTriggering, setDeployTriggering] = useState(null); // "staging" | "production" | null
     const [deployResult, setDeployResult] = useState(null);
 
+    // Blog tab
+    const [blogPosts, setBlogPosts] = useState([]);
+    const [blogLoading, setBlogLoading] = useState(false);
+    const [blogEditing, setBlogEditing] = useState(null); // null | "new" | post object
+    const [blogSaving, setBlogSaving] = useState(false);
+    const [blogForm, setBlogForm] = useState({ title: "", slug: "", excerpt: "", content: "", category: "", author: "TuitionsInIndia", readTime: "5 min read", isPublished: false });
+    const [blogDeleteLoading, setBlogDeleteLoading] = useState(null);
+
+    // Marketing tab
+    const [mktSegment, setMktSegment] = useState("ALL");
+    const [mktSubject, setMktSubject] = useState("");
+    const [mktBody, setMktBody] = useState("");
+    const [mktSending, setMktSending] = useState(false);
+    const [mktPreviewResult, setMktPreviewResult] = useState(null);
+    const [mktSendResult, setMktSendResult] = useState(null);
+
     // On mount, check sessionStorage for saved key
     useEffect(() => {
         const saved = sessionStorage.getItem("adminKey");
@@ -100,6 +124,7 @@ function AdminDashboardContent() {
             fetchVersionData();
             fetchDeployRuns();
         }
+        if (activeTab === "blog" && adminKey) fetchBlogPosts();
     }, [activeTab]);
 
     // Poll deploy run status every 8s while deployments tab is active
@@ -340,6 +365,110 @@ function AdminDashboardContent() {
         }
     };
 
+    // ── Blog handlers ──────────────────────────────────────────────────────────
+    const fetchBlogPosts = async () => {
+        setBlogLoading(true);
+        try {
+            const res = await fetch("/api/admin/blog", { headers: { "x-admin-key": adminKey } });
+            const json = await res.json();
+            if (json.posts) setBlogPosts(json.posts);
+        } catch {} finally { setBlogLoading(false); }
+    };
+
+    const openNewBlog = () => {
+        setBlogForm({ title: "", slug: "", excerpt: "", content: "", category: "", author: "TuitionsInIndia", readTime: "5 min read", isPublished: false });
+        setBlogEditing("new");
+    };
+
+    const openEditBlog = (post) => {
+        setBlogForm({ title: post.title, slug: post.slug, excerpt: post.excerpt, content: post.content, category: post.category, author: post.author || "TuitionsInIndia", readTime: post.readTime || "5 min read", isPublished: post.isPublished });
+        setBlogEditing(post);
+    };
+
+    const saveBlogPost = async () => {
+        if (!blogForm.title || !blogForm.excerpt || !blogForm.content || !blogForm.category) {
+            alert("Title, excerpt, content, and category are required.");
+            return;
+        }
+        setBlogSaving(true);
+        try {
+            const isNew = blogEditing === "new";
+            const res = await fetch("/api/admin/blog", {
+                method: isNew ? "POST" : "PATCH",
+                headers: { ...adminHeaders(), "x-admin-key": adminKey },
+                body: JSON.stringify(isNew ? blogForm : { id: blogEditing.id, ...blogForm }),
+            });
+            const json = await res.json();
+            if (json.post) {
+                setBlogEditing(null);
+                fetchBlogPosts();
+            } else {
+                alert(json.error || "Could not save post.");
+            }
+        } catch { alert("Save failed. Please try again."); }
+        finally { setBlogSaving(false); }
+    };
+
+    const deleteBlogPost = async (id) => {
+        if (!confirm("Delete this blog post? This cannot be undone.")) return;
+        setBlogDeleteLoading(id);
+        try {
+            const res = await fetch("/api/admin/blog", {
+                method: "DELETE",
+                headers: { ...adminHeaders(), "x-admin-key": adminKey },
+                body: JSON.stringify({ id }),
+            });
+            const json = await res.json();
+            if (json.success) setBlogPosts(prev => prev.filter(p => p.id !== id));
+            else alert(json.error || "Could not delete post.");
+        } catch { alert("Delete failed."); }
+        finally { setBlogDeleteLoading(null); }
+    };
+
+    const togglePublish = async (post) => {
+        try {
+            const res = await fetch("/api/admin/blog", {
+                method: "PATCH",
+                headers: { ...adminHeaders(), "x-admin-key": adminKey },
+                body: JSON.stringify({ id: post.id, isPublished: !post.isPublished }),
+            });
+            const json = await res.json();
+            if (json.post) setBlogPosts(prev => prev.map(p => p.id === post.id ? json.post : p));
+        } catch {}
+    };
+
+    // ── Marketing handlers ─────────────────────────────────────────────────────
+    const previewBroadcast = async () => {
+        if (!mktSubject || !mktBody) { alert("Subject and message are required."); return; }
+        setMktPreviewResult(null);
+        try {
+            const res = await fetch("/api/admin/email/broadcast", {
+                method: "POST",
+                headers: { ...adminHeaders(), "x-admin-key": adminKey },
+                body: JSON.stringify({ subject: mktSubject, body: mktBody, segment: mktSegment, preview: true }),
+            });
+            const json = await res.json();
+            setMktPreviewResult(json);
+        } catch { alert("Preview failed."); }
+    };
+
+    const sendBroadcast = async () => {
+        if (!mktSubject || !mktBody) { alert("Subject and message are required."); return; }
+        if (!confirm(`Send to all ${mktSegment === "ALL" ? "users" : mktSegment.toLowerCase() + "s"}? This will send real emails.`)) return;
+        setMktSending(true);
+        setMktSendResult(null);
+        try {
+            const res = await fetch("/api/admin/email/broadcast", {
+                method: "POST",
+                headers: { ...adminHeaders(), "x-admin-key": adminKey },
+                body: JSON.stringify({ subject: mktSubject, body: mktBody, segment: mktSegment }),
+            });
+            const json = await res.json();
+            setMktSendResult(json);
+        } catch { setMktSendResult({ error: "Send failed. Please try again." }); }
+        finally { setMktSending(false); }
+    };
+
     const handleApproveTutor = async (tutorId) => {
         const tutorToApprove = data?.pendingTutors?.find(t => t.id === tutorId);
         if (!tutorToApprove) return;
@@ -427,6 +556,8 @@ function AdminDashboardContent() {
                                 { id: "vip", icon: Star, label: "VIP Service" },
                                 { id: "financials", icon: CreditCard, label: "Transactions" },
                                 { id: "stats", icon: BarChart3, label: "Analytics" },
+                                { id: "blog", icon: FileText, label: "Blog" },
+                                { id: "marketing", icon: Megaphone, label: "Marketing" },
                                 { id: "deployments", icon: GitBranch, label: "Deployments" }
                             ].map((item) => (
                                 <button
@@ -893,6 +1024,300 @@ function AdminDashboardContent() {
 
                     {activeTab === "vip" && <VipAdminPanel adminKey={adminKey} />}
 
+                            {/* ─── BLOG ──────────────────────────────────────────────────────── */}
+                            {activeTab === "blog" && (
+                                <div className="space-y-4">
+                                    {/* Header */}
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <h3 className="font-bold text-lg text-gray-900">Blog Posts</h3>
+                                            <p className="text-xs text-gray-400 mt-0.5">{blogPosts.length} posts total</p>
+                                        </div>
+                                        <button
+                                            onClick={openNewBlog}
+                                            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition-colors"
+                                        >
+                                            <Plus size={14} /> New Post
+                                        </button>
+                                    </div>
+
+                                    {/* Editor / Form */}
+                                    {blogEditing && (
+                                        <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 space-y-4">
+                                            <div className="flex items-center justify-between">
+                                                <h4 className="font-bold text-gray-900">{blogEditing === "new" ? "New Post" : "Edit Post"}</h4>
+                                                <button onClick={() => setBlogEditing(null)} className="text-gray-400 hover:text-gray-600 transition-colors"><X size={16} /></button>
+                                            </div>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div>
+                                                    <label className="block text-xs font-semibold text-gray-600 mb-1.5">Title</label>
+                                                    <input
+                                                        value={blogForm.title}
+                                                        onChange={e => setBlogForm(f => ({ ...f, title: e.target.value }))}
+                                                        placeholder="Post title"
+                                                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-semibold text-gray-600 mb-1.5">Slug (URL)</label>
+                                                    <input
+                                                        value={blogForm.slug}
+                                                        onChange={e => setBlogForm(f => ({ ...f, slug: e.target.value }))}
+                                                        placeholder="auto-generated if blank"
+                                                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 font-mono"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-semibold text-gray-600 mb-1.5">Category</label>
+                                                    <input
+                                                        value={blogForm.category}
+                                                        onChange={e => setBlogForm(f => ({ ...f, category: e.target.value }))}
+                                                        placeholder="e.g. Tips, News, Guides"
+                                                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-semibold text-gray-600 mb-1.5">Author</label>
+                                                    <input
+                                                        value={blogForm.author}
+                                                        onChange={e => setBlogForm(f => ({ ...f, author: e.target.value }))}
+                                                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-semibold text-gray-600 mb-1.5">Excerpt (shown in listing)</label>
+                                                <textarea
+                                                    value={blogForm.excerpt}
+                                                    onChange={e => setBlogForm(f => ({ ...f, excerpt: e.target.value }))}
+                                                    rows={2}
+                                                    placeholder="Short summary shown on the blog listing page"
+                                                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 resize-none"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-semibold text-gray-600 mb-1.5">Content (Markdown supported)</label>
+                                                <textarea
+                                                    value={blogForm.content}
+                                                    onChange={e => setBlogForm(f => ({ ...f, content: e.target.value }))}
+                                                    rows={14}
+                                                    placeholder="Write your full post content here. Markdown is supported."
+                                                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 resize-y"
+                                                />
+                                            </div>
+                                            <div className="flex items-center justify-between pt-2">
+                                                <label className="flex items-center gap-2 cursor-pointer select-none">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={blogForm.isPublished}
+                                                        onChange={e => setBlogForm(f => ({ ...f, isPublished: e.target.checked }))}
+                                                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                    />
+                                                    <span className="text-sm font-semibold text-gray-700">Publish immediately</span>
+                                                </label>
+                                                <div className="flex items-center gap-3">
+                                                    <button onClick={() => setBlogEditing(null)} className="px-4 py-2 text-sm font-semibold text-gray-500 hover:text-gray-700 transition-colors">Cancel</button>
+                                                    <button
+                                                        onClick={saveBlogPost}
+                                                        disabled={blogSaving}
+                                                        className="flex items-center gap-2 px-5 py-2 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                                                    >
+                                                        {blogSaving ? "Saving…" : "Save post"}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Post list */}
+                                    <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+                                        {blogLoading ? (
+                                            <div className="flex items-center justify-center py-16">
+                                                <div className="size-8 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin" />
+                                            </div>
+                                        ) : blogPosts.length === 0 ? (
+                                            <div className="py-16 text-center">
+                                                <FileText size={32} className="text-gray-200 mx-auto mb-3" />
+                                                <p className="text-sm font-semibold text-gray-400">No posts yet</p>
+                                                <p className="text-xs text-gray-400 mt-1">Click "New Post" to write your first article.</p>
+                                            </div>
+                                        ) : (
+                                            <div className="divide-y divide-gray-100">
+                                                {blogPosts.map(post => (
+                                                    <div key={post.id} className="px-5 py-4 flex items-center gap-4 hover:bg-gray-50 transition-colors">
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                                                                <span className="text-sm font-semibold text-gray-900 truncate">{post.title}</span>
+                                                                <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${post.isPublished ? "bg-emerald-50 text-emerald-600" : "bg-gray-100 text-gray-500"}`}>
+                                                                    {post.isPublished ? "Published" : "Draft"}
+                                                                </span>
+                                                                {post.category && (
+                                                                    <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-blue-50 text-blue-600 flex items-center gap-1">
+                                                                        <Tag size={9} /> {post.category}
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                            <p className="text-xs text-gray-400">{post.author} · {post.slug} · {post.publishedAt ? new Date(post.publishedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "Unpublished"}</p>
+                                                        </div>
+                                                        <div className="flex items-center gap-2 shrink-0">
+                                                            {post.isPublished && (
+                                                                <a
+                                                                    href={`/blog/${post.slug}`}
+                                                                    target="_blank" rel="noopener noreferrer"
+                                                                    className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                                    title="View live post"
+                                                                >
+                                                                    <Globe size={14} />
+                                                                </a>
+                                                            )}
+                                                            <button
+                                                                onClick={() => togglePublish(post)}
+                                                                title={post.isPublished ? "Unpublish" : "Publish"}
+                                                                className={`p-2 rounded-lg transition-colors ${post.isPublished ? "text-emerald-600 hover:bg-emerald-50" : "text-gray-400 hover:bg-gray-100"}`}
+                                                            >
+                                                                {post.isPublished ? <Eye size={14} /> : <EyeOff size={14} />}
+                                                            </button>
+                                                            <button
+                                                                onClick={() => openEditBlog(post)}
+                                                                className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                                title="Edit post"
+                                                            >
+                                                                <Edit2 size={14} />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => deleteBlogPost(post.id)}
+                                                                disabled={blogDeleteLoading === post.id}
+                                                                className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                                                title="Delete post"
+                                                            >
+                                                                {blogDeleteLoading === post.id ? <div className="size-3.5 border-2 border-gray-200 border-t-red-400 rounded-full animate-spin" /> : <Trash2 size={14} />}
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* ─── MARKETING ─────────────────────────────────────────────────── */}
+                            {activeTab === "marketing" && (
+                                <div className="space-y-5 max-w-3xl">
+                                    <div>
+                                        <h3 className="font-bold text-lg text-gray-900">Marketing</h3>
+                                        <p className="text-xs text-gray-400 mt-0.5">Send email campaigns to your users.</p>
+                                    </div>
+
+                                    {/* Email Broadcast */}
+                                    <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 space-y-4">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <div className="p-2 bg-blue-50 rounded-xl">
+                                                <Send size={14} className="text-blue-600" />
+                                            </div>
+                                            <h4 className="font-bold text-gray-900">Email Broadcast</h4>
+                                        </div>
+
+                                        {/* Segment selector */}
+                                        <div>
+                                            <label className="block text-xs font-semibold text-gray-600 mb-2">Send to</label>
+                                            <div className="flex flex-wrap gap-2">
+                                                {[
+                                                    { value: "ALL", label: "All users" },
+                                                    { value: "TUTOR", label: "All tutors" },
+                                                    { value: "STUDENT", label: "All students" },
+                                                    { value: "PRO", label: "Pro tutors" },
+                                                    { value: "ELITE", label: "Elite tutors" },
+                                                    { value: "UNVERIFIED_TUTOR", label: "Unverified tutors" },
+                                                ].map(({ value, label }) => (
+                                                    <button
+                                                        key={value}
+                                                        onClick={() => { setMktSegment(value); setMktPreviewResult(null); }}
+                                                        className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${mktSegment === value ? "bg-blue-600 text-white" : "bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100"}`}
+                                                    >
+                                                        {label}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {/* Subject */}
+                                        <div>
+                                            <label className="block text-xs font-semibold text-gray-600 mb-1.5">Email subject</label>
+                                            <input
+                                                value={mktSubject}
+                                                onChange={e => setMktSubject(e.target.value)}
+                                                placeholder="e.g. New features on TuitionsinIndia!"
+                                                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400"
+                                            />
+                                        </div>
+
+                                        {/* Body */}
+                                        <div>
+                                            <label className="block text-xs font-semibold text-gray-600 mb-1.5">Message body</label>
+                                            <textarea
+                                                value={mktBody}
+                                                onChange={e => setMktBody(e.target.value)}
+                                                rows={8}
+                                                placeholder={"Hi,\n\nWrite your message here. It will be sent as a branded email.\n\nThanks,\nTeam TuitionsinIndia"}
+                                                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 resize-y"
+                                            />
+                                        </div>
+
+                                        {/* Preview result */}
+                                        {mktPreviewResult && (
+                                            <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
+                                                <p className="text-sm font-semibold text-blue-800 mb-1">{mktPreviewResult.count} recipients found</p>
+                                                {mktPreviewResult.emails?.length > 0 && (
+                                                    <p className="text-xs text-blue-700">Sample: {mktPreviewResult.emails.filter(Boolean).join(", ")}{mktPreviewResult.count > 5 ? ` …and ${mktPreviewResult.count - 5} more` : ""}</p>
+                                                )}
+                                                {mktPreviewResult.count === 0 && (
+                                                    <p className="text-xs text-blue-600">No matching users found for this segment.</p>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {/* Send result */}
+                                        {mktSendResult && (
+                                            <div className={`rounded-xl p-4 border ${mktSendResult.success ? "bg-emerald-50 border-emerald-100" : "bg-red-50 border-red-100"}`}>
+                                                {mktSendResult.success ? (
+                                                    <p className="text-sm font-semibold text-emerald-800">
+                                                        Sent to {mktSendResult.sent} recipients{mktSendResult.failed > 0 ? `, ${mktSendResult.failed} failed` : ""}.
+                                                    </p>
+                                                ) : (
+                                                    <p className="text-sm font-semibold text-red-700">{mktSendResult.error}</p>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {/* Actions */}
+                                        <div className="flex items-center gap-3 pt-1">
+                                            <button
+                                                onClick={previewBroadcast}
+                                                disabled={mktSending}
+                                                className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 text-gray-700 text-sm font-semibold rounded-xl hover:bg-gray-200 disabled:opacity-50 transition-colors"
+                                            >
+                                                <Eye size={14} /> Preview recipients
+                                            </button>
+                                            <button
+                                                onClick={sendBroadcast}
+                                                disabled={mktSending || !mktSubject || !mktBody}
+                                                className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                                            >
+                                                {mktSending ? <><div className="size-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Sending…</> : <><Send size={14} /> Send campaign</>}
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Placeholder for future channels */}
+                                    <div className="bg-gray-50 border border-gray-200 rounded-2xl p-5 text-center">
+                                        <Megaphone size={24} className="text-gray-300 mx-auto mb-2" />
+                                        <p className="text-sm font-semibold text-gray-400">SMS campaigns coming soon</p>
+                                        <p className="text-xs text-gray-400 mt-1">WhatsApp and SMS broadcasts will be available here.</p>
+                                    </div>
+                                </div>
+                            )}
+
                     {/* ─── DEPLOYMENTS TAB ─── */}
                     {activeTab === "deployments" && (() => {
                         const fmtDate = (d) => d ? new Date(d).toLocaleString("en-IN", { day:"numeric", month:"short", hour:"2-digit", minute:"2-digit" }) : "—";
@@ -1045,36 +1470,11 @@ function AdminDashboardContent() {
                                 </div>
                             </div>
 
-                            {/* ── How the workflow works ── */}
-                            <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5">
-                                <h3 className="font-bold text-sm text-blue-900 mb-3 flex items-center gap-2">
-                                    <GitBranch size={15} className="text-blue-600" /> How to deploy new changes
-                                </h3>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-                                    {[
-                                        {
-                                            step: "1", title: "Push your code",
-                                            desc: "From your computer, run the push script. It commits and sends your changes to GitHub.",
-                                            code: "./push-staging.sh \"Your change description\""
-                                        },
-                                        {
-                                            step: "2", title: "Click 'Deploy to Staging'",
-                                            desc: "Click the button above. GitHub builds and deploys to tuitionsinindia.in in ~3 minutes.",
-                                            code: "Test everything at\ntuitionsinindia.in"
-                                        },
-                                        {
-                                            step: "3", title: "Promote to Production",
-                                            desc: "Happy with staging? Click 'Promote to Production' to go live on tuitionsinindia.com.",
-                                            code: "Or run:\n./promote-production.sh"
-                                        }
-                                    ].map(({ step, title, desc, code }) => (
-                                        <div key={step} className="bg-white rounded-xl p-4 border border-blue-100">
-                                            <div className="size-6 bg-blue-600 text-white rounded-lg flex items-center justify-center text-xs font-bold mb-2">{step}</div>
-                                            <p className="font-semibold text-gray-800 mb-1">{title}</p>
-                                            <p className="text-gray-500 mb-2 leading-relaxed">{desc}</p>
-                                            <pre className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs font-mono text-gray-600 whitespace-pre-wrap">{code}</pre>
-                                        </div>
-                                    ))}
+                            {/* ── Workflow tip ── */}
+                            <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 flex items-start gap-3">
+                                <GitBranch size={15} className="text-blue-600 mt-0.5 shrink-0" />
+                                <div className="text-xs text-blue-800 leading-relaxed">
+                                    <span className="font-bold">Workflow:</span> Push changes from your computer → click <span className="font-semibold">Deploy to Staging</span> → test on tuitionsinindia.in → click <span className="font-semibold">Promote to Production</span> to go live.
                                 </div>
                             </div>
 
@@ -1148,28 +1548,42 @@ function AdminDashboardContent() {
                                 </div>
                             </div>
 
-                            {/* ── Emergency Rollback ── */}
-                            <div className="bg-amber-50 border border-amber-100 rounded-2xl p-5">
-                                <h3 className="font-bold text-sm text-amber-900 mb-3 flex items-center gap-2">
-                                    <RotateCcw size={15} className="text-amber-600" /> Emergency Rollback
-                                </h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                                    <div>
-                                        <p className="font-semibold text-amber-800 mb-2">Roll back the app:</p>
-                                        <pre className="bg-white border border-amber-200 rounded-lg px-3 py-2 font-mono text-gray-600 whitespace-pre-wrap leading-relaxed">{`ssh root@187.77.188.36
-cd /root/tuitionsinindia
-git log --oneline -10
-git reset --hard <previous-sha>
-docker compose build --no-cache
-docker compose up -d`}</pre>
-                                    </div>
-                                    <div>
-                                        <p className="font-semibold text-amber-800 mb-2">Restore database from backup:</p>
-                                        <pre className="bg-white border border-amber-200 rounded-lg px-3 py-2 font-mono text-gray-600 whitespace-pre-wrap leading-relaxed">{`ls /root/db-backups/production/
-gunzip < /root/db-backups/production/prod_DATE.sql.gz \\
-  | docker exec -i tuitionsinindia-db \\
-    psql -U tuitions_admin tuitionsinindia`}</pre>
-                                    </div>
+                            {/* ── Rollback ── */}
+                            <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+                                <div className="px-5 py-4 border-b border-gray-100 flex items-center gap-2">
+                                    <RotateCcw size={15} className="text-amber-600" />
+                                    <h3 className="font-bold text-sm text-gray-900">Rollback to a previous version</h3>
+                                </div>
+                                <div className="divide-y divide-gray-50">
+                                    {[...(versionData?.production?.history || []), ...(versionData?.staging?.history || [])]
+                                        .sort((a, b) => new Date(b.deployedAt) - new Date(a.deployedAt))
+                                        .slice(0, 10)
+                                        .map((entry, i) => (
+                                            <div key={i} className="px-5 py-3 flex items-center gap-3 hover:bg-gray-50 transition-colors">
+                                                <div className={`size-2 rounded-full shrink-0 ${entry.status === "success" ? "bg-emerald-400" : "bg-red-400"}`} />
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className={`text-xs font-semibold ${entry.env === "production" ? "text-emerald-600" : "text-blue-600"}`}>{entry.env}</span>
+                                                        <span className="font-mono text-xs bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">{entry.sha}</span>
+                                                        <span className="text-xs text-gray-600 truncate">{entry.message}</span>
+                                                    </div>
+                                                    <p className="text-xs text-gray-400">{entry.author} · {fmtDate(entry.deployedAt)}</p>
+                                                </div>
+                                                <button
+                                                    onClick={() => {
+                                                        if (confirm(`Roll back ${entry.env} to commit ${entry.sha}?\n\n"${entry.message}"\n\nThis will redeploy the ${entry.env} environment from this commit.`)) {
+                                                            triggerDeploy(entry.env);
+                                                        }
+                                                    }}
+                                                    className="shrink-0 flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-100 rounded-lg hover:bg-amber-100 transition-colors"
+                                                >
+                                                    <RotateCcw size={11} /> Rollback
+                                                </button>
+                                            </div>
+                                        ))}
+                                    {(!versionData?.production?.history?.length && !versionData?.staging?.history?.length) && (
+                                        <div className="px-5 py-8 text-center text-xs text-gray-400">No deploy history yet. Run a deploy to start tracking versions.</div>
+                                    )}
                                 </div>
                             </div>
                         </div>

@@ -78,12 +78,8 @@ export default function StagingBar({ adminKey: initialAdminKey }) {
             });
             const json = await res.json();
             if (json.success) {
-                setMe(null); // will refresh
-                router.push(json.redirect);
-                // refresh user after nav
-                setTimeout(() => {
-                    fetch("/api/auth/me").then(r => r.json()).then(j => { if (j.user) setMe(j.user); });
-                }, 800);
+                // Full navigation so the new session cookie is picked up
+                window.location.href = json.redirect;
             } else {
                 alert(json.error || "Login failed");
             }
