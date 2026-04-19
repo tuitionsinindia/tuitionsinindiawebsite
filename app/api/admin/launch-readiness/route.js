@@ -109,6 +109,64 @@ export async function GET(request) {
         detail: process.env.RESEND_API_KEY ? "RESEND_API_KEY is set" : "RESEND_API_KEY missing",
     });
 
+    // Live-check Resend domain verification status. If the API key is set
+    // we can call /domains to see if tuitionsinindia.com has verified
+    // SPF/DKIM/DMARC records. Important for deliverability.
+    if (process.env.RESEND_API_KEY) {
+        try {
+            const r = await fetch("https://api.resend.com/domains", {
+                headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}` },
+            });
+            if (r.ok) {
+                const body = await r.json();
+                const domain = (body?.data || []).find((d) =>
+                    (d.name || "").toLowerCase() === "tuitionsinindia.com"
+                );
+                if (!domain) {
+                    checks.push({
+                        id: "resend-domain",
+                        category: "Email & SMS",
+                        label: "Resend domain verification",
+                        status: "fail",
+                        detail: "tuitionsinindia.com is NOT added to Resend. Add it at resend.com/domains.",
+                    });
+                } else if (domain.status === "verified") {
+                    checks.push({
+                        id: "resend-domain",
+                        category: "Email & SMS",
+                        label: "Resend domain verification",
+                        status: "ok",
+                        detail: `Verified · region ${domain.region || "unknown"}`,
+                    });
+                } else {
+                    checks.push({
+                        id: "resend-domain",
+                        category: "Email & SMS",
+                        label: "Resend domain verification",
+                        status: "fail",
+                        detail: `Status: ${domain.status}. Add the DNS records shown in resend.com/domains and wait ~10 min.`,
+                    });
+                }
+            } else {
+                checks.push({
+                    id: "resend-domain",
+                    category: "Email & SMS",
+                    label: "Resend domain verification",
+                    status: "warn",
+                    detail: `Couldn't query Resend domains API (HTTP ${r.status}). Check key permissions.`,
+                });
+            }
+        } catch (err) {
+            checks.push({
+                id: "resend-domain",
+                category: "Email & SMS",
+                label: "Resend domain verification",
+                status: "warn",
+                detail: `Resend check failed: ${err.message}`,
+            });
+        }
+    }
+
     // --- SMS (Twilio) ---
     const twilioSid = process.env.TWILIO_ACCOUNT_SID;
     const twilioToken = process.env.TWILIO_AUTH_TOKEN;
@@ -243,13 +301,7 @@ export async function GET(request) {
         detail: "PAN, GST, bank details activated in Razorpay dashboard",
     });
 
-    checks.push({
-        id: "resend-domain",
-        category: "Compliance",
-        label: "Resend domain verification (manual)",
-        status: "manual",
-        detail: "Confirm SPF/DKIM/DMARC verified for tuitionsinindia.com in Resend",
-    });
+    // (Resend domain verification now live-checked via the API — see above.)
 
     // --- Summary ---
     const summary = {

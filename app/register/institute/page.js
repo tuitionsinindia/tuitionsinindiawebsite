@@ -23,6 +23,14 @@ export default function InstituteRegisterPage() {
     const searchParams = useSearchParams();
     const [user, setUser] = useState(null);
     const [step, setStep] = useState(1); // 1: Capture, 2: Listing, 3: Payment, 4: Done
+
+    // Prefill from chatbot handoff URL params (/register/institute?subject=...&location=...&institute_name=...).
+    const prefill = {
+        subject: searchParams.get("subject") || "",
+        location: searchParams.get("location") || "",
+        category: searchParams.get("category") || "",
+        institute_name: searchParams.get("institute_name") || "",
+    };
     const [paymentLoading, setPaymentLoading] = useState(false);
     const [paymentError, setPaymentError] = useState("");
 
@@ -196,7 +204,7 @@ export default function InstituteRegisterPage() {
 
                     {step === 2 && (
                         <div className="animate-in fade-in duration-500">
-                            <InstituteListingForm user={user} onComplete={handleListingComplete} />
+                            <InstituteListingForm user={user} prefill={prefill} onComplete={handleListingComplete} />
                         </div>
                     )}
 

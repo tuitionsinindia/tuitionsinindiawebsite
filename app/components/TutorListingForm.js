@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import { BROAD_CATEGORIES, getSubjectsForCategory } from "@/lib/subjects";
 
-export default function TutorListingForm({ user, onComplete }) {
+export default function TutorListingForm({ user, onComplete, prefill = {} }) {
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
     const [error, setError] = useState("");
@@ -53,13 +53,15 @@ export default function TutorListingForm({ user, onComplete }) {
         }, () => setIsDetecting(false));
     };
 
+    // Prefill values from URL params (populated by the chatbot handoff).
+    // These give the user a head-start — they can still edit anything.
     const [form, setForm] = useState({
-        title: "",
+        title: prefill.subject ? `${prefill.subject} tutor` : "",
         bio: "",
-        category: "",
-        subjects: [],
+        category: prefill.category || "",
+        subjects: prefill.subject ? [prefill.subject] : [],
         grades: [],
-        locations: [],
+        locations: prefill.location ? [prefill.location] : [],
         experience: 0,
         hourlyRate: 500,
         languages: ["ENGLISH", "HINDI"],

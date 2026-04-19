@@ -6,19 +6,20 @@ import {
     BookOpen, MapPin, Monitor, Home, Clock
 } from "lucide-react";
 
-export default function InstituteListingForm({ user, onComplete }) {
+export default function InstituteListingForm({ user, onComplete, prefill = {} }) {
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
     const [error, setError] = useState("");
     const [step, setStep] = useState(1);
     const [isDetecting, setIsDetecting] = useState(false);
 
+    // Prefill from chatbot handoff URL params where available.
     const [form, setForm] = useState({
-        instituteName: "",
+        instituteName: prefill.institute_name || "",
         bio: "",
-        subjects: [],
+        subjects: prefill.subject ? [prefill.subject] : [],
         grades: [],
-        locations: [],
+        locations: prefill.location ? [prefill.location] : [],
         contactPerson: user?.name || "",
         hourlyRate: 500,
         teachingModes: ["OFFLINE"],

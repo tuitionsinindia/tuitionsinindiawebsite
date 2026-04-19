@@ -19,6 +19,7 @@ function TutorRegisterContent() {
         subject: searchParams.get("subject") || "",
         location: searchParams.get("location") || "",
         grade: searchParams.get("grade") || "",
+        category: searchParams.get("category") || "",
         intent: searchParams.get("intent") || "",
     };
     const hasContext = context.subject || context.location;
@@ -123,7 +124,11 @@ function TutorRegisterContent() {
                         />
                     )}
                     {step === 2 && (
-                        <TutorListingForm user={user} onComplete={() => setStep(3)} />
+                        <TutorListingForm
+                            user={user}
+                            prefill={context}
+                            onComplete={() => setStep(3)}
+                        />
                     )}
                     {step === 3 && (
                         <div className="text-center py-8 space-y-6">

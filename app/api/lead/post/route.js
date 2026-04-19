@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { sendWelcomeEmail, sendLeadAlertEmail } from "@/lib/email";
+import { sendWelcomeEmail, sendLeadAlertEmail, sendLeadPostedEmail } from "@/lib/email";
 import { sendLeadAlertSMS } from "@/lib/sms";
 import { getAttributionFromRequest } from "@/lib/attribution";
 
@@ -84,6 +84,9 @@ export async function POST(request) {
             if (isNewUser) {
                 sendWelcomeEmail(email, name, "Student").catch(console.error);
             }
+
+            // Confirm to the student that their requirement was posted.
+            sendLeadPostedEmail(email, name, lead).catch(console.error);
 
             // Fetch active tutors to notify them about the new lead
             prisma.user.findMany({

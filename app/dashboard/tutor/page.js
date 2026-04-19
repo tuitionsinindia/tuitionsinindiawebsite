@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import DashboardWelcomeCard from "@/app/components/DashboardWelcomeCard";
 import Script from "next/script";
 import { trackPurchase, trackBeginCheckout } from "@/lib/analytics";
 import {
@@ -680,6 +681,17 @@ function DashboardContent() {
 
                         {activeTab === "HOME" && (
                             <div className="space-y-8">
+                                {/* First-time welcome card — appears only when arriving via ?welcome=1 */}
+                                <DashboardWelcomeCard
+                                    role="TUTOR"
+                                    steps={[
+                                        { label: "Upload a profile photo", href: "/dashboard/tutor/profile", done: !!tutorData?.image },
+                                        { label: "Write a bio (50+ chars)", href: "/dashboard/tutor/profile", done: !!(tutorData?.tutorListing?.bio && tutorData.tutorListing.bio.length >= 50) },
+                                        { label: "Set your hourly rate", href: "/dashboard/tutor/profile", done: !!(tutorData?.tutorListing?.hourlyRate && tutorData.tutorListing.hourlyRate > 0) },
+                                        { label: "Get verified (free for first 100 tutors)", href: null, done: !!tutorData?.isVerified },
+                                    ]}
+                                />
+
                                 <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
                                     <div>
                                         <h1 className="text-3xl font-bold text-gray-900 tracking-tight mb-2">

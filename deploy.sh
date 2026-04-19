@@ -55,10 +55,12 @@ ssh -o StrictHostKeyChecking=no ${VPS_USER}@${VPS_HOST} "
   VIP_JOB='0 7 1 * * curl -s -X POST -H \"x-cron-key: \${AUDIT_SEED_KEY}\" \"http://localhost:3000/api/cron/vip-billing\" >> /var/log/vip-billing.log 2>&1'
   # Weekly analysis — every Sunday at 8:00 AM
   WEEKLY_JOB='0 8 * * 0 curl -s -X POST -H \"x-cron-key: \${AUDIT_SEED_KEY}\" \"http://localhost:3000/api/cron/weekly-analysis\" >> /var/log/weekly-analysis.log 2>&1'
+  # Weekly user digests (tutors + students) — every Sunday at 9:00 AM
+  DIGEST_JOB='0 9 * * 0 curl -s -X POST -H \"x-cron-key: \${AUDIT_SEED_KEY}\" \"http://localhost:3000/api/cron/weekly-digest\" >> /var/log/weekly-digest.log 2>&1'
 
-  (crontab -l 2>/dev/null | grep -v 'email-drip\|reset-credits\|vip-billing\|weekly-analysis'; echo \"\$DRIP_JOB\"; echo \"\$CREDITS_JOB\"; echo \"\$VIP_JOB\"; echo \"\$WEEKLY_JOB\") | crontab -
+  (crontab -l 2>/dev/null | grep -v 'email-drip\|reset-credits\|vip-billing\|weekly-analysis\|weekly-digest'; echo \"\$DRIP_JOB\"; echo \"\$CREDITS_JOB\"; echo \"\$VIP_JOB\"; echo \"\$WEEKLY_JOB\"; echo \"\$DIGEST_JOB\") | crontab -
   echo 'Cron jobs configured.'
-  crontab -l | grep -E 'drip|credits|vip|weekly-analysis'
+  crontab -l | grep -E 'drip|credits|vip|weekly-analysis|weekly-digest'
 "
 
 echo "🔍 Step 5: Checking required env vars on VPS..."

@@ -103,6 +103,45 @@ function AdminDashboardContent() {
     const [blogForm, setBlogForm] = useState({ title: "", slug: "", excerpt: "", content: "", category: "", author: "TuitionsInIndia", readTime: "5 min read", isPublished: false });
     const [blogDeleteLoading, setBlogDeleteLoading] = useState(null);
 
+    // Email test tab
+    const [emailTemplates, setEmailTemplates] = useState([]);
+    const [emailTo, setEmailTo] = useState("");
+    const [emailSending, setEmailSending] = useState(null);
+    const [emailResult, setEmailResult] = useState({});
+
+    const fetchEmailTemplates = async () => {
+        if (!adminKey) return;
+        try {
+            const res = await fetch("/api/admin/email-test", { headers: { "x-admin-key": adminKey } });
+            const json = await res.json();
+            if (json.success) setEmailTemplates(json.templates || []);
+        } catch {}
+    };
+
+    const sendTestEmail = async (templateId) => {
+        if (!emailTo.trim()) { setEmailResult({ [templateId]: { error: "Enter an email address at the top first." } }); return; }
+        setEmailSending(templateId);
+        setEmailResult((prev) => ({ ...prev, [templateId]: null }));
+        try {
+            const res = await fetch("/api/admin/email-test", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "x-admin-key": adminKey },
+                body: JSON.stringify({ template: templateId, to: emailTo.trim() }),
+            });
+            const json = await res.json();
+            setEmailResult((prev) => ({
+                ...prev,
+                [templateId]: json.success
+                    ? { success: true, sentTo: json.sentTo, mocked: json.mocked }
+                    : { error: json.error || "Send failed" },
+            }));
+        } catch (err) {
+            setEmailResult((prev) => ({ ...prev, [templateId]: { error: err.message } }));
+        } finally {
+            setEmailSending(null);
+        }
+    };
+
     // Tickets tab
     const [tickets, setTickets] = useState(null);
     const [ticketsLoading, setTicketsLoading] = useState(false);
@@ -207,6 +246,7 @@ function AdminDashboardContent() {
         if (activeTab === "launch" && adminKey) fetchLaunchReadiness();
         if (activeTab === "attribution" && adminKey) fetchAttribution();
         if (activeTab === "tickets" && adminKey) fetchTickets();
+        if (activeTab === "email_test" && adminKey) fetchEmailTemplates();
     }, [activeTab]);
 
     // Poll deploy run status every 8s while deployments tab is active
@@ -636,6 +676,7 @@ function AdminDashboardContent() {
                                 { id: "launch", icon: Rocket, label: "Launch Readiness" },
                                 { id: "attribution", icon: Megaphone, label: "Ad Attribution" },
                                 { id: "tickets", icon: Inbox, label: "Tickets" },
+                                { id: "email_test", icon: Mail, label: "Email Test" },
                                 { id: "users", icon: Users, label: "User Directory" },
                                 { id: "listings", icon: GraduationCap, label: "Tutor Approvals" },
                                 { id: "vip", icon: Star, label: "VIP Service" },
@@ -1749,6 +1790,72 @@ function AdminDashboardContent() {
                                                 })}
                                             </div>
                                         )}
+                                    </div>
+                                );
+                            })()}
+
+                            {/* ─── EMAIL TEST ──────────────────────────────────────────────── */}
+                            {activeTab === "email_test" && (() => {
+                                const grouped = (emailTemplates || []).reduce((acc, t) => {
+                                    (acc[t.category] = acc[t.category] || []).push(t);
+                                    return acc;
+                                }, {});
+                                return (
+                                    <div className="max-w-4xl space-y-5">
+                                        <div>
+                                            <h2 className="text-xl font-bold text-gray-900">Email Test</h2>
+                                            <p className="text-sm text-gray-400 mt-0.5">Send any email template to yourself to verify deliverability and formatting. Check spam folder too.</p>
+                                        </div>
+
+                                        <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4">
+                                            <label className="block text-xs font-semibold text-blue-700 mb-1.5">Send test emails to</label>
+                                            <input
+                                                type="email"
+                                                value={emailTo}
+                                                onChange={(e) => setEmailTo(e.target.value)}
+                                                placeholder="you@example.com"
+                                                className="w-full bg-white border border-blue-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-600 outline-none"
+                                            />
+                                            <p className="text-[11px] text-blue-500 mt-1.5">
+                                                Emails use sample data. If <code>RESEND_API_KEY</code> isn't set, the send will be mocked (logged, not delivered).
+                                            </p>
+                                        </div>
+
+                                        {Object.entries(grouped).map(([cat, list]) => (
+                                            <div key={cat} className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+                                                <div className="px-5 py-3 border-b border-gray-100 bg-gray-50">
+                                                    <h3 className="text-sm font-bold text-gray-900">{cat}</h3>
+                                                </div>
+                                                <div className="divide-y divide-gray-100">
+                                                    {list.map((t) => {
+                                                        const res = emailResult[t.id];
+                                                        return (
+                                                            <div key={t.id} className="px-5 py-3 flex items-start gap-3">
+                                                                <div className="flex-1 min-w-0">
+                                                                    <p className="text-sm font-semibold text-gray-900">{t.label}</p>
+                                                                    <p className="text-xs text-gray-500 mt-0.5">{t.when}</p>
+                                                                    {res?.success && (
+                                                                        <p className="text-xs text-emerald-600 font-semibold mt-1">
+                                                                            ✓ Sent to {res.sentTo}{res.mocked ? " (mocked — no API key)" : ""}
+                                                                        </p>
+                                                                    )}
+                                                                    {res?.error && (
+                                                                        <p className="text-xs text-red-600 font-semibold mt-1">✗ {res.error}</p>
+                                                                    )}
+                                                                </div>
+                                                                <button
+                                                                    onClick={() => sendTestEmail(t.id)}
+                                                                    disabled={emailSending === t.id || !emailTo.trim()}
+                                                                    className="shrink-0 text-xs font-semibold px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-40 transition-colors"
+                                                                >
+                                                                    {emailSending === t.id ? "Sending…" : "Send test"}
+                                                                </button>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
                                 );
                             })()}

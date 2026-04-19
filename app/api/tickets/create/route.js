@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { sendTicketNotificationEmail } from "@/lib/email";
+import { sendTicketNotificationEmail, sendTicketUserCopyEmail } from "@/lib/email";
 import { checkRateLimit } from "@/lib/rateLimit";
 import { getSession } from "@/lib/auth";
 
@@ -67,9 +67,13 @@ export async function POST(request) {
             },
         });
 
-        // Email notification is best-effort — don't block the response.
+        // Email notifications — best-effort, don't block the response.
         sendTicketNotificationEmail(ticket).catch((err) =>
             console.error("Failed to send ticket notification:", err)
+        );
+        // Send a confirmation copy to the user so they have the ticket ID.
+        sendTicketUserCopyEmail(ticket).catch((err) =>
+            console.error("Failed to send ticket user copy:", err)
         );
 
         return NextResponse.json({

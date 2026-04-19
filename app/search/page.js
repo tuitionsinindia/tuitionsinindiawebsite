@@ -683,6 +683,23 @@ function SearchResultsContent() {
                 {/* ── CENTRE: RESULTS ── */}
                 <div className="flex-1 flex flex-col min-w-0">
 
+                    {/* Post-lead welcome banner — shown when user lands from chatbot/form after posting a requirement */}
+                    {searchParams.get("welcome") === "lead" && (
+                        <div className="bg-emerald-50 border-b border-emerald-100 px-4 py-3">
+                            <div className="flex items-start gap-3 max-w-4xl mx-auto">
+                                <BadgeCheck size={18} className="text-emerald-600 shrink-0 mt-0.5" />
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-bold text-emerald-900">
+                                        Your requirement is posted ✓ Matching tutors will contact you within 12 hours.
+                                    </p>
+                                    <p className="text-xs text-emerald-700 mt-0.5">
+                                        Meanwhile, here are {querySubject ? <><strong>{querySubject}</strong> </> : ""}tutors{queryLocation ? <> in <strong>{queryLocation}</strong></> : ""} you can browse and contact directly.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Results Toolbar */}
                     <div className="bg-white border-b border-gray-200 px-4 py-3 sticky top-16 z-30 flex items-center justify-between gap-3">
                         <div className="flex items-center gap-3 min-w-0">

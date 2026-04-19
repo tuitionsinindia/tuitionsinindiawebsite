@@ -5,7 +5,6 @@ import { usePathname, useRouter } from "next/navigation";
 import { MessageCircle, X, Send, Loader2, Sparkles, CheckCircle2, ArrowRight, ArrowLeft } from "lucide-react";
 import { SUBJECT_CATEGORIES } from "@/lib/subjects";
 import {
-    STUDENT_FLOW, TUTOR_FLOW, INSTITUTE_FLOW,
     GRADE_CHOICES, BUDGET_CHOICES, TUTOR_RATE_CHOICES, MODE_CHOICES, EXPERIENCE_CHOICES,
     TOP_CITIES,
     shouldSkipGrade, getCategoryById, getFlowForRole, formatWizardSummary,
@@ -156,6 +155,20 @@ export default function Chatbot() {
             appendAssistant(prompt, { type: "confirm", role, data });
             return;
         }
+        if (stage === "handoff") {
+            // Chat hands off to the dedicated signup page with everything we know
+            // pre-filled via URL params. Dedicated page handles OTP + legal +
+            // full profile + verification — best practice for high-trust signup.
+            const params = new URLSearchParams();
+            if (data.categoryId) params.set("category", data.categoryId);
+            if (data.subject) params.set("subject", data.subject);
+            if (data.city) params.set("location", data.city);
+            if (role === "INSTITUTE" && data.institute_name) params.set("institute_name", data.institute_name);
+            const target = role === "INSTITUTE" ? "/register/institute" : "/register/tutor";
+            const href = `${target}?${params.toString()}`;
+            appendAssistant(prompt, { type: "handoff_cta", href, role });
+            return;
+        }
         if (stage === "done") {
             appendAssistant(prompt);
             return;
@@ -289,59 +302,10 @@ export default function Chatbot() {
                     router.push(`/search?${params.toString()}`);
                 }, 800);
 
-            } else if (role === "TUTOR" || role === "INSTITUTE") {
-                // Require the user to be logged in (OTP should have set session).
-                const sessionRes = await fetch("/api/auth/session", { credentials: "include" });
-                if (!sessionRes.ok) throw new Error("Your session expired. Please reload and try again.");
-                const sessionJson = await sessionRes.json();
-                const userId = sessionJson.user?.id;
-                if (!userId) throw new Error("Signup incomplete. Please verify your phone again.");
-
-                // Update email on the user record.
-                if (data.email) {
-                    await fetch("/api/user/update", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        credentials: "include",
-                        body: JSON.stringify({ userId, email: data.email }),
-                    }).catch(() => {});
-                }
-
-                // Build tutor/institute profile. Matches /api/tutor/profile/update shape.
-                const profileBody = {
-                    userId,
-                    title: role === "INSTITUTE" ? (data.institute_name || "Institute") : `${data.subject || "Tutor"} tutor`,
-                    subjects: data.subject ? [data.subject] : [],
-                    grades: data.grade ? [data.grade] : [],
-                    locations: data.city ? [data.city] : [],
-                    hourlyRate: data.rate || 0,
-                    experience: data.experience ?? 0,
-                    isInstitute: role === "INSTITUTE",
-                    instituteName: role === "INSTITUTE" ? data.institute_name : null,
-                    teachingModes: ["ONLINE", "HOME"],
-                    bio: role === "INSTITUTE"
-                        ? `${data.institute_name} — ${data.subject} in ${data.city}.`
-                        : `${data.experience ?? 0}+ years teaching ${data.subject}${data.city ? ` in ${data.city}` : ""}.`,
-                };
-                const res = await fetch("/api/tutor/profile/update", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    credentials: "include",
-                    body: JSON.stringify(profileBody),
-                });
-                const json = await res.json();
-                if (!json.success && res.status !== 200) throw new Error(json.error || "Could not save your profile.");
-
-                appendAssistant(
-                    role === "INSTITUTE"
-                        ? "Institute listing created. Taking you to your dashboard…"
-                        : "Profile created! Taking you to your dashboard…",
-                    { type: "success" }
-                );
-                setTimeout(() => {
-                    router.push(role === "INSTITUTE" ? "/dashboard/institute?welcome=1" : "/dashboard/tutor?welcome=1");
-                }, 800);
             }
+            // Tutor / Institute paths don't reach confirm — they hand off via
+            // the "handoff" stage's CTA, which navigates to /register/{role}
+            // with URL params pre-filled.
 
             advanceWizard({ ...wizard, stage: "done", stageIndex: wizard.stageIndex + 1 });
         } catch (err) {
@@ -606,9 +570,22 @@ function WizardWidget(props) {
         case "contact_form":    return <ContactForm onSubmit={props.onSubmitContact} />;
         case "otp_form":        return <OtpForm role={widget.role} onVerified={props.onOtpVerified} />;
         case "confirm":         return <ConfirmSummary wizard={props.wizard} submitting={props.submitting} onConfirm={props.onConfirm} />;
+        case "handoff_cta":     return <HandoffCTA href={widget.href} role={widget.role} />;
         case "success":         return null;
         default:                return null;
     }
+}
+
+function HandoffCTA({ href, role }) {
+    const label = role === "INSTITUTE" ? "Continue to institute signup →" : "Continue to tutor signup →";
+    return (
+        <a
+            href={href}
+            className="mt-3 inline-flex items-center justify-center w-full px-5 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors text-sm"
+        >
+            {label}
+        </a>
+    );
 }
 
 function CategoryPicker({ onPickCategory }) {

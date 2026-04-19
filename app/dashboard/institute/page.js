@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import DashboardHeader from "@/app/components/DashboardHeader";
+import DashboardWelcomeCard from "@/app/components/DashboardWelcomeCard";
 import Chat from "@/app/components/chat/Chat";
 import SettingsModule from "@/app/components/dashboard/SettingsModule";
 import BillingModule from "@/app/components/dashboard/BillingModule";
@@ -293,7 +294,17 @@ function InstituteDashboardContent() {
                             )}
 
                             {activeTab === "leads" && (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pb-10">
+                                <>
+                                    <DashboardWelcomeCard
+                                        role="INSTITUTE"
+                                        steps={[
+                                            { label: "Add your institute address and photos", href: "/dashboard/institute/profile", done: !!instituteData?.image },
+                                            { label: "List the subjects / courses you offer", href: "/dashboard/institute/profile", done: (instituteData?.tutorListing?.subjects || []).length > 0 },
+                                            { label: "Set your fee structure", href: "/dashboard/institute/profile", done: !!(instituteData?.tutorListing?.hourlyRate && instituteData.tutorListing.hourlyRate > 0) },
+                                            { label: "Verify the institute for a trust badge", href: null, done: !!instituteData?.isVerified },
+                                        ]}
+                                    />
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pb-10 mt-6">
                                     {loading ? (
                                         <div className="col-span-2 py-24 flex flex-col items-center justify-center text-gray-400 bg-white rounded-2xl border border-gray-200">
                                             <Loader2 className="animate-spin mb-4" size={32} />
@@ -339,6 +350,7 @@ function InstituteDashboardContent() {
                                         <div className="col-span-2 py-24 text-center text-gray-400 text-sm bg-white rounded-2xl border border-gray-200">No student leads found yet.</div>
                                     )}
                                 </div>
+                                </>
                             )}
 
                             {activeTab === "recruitment" && (
