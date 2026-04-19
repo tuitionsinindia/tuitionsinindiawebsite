@@ -3,7 +3,6 @@ import Link from "next/link";
 import { ShieldCheck, Star, CheckCircle2, Award, Users, Clock, MessageCircle } from "lucide-react";
 import { getAdLandingPage, listAdLandingSlugs } from "@/lib/adLandingPages";
 import LeadForm from "./LeadForm";
-import WhatsAppButton from "@/app/components/WhatsAppButton";
 
 export async function generateStaticParams() {
     return listAdLandingSlugs().map(slug => ({ slug }));
@@ -189,9 +188,6 @@ export default async function AdLandingPage({ params, searchParams }) {
                     </a>
                 </div>
             </section>
-
-            {/* WhatsApp click-to-chat — only renders if NEXT_PUBLIC_WHATSAPP_NUMBER is set */}
-            <WhatsAppButton message={`Hi, I'm looking for a ${page.subject || "tutor"}${page.location ? ` in ${page.location}` : ""}.`} />
 
             {/* Footer — minimal */}
             <footer className="py-6 border-t border-gray-100 bg-white">
