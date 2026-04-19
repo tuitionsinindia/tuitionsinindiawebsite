@@ -20,6 +20,10 @@ COPY . .
 # Generate Prisma client
 RUN npx prisma generate
 
+# Accept build-time env (e.g. NEXT_PUBLIC_ENV=staging) so Next.js bakes it in
+ARG NEXT_PUBLIC_ENV
+ENV NEXT_PUBLIC_ENV=$NEXT_PUBLIC_ENV
+
 # Build the Next.js application
 RUN npm run build
 
