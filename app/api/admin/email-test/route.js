@@ -112,10 +112,27 @@ export async function POST(request) {
         if (result === null) {
             return NextResponse.json({ success: false, error: "Send failed — check server logs" }, { status: 500 });
         }
+
+        // Resend SDK returns { data, error } instead of throwing, so we have
+        // to inspect the response. In particular, a 403 "domain not verified"
+        // comes back as result.error with no exception.
+        if (result?.error) {
+            const msg = result.error.message || result.error.name || "Resend returned an error";
+            const hint = /domain.*not verified/i.test(msg)
+                ? " → Go to resend.com/domains and verify tuitionsinindia.com"
+                : "";
+            return NextResponse.json({
+                success: false,
+                error: `${msg}${hint}`,
+                rawError: result.error,
+            }, { status: 502 });
+        }
+
         return NextResponse.json({
             success: true,
             sentTo: to,
             template,
+            messageId: result?.data?.id || null,
             mocked: !process.env.RESEND_API_KEY,
         });
     } catch (err) {
