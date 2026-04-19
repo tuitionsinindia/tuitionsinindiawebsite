@@ -3,6 +3,9 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import GoogleAnalytics from "./components/GoogleAnalytics";
 import MetaPixel from "./components/MetaPixel";
+import StagingBar from "./components/StagingBar";
+
+const IS_STAGING = process.env.NEXT_PUBLIC_ENV === "staging";
 
 export const metadata = {
   title: {
@@ -123,6 +126,7 @@ export default function RootLayout({ children }) {
         <Header />
         {children}
         <Footer />
+        {IS_STAGING && <StagingBar adminKey={process.env.AUDIT_SEED_KEY} />}
       </body>
     </html>
   );
