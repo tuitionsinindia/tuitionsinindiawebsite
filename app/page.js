@@ -6,8 +6,102 @@ import Link from "next/link";
 import {
     Search, MapPin, ChevronDown, Star, ShieldCheck,
     MessageSquare, ArrowRight, CheckCircle2, Users,
-    GraduationCap, Zap, BookOpen, Building2, Award
+    GraduationCap, Zap, BookOpen, Building2, Award,
+    BadgeCheck, Monitor, Home as HomeIcon, Layers
 } from "lucide-react";
+
+// ── Avatar with initials + deterministic colour ──────────────────────────────
+const AVATAR_COLOURS = [
+    "from-blue-500 to-blue-700",
+    "from-violet-500 to-purple-700",
+    "from-emerald-500 to-teal-700",
+    "from-rose-500 to-pink-700",
+    "from-amber-500 to-orange-600",
+    "from-cyan-500 to-sky-700",
+];
+
+function TutorAvatar({ name, image, size = "lg" }) {
+    const initials = (name || "?").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
+    const colourIdx = (name || "").charCodeAt(0) % AVATAR_COLOURS.length;
+    const dim = size === "lg" ? "w-14 h-14 text-lg" : "w-10 h-10 text-sm";
+    if (image) return <img src={image} alt={name} className={`${dim} rounded-full object-cover`} />;
+    return (
+        <div className={`${dim} rounded-full bg-gradient-to-br ${AVATAR_COLOURS[colourIdx]} text-white font-bold flex items-center justify-center shrink-0`}>
+            {initials}
+        </div>
+    );
+}
+
+// ── Teaching mode badge ──────────────────────────────────────────────────────
+function ModeBadge({ modes = [] }) {
+    const has = (m) => modes.includes(m);
+    if (has("ONLINE") && has("HOME")) return <span className="text-xs text-purple-700 bg-purple-50 px-2 py-0.5 rounded-full font-medium">Online + Home</span>;
+    if (has("ONLINE")) return <span className="text-xs text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full font-medium">Online</span>;
+    if (has("HOME")) return <span className="text-xs text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full font-medium">Home Tuition</span>;
+    return null;
+}
+
+// ── Single tutor card ────────────────────────────────────────────────────────
+function TutorCard({ listing }) {
+    const { id, title, subjects = [], locations = [], hourlyRate, rating, reviewCount, experience, teachingModes = [], offersTrialClass, tutor } = listing;
+    const name = tutor?.name || "Tutor";
+    const verified = tutor?.isVerified || tutor?.isIdVerified;
+    const subjectsShown = subjects.slice(0, 3);
+    const city = locations[0] || "";
+
+    return (
+        <Link href={`/search/${id}`} className="group flex flex-col bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all overflow-hidden">
+            {/* Card top */}
+            <div className="p-5 flex gap-3 items-start">
+                <TutorAvatar name={name} image={tutor?.image} />
+                <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5 mb-0.5">
+                        <span className="font-semibold text-gray-900 text-sm truncate">{name}</span>
+                        {verified && <BadgeCheck size={14} className="text-blue-600 shrink-0" />}
+                    </div>
+                    <p className="text-xs text-gray-500 leading-snug line-clamp-2">{title}</p>
+                </div>
+            </div>
+
+            {/* Subjects */}
+            <div className="px-5 pb-3 flex flex-wrap gap-1.5">
+                {subjectsShown.map(s => (
+                    <span key={s} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{s}</span>
+                ))}
+                {subjects.length > 3 && (
+                    <span className="text-xs bg-gray-100 text-gray-400 px-2 py-0.5 rounded-full">+{subjects.length - 3}</span>
+                )}
+            </div>
+
+            {/* Meta row */}
+            <div className="px-5 pb-4 flex flex-wrap items-center gap-2 text-xs text-gray-500 mt-auto">
+                {city && <span className="flex items-center gap-1"><MapPin size={11} />{city}</span>}
+                {experience > 0 && <span>{experience}yr exp</span>}
+                <ModeBadge modes={teachingModes} />
+                {offersTrialClass && <span className="text-emerald-600 font-medium">Free trial</span>}
+            </div>
+
+            {/* Footer */}
+            <div className="border-t border-gray-100 px-5 py-3 flex items-center justify-between">
+                <div>
+                    {rating > 0 ? (
+                        <span className="flex items-center gap-1 text-xs font-medium text-gray-700">
+                            <Star size={12} className="text-yellow-400 fill-yellow-400" />
+                            {rating.toFixed(1)}
+                            <span className="text-gray-400">({reviewCount})</span>
+                        </span>
+                    ) : (
+                        <span className="text-xs text-gray-400">New tutor</span>
+                    )}
+                </div>
+                <div className="flex items-center gap-3">
+                    {hourlyRate && <span className="text-xs font-semibold text-gray-800">₹{hourlyRate}/hr</span>}
+                    <span className="text-xs text-blue-600 font-semibold group-hover:underline">View Profile →</span>
+                </div>
+            </div>
+        </Link>
+    );
+}
 import { ALL_SUBJECTS, BROAD_CATEGORIES, SUBJECT_CATEGORIES, getSubjectsForCategory, GRADE_OPTIONS, CITY_OPTIONS } from "../lib/subjects";
 
 // School sub-categories that need a level step before showing subjects
@@ -23,6 +117,14 @@ export default function Home() {
     const [searchLocation, setSearchLocation] = useState("");
     const [activeTab, setActiveTab] = useState("TUTOR");
     const [openFaq, setOpenFaq] = useState(null);
+    const [featuredTutors, setFeaturedTutors] = useState([]);
+
+    useEffect(() => {
+        fetch("/api/tutors/featured")
+            .then(r => r.json())
+            .then(data => { if (Array.isArray(data)) setFeaturedTutors(data); })
+            .catch(() => {});
+    }, []);
 
     const isAcademics = searchCategory === "academics";
 
@@ -257,6 +359,36 @@ export default function Home() {
                 </div>
             </section>
 
+            {/* ── FEATURED TUTORS ── */}
+            {featuredTutors.length > 0 && (
+                <section className="py-14 px-4 bg-gray-50">
+                    <div className="max-w-5xl mx-auto">
+                        <div className="flex items-end justify-between mb-8">
+                            <div>
+                                <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Meet Our Tutors</h2>
+                                <p className="text-gray-500 mt-1.5 text-sm">Real profiles, real expertise — browse and connect directly</p>
+                            </div>
+                            <Link href="/search?role=TUTOR" className="hidden md:flex items-center gap-1.5 text-blue-600 font-semibold text-sm hover:underline shrink-0 ml-4">
+                                View all <ArrowRight size={14} />
+                            </Link>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {featuredTutors.slice(0, 6).map(listing => (
+                                <TutorCard key={listing.id} listing={listing} />
+                            ))}
+                        </div>
+
+                        <div className="mt-8 text-center md:hidden">
+                            <Link href="/search?role=TUTOR"
+                                className="inline-flex items-center gap-2 px-6 py-2.5 border border-blue-600 text-blue-600 rounded-lg font-semibold text-sm hover:bg-blue-50 transition-colors">
+                                View all tutors <ArrowRight size={14} />
+                            </Link>
+                        </div>
+                    </div>
+                </section>
+            )}
+
             {/* ── WHY CHOOSE US ── */}
             <section className="py-14 px-4 bg-blue-600 text-white">
                 <div className="max-w-5xl mx-auto">
@@ -375,9 +507,9 @@ export default function Home() {
                             {
                                 icon: Building2,
                                 title: "For institutes",
-                                desc: "List your coaching centre and reach students across India.",
-                                link: "/register/institute",
-                                btnLabel: "Sign up as institute"
+                                desc: "List your coaching centre or browse verified institutes near you.",
+                                link: "/institutes",
+                                btnLabel: "Browse institutes"
                             }
                         ].map((item, i) => (
                             <div key={i} className="bg-white rounded-xl p-6 text-center border border-gray-200 shadow-sm">
@@ -442,6 +574,7 @@ export default function Home() {
                             <h4 className="text-xs font-semibold text-gray-900 mb-3">For Institutes</h4>
                             <div className="space-y-2">
                                 {[
+                                    { label: "Browse Institutes", href: "/institutes" },
                                     { label: "How it Works", href: "/how-it-works/institute" },
                                     { label: "Pricing", href: "/pricing/institute" },
                                     { label: "Sign Up", href: "/register/institute" },
