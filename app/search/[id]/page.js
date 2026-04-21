@@ -165,61 +165,66 @@ export default async function TutorProfilePage({ params, searchParams }) {
             <div className="max-w-5xl mx-auto px-4 py-6 space-y-5">
 
                 {/* ── Hero Card ── */}
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                    {/* Banner */}
-                    <div className="h-28 bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-500 relative">
-                        {listing.isFeatured && (
-                            <span className="absolute top-3 right-3 flex items-center gap-1 text-xs font-semibold bg-amber-400 text-amber-900 px-2.5 py-1 rounded-full">
-                                <Sparkles size={11} /> Featured
-                            </span>
-                        )}
-                    </div>
-
-                    <div className="px-6 pb-6">
-                        {/* Photo + name row */}
-                        <div className="flex flex-col sm:flex-row sm:items-end gap-4 -mt-10 mb-5">
+                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm">
+                    <div className="p-6">
+                        {/* Photo + identity row */}
+                        <div className="flex gap-5 items-start">
+                            {/* Photo */}
                             <div className="relative shrink-0">
                                 {tutor.image ? (
                                     <img src={tutor.image} alt={tutor.name}
-                                        className="w-20 h-20 rounded-2xl object-cover border-4 border-white shadow-lg" />
+                                        className="w-20 h-20 rounded-2xl object-cover shadow-sm border border-gray-100" />
                                 ) : (
-                                    <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-white text-2xl font-bold flex items-center justify-center border-4 border-white shadow-lg">
+                                    <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-white text-2xl font-bold flex items-center justify-center shadow-sm">
                                         {initials}
                                     </div>
                                 )}
                                 {(tutor.isVerified || tutor.isIdVerified) && (
-                                    <span className="absolute -bottom-1 -right-1 size-6 bg-blue-600 rounded-full flex items-center justify-center border-2 border-white">
+                                    <span className="absolute -bottom-1.5 -right-1.5 size-6 bg-blue-600 rounded-full flex items-center justify-center border-2 border-white shadow-sm">
                                         <BadgeCheck size={13} className="text-white" />
                                     </span>
                                 )}
                             </div>
-                            <div className="flex-1 sm:pb-1">
-                                <div className="flex flex-wrap items-center gap-2 mb-0.5">
+
+                            {/* Identity */}
+                            <div className="flex-1 min-w-0">
+                                <div className="flex flex-wrap items-center gap-2 mb-1">
                                     <h1 className="text-xl font-bold text-gray-900">{tutor.name}</h1>
                                     {isPremium && (
                                         <span className="px-2 py-0.5 bg-amber-50 text-amber-700 text-xs font-semibold rounded-full border border-amber-200">
                                             {tutor.subscriptionTier}
                                         </span>
                                     )}
+                                    {listing.isFeatured && (
+                                        <span className="flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-700 text-xs font-semibold rounded-full border border-blue-100">
+                                            <Sparkles size={10} /> Featured
+                                        </span>
+                                    )}
                                     {listing.offersTrialClass && (
-                                        <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-xs font-semibold rounded-full border border-emerald-200">
+                                        <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-xs font-semibold rounded-full border border-emerald-100">
                                             Free Trial
                                         </span>
                                     )}
                                 </div>
-                                <p className="text-sm text-gray-500 leading-snug">{listing.title}</p>
+                                <p className="text-sm text-gray-500 leading-snug mb-3">{listing.title}</p>
+
+                                {/* Rating */}
+                                {listing.rating > 0 && (
+                                    <div className="flex items-center gap-2">
+                                        <div className="flex gap-0.5">
+                                            {[1,2,3,4,5].map(i => (
+                                                <Star key={i} size={13} className={i <= Math.round(listing.rating) ? "fill-amber-400 text-amber-400" : "fill-gray-200 text-gray-200"} />
+                                            ))}
+                                        </div>
+                                        <span className="text-sm font-semibold text-gray-800">{listing.rating.toFixed(1)}</span>
+                                        <span className="text-sm text-gray-400">({listing.reviewCount} {listing.reviewCount === 1 ? "review" : "reviews"})</span>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
                         {/* Stats strip */}
-                        <div className="flex flex-wrap gap-x-5 gap-y-2 mb-5 text-sm text-gray-600">
-                            {listing.rating > 0 && (
-                                <span className="flex items-center gap-1.5 font-medium text-amber-600">
-                                    <Star size={14} className="fill-amber-400 text-amber-400" />
-                                    {listing.rating.toFixed(1)}
-                                    <span className="text-gray-400 font-normal">({listing.reviewCount} reviews)</span>
-                                </span>
-                            )}
+                        <div className="flex flex-wrap gap-x-5 gap-y-2 mt-5 pt-5 border-t border-gray-50 text-sm text-gray-600">
                             {listing.experience > 0 && (
                                 <span className="flex items-center gap-1.5">
                                     <Briefcase size={13} className="text-gray-400" />
@@ -242,14 +247,15 @@ export default async function TutorProfilePage({ params, searchParams }) {
                                 </span>
                             )}
                             {listing.hourlyRate > 0 && (
-                                <span className="flex items-center gap-1.5 font-semibold text-gray-800">
-                                    <IndianRupee size={13} className="text-gray-400" />
+                                <span className="flex items-center gap-1.5 font-semibold text-gray-900">
                                     ₹{listing.hourlyRate.toLocaleString("en-IN")}/hr
                                 </span>
                             )}
                         </div>
+                    </div>
 
-                        {/* CTA */}
+                    {/* CTA area */}
+                    <div className="px-6 pb-6">
                         <TutorProfileActions
                             tutor={{ id: tutor.id, name: tutor.name }}
                             subject={listing.subjects?.[0] || ""}
@@ -430,10 +436,10 @@ export default async function TutorProfilePage({ params, searchParams }) {
                     {/* Right: sticky sidebar */}
                     <div className="space-y-4">
 
-                        {/* Contact card */}
+                        {/* Sticky contact card */}
                         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 lg:sticky lg:top-20">
                             {listing.hourlyRate > 0 && (
-                                <div className="mb-4">
+                                <div className="mb-4 pb-4 border-b border-gray-50">
                                     <span className="text-2xl font-bold text-gray-900">₹{listing.hourlyRate.toLocaleString("en-IN")}</span>
                                     <span className="text-sm text-gray-400">/hr</span>
                                 </div>
@@ -446,7 +452,7 @@ export default async function TutorProfilePage({ params, searchParams }) {
                                 initialAction={initialAction}
                                 compact
                             />
-                            <p className="text-xs text-center text-gray-400 mt-3">No commission · Pay tutor directly</p>
+                            <p className="text-xs text-center text-gray-400 mt-4">Zero commission · Pay tutor directly</p>
                         </div>
 
                         {/* Details */}
