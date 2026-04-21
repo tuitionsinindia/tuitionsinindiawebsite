@@ -164,7 +164,7 @@ function InstituteCard({ listing }) {
     );
 }
 
-import { ALL_SUBJECTS, BROAD_CATEGORIES, SUBJECT_CATEGORIES, getSubjectsForCategory, GRADE_OPTIONS, CITY_OPTIONS } from "../lib/subjects";
+import { ALL_SUBJECTS, BROAD_CATEGORIES, SUBJECT_CATEGORIES, getSubjectsForCategory, GRADE_OPTIONS, ACTIVE_CITIES, COMING_SOON_CITIES } from "../lib/subjects";
 
 const SCHOOL_SUB_CATEGORIES = SUBJECT_CATEGORIES.filter(sc =>
     ["school_k5", "school_6_10", "school_11_12_sci", "school_11_12_comm", "school_11_12_hum", "college_uni"].includes(sc.id)
@@ -334,8 +334,13 @@ export default function Home() {
                                     onChange={(e) => setSearchLocation(e.target.value)}
                                     className="h-11 px-3 border border-gray-200 rounded-lg bg-gray-50 text-sm text-gray-700 outline-none focus:border-blue-500 cursor-pointer"
                                 >
-                                    <option value="">City</option>
-                                    {CITY_OPTIONS.map(c => <option key={c} value={c}>{c}</option>)}
+                                    <option value="">Select City</option>
+                                    <optgroup label="Available Now">
+                                        {ACTIVE_CITIES.map(c => <option key={c} value={c}>{c}</option>)}
+                                    </optgroup>
+                                    <optgroup label="Coming Soon">
+                                        {COMING_SOON_CITIES.map(c => <option key={c} value={c} disabled>{c}</option>)}
+                                    </optgroup>
                                 </select>
                             </div>
 
