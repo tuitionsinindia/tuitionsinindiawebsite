@@ -55,21 +55,24 @@ export async function POST(request) {
         }
 
         // 2. Create the Listing (Institutes use the Listing model for directory visibility)
+        const bioText = `${bio}${website ? `\n\nWebsite: ${website}` : ''}${foundingYear ? `\nEstablished: ${foundingYear}` : ''}`;
         const listing = await prisma.listing.upsert({
             where: { tutorId: user.id },
             update: {
                 title: organizationName,
-                bio: `${bio}${website ? `\n\nWebsite: ${website}` : ''}${foundingYear ? `\nEstablished: ${foundingYear}` : ''}`,
+                bio: bioText,
                 subjects: subjectList,
                 locations: locationList,
-                isActive: false, // Profiles require admin approval
+                isInstitute: true,
+                isActive: false, // Requires admin approval
             },
             create: {
                 tutorId: user.id,
                 title: organizationName,
-                bio: `${bio}${website ? `\n\nWebsite: ${website}` : ''}${foundingYear ? `\nEstablished: ${foundingYear}` : ''}`,
+                bio: bioText,
                 subjects: subjectList,
                 locations: locationList,
+                isInstitute: true,
                 isActive: false,
             },
         });

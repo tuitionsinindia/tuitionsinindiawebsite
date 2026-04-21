@@ -29,6 +29,7 @@ model User {
   isIdVerified        Boolean            @default(false)
   isSuspended         Boolean            @default(false)
   credits             Int                @default(0)
+  expoPushToken       String?            // Mobile app push notification token
   platformCredit      Int                @default(0) // demo deposit credits in paise
   contactViewsThisMonth Int             @default(0) // resets 1st of each month
   demoBookingsThisMonth Int              @default(0) // resets 1st of each month

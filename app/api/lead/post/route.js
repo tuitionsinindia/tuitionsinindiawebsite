@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma";
 import { sendWelcomeEmail, sendLeadAlertEmail, sendLeadPostedEmail } from "@/lib/email";
 import { sendLeadAlertSMS } from "@/lib/sms";
 import { getAttributionFromRequest } from "@/lib/attribution";
+import { notifyMatchingTutors } from "@/lib/push";
 
 export const dynamic = 'force-dynamic';
 
@@ -115,6 +116,9 @@ export async function POST(request) {
                     if (t.phone) sendLeadAlertSMS(t.phone, lead).catch(console.error);
                 }
             })().catch((err) => console.error("Lead notification error:", err));
+
+            // Fire push notifications to matching tutors on the mobile app
+            notifyMatchingTutors(prisma, lead).catch(console.error);
         } catch (notifyErr) {
             console.error("Non-blocking notification error", notifyErr);
         }

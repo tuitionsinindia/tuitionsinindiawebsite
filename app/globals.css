@@ -94,6 +94,12 @@
   animation: slideUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
+/* Hero dot pattern */
+.hero-dots {
+  background-image: radial-gradient(circle, rgba(255,255,255,0.12) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
 /* Material Symbols Integration */
 .material-symbols-outlined {
   font-family: 'Material Symbols Outlined';
