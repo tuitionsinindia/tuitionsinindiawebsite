@@ -476,6 +476,15 @@ function SearchResultsContent() {
         setGender(""); setExperience(""); setTeachingMode(""); setBoard(""); setListingType("ALL");
     };
 
+    const INSTITUTE_TYPE_LABELS = {
+        coaching_centre: "Coaching Centre",
+        music_school: "Music School",
+        language_institute: "Language Institute",
+        test_prep: "Test Prep",
+        sports_fitness: "Sports & Fitness",
+        hobby_craft: "Hobby & Craft",
+    };
+
     const teachingModeLabel = (mode) => ({
         STUDENT_HOME: "Tutor comes to you",
         TUTOR_HOME: "Visit tutor's place",
@@ -801,7 +810,12 @@ function SearchResultsContent() {
                             <>
                                 {results.slice(0, visibleCount).map((item, idx) => (
                                     <div key={idx}
-                                        className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md hover:border-blue-100 transition-all p-4 flex gap-4">
+                                        className={`relative bg-white border rounded-xl shadow-sm hover:shadow-md transition-all p-4 flex gap-4 ${item.isSponsored ? "border-amber-200 ring-1 ring-amber-100" : "border-gray-200 hover:border-blue-100"}`}>
+                                        {item.isSponsored && (
+                                            <div className="absolute -top-px left-0 right-0 flex justify-end px-3">
+                                                <span className="bg-amber-50 border border-amber-200 text-amber-700 text-[10px] font-semibold px-2 py-0.5 rounded-b-md">Sponsored</span>
+                                            </div>
+                                        )}
                                         {/* Avatar */}
                                         <div className="flex flex-col items-center shrink-0 gap-1.5">
                                             <div className="w-16 h-16 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center relative overflow-hidden">
@@ -841,6 +855,16 @@ function SearchResultsContent() {
                                                         {item.isFeatured && (
                                                             <span className="text-xs text-amber-700 font-medium bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100">Featured</span>
                                                         )}
+                                                        {item.subscriptionTier === "ELITE" && (
+                                                            <span className="inline-flex items-center gap-1 text-xs font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-full border border-purple-200">
+                                                                <Star size={9} fill="currentColor" /> Elite
+                                                            </span>
+                                                        )}
+                                                        {item.subscriptionTier === "PRO" && (
+                                                            <span className="inline-flex items-center gap-1 text-xs font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">
+                                                                <BadgeCheck size={9} /> Pro
+                                                            </span>
+                                                        )}
                                                         {item.isVipEligible && (
                                                             <span className="inline-flex items-center gap-1 text-xs text-indigo-700 font-semibold bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">
                                                                 <Star size={9} fill="currentColor" /> VIP
@@ -855,9 +879,15 @@ function SearchResultsContent() {
                                                         )}
                                                     </div>
                                                     <div className="flex flex-wrap items-center gap-2 mt-1">
-                                                        <span className="inline-flex items-center gap-1 text-xs font-medium text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md">
-                                                            <GraduationCap size={11} /> {item.subject || querySubject || "Academics"}
-                                                        </span>
+                                                        {item.isInstitute && item.instituteType ? (
+                                                            <span className="inline-flex items-center gap-1 text-xs font-medium text-violet-700 bg-violet-50 px-2 py-0.5 rounded-md">
+                                                                <Building2 size={11} /> {INSTITUTE_TYPE_LABELS[item.instituteType] || item.instituteType}
+                                                            </span>
+                                                        ) : (
+                                                            <span className="inline-flex items-center gap-1 text-xs font-medium text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md">
+                                                                <GraduationCap size={11} /> {item.subject || querySubject || "Academics"}
+                                                            </span>
+                                                        )}
                                                         {item.distance != null && item.distance < 9999 ? (
                                                             <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">
                                                                 <MapPin size={11} /> {item.distance < 1 ? "< 1 km" : `${Math.round(item.distance)} km away`}

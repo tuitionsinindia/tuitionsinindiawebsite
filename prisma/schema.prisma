@@ -159,7 +159,8 @@ model Listing {
   isVipEligible    Boolean     @default(false)
   vipAvailability  Json? // weekly schedule slots for VIP matching
   isFeatured       Boolean     @default(false)
-  featuredUntil    DateTime?   // null = permanently featured
+  featuredUntil    DateTime?
+  instituteType    String?     // coaching_centre | music_school | language_institute | test_prep | sports_fitness | hobby_craft
   tutor            User        @relation(fields: [tutorId], references: [id], onDelete: Cascade)
 
   @@index([isActive])
