@@ -45,51 +45,134 @@ function TutorCard({ listing }) {
     const { id, title, subjects = [], locations = [], hourlyRate, rating, reviewCount, experience, teachingModes = [], offersTrialClass, tutor } = listing;
     const name = tutor?.name || "Tutor";
     const verified = tutor?.isVerified || tutor?.isIdVerified;
-    const subjectsShown = subjects.slice(0, 3);
     const city = locations[0] || "";
 
     return (
-        <Link href={`/search/${id}`} className="group flex flex-col bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all overflow-hidden">
-            <div className="p-5 flex gap-3 items-start">
-                <TutorAvatar name={name} image={tutor?.image} />
-                <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-1.5 mb-0.5">
-                        <span className="font-semibold text-gray-900 text-sm truncate">{name}</span>
-                        {verified && <BadgeCheck size={14} className="text-blue-600 shrink-0" />}
-                    </div>
-                    <p className="text-xs text-gray-500 leading-snug line-clamp-2">{title}</p>
-                </div>
-            </div>
-            <div className="px-5 pb-3 flex flex-wrap gap-1.5">
-                {subjectsShown.map(s => (
-                    <span key={s} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{s}</span>
-                ))}
-                {subjects.length > 3 && (
-                    <span className="text-xs bg-gray-100 text-gray-400 px-2 py-0.5 rounded-full">+{subjects.length - 3}</span>
-                )}
-            </div>
-            <div className="px-5 pb-4 flex flex-wrap items-center gap-2 text-xs text-gray-500 mt-auto">
-                {city && <span className="flex items-center gap-1"><MapPin size={11} />{city}</span>}
-                {experience > 0 && <span>{experience}yr exp</span>}
-                <ModeBadge modes={teachingModes} />
-                {offersTrialClass && <span className="text-emerald-600 font-medium">Free trial</span>}
-            </div>
-            <div className="border-t border-gray-100 px-5 py-3 flex items-center justify-between">
-                <div>
-                    {rating > 0 ? (
-                        <span className="flex items-center gap-1 text-xs font-medium text-gray-700">
-                            <Star size={12} className="text-yellow-400 fill-yellow-400" />
-                            {rating.toFixed(1)}
-                            <span className="text-gray-400">({reviewCount})</span>
+        <Link href={`/search/${id}`} className="group flex flex-col bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg hover:border-blue-100 transition-all overflow-hidden">
+            {/* Photo + name header */}
+            <div className="p-5 pb-3 flex gap-4 items-center">
+                <div className="relative shrink-0">
+                    <TutorAvatar name={name} image={tutor?.image} size="lg" />
+                    {verified && (
+                        <span className="absolute -bottom-1 -right-1 size-5 bg-blue-600 rounded-full flex items-center justify-center border-2 border-white">
+                            <BadgeCheck size={10} className="text-white" />
                         </span>
-                    ) : (
-                        <span className="text-xs text-gray-400">New tutor</span>
                     )}
                 </div>
-                <div className="flex items-center gap-3">
-                    {hourlyRate && <span className="text-xs font-semibold text-gray-800">₹{hourlyRate}/hr</span>}
-                    <span className="text-xs text-blue-600 font-semibold group-hover:underline">View Profile →</span>
+                <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="font-bold text-gray-900 text-sm">{name}</span>
+                        {rating > 0 && (
+                            <span className="flex items-center gap-0.5 text-xs font-semibold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full">
+                                <Star size={10} className="fill-amber-500 text-amber-500" /> {rating.toFixed(1)}
+                            </span>
+                        )}
+                    </div>
+                    <p className="text-xs text-gray-500 mt-0.5 line-clamp-2 leading-relaxed">{title}</p>
                 </div>
+            </div>
+
+            {/* Subjects */}
+            <div className="px-5 pb-3 flex flex-wrap gap-1.5">
+                {subjects.slice(0, 3).map(s => (
+                    <span key={s} className="text-xs bg-blue-50 text-blue-700 px-2.5 py-0.5 rounded-full font-medium">{s}</span>
+                ))}
+                {subjects.length > 3 && (
+                    <span className="text-xs bg-gray-100 text-gray-400 px-2 py-0.5 rounded-full">+{subjects.length - 3} more</span>
+                )}
+            </div>
+
+            {/* Meta */}
+            <div className="px-5 pb-4 flex flex-wrap items-center gap-3 text-xs text-gray-500 mt-auto">
+                {city && <span className="flex items-center gap-1"><MapPin size={11} className="text-gray-400" />{city}</span>}
+                {experience > 0 && <span className="flex items-center gap-1"><Award size={11} className="text-gray-400" />{experience} yrs exp</span>}
+                <ModeBadge modes={teachingModes} />
+                {offersTrialClass && (
+                    <span className="flex items-center gap-1 text-emerald-600 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full">
+                        ✓ Free trial
+                    </span>
+                )}
+            </div>
+
+            {/* Footer */}
+            <div className="border-t border-gray-100 px-5 py-3 flex items-center justify-between bg-gray-50/50">
+                <div className="text-xs text-gray-400">{reviewCount > 0 ? `${reviewCount} reviews` : "New tutor"}</div>
+                <div className="flex items-center gap-3">
+                    {hourlyRate && <span className="text-sm font-bold text-gray-900">₹{hourlyRate}<span className="text-xs font-normal text-gray-400">/hr</span></span>}
+                    <span className="text-xs font-semibold text-blue-600 group-hover:underline flex items-center gap-0.5">
+                        View Profile <ArrowRight size={11} />
+                    </span>
+                </div>
+            </div>
+        </Link>
+    );
+}
+
+function InstituteCard({ listing }) {
+    const { id, title, subjects = [], locations = [], hourlyRate, rating, reviewCount, experience, offersTrialClass, tutor } = listing;
+    const name = tutor?.name || "Institute";
+    const verified = tutor?.isVerified;
+    const city = locations[0] || "";
+    const initials = name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
+
+    return (
+        <Link href={`/search/${id}`} className="group flex flex-col bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg hover:border-blue-100 transition-all overflow-hidden">
+            {/* Header with logo */}
+            <div className="p-5 pb-3 flex gap-4 items-center">
+                <div className="relative shrink-0">
+                    {tutor?.image ? (
+                        <img src={tutor.image} alt={name} className="w-14 h-14 rounded-xl object-cover border border-gray-100" />
+                    ) : (
+                        <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white font-bold text-lg border border-blue-200">
+                            {initials}
+                        </div>
+                    )}
+                    {verified && (
+                        <span className="absolute -bottom-1 -right-1 size-5 bg-blue-600 rounded-full flex items-center justify-center border-2 border-white">
+                            <BadgeCheck size={10} className="text-white" />
+                        </span>
+                    )}
+                </div>
+                <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="font-bold text-gray-900 text-sm">{name}</span>
+                        {rating > 0 && (
+                            <span className="flex items-center gap-0.5 text-xs font-semibold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full">
+                                <Star size={10} className="fill-amber-500 text-amber-500" /> {rating.toFixed(1)}
+                            </span>
+                        )}
+                    </div>
+                    <p className="text-xs text-gray-500 mt-0.5 line-clamp-2 leading-relaxed">{title}</p>
+                </div>
+            </div>
+
+            {/* Courses */}
+            <div className="px-5 pb-3 flex flex-wrap gap-1.5">
+                {subjects.slice(0, 3).map(s => (
+                    <span key={s} className="text-xs bg-violet-50 text-violet-700 px-2.5 py-0.5 rounded-full font-medium">{s}</span>
+                ))}
+                {subjects.length > 3 && (
+                    <span className="text-xs bg-gray-100 text-gray-400 px-2 py-0.5 rounded-full">+{subjects.length - 3} more</span>
+                )}
+            </div>
+
+            {/* Meta */}
+            <div className="px-5 pb-4 flex flex-wrap items-center gap-3 text-xs text-gray-500 mt-auto">
+                {city && <span className="flex items-center gap-1"><MapPin size={11} className="text-gray-400" />{city}</span>}
+                {experience > 0 && <span className="flex items-center gap-1"><Clock size={11} className="text-gray-400" />Est. {new Date().getFullYear() - experience}</span>}
+                {offersTrialClass && (
+                    <span className="flex items-center gap-1 text-emerald-600 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full">
+                        ✓ Free demo class
+                    </span>
+                )}
+            </div>
+
+            {/* Footer */}
+            <div className="border-t border-gray-100 px-5 py-3 flex items-center justify-between bg-gray-50/50">
+                <div className="text-xs text-gray-400">{reviewCount > 0 ? `${reviewCount} reviews` : "New listing"}</div>
+                <span className="text-xs font-semibold text-blue-600 group-hover:underline flex items-center gap-0.5">
+                    Explore <ArrowRight size={11} />
+                </span>
             </div>
         </Link>
     );
@@ -110,11 +193,16 @@ export default function Home() {
     const [activeTab, setActiveTab] = useState("TUTOR");
     const [openFaq, setOpenFaq] = useState(null);
     const [featuredTutors, setFeaturedTutors] = useState([]);
+    const [featuredInstitutes, setFeaturedInstitutes] = useState([]);
 
     useEffect(() => {
         fetch("/api/tutors/featured")
             .then(r => r.json())
             .then(data => { if (Array.isArray(data)) setFeaturedTutors(data); })
+            .catch(() => {});
+        fetch("/api/institutes/featured")
+            .then(r => r.json())
+            .then(data => { if (Array.isArray(data)) setFeaturedInstitutes(data); })
             .catch(() => {});
     }, []);
 
@@ -384,6 +472,35 @@ export default function Home() {
                             <Link href="/search?role=TUTOR"
                                 className="inline-flex items-center gap-2 px-6 py-2.5 border border-blue-600 text-blue-600 rounded-lg font-semibold text-sm hover:bg-blue-50 transition-colors">
                                 View all tutors <ArrowRight size={14} />
+                            </Link>
+                        </div>
+                    </div>
+                </section>
+            )}
+
+            {/* ── FEATURED INSTITUTES ── */}
+            {featuredInstitutes.length > 0 && (
+                <section className="py-16 px-4 bg-white">
+                    <div className="max-w-4xl mx-auto">
+                        <div className="flex items-end justify-between mb-10">
+                            <div>
+                                <span className="text-xs font-semibold text-violet-600 mb-2 block">INSTITUTES</span>
+                                <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Featured Coaching Centres</h2>
+                                <p className="text-gray-500 mt-1.5 text-sm">Verified institutes across India — find the right coaching centre for you</p>
+                            </div>
+                            <Link href="/search?role=INSTITUTE" className="hidden md:flex items-center gap-1.5 text-blue-600 font-semibold text-sm hover:underline shrink-0 ml-4">
+                                View all <ArrowRight size={14} />
+                            </Link>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {featuredInstitutes.slice(0, 6).map(listing => (
+                                <InstituteCard key={listing.id} listing={listing} />
+                            ))}
+                        </div>
+                        <div className="mt-8 text-center md:hidden">
+                            <Link href="/search?role=INSTITUTE"
+                                className="inline-flex items-center gap-2 px-6 py-2.5 border border-blue-600 text-blue-600 rounded-lg font-semibold text-sm hover:bg-blue-50 transition-colors">
+                                View all institutes <ArrowRight size={14} />
                             </Link>
                         </div>
                     </div>
