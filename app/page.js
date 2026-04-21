@@ -8,51 +8,52 @@ import {
     MessageSquare, ArrowRight, CheckCircle2, Users,
     GraduationCap, Zap, BookOpen, Building2, Award,
     BadgeCheck, Monitor, Home as HomeIcon, Layers,
-    TrendingUp, Clock, IndianRupee
+    TrendingUp, Clock, IndianRupee, Flame, Sparkles
 } from "lucide-react";
 
-// ── Avatar with initials + deterministic colour ──────────────────────────────
+// ── Shared helpers ────────────────────────────────────────────────────────────
 const AVATAR_COLOURS = [
-    "from-blue-500 to-blue-700",
-    "from-violet-500 to-purple-700",
-    "from-emerald-500 to-teal-700",
-    "from-rose-500 to-pink-700",
-    "from-amber-500 to-orange-600",
-    "from-cyan-500 to-sky-700",
+    "from-blue-500 to-blue-700", "from-violet-500 to-purple-700",
+    "from-emerald-500 to-teal-700", "from-rose-500 to-pink-700",
+    "from-amber-500 to-orange-600", "from-cyan-500 to-sky-700",
 ];
 
-function TutorAvatar({ name, image, size = "lg" }) {
+function Avatar({ name, image, size = "md" }) {
     const initials = (name || "?").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
-    const colourIdx = (name || "").charCodeAt(0) % AVATAR_COLOURS.length;
-    const dim = size === "lg" ? "w-14 h-14 text-lg" : "w-10 h-10 text-sm";
+    const col = AVATAR_COLOURS[(name || "").charCodeAt(0) % AVATAR_COLOURS.length];
+    const dim = size === "lg" ? "w-16 h-16 text-xl" : "w-12 h-12 text-sm";
     if (image) return <img src={image} alt={name} className={`${dim} rounded-full object-cover`} />;
     return (
-        <div className={`${dim} rounded-full bg-gradient-to-br ${AVATAR_COLOURS[colourIdx]} text-white font-bold flex items-center justify-center shrink-0`}>
+        <div className={`${dim} rounded-full bg-gradient-to-br ${col} text-white font-bold flex items-center justify-center shrink-0`}>
             {initials}
         </div>
     );
 }
 
-function ModeBadge({ modes = [] }) {
-    const has = (m) => modes.includes(m);
-    if (has("ONLINE") && has("HOME")) return <span className="text-xs text-purple-700 bg-purple-50 px-2 py-0.5 rounded-full font-medium">Online + Home</span>;
-    if (has("ONLINE")) return <span className="text-xs text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full font-medium">Online</span>;
-    if (has("HOME")) return <span className="text-xs text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full font-medium">Home Tuition</span>;
-    return null;
+function InstituteAvatar({ name, image }) {
+    const initials = (name || "?").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
+    const colours = ["from-blue-600 to-indigo-700", "from-violet-600 to-purple-700", "from-emerald-600 to-teal-700", "from-rose-500 to-pink-700"];
+    const col = colours[(name || "").charCodeAt(0) % colours.length];
+    if (image) return <img src={image} alt={name} className="w-12 h-12 rounded-xl object-cover border border-gray-100" />;
+    return (
+        <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${col} text-white font-bold text-base flex items-center justify-center shrink-0`}>
+            {initials}
+        </div>
+    );
 }
 
-function TutorCard({ listing }) {
-    const { id, title, subjects = [], locations = [], hourlyRate, rating, reviewCount, experience, teachingModes = [], offersTrialClass, tutor } = listing;
+// ── Tutor card — used for Popular and Top Reviewed tabs ───────────────────────
+function TutorCard({ listing, badge }) {
+    const { id, title, subjects = [], locations = [], hourlyRate, rating, reviewCount, viewCount, experience, teachingModes = [], offersTrialClass, tutor } = listing;
     const name = tutor?.name || "Tutor";
     const verified = tutor?.isVerified || tutor?.isIdVerified;
     const city = locations[0] || "";
 
     return (
-        <Link href={`/search/${id}`} className="group flex flex-col bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg hover:border-blue-100 transition-all overflow-hidden">
-            {/* Photo + name header */}
-            <div className="p-5 pb-3 flex gap-4 items-center">
+        <Link href={`/search/${id}`} className="group flex flex-col bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-blue-100 transition-all overflow-hidden">
+            <div className="p-5 flex gap-3 items-start">
                 <div className="relative shrink-0">
-                    <TutorAvatar name={name} image={tutor?.image} size="lg" />
+                    <Avatar name={name} image={tutor?.image} size="lg" />
                     {verified && (
                         <span className="absolute -bottom-1 -right-1 size-5 bg-blue-600 rounded-full flex items-center justify-center border-2 border-white">
                             <BadgeCheck size={10} className="text-white" />
@@ -60,73 +61,64 @@ function TutorCard({ listing }) {
                     )}
                 </div>
                 <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="font-bold text-gray-900 text-sm">{name}</span>
-                        {rating > 0 && (
-                            <span className="flex items-center gap-0.5 text-xs font-semibold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full">
-                                <Star size={10} className="fill-amber-500 text-amber-500" /> {rating.toFixed(1)}
-                            </span>
-                        )}
+                    <div className="flex items-start justify-between gap-1">
+                        <span className="font-bold text-gray-900 text-sm leading-snug">{name}</span>
+                        {badge}
                     </div>
-                    <p className="text-xs text-gray-500 mt-0.5 line-clamp-2 leading-relaxed">{title}</p>
+                    <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">{title}</p>
+                    {rating > 0 && (
+                        <div className="flex items-center gap-1 mt-1.5">
+                            <Star size={11} className="fill-amber-400 text-amber-400" />
+                            <span className="text-xs font-semibold text-gray-800">{rating.toFixed(1)}</span>
+                            <span className="text-xs text-gray-400">({reviewCount})</span>
+                        </div>
+                    )}
                 </div>
             </div>
 
-            {/* Subjects */}
             <div className="px-5 pb-3 flex flex-wrap gap-1.5">
                 {subjects.slice(0, 3).map(s => (
                     <span key={s} className="text-xs bg-blue-50 text-blue-700 px-2.5 py-0.5 rounded-full font-medium">{s}</span>
                 ))}
                 {subjects.length > 3 && (
-                    <span className="text-xs bg-gray-100 text-gray-400 px-2 py-0.5 rounded-full">+{subjects.length - 3} more</span>
+                    <span className="text-xs bg-gray-100 text-gray-400 px-2 py-0.5 rounded-full">+{subjects.length - 3}</span>
                 )}
             </div>
 
-            {/* Meta */}
-            <div className="px-5 pb-4 flex flex-wrap items-center gap-3 text-xs text-gray-500 mt-auto">
-                {city && <span className="flex items-center gap-1"><MapPin size={11} className="text-gray-400" />{city}</span>}
-                {experience > 0 && <span className="flex items-center gap-1"><Award size={11} className="text-gray-400" />{experience} yrs exp</span>}
-                <ModeBadge modes={teachingModes} />
-                {offersTrialClass && (
-                    <span className="flex items-center gap-1 text-emerald-600 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full">
-                        ✓ Free trial
-                    </span>
-                )}
+            <div className="px-5 pb-4 flex flex-wrap gap-x-3 gap-y-1 text-xs text-gray-500 mt-auto">
+                {city && <span className="flex items-center gap-1"><MapPin size={10} className="text-gray-400" />{city}</span>}
+                {experience > 0 && <span className="flex items-center gap-1"><Award size={10} className="text-gray-400" />{experience} yrs</span>}
+                {teachingModes.includes("ONLINE") && teachingModes.includes("HOME") && <span className="text-purple-600 font-medium">Online + Home</span>}
+                {teachingModes.includes("ONLINE") && !teachingModes.includes("HOME") && <span className="text-blue-600 font-medium">Online</span>}
+                {!teachingModes.includes("ONLINE") && teachingModes.includes("HOME") && <span className="text-emerald-600 font-medium">Home Tuition</span>}
+                {offersTrialClass && <span className="text-emerald-600 font-semibold">✓ Free trial</span>}
             </div>
 
-            {/* Footer */}
-            <div className="border-t border-gray-100 px-5 py-3 flex items-center justify-between bg-gray-50/50">
-                <div className="text-xs text-gray-400">{reviewCount > 0 ? `${reviewCount} reviews` : "New tutor"}</div>
-                <div className="flex items-center gap-3">
-                    {hourlyRate && <span className="text-sm font-bold text-gray-900">₹{hourlyRate}<span className="text-xs font-normal text-gray-400">/hr</span></span>}
-                    <span className="text-xs font-semibold text-blue-600 group-hover:underline flex items-center gap-0.5">
-                        View Profile <ArrowRight size={11} />
-                    </span>
-                </div>
+            <div className="border-t border-gray-100 px-5 py-3 flex items-center justify-between bg-gray-50/40">
+                {hourlyRate
+                    ? <span className="text-sm font-bold text-gray-900">₹{hourlyRate}<span className="text-xs font-normal text-gray-400">/hr</span></span>
+                    : <span />}
+                <span className="text-xs font-semibold text-blue-600 group-hover:underline flex items-center gap-0.5">
+                    View Profile <ArrowRight size={11} />
+                </span>
             </div>
         </Link>
     );
 }
 
+// ── Institute card ─────────────────────────────────────────────────────────────
 function InstituteCard({ listing }) {
     const { id, title, subjects = [], locations = [], hourlyRate, rating, reviewCount, experience, offersTrialClass, tutor } = listing;
     const name = tutor?.name || "Institute";
     const verified = tutor?.isVerified;
     const city = locations[0] || "";
-    const initials = name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
+    const estYear = experience ? new Date().getFullYear() - experience : null;
 
     return (
-        <Link href={`/search/${id}`} className="group flex flex-col bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg hover:border-blue-100 transition-all overflow-hidden">
-            {/* Header with logo */}
-            <div className="p-5 pb-3 flex gap-4 items-center">
+        <Link href={`/institute/${id}`} className="group flex flex-col bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-blue-100 transition-all overflow-hidden">
+            <div className="p-5 flex gap-3 items-start">
                 <div className="relative shrink-0">
-                    {tutor?.image ? (
-                        <img src={tutor.image} alt={name} className="w-14 h-14 rounded-xl object-cover border border-gray-100" />
-                    ) : (
-                        <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white font-bold text-lg border border-blue-200">
-                            {initials}
-                        </div>
-                    )}
+                    <InstituteAvatar name={name} image={tutor?.image} />
                     {verified && (
                         <span className="absolute -bottom-1 -right-1 size-5 bg-blue-600 rounded-full flex items-center justify-center border-2 border-white">
                             <BadgeCheck size={10} className="text-white" />
@@ -134,42 +126,36 @@ function InstituteCard({ listing }) {
                     )}
                 </div>
                 <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="font-bold text-gray-900 text-sm">{name}</span>
-                        {rating > 0 && (
-                            <span className="flex items-center gap-0.5 text-xs font-semibold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full">
-                                <Star size={10} className="fill-amber-500 text-amber-500" /> {rating.toFixed(1)}
-                            </span>
-                        )}
-                    </div>
-                    <p className="text-xs text-gray-500 mt-0.5 line-clamp-2 leading-relaxed">{title}</p>
+                    <span className="font-bold text-gray-900 text-sm leading-snug block">{name}</span>
+                    {rating > 0 && (
+                        <div className="flex items-center gap-1 mt-1">
+                            <Star size={11} className="fill-amber-400 text-amber-400" />
+                            <span className="text-xs font-semibold text-gray-800">{rating.toFixed(1)}</span>
+                            <span className="text-xs text-gray-400">({reviewCount} reviews)</span>
+                        </div>
+                    )}
+                    {estYear && <p className="text-xs text-gray-400 mt-0.5">Est. {estYear}</p>}
                 </div>
             </div>
 
-            {/* Courses */}
             <div className="px-5 pb-3 flex flex-wrap gap-1.5">
                 {subjects.slice(0, 3).map(s => (
                     <span key={s} className="text-xs bg-violet-50 text-violet-700 px-2.5 py-0.5 rounded-full font-medium">{s}</span>
                 ))}
                 {subjects.length > 3 && (
-                    <span className="text-xs bg-gray-100 text-gray-400 px-2 py-0.5 rounded-full">+{subjects.length - 3} more</span>
+                    <span className="text-xs bg-gray-100 text-gray-400 px-2 py-0.5 rounded-full">+{subjects.length - 3}</span>
                 )}
             </div>
 
-            {/* Meta */}
-            <div className="px-5 pb-4 flex flex-wrap items-center gap-3 text-xs text-gray-500 mt-auto">
-                {city && <span className="flex items-center gap-1"><MapPin size={11} className="text-gray-400" />{city}</span>}
-                {experience > 0 && <span className="flex items-center gap-1"><Clock size={11} className="text-gray-400" />Est. {new Date().getFullYear() - experience}</span>}
-                {offersTrialClass && (
-                    <span className="flex items-center gap-1 text-emerald-600 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full">
-                        ✓ Free demo class
-                    </span>
-                )}
+            <div className="px-5 pb-4 flex flex-wrap gap-x-3 gap-y-1 text-xs text-gray-500 mt-auto">
+                {city && <span className="flex items-center gap-1"><MapPin size={10} className="text-gray-400" />{city}</span>}
+                {offersTrialClass && <span className="text-emerald-600 font-semibold">✓ Free demo class</span>}
             </div>
 
-            {/* Footer */}
-            <div className="border-t border-gray-100 px-5 py-3 flex items-center justify-between bg-gray-50/50">
-                <div className="text-xs text-gray-400">{reviewCount > 0 ? `${reviewCount} reviews` : "New listing"}</div>
+            <div className="border-t border-gray-100 px-5 py-3 flex items-center justify-between bg-gray-50/40">
+                {hourlyRate
+                    ? <span className="text-xs text-gray-500">From <span className="font-bold text-gray-900">₹{hourlyRate}</span>/hr</span>
+                    : <span />}
                 <span className="text-xs font-semibold text-blue-600 group-hover:underline flex items-center gap-0.5">
                     Explore <ArrowRight size={11} />
                 </span>
@@ -192,18 +178,18 @@ export default function Home() {
     const [searchLocation, setSearchLocation] = useState("");
     const [activeTab, setActiveTab] = useState("TUTOR");
     const [openFaq, setOpenFaq] = useState(null);
-    const [featuredTutors, setFeaturedTutors] = useState([]);
+    const [profileTab, setProfileTab] = useState("popular");
+    const [popularTutors, setPopularTutors] = useState([]);
+    const [topReviewed, setTopReviewed] = useState([]);
     const [featuredInstitutes, setFeaturedInstitutes] = useState([]);
 
     useEffect(() => {
-        fetch("/api/tutors/featured")
-            .then(r => r.json())
-            .then(data => { if (Array.isArray(data)) setFeaturedTutors(data); })
-            .catch(() => {});
+        fetch("/api/tutors/featured?sort=popular")
+            .then(r => r.json()).then(d => { if (Array.isArray(d)) setPopularTutors(d); }).catch(() => {});
+        fetch("/api/tutors/featured?sort=reviewed")
+            .then(r => r.json()).then(d => { if (Array.isArray(d)) setTopReviewed(d); }).catch(() => {});
         fetch("/api/institutes/featured")
-            .then(r => r.json())
-            .then(data => { if (Array.isArray(data)) setFeaturedInstitutes(data); })
-            .catch(() => {});
+            .then(r => r.json()).then(d => { if (Array.isArray(d)) setFeaturedInstitutes(d); }).catch(() => {});
     }, []);
 
     const isAcademics = searchCategory === "academics";
@@ -449,58 +435,107 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* ── FEATURED TUTORS ── */}
-            {featuredTutors.length > 0 && (
-                <section className="py-16 px-4 bg-blue-50">
-                    <div className="max-w-4xl mx-auto">
-                        <div className="flex items-end justify-between mb-10">
-                            <div>
-                                <span className="text-xs font-semibold text-blue-600 tracking-widest mb-2 block">FEATURED</span>
-                                <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Meet Our Tutors</h2>
-                                <p className="text-gray-500 mt-1.5 text-sm">Real profiles, real expertise — browse and connect directly</p>
-                            </div>
-                            <Link href="/search?role=TUTOR" className="hidden md:flex items-center gap-1.5 text-blue-600 font-semibold text-sm hover:underline shrink-0 ml-4">
-                                View all <ArrowRight size={14} />
-                            </Link>
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {featuredTutors.slice(0, 6).map(listing => (
-                                <TutorCard key={listing.id} listing={listing} />
-                            ))}
-                        </div>
-                        <div className="mt-8 text-center md:hidden">
-                            <Link href="/search?role=TUTOR"
-                                className="inline-flex items-center gap-2 px-6 py-2.5 border border-blue-600 text-blue-600 rounded-lg font-semibold text-sm hover:bg-blue-50 transition-colors">
-                                View all tutors <ArrowRight size={14} />
-                            </Link>
-                        </div>
-                    </div>
-                </section>
-            )}
-
-            {/* ── FEATURED INSTITUTES ── */}
-            {featuredInstitutes.length > 0 && (
+            {/* ── TUTORS & INSTITUTES ── */}
+            {(popularTutors.length > 0 || topReviewed.length > 0 || featuredInstitutes.length > 0) && (
                 <section className="py-16 px-4 bg-white">
-                    <div className="max-w-4xl mx-auto">
-                        <div className="flex items-end justify-between mb-10">
+                    <div className="max-w-5xl mx-auto">
+                        {/* Section header */}
+                        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
                             <div>
-                                <span className="text-xs font-semibold text-violet-600 mb-2 block">INSTITUTES</span>
-                                <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Featured Coaching Centres</h2>
-                                <p className="text-gray-500 mt-1.5 text-sm">Verified institutes across India — find the right coaching centre for you</p>
+                                <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Find the Best Tutors</h2>
+                                <p className="text-gray-500 mt-1 text-sm">Real profiles, real reviews — connect directly with no commission</p>
                             </div>
-                            <Link href="/search?role=INSTITUTE" className="hidden md:flex items-center gap-1.5 text-blue-600 font-semibold text-sm hover:underline shrink-0 ml-4">
-                                View all <ArrowRight size={14} />
+                            <Link href="/search" className="hidden sm:flex items-center gap-1.5 text-blue-600 font-semibold text-sm hover:underline shrink-0">
+                                Browse all <ArrowRight size={14} />
                             </Link>
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {featuredInstitutes.slice(0, 6).map(listing => (
-                                <InstituteCard key={listing.id} listing={listing} />
+
+                        {/* Tab bar */}
+                        <div className="flex gap-2 mb-6 border-b border-gray-100 pb-0">
+                            {[
+                                { id: "popular", label: "Popular Tutors", icon: <Flame size={14} />, count: popularTutors.length },
+                                { id: "reviewed", label: "Top Reviewed", icon: <Star size={14} />, count: topReviewed.length },
+                                { id: "institutes", label: "Coaching Centres", icon: <Building2 size={14} />, count: featuredInstitutes.length },
+                            ].filter(t => t.count > 0).map(tab => (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => setProfileTab(tab.id)}
+                                    className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold border-b-2 -mb-px transition-colors ${
+                                        profileTab === tab.id
+                                            ? "border-blue-600 text-blue-600"
+                                            : "border-transparent text-gray-400 hover:text-gray-700"
+                                    }`}
+                                >
+                                    {tab.icon} {tab.label}
+                                </button>
                             ))}
                         </div>
-                        <div className="mt-8 text-center md:hidden">
-                            <Link href="/search?role=INSTITUTE"
-                                className="inline-flex items-center gap-2 px-6 py-2.5 border border-blue-600 text-blue-600 rounded-lg font-semibold text-sm hover:bg-blue-50 transition-colors">
-                                View all institutes <ArrowRight size={14} />
+
+                        {/* Tab: Popular Tutors */}
+                        {profileTab === "popular" && popularTutors.length > 0 && (
+                            <>
+                                <p className="text-xs text-gray-400 mb-4 flex items-center gap-1.5">
+                                    <Flame size={12} className="text-orange-500" />
+                                    Ranked by student interest and profile views
+                                </p>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                                    {popularTutors.slice(0, 8).map((listing, i) => (
+                                        <TutorCard key={listing.id} listing={listing}
+                                            badge={listing.viewCount > 0
+                                                ? <span className="flex items-center gap-0.5 text-[10px] font-semibold text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded-full shrink-0">
+                                                    <Flame size={9} /> {listing.viewCount > 999 ? `${(listing.viewCount/1000).toFixed(1)}k` : listing.viewCount}
+                                                  </span>
+                                                : null}
+                                        />
+                                    ))}
+                                </div>
+                            </>
+                        )}
+
+                        {/* Tab: Top Reviewed */}
+                        {profileTab === "reviewed" && topReviewed.length > 0 && (
+                            <>
+                                <p className="text-xs text-gray-400 mb-4 flex items-center gap-1.5">
+                                    <Star size={12} className="fill-amber-400 text-amber-400" />
+                                    Ranked by student ratings and number of reviews
+                                </p>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                                    {topReviewed.slice(0, 8).map(listing => (
+                                        <TutorCard key={listing.id} listing={listing}
+                                            badge={listing.reviewCount > 0
+                                                ? <span className="flex items-center gap-0.5 text-[10px] font-semibold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded-full shrink-0">
+                                                    <Star size={9} className="fill-amber-500 text-amber-500" /> {listing.reviewCount}
+                                                  </span>
+                                                : null}
+                                        />
+                                    ))}
+                                </div>
+                            </>
+                        )}
+
+                        {/* Tab: Coaching Centres */}
+                        {profileTab === "institutes" && featuredInstitutes.length > 0 && (
+                            <>
+                                <p className="text-xs text-gray-400 mb-4 flex items-center gap-1.5">
+                                    <Sparkles size={12} className="text-violet-500" />
+                                    Verified coaching centres across India
+                                </p>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                                    {featuredInstitutes.slice(0, 8).map(listing => (
+                                        <InstituteCard key={listing.id} listing={listing} />
+                                    ))}
+                                </div>
+                            </>
+                        )}
+
+                        <div className="mt-8 flex flex-wrap gap-3 justify-center sm:justify-start">
+                            <Link href="/search?role=TUTOR"
+                                className="inline-flex items-center gap-2 px-5 py-2 border border-gray-200 text-gray-600 rounded-lg font-semibold text-sm hover:bg-gray-50 transition-colors">
+                                All Tutors <ArrowRight size={13} />
+                            </Link>
+                            <Link href="/institutes"
+                                className="inline-flex items-center gap-2 px-5 py-2 border border-gray-200 text-gray-600 rounded-lg font-semibold text-sm hover:bg-gray-50 transition-colors">
+                                All Institutes <ArrowRight size={13} />
                             </Link>
                         </div>
                     </div>

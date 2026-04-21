@@ -81,9 +81,9 @@ function InitialsLogo({ name, image, size = "lg" }) {
     const colours = ["from-blue-600 to-indigo-700", "from-violet-600 to-purple-700", "from-emerald-600 to-teal-700", "from-rose-500 to-pink-700"];
     const idx = (name || "").charCodeAt(0) % colours.length;
     const dim = size === "lg" ? "w-20 h-20 text-2xl" : "w-12 h-12 text-base";
-    if (image) return <img src={image} alt={name} className={`${dim} rounded-2xl object-cover border-4 border-white shadow-lg`} />;
+    if (image) return <img src={image} alt={name} className={`${dim} rounded-2xl object-cover shadow-sm border border-gray-100`} />;
     return (
-        <div className={`${dim} rounded-2xl bg-gradient-to-br ${colours[idx]} text-white font-bold flex items-center justify-center border-4 border-white shadow-lg shrink-0`}>
+        <div className={`${dim} rounded-2xl bg-gradient-to-br ${colours[idx]} text-white font-bold flex items-center justify-center shadow-sm shrink-0`}>
             {initials}
         </div>
     );
@@ -159,82 +159,90 @@ export default async function InstituteProfilePage({ params }) {
             <div className="max-w-5xl mx-auto px-4 py-6 space-y-5">
 
                 {/* ── Hero Card ── */}
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                    {/* Banner */}
-                    <div className="h-28 bg-gradient-to-r from-violet-600 via-blue-600 to-blue-500 relative">
-                        {listing.isFeatured && (
-                            <span className="absolute top-3 right-3 flex items-center gap-1 text-xs font-semibold bg-amber-400 text-amber-900 px-2.5 py-1 rounded-full">
-                                <Sparkles size={11} /> Featured
-                            </span>
-                        )}
-                    </div>
+                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                    <div className="flex gap-5 items-start">
+                        {/* Logo */}
+                        <InitialsLogo name={listing.title} image={institute.image} size="lg" />
 
-                    <div className="px-6 pb-6">
-                        <div className="flex flex-col sm:flex-row sm:items-end gap-4 -mt-10 mb-5">
-                            <InitialsLogo name={listing.title} image={institute.image} />
-                            <div className="flex-1 sm:pb-1">
-                                <div className="flex flex-wrap items-center gap-2 mb-0.5">
-                                    <h1 className="text-xl font-bold text-gray-900">{listing.title}</h1>
-                                    {institute.isVerified && (
-                                        <span className="flex items-center gap-1 text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full font-medium border border-blue-100">
-                                            <BadgeCheck size={11} /> Verified
-                                        </span>
-                                    )}
-                                    {listing.offersTrialClass && (
-                                        <span className="text-xs bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full font-medium border border-emerald-100">
-                                            Free Demo Class
-                                        </span>
-                                    )}
+                        {/* Identity */}
+                        <div className="flex-1 min-w-0">
+                            <div className="flex flex-wrap items-center gap-2 mb-1">
+                                <h1 className="text-xl font-bold text-gray-900">{listing.title}</h1>
+                                {institute.isVerified && (
+                                    <span className="flex items-center gap-1 text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full font-medium border border-blue-100">
+                                        <BadgeCheck size={11} /> Verified
+                                    </span>
+                                )}
+                                {listing.isFeatured && (
+                                    <span className="flex items-center gap-1 text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full font-medium border border-blue-100">
+                                        <Sparkles size={10} /> Featured
+                                    </span>
+                                )}
+                                {listing.offersTrialClass && (
+                                    <span className="text-xs bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full font-medium border border-emerald-100">
+                                        Free Demo Class
+                                    </span>
+                                )}
+                            </div>
+
+                            {/* Rating */}
+                            {listing.rating > 0 && (
+                                <div className="flex items-center gap-2 mb-3">
+                                    <div className="flex gap-0.5">
+                                        {[1,2,3,4,5].map(i => (
+                                            <Star key={i} size={13} className={i <= Math.round(listing.rating) ? "fill-amber-400 text-amber-400" : "fill-gray-200 text-gray-200"} />
+                                        ))}
+                                    </div>
+                                    <span className="text-sm font-semibold text-gray-800">{listing.rating.toFixed(1)}</span>
+                                    <span className="text-sm text-gray-400">({listing.reviewCount} reviews)</span>
                                 </div>
-                                <p className="text-sm text-gray-500">{listing.title}</p>
+                            )}
+
+                            {/* Stats strip */}
+                            <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-sm text-gray-600">
+                                {foundingYear && (
+                                    <span className="flex items-center gap-1.5">
+                                        <Calendar size={13} className="text-gray-400" />
+                                        Est. {foundingYear}{yearsActive ? ` · ${yearsActive} yrs` : ""}
+                                    </span>
+                                )}
+                                {listing.locations?.length > 0 && (
+                                    <span className="flex items-center gap-1.5">
+                                        <MapPin size={13} className="text-gray-400" />
+                                        {listing.locations.slice(0, 2).join(", ")}
+                                        {listing.locations.length > 2 && ` +${listing.locations.length - 2}`}
+                                    </span>
+                                )}
+                                {institute.courses?.length > 0 && (
+                                    <span className="flex items-center gap-1.5">
+                                        <BookOpen size={13} className="text-gray-400" />
+                                        {institute.courses.length} courses
+                                    </span>
+                                )}
+                                {website && (
+                                    <a href={website} target="_blank" rel="noopener noreferrer"
+                                        className="flex items-center gap-1.5 text-blue-600 hover:underline">
+                                        <Globe size={13} /> Website
+                                    </a>
+                                )}
                             </div>
                         </div>
+                    </div>
 
-                        {/* Stats strip */}
-                        <div className="flex flex-wrap gap-x-5 gap-y-2 mb-5 text-sm text-gray-600">
-                            {listing.rating > 0 && (
-                                <span className="flex items-center gap-1.5 font-medium text-amber-600">
-                                    <Star size={14} className="fill-amber-400 text-amber-400" />
-                                    {listing.rating.toFixed(1)}
-                                    <span className="text-gray-400 font-normal">({listing.reviewCount} reviews)</span>
-                                </span>
-                            )}
-                            {foundingYear && (
-                                <span className="flex items-center gap-1.5">
-                                    <Calendar size={13} className="text-gray-400" />
-                                    Est. {foundingYear}{yearsActive ? ` · ${yearsActive} yrs` : ""}
-                                </span>
-                            )}
-                            {listing.locations?.length > 0 && (
-                                <span className="flex items-center gap-1.5">
-                                    <MapPin size={13} className="text-gray-400" />
-                                    {listing.locations.slice(0, 2).join(", ")}
-                                    {listing.locations.length > 2 && ` +${listing.locations.length - 2}`}
-                                </span>
-                            )}
-                            {institute.courses?.length > 0 && (
-                                <span className="flex items-center gap-1.5">
-                                    <BookOpen size={13} className="text-gray-400" />
-                                    {institute.courses.length} courses
-                                </span>
-                            )}
-                        </div>
-
-                        {/* CTAs */}
-                        <div className="flex flex-wrap gap-3">
-                            {institute.email && (
-                                <a href={`mailto:${institute.email}`}
-                                    className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors">
-                                    <Mail size={15} /> Contact Institute
-                                </a>
-                            )}
-                            {website && (
-                                <a href={website} target="_blank" rel="noopener noreferrer"
-                                    className="flex items-center gap-2 px-5 py-2.5 border border-gray-200 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-colors">
-                                    <Globe size={15} /> Visit Website
-                                </a>
-                            )}
-                        </div>
+                    {/* CTAs */}
+                    <div className="flex flex-wrap gap-3 mt-5 pt-5 border-t border-gray-50">
+                        {institute.email && (
+                            <a href={`mailto:${institute.email}`}
+                                className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors">
+                                <Mail size={15} /> Contact Institute
+                            </a>
+                        )}
+                        {website && (
+                            <a href={website} target="_blank" rel="noopener noreferrer"
+                                className="flex items-center gap-2 px-5 py-2.5 border border-gray-200 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-colors">
+                                <Globe size={15} /> Visit Website
+                            </a>
+                        )}
                     </div>
                 </div>
 
