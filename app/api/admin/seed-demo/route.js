@@ -233,80 +233,6 @@ export async function GET(request) {
         },
     ];
 
-    // Seed Mumbai tutors
-    for (const t of MUMBAI_TUTORS) {
-        try {
-            const existingUser = await prisma.user.findFirst({
-                where: { OR: [{ phone: t.phone }, { email: t.email }] },
-                include: { tutorListing: true },
-            });
-            if (existingUser?.tutorListing) { results.skipped++; continue; }
-
-            const user = existingUser
-                ? await prisma.user.update({ where: { id: existingUser.id }, data: { name: t.name, image: t.image, role: "TUTOR", phoneVerified: true, lat: t.lat, lng: t.lng } })
-                : await prisma.user.create({ data: { name: t.name, phone: t.phone, email: t.email, image: t.image, role: "TUTOR", phoneVerified: true, isVerified: true, lat: t.lat, lng: t.lng } });
-
-            await prisma.listing.create({
-                data: {
-                    tutorId: user.id,
-                    title: t.title,
-                    bio: t.bio,
-                    subjects: t.subjects,
-                    grades: t.grades,
-                    locations: t.locations,
-                    hourlyRate: t.hourlyRate,
-                    rating: t.rating,
-                    reviewCount: t.reviewCount,
-                    experience: t.experience,
-                    teachingModes: t.teachingModes,
-                    offersTrialClass: t.offersTrialClass,
-                    isActive: true,
-                    isVipEligible: true,
-                    isInstitute: false,
-                },
-            });
-            results.tutors++;
-        } catch (e) {
-            console.error(`Seed error for ${t.name}:`, e.message);
-        }
-    }
-
-    for (const inst of MUMBAI_INSTITUTES) {
-        try {
-            const existingUser = await prisma.user.findFirst({
-                where: { OR: [{ phone: inst.phone }, { email: inst.email }] },
-                include: { tutorListing: true },
-            });
-            if (existingUser?.tutorListing) { results.skipped++; continue; }
-
-            const user = existingUser
-                ? await prisma.user.update({ where: { id: existingUser.id }, data: { name: inst.name, image: inst.image, role: "INSTITUTE", phoneVerified: true, lat: inst.lat, lng: inst.lng } })
-                : await prisma.user.create({ data: { name: inst.name, phone: inst.phone, email: inst.email, image: inst.image, role: "INSTITUTE", phoneVerified: true, isVerified: true, lat: inst.lat, lng: inst.lng } });
-
-            await prisma.listing.create({
-                data: {
-                    tutorId: user.id,
-                    title: inst.title,
-                    bio: inst.bio,
-                    subjects: inst.subjects,
-                    grades: inst.grades,
-                    locations: inst.locations,
-                    hourlyRate: inst.hourlyRate,
-                    rating: inst.rating,
-                    reviewCount: inst.reviewCount,
-                    experience: inst.experience,
-                    teachingModes: inst.teachingModes,
-                    offersTrialClass: inst.offersTrialClass,
-                    isActive: true,
-                    isInstitute: true,
-                },
-            });
-            results.institutes++;
-        } catch (e) {
-            console.error(`Seed error for ${inst.name}:`, e.message);
-        }
-    }
-
     const DEMO_INSTITUTES = [
         {
             name: "Excellence Academy",
@@ -365,6 +291,57 @@ export async function GET(request) {
     ];
 
     const results = { tutors: 0, institutes: 0, skipped: 0 };
+
+    // Seed Mumbai tutors and institutes (declared above in MUMBAI_TUTORS / MUMBAI_INSTITUTES)
+    for (const t of MUMBAI_TUTORS) {
+        try {
+            const existingUser = await prisma.user.findFirst({
+                where: { OR: [{ phone: t.phone }, { email: t.email }] },
+                include: { tutorListing: true },
+            });
+            if (existingUser?.tutorListing) { results.skipped++; continue; }
+
+            const user = existingUser
+                ? await prisma.user.update({ where: { id: existingUser.id }, data: { name: t.name, image: t.image, role: "TUTOR", phoneVerified: true, lat: t.lat, lng: t.lng } })
+                : await prisma.user.create({ data: { name: t.name, phone: t.phone, email: t.email, image: t.image, role: "TUTOR", phoneVerified: true, isVerified: true, lat: t.lat, lng: t.lng } });
+
+            await prisma.listing.create({
+                data: {
+                    tutorId: user.id, title: t.title, bio: t.bio, subjects: t.subjects,
+                    grades: t.grades, locations: t.locations, hourlyRate: t.hourlyRate,
+                    rating: t.rating, reviewCount: t.reviewCount, experience: t.experience,
+                    teachingModes: t.teachingModes, offersTrialClass: t.offersTrialClass,
+                    isActive: true, isVipEligible: true, isInstitute: false,
+                },
+            });
+            results.tutors++;
+        } catch (e) { console.error(`Seed error for ${t.name}:`, e.message); }
+    }
+
+    for (const inst of MUMBAI_INSTITUTES) {
+        try {
+            const existingUser = await prisma.user.findFirst({
+                where: { OR: [{ phone: inst.phone }, { email: inst.email }] },
+                include: { tutorListing: true },
+            });
+            if (existingUser?.tutorListing) { results.skipped++; continue; }
+
+            const user = existingUser
+                ? await prisma.user.update({ where: { id: existingUser.id }, data: { name: inst.name, image: inst.image, role: "INSTITUTE", phoneVerified: true, lat: inst.lat, lng: inst.lng } })
+                : await prisma.user.create({ data: { name: inst.name, phone: inst.phone, email: inst.email, image: inst.image, role: "INSTITUTE", phoneVerified: true, isVerified: true, lat: inst.lat, lng: inst.lng } });
+
+            await prisma.listing.create({
+                data: {
+                    tutorId: user.id, title: inst.title, bio: inst.bio, subjects: inst.subjects,
+                    grades: inst.grades, locations: inst.locations, hourlyRate: inst.hourlyRate,
+                    rating: inst.rating, reviewCount: inst.reviewCount, experience: inst.experience,
+                    teachingModes: inst.teachingModes, offersTrialClass: inst.offersTrialClass,
+                    isActive: true, isInstitute: true,
+                },
+            });
+            results.institutes++;
+        } catch (e) { console.error(`Seed error for ${inst.name}:`, e.message); }
+    }
 
     for (const t of DEMO_TUTORS) {
         try {
