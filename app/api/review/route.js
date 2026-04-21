@@ -86,9 +86,16 @@ export async function POST(request) {
         const reviewCount = reviews.length;
         const averageRating = reviews.reduce((acc, curr) => acc + curr.rating, 0) / reviewCount;
 
+        // Auto-feature listings that earn 4.5+ stars with 10+ reviews
+        const shouldFeature = averageRating >= 4.5 && reviewCount >= 10;
+
         await prisma.listing.update({
             where: { tutorId: targetId },
-            data: { rating: averageRating, reviewCount: reviewCount }
+            data: {
+                rating: averageRating,
+                reviewCount,
+                ...(shouldFeature && { isFeatured: true }),
+            },
         });
 
         return NextResponse.json({ success: true, review, newRating: averageRating.toFixed(1), newReviewCount: reviewCount });

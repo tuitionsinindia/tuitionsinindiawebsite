@@ -158,12 +158,15 @@ model Listing {
   trialDuration    Int         @default(30)
   isVipEligible    Boolean     @default(false)
   vipAvailability  Json? // weekly schedule slots for VIP matching
+  isFeatured       Boolean     @default(false)
+  featuredUntil    DateTime?   // null = permanently featured
   tutor            User        @relation(fields: [tutorId], references: [id], onDelete: Cascade)
 
   @@index([isActive])
   @@index([rating])
   @@index([createdAt])
   @@index([hourlyRate])
+  @@index([isFeatured])
 }
 
 model TrialBooking {

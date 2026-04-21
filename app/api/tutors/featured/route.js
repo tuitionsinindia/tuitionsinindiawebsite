@@ -13,9 +13,10 @@ export async function GET() {
                 bio: { not: "" },
             },
             orderBy: [
+                { isFeatured: "desc" },
                 { rating: "desc" },
-                { viewCount: "desc" },
                 { reviewCount: "desc" },
+                { viewCount: "desc" },
             ],
             take: 8,
             select: {
@@ -31,6 +32,7 @@ export async function GET() {
                 teachingModes: true,
                 expertiseLevel: true,
                 offersTrialClass: true,
+                isFeatured: true,
                 tutor: {
                     select: {
                         id: true,
