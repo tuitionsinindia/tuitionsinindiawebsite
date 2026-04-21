@@ -8,7 +8,7 @@ export async function GET() {
     try {
         const listings = await prisma.listing.findMany({
             where: { isActive: true, isInstitute: true },
-            orderBy: [{ rating: "desc" }, { reviewCount: "desc" }],
+            orderBy: [{ isFeatured: "desc" }, { rating: "desc" }, { reviewCount: "desc" }],
             take: 6,
             select: {
                 id: true,
@@ -22,6 +22,7 @@ export async function GET() {
                 experience: true,
                 teachingModes: true,
                 offersTrialClass: true,
+                isFeatured: true,
                 tutor: {
                     select: {
                         name: true,
