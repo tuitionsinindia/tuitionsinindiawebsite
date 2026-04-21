@@ -873,31 +873,6 @@ function SearchResultsContent() {
                                                     {item.role === "INSTITUTE" ? "Contact Institute" : "Contact Tutor"}
                                                 </button>
 
-                                                {/* Secondary: Send Inquiry */}
-                                                <button
-                                                    onClick={() => handleSendInquiry(item)}
-                                                    className="flex items-center gap-1.5 px-4 py-2 border border-blue-200 bg-blue-50 text-blue-700 text-sm font-semibold rounded-lg hover:bg-blue-100 active:scale-95 transition-all"
-                                                >
-                                                    <MessageCircle size={12} /> Send Inquiry
-                                                </button>
-
-                                                {/* Book Demo */}
-                                                {item.offersTrialClass && (
-                                                    <button
-                                                        onClick={() => {
-                                                            if (!loggedInUser) {
-                                                                saveIntent({ action: "inquiry", tutorId: item.id || item.userId, tutorName: item.name });
-                                                                setSignupModal({ open: true, targetTutor: item, pendingAction: "inquiry" });
-                                                            } else {
-                                                                setTrialModal({ open: true, tutor: item });
-                                                            }
-                                                        }}
-                                                        className="flex items-center gap-1.5 px-4 py-2 bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm font-semibold rounded-lg hover:bg-emerald-100 active:scale-95 transition-all"
-                                                    >
-                                                        <Clock size={12} /> Book Demo
-                                                    </button>
-                                                )}
-
                                                 {/* View Profile */}
                                                 <Link href={`/search/${item.id || item.userId || "#"}`}
                                                     onClick={() => trackViewProfile(item.id)}

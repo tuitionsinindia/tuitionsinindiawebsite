@@ -435,51 +435,44 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* ── TUTORS & INSTITUTES ── */}
-            {(popularTutors.length > 0 || topReviewed.length > 0 || featuredInstitutes.length > 0) && (
-                <section className="py-16 px-4 bg-white">
+            {/* ── TUTORS ── */}
+            {(popularTutors.length > 0 || topReviewed.length > 0) && (
+                <section className="py-16 px-4 bg-blue-50">
                     <div className="max-w-5xl mx-auto">
-                        {/* Section header */}
                         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
                             <div>
                                 <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Find the Best Tutors</h2>
                                 <p className="text-gray-500 mt-1 text-sm">Real profiles, real reviews — connect directly with no commission</p>
                             </div>
-                            <Link href="/search" className="hidden sm:flex items-center gap-1.5 text-blue-600 font-semibold text-sm hover:underline shrink-0">
-                                Browse all <ArrowRight size={14} />
+                            <Link href="/search?role=TUTOR" className="hidden sm:flex items-center gap-1.5 text-blue-600 font-semibold text-sm hover:underline shrink-0">
+                                Browse all tutors <ArrowRight size={14} />
                             </Link>
                         </div>
 
                         {/* Tab bar */}
-                        <div className="flex gap-2 mb-6 border-b border-gray-100 pb-0">
+                        <div className="flex gap-1 mb-6 border-b border-blue-100">
                             {[
-                                { id: "popular", label: "Popular Tutors", icon: <Flame size={14} />, count: popularTutors.length },
-                                { id: "reviewed", label: "Top Reviewed", icon: <Star size={14} />, count: topReviewed.length },
-                                { id: "institutes", label: "Coaching Centres", icon: <Building2 size={14} />, count: featuredInstitutes.length },
+                                { id: "popular", label: "Popular", icon: <Flame size={13} />, count: popularTutors.length },
+                                { id: "reviewed", label: "Top Reviewed", icon: <Star size={13} />, count: topReviewed.length },
                             ].filter(t => t.count > 0).map(tab => (
-                                <button
-                                    key={tab.id}
-                                    onClick={() => setProfileTab(tab.id)}
+                                <button key={tab.id} onClick={() => setProfileTab(tab.id)}
                                     className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold border-b-2 -mb-px transition-colors ${
                                         profileTab === tab.id
                                             ? "border-blue-600 text-blue-600"
                                             : "border-transparent text-gray-400 hover:text-gray-700"
-                                    }`}
-                                >
+                                    }`}>
                                     {tab.icon} {tab.label}
                                 </button>
                             ))}
                         </div>
 
-                        {/* Tab: Popular Tutors */}
                         {profileTab === "popular" && popularTutors.length > 0 && (
                             <>
-                                <p className="text-xs text-gray-400 mb-4 flex items-center gap-1.5">
-                                    <Flame size={12} className="text-orange-500" />
-                                    Ranked by student interest and profile views
+                                <p className="text-xs text-gray-400 mb-5 flex items-center gap-1.5">
+                                    <Flame size={12} className="text-orange-500" /> Ranked by student interest and profile views
                                 </p>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                                    {popularTutors.slice(0, 8).map((listing, i) => (
+                                    {popularTutors.slice(0, 8).map(listing => (
                                         <TutorCard key={listing.id} listing={listing}
                                             badge={listing.viewCount > 0
                                                 ? <span className="flex items-center gap-0.5 text-[10px] font-semibold text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded-full shrink-0">
@@ -492,12 +485,10 @@ export default function Home() {
                             </>
                         )}
 
-                        {/* Tab: Top Reviewed */}
                         {profileTab === "reviewed" && topReviewed.length > 0 && (
                             <>
-                                <p className="text-xs text-gray-400 mb-4 flex items-center gap-1.5">
-                                    <Star size={12} className="fill-amber-400 text-amber-400" />
-                                    Ranked by student ratings and number of reviews
+                                <p className="text-xs text-gray-400 mb-5 flex items-center gap-1.5">
+                                    <Star size={12} className="fill-amber-400 text-amber-400" /> Ranked by student ratings and review count
                                 </p>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                                     {topReviewed.slice(0, 8).map(listing => (
@@ -513,29 +504,38 @@ export default function Home() {
                             </>
                         )}
 
-                        {/* Tab: Coaching Centres */}
-                        {profileTab === "institutes" && featuredInstitutes.length > 0 && (
-                            <>
-                                <p className="text-xs text-gray-400 mb-4 flex items-center gap-1.5">
-                                    <Sparkles size={12} className="text-violet-500" />
-                                    Verified coaching centres across India
-                                </p>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                                    {featuredInstitutes.slice(0, 8).map(listing => (
-                                        <InstituteCard key={listing.id} listing={listing} />
-                                    ))}
-                                </div>
-                            </>
-                        )}
-
-                        <div className="mt-8 flex flex-wrap gap-3 justify-center sm:justify-start">
+                        <div className="mt-8">
                             <Link href="/search?role=TUTOR"
-                                className="inline-flex items-center gap-2 px-5 py-2 border border-gray-200 text-gray-600 rounded-lg font-semibold text-sm hover:bg-gray-50 transition-colors">
-                                All Tutors <ArrowRight size={13} />
+                                className="inline-flex items-center gap-2 px-5 py-2.5 border border-blue-200 text-blue-600 bg-white rounded-lg font-semibold text-sm hover:bg-blue-50 transition-colors">
+                                Browse all tutors <ArrowRight size={13} />
                             </Link>
+                        </div>
+                    </div>
+                </section>
+            )}
+
+            {/* ── COACHING CENTRES ── */}
+            {featuredInstitutes.length > 0 && (
+                <section className="py-16 px-4 bg-white">
+                    <div className="max-w-5xl mx-auto">
+                        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+                            <div>
+                                <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Top Coaching Centres</h2>
+                                <p className="text-gray-500 mt-1 text-sm">Verified institutes across India — find the right coaching centre for you</p>
+                            </div>
+                            <Link href="/institutes" className="hidden sm:flex items-center gap-1.5 text-blue-600 font-semibold text-sm hover:underline shrink-0">
+                                Browse all institutes <ArrowRight size={14} />
+                            </Link>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                            {featuredInstitutes.slice(0, 8).map(listing => (
+                                <InstituteCard key={listing.id} listing={listing} />
+                            ))}
+                        </div>
+                        <div className="mt-8">
                             <Link href="/institutes"
-                                className="inline-flex items-center gap-2 px-5 py-2 border border-gray-200 text-gray-600 rounded-lg font-semibold text-sm hover:bg-gray-50 transition-colors">
-                                All Institutes <ArrowRight size={13} />
+                                className="inline-flex items-center gap-2 px-5 py-2.5 border border-gray-200 text-gray-600 rounded-lg font-semibold text-sm hover:bg-gray-50 transition-colors">
+                                Browse all institutes <ArrowRight size={13} />
                             </Link>
                         </div>
                     </div>
