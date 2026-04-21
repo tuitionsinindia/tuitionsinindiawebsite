@@ -477,9 +477,22 @@ function SearchResultsContent() {
     };
 
     const teachingModeLabel = (mode) => ({
-        ONLINE: "Online", STUDENT_HOME: "At Student's Home",
-        TUTOR_HOME: "At Tutor's Home", CENTER: "At Centre"
+        STUDENT_HOME: "Tutor comes to you",
+        TUTOR_HOME: "Visit tutor's place",
+        CENTER: "At coaching centre",
+        ONLINE: "Online",
     }[mode] || mode);
+
+    // Smart sort: when student picks home visit → auto-sort by distance
+    useEffect(() => {
+        if (teachingMode === "STUDENT_HOME") {
+            setSortBy("distance");
+            if (!userLat) detectLocation();
+        } else if (teachingMode === "ONLINE" && sortBy === "distance") {
+            setSortBy("relevance");
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [teachingMode]);
 
     const activeFilterCount = [grade, teachingMode, verifiedOnly, board, gender, experience, listingType !== "ALL", maxRate < 10000].filter(Boolean).length;
 
@@ -568,17 +581,20 @@ function SearchResultsContent() {
                             <p className="text-xs font-semibold text-gray-500">Teaching Mode</p>
                             {[
                                 { id: "", label: "All Modes" },
+                                { id: "STUDENT_HOME", label: "Tutor comes to you", hint: "sorts by distance" },
+                                { id: "TUTOR_HOME", label: "Visit tutor's place" },
+                                { id: "CENTER", label: "At coaching centre" },
                                 { id: "ONLINE", label: "Online" },
-                                { id: "STUDENT_HOME", label: "At Student's Home" },
-                                { id: "TUTOR_HOME", label: "At Tutor's Home" },
-                                { id: "CENTER", label: "At Centre" }
                             ].map(mode => (
                                 <label key={mode.id} className="flex items-center gap-2.5 cursor-pointer group">
                                     <input type="radio" name="teachingMode" value={mode.id}
                                         checked={teachingMode === mode.id}
                                         onChange={() => setTeachingMode(mode.id)}
                                         className="accent-blue-600 w-4 h-4 cursor-pointer" />
-                                    <span className="text-sm text-gray-700 group-hover:text-blue-600">{mode.label}</span>
+                                    <span className="text-sm text-gray-700 group-hover:text-blue-600">
+                                        {mode.label}
+                                        {mode.hint && <span className="ml-1 text-xs text-blue-400">{mode.hint}</span>}
+                                    </span>
                                 </label>
                             ))}
                         </div>
@@ -736,14 +752,23 @@ function SearchResultsContent() {
                         </div>
 
                         {/* Sort */}
-                        <select value={sortBy} onChange={e => setSortBy(e.target.value)}
-                            className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 bg-white outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer shrink-0">
-                            <option value="relevance">Relevance</option>
-                            <option value="rating">Highest Rated</option>
-                            <option value="fee_low">Fee: Low to High</option>
-                            <option value="fee_high">Fee: High to Low</option>
-                            <option value="experience">Most Experienced</option>
-                        </select>
+                        <div className="flex items-center gap-2 shrink-0">
+                            {sortBy === "distance" && !userLat && (
+                                <button onClick={detectLocation} disabled={isLocating}
+                                    className="flex items-center gap-1 text-xs text-blue-600 border border-blue-200 bg-blue-50 px-2.5 py-2 rounded-lg hover:bg-blue-100 transition-colors whitespace-nowrap">
+                                    <MapPin size={12} /> {isLocating ? "Detecting..." : "Share location"}
+                                </button>
+                            )}
+                            <select value={sortBy} onChange={e => setSortBy(e.target.value)}
+                                className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 bg-white outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
+                                {teachingMode !== "ONLINE" && <option value="distance">Nearest First</option>}
+                                <option value="relevance">Relevance</option>
+                                <option value="rating">Highest Rated</option>
+                                <option value="fee_low">Fee: Low to High</option>
+                                <option value="fee_high">Fee: High to Low</option>
+                                <option value="experience">Most Experienced</option>
+                            </select>
+                        </div>
                     </div>
 
                     {/* Active Filter Chips */}
