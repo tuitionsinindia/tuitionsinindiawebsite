@@ -27,6 +27,7 @@ model User {
   isVerified          Boolean            @default(false)
   verificationRequest VerificationRequest?
   isIdVerified        Boolean            @default(false)
+  isSuspended         Boolean            @default(false)
   credits             Int                @default(0)
   platformCredit      Int                @default(0) // demo deposit credits in paise
   contactViewsThisMonth Int             @default(0) // resets 1st of each month

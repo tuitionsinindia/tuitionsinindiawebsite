@@ -65,6 +65,13 @@ export async function POST(request) {
         }
 
         // 2. Create the Lead
+        // budget arrives as a free-text string (e.g. "300-500 per hour") from the
+        // requirement form, but the schema stores it as Int?. Extract the first
+        // integer from the string; fall back to null so Prisma never rejects it.
+        const budgetInt = budget
+            ? (parseInt(String(budget).match(/\d+/)?.[0] ?? '', 10) || null)
+            : null;
+
         const lead = await prisma.lead.create({
             data: {
                 studentId: user.id,
@@ -72,7 +79,7 @@ export async function POST(request) {
                 grades: grade ? [grade] : [],
                 locations: location ? [location] : [],
                 modes: Array.isArray(modes) && modes.length > 0 ? modes : ["BOTH"],
-                budget: budget,
+                budget: budgetInt,
                 description: description,
                 status: 'OPEN',
             },
