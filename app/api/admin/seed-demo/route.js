@@ -299,7 +299,6 @@ export async function GET(request) {
                     offersTrialClass: inst.offersTrialClass,
                     isActive: true,
                     isInstitute: true,
-                    lat: inst.lat, lng: inst.lng,
                 },
             });
             results.institutes++;
