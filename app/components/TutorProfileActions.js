@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
-    Clock, Phone, MessageCircle, LogIn, Bookmark,
+    Clock, Phone, Bookmark,
     Copy, Check, ExternalLink, Loader2, Send, X
 } from "lucide-react";
 import TrialBookingModal from "./TrialBookingModal";
@@ -301,26 +301,13 @@ export default function TutorProfileActions({ tutor, subject, offersTrialClass, 
                     {loggedInUser ? (showContact ? "Hide Contact" : "View Contact") : "View Contact"}
                 </button>
 
-                {/* Send Inquiry */}
-                <button
-                    onClick={handleSendInquiry}
-                    className={`flex items-center gap-2 px-5 py-2.5 border rounded-xl text-sm font-semibold transition-colors ${
-                        showInquiry
-                            ? "bg-blue-100 border-blue-300 text-blue-700"
-                            : "border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100"
-                    }`}
-                >
-                    <MessageCircle size={14} />
-                    Send Inquiry
-                </button>
-
-                {/* Book Demo */}
+                {/* Book Free Trial */}
                 {offersTrialClass && (
                     <button
                         onClick={handleTrialClick}
-                        className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold transition-colors"
+                        className="flex items-center gap-2 px-5 py-2.5 border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl text-sm font-semibold transition-colors"
                     >
-                        <Clock size={14} /> Book Demo Class
+                        <Clock size={14} /> Book Free Trial
                     </button>
                 )}
 
@@ -339,15 +326,6 @@ export default function TutorProfileActions({ tutor, subject, offersTrialClass, 
                     </button>
                 )}
 
-                {/* Log In prompt */}
-                {!loggedInUser && (
-                    <a
-                        href="/login"
-                        className="flex items-center gap-2 px-5 py-2.5 border border-gray-200 text-gray-600 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-colors"
-                    >
-                        <LogIn size={14} /> Log In
-                    </a>
-                )}
             </div>
 
             {/* Inline panels — shown below buttons on profile page */}
