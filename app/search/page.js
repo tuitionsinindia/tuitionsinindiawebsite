@@ -404,7 +404,13 @@ function SearchResultsContent() {
 
     // ── Action handlers ───────────────────────────────────────────────────────
 
-    /** Student wants to view contact details. If not logged in → save intent, open signup. */
+    const isUserPremium = (user) => {
+        if (!user) return false;
+        const hasSub = ["PRO", "ELITE"].includes(user.subscriptionTier) && user.subscriptionStatus === "ACTIVE";
+        return hasSub || (user.credits || 0) > 0;
+    };
+
+    /** Student wants to view contact details. If not logged in → signup. If not premium → pricing. */
     const handleViewContact = (tutor) => {
         if (!loggedInUser) {
             saveIntent({
@@ -414,6 +420,10 @@ function SearchResultsContent() {
                 subject: querySubject || undefined,
             });
             setSignupModal({ open: true, targetTutor: tutor, pendingAction: "contact" });
+            return;
+        }
+        if (!isUserPremium(loggedInUser)) {
+            router.push("/pricing/student");
             return;
         }
         setContactModal({ open: true, tutor });

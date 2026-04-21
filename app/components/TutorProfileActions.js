@@ -14,16 +14,13 @@ function ContactPanel({ tutorId, onClose }) {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
-    const [limitReached, setLimitReached] = useState(false);
     const [copied, setCopied] = useState(false);
 
     useEffect(() => {
         fetch(`/api/tutor/contact?tutorId=${tutorId}`)
             .then(r => r.json())
             .then(d => {
-                if (d.limitReached) {
-                    setLimitReached(true);
-                } else if (d.phone || d.email) {
+                if (d.phone || d.email) {
                     setData(d);
                 } else {
                     setError(d.error || "Could not load contact details.");
@@ -54,12 +51,6 @@ function ContactPanel({ tutorId, onClose }) {
                 <div className="flex items-center gap-2 py-2">
                     <Loader2 size={16} className="animate-spin text-blue-600" />
                     <span className="text-sm text-blue-600">Loading...</span>
-                </div>
-            ) : limitReached ? (
-                <div className="space-y-1.5">
-                    <p className="text-sm font-semibold text-amber-800">Monthly limit reached</p>
-                    <p className="text-xs text-amber-700 leading-relaxed">You&apos;ve used your 3 free contact views this month. Limit resets on the 1st of next month.</p>
-                    <p className="text-xs text-blue-600">Tip: Book a demo class — the tutor will reach out to you.</p>
                 </div>
             ) : error ? (
                 <p className="text-sm text-red-500">{error}</p>
@@ -244,10 +235,18 @@ export default function TutorProfileActions({ tutor, subject, offersTrialClass, 
         }
     };
 
+    const isPremium = loggedInUser &&
+        ((["PRO", "ELITE"].includes(loggedInUser.subscriptionTier) && loggedInUser.subscriptionStatus === "ACTIVE") ||
+         (loggedInUser.credits || 0) > 0);
+
     const handleViewContact = () => {
         if (!loggedInUser) {
             saveIntent({ action: "contact", tutorId: tutor.id, tutorName: tutor.name, subject });
             router.push(`/register/student?intent=contact&tutorId=${tutor.id}&subject=${subject || ""}`);
+            return;
+        }
+        if (!isPremium) {
+            router.push("/pricing/student");
             return;
         }
         setShowInquiry(false);

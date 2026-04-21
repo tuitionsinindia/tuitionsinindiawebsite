@@ -4,12 +4,10 @@ import { getSession } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
-// Free contact views per month for students (separate from demo booking limit)
-const FREE_CONTACT_VIEWS_PER_MONTH = 3;
-
 // GET /api/tutor/contact?tutorId=xxx
 // Returns a tutor's contact details.
-// Students: limited to 3 free contact views/month. Tutors/admins: unlimited.
+// Students: must have an active PRO/ELITE subscription or credits > 0.
+// Tutors/admins: unlimited.
 export async function GET(request) {
     try {
         const session = getSession();
@@ -24,31 +22,31 @@ export async function GET(request) {
             return NextResponse.json({ error: "tutorId is required." }, { status: 400 });
         }
 
-        // Students: enforce monthly contact view limit
+        // Students: must be premium (active subscription or credits)
         if (session.role === "STUDENT") {
             const student = await prisma.user.findUnique({
                 where: { id: session.id },
-                select: { contactViewsThisMonth: true },
+                select: { subscriptionTier: true, subscriptionStatus: true, credits: true },
             });
 
             if (!student) {
                 return NextResponse.json({ error: "Account not found." }, { status: 404 });
             }
 
-            if (student.contactViewsThisMonth >= FREE_CONTACT_VIEWS_PER_MONTH) {
-                return NextResponse.json({
-                    error: `You've used your ${FREE_CONTACT_VIEWS_PER_MONTH} free contact views this month. Your limit resets on the 1st of next month.`,
-                    limitReached: true,
-                    used: student.contactViewsThisMonth,
-                    limit: FREE_CONTACT_VIEWS_PER_MONTH,
-                }, { status: 429 });
+            const hasActiveSub = ["PRO", "ELITE"].includes(student.subscriptionTier) && student.subscriptionStatus === "ACTIVE";
+            const hasCredits = (student.credits || 0) > 0;
+
+            if (!hasActiveSub && !hasCredits) {
+                return NextResponse.json({ needsUpgrade: true }, { status: 402 });
             }
 
-            // Increment the counter atomically
-            await prisma.user.update({
-                where: { id: session.id },
-                data: { contactViewsThisMonth: { increment: 1 } },
-            });
+            // Deduct 1 credit per view for credit-based access (subscription members pay nothing extra)
+            if (!hasActiveSub && hasCredits) {
+                await prisma.user.update({
+                    where: { id: session.id },
+                    data: { credits: { decrement: 1 } },
+                });
+            }
         }
 
         const tutor = await prisma.user.findUnique({
